@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">BookYrself-Android</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_search">Search</string>
+    <string name="title_calendar">Calendar</string>
+    <string name="title_messages">Messages</string>
+    <string name="title_profile">Profile</string>
+    <string name="title_activity_search">SearchActivity</string>
+    <string name="title_activity_messages">MessagesActivity</string>
+    <string name="title_activity_calendar">CalendarActivity</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+</resources>
