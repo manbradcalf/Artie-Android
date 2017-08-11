@@ -13,6 +13,7 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
 
     protected BottomNavigationView navigationView;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,8 +37,7 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
     }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        navigationView.postDelayed(() -> {
+    public boolean onNavigationItemSelected(MenuItem item) {
             int itemId = item.getItemId();
             if (itemId == R.id.navigation_search) {
                 startActivity(new Intent(this, SearchActivity.class));
@@ -48,8 +48,6 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
             } else if (itemId == R.id.navigation_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
             }
-            finish();
-        }, 300);
     return true;
     }
 
