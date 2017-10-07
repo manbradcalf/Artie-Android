@@ -19,4 +19,9 @@ public class MessagesActivity extends MainActivity {
         return R.id.navigation_messages;
     }
 
+    @Override
+    void setLayout() {
+
+    }
+
 }

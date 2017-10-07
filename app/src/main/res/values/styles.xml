@@ -6,6 +6,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:editTextColor">@android:color/black</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -16,5 +17,23 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="SearchViewStyleWhat" parent="Widget.AppCompat.SearchView">
+        <item name="submitBackground">@color/cardview_light_background</item>
+        <item name="searchIcon">@drawable/ic_search_black_24dp</item>
+        <item name="closeIcon">@drawable/ic_close_black_24dp</item>
+    </style>
+
+    <style name="SearchViewStyleWhen" parent="Widget.AppCompat.SearchView">
+        <item name="submitBackground">@color/cardview_light_background</item>
+        <item name="searchIcon">@drawable/ic_calendar_black_24dp</item>
+        <item name="closeIcon">@drawable/ic_close_black_24dp</item>
+    </style>
+
+    <style name="SearchViewStyleWhere" parent="Widget.AppCompat.SearchView">
+        <item name="submitBackground">@color/cardview_light_background</item>
+        <item name="searchIcon">@drawable/ic_map_black_24dp</item>
+        <item name="closeIcon">@drawable/ic_close_black_24dp</item>
+    </style>
 
 </resources>

@@ -2,22 +2,29 @@ package com.bookyrself.bookyrself;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
+
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.FirebaseDatabase;
 
 public abstract class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     protected BottomNavigationView navigationView;
+    protected FirebaseDatabase db;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setEnterTransition(null);
+        FirebaseApp.initializeApp(this);
         setContentView(getContentViewId());
+        setLayout();
+        db = FirebaseDatabase.getInstance("https://bookyrself-staging.firebaseio.com/");
+
 
         navigationView = (BottomNavigationView) findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(this);
@@ -27,7 +34,8 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
     @Override
     public void onPause() {
         super.onPause();
-        overridePendingTransition(0, 0);
+//        overridePendingTransition(0, 0);
+        getWindow().setExitTransition(null);
     }
 
     @Override
@@ -37,21 +45,28 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
     }
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-            int itemId = item.getItemId();
-            if (itemId == R.id.navigation_search) {
-                startActivity(new Intent(this, SearchActivity.class));
-            } else if (itemId == R.id.navigation_messages) {
-                startActivity(new Intent(this, MessagesActivity.class));
-            } else if (itemId == R.id.navigation_calendar) {
-                startActivity(new Intent(this, CalendarActivity.class));
-            } else if (itemId == R.id.navigation_profile) {
-                startActivity(new Intent(this, ProfileActivity.class));
+    public boolean onNavigationItemSelected(final MenuItem item) {
+
+        navigationView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                int itemId = item.getItemId();
+                if (itemId == R.id.navigation_search) {
+                    startActivity(new Intent(getApplicationContext(), SearchActivity.class));
+                } else if (itemId == R.id.navigation_messages) {
+                    startActivity(new Intent(getApplicationContext(), MessagesActivity.class));
+                } else if (itemId == R.id.navigation_calendar) {
+                    startActivity(new Intent(getApplicationContext(), CalendarActivity.class));
+                } else if (itemId == R.id.navigation_profile) {
+                    startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+                }
+                finish();
             }
-    return true;
+        }, 300);
+        return true;
     }
 
-    private void updateNavigationBarState(){
+    private void updateNavigationBarState() {
         int actionId = getNavigationMenuItemId();
         selectBottomNavigationBarItem(actionId);
     }
@@ -71,5 +86,7 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
     abstract int getContentViewId();
 
     abstract int getNavigationMenuItemId();
+
+    abstract void setLayout();
 
 }

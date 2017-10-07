@@ -19,4 +19,9 @@ public class ProfileActivity extends MainActivity {
         return R.id.navigation_profile;
     }
 
+    @Override
+    void setLayout() {
+
+    }
+
 }

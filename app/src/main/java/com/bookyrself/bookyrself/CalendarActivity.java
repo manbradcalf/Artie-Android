@@ -19,4 +19,9 @@ public class CalendarActivity extends MainActivity {
         return R.id.navigation_calendar;
     }
 
+    @Override
+    void setLayout() {
+
+    }
+
 }
