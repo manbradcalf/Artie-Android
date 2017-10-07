@@ -1,12 +1,15 @@
 package com.bookyrself.bookyrself;
 
 import android.app.DatePickerDialog;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.models.searchresponse.Hit;
@@ -19,10 +22,11 @@ import java.util.List;
 
 public class SearchActivity extends MainActivity implements SearchPresenter.SearchPresenterListener {
 
+    private RelativeLayout root;
     private SearchView searchViewWhat;
     private SearchView searchViewWhere;
-    private TextView fromTextView;
-    private TextView toTextView;
+    private Button fromButton;
+    private Button toButton;
     private SearchPresenter presenter;
     private List<Hit> results;
     private RecyclerView recyclerView;
@@ -43,6 +47,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
 
     @Override
     void setLayout() {
+        root = (RelativeLayout) findViewById(R.id.search_activity_root);
         presenter = new SearchPresenter(this);
         recyclerView = (RecyclerView) findViewById(R.id.search_recycler_view);
         adapter = new resultsAdapter();
@@ -53,15 +58,22 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         searchViewWhat.setQueryHint("test");
         searchViewWhere = (SearchView) findViewById(R.id.search_where);
         searchViewWhere.setVisibility(View.GONE);
-        fromTextView = (TextView) findViewById(R.id.from_textview);
-        fromTextView.setVisibility(View.GONE);
-        toTextView = (TextView) findViewById(R.id.to_textview);
-        toTextView.setVisibility(View.GONE);
+        fromButton = (Button) findViewById(R.id.from_button);
+        fromButton.setVisibility(View.GONE);
+        toButton = (Button) findViewById(R.id.to_button);
+        toButton.setVisibility(View.GONE);
 
+
+        /**
+         * SearchView for What field
+         */
         searchViewWhat.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                presenter.executeSearch(db, query);
+                presenter.executeSearch(db, query, searchViewWhere.getQuery().toString());
+                searchViewWhere.setVisibility((View.GONE));
+                fromButton.setVisibility(View.GONE);
+                toButton.setVisibility(View.GONE);
                 return true;
             }
 
@@ -75,12 +87,34 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
             @Override
             public void onClick(View view) {
                 searchViewWhere.setVisibility((View.VISIBLE));
-                fromTextView.setVisibility(View.VISIBLE);
-                toTextView.setVisibility(View.VISIBLE);
+                fromButton.setVisibility(View.VISIBLE);
+                toButton.setVisibility(View.VISIBLE);
             }
         });
 
-        fromTextView.setOnClickListener(new View.OnClickListener() {
+        /**
+         * SearchView for Where field
+         */
+        searchViewWhere.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                presenter.executeSearch(db, searchViewWhat.getQuery().toString(), query);
+                searchViewWhere.setVisibility((View.GONE));
+                fromButton.setVisibility(View.GONE);
+                toButton.setVisibility(View.GONE);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
+        /**
+         * Buttons for "From" and "To" date fields
+         */
+        fromButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 DatePickerDialogFragment dialog = new DatePickerDialogFragment();
@@ -90,7 +124,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
             }
         });
 
-        toTextView.setOnClickListener(new View.OnClickListener() {
+        toButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 DatePickerDialogFragment dialog = new DatePickerDialogFragment();
@@ -102,19 +136,20 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     }
 
     @Override
-    public void searchResponseReady(List<Hit> hits) {
+    public void searchResponseReady(List<Hit> hits, String query) {
+        Snackbar.make(root, query, Snackbar.LENGTH_INDEFINITE).show();
         results = hits;
         adapter.notifyDataSetChanged();
     }
 
     @Override
     public void startDateChanged(String date) {
-        fromTextView.setText(date);
+        fromButton.setText(date);
     }
 
     @Override
     public void endDateChanged(String date) {
-        toTextView.setText(date);
+        toButton.setText(date);
     }
 
     /**

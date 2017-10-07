@@ -34,8 +34,10 @@ public class SearchPresenter {
      * Contract / Listener
      */
     public interface SearchPresenterListener {
-        void searchResponseReady(List<Hit> hits);
+        void searchResponseReady(List<Hit> hits, String query);
+
         void startDateChanged(String date);
+
         void endDateChanged(String date);
     }
 
@@ -51,8 +53,10 @@ public class SearchPresenter {
     /**
      * Methods
      */
-    public void executeSearch(FirebaseDatabase db, String query) {
+    //TODO: Add when
+    public void executeSearch(FirebaseDatabase db, String what, String where) {
         SearchRequest request = new SearchRequest();
+        final String query = createQuery(what, where);
         request.setQ(query);
         request.setIndex("firebase");
         request.setType("events");
@@ -78,7 +82,7 @@ public class SearchPresenter {
                 SearchEventsResponse responseEvents = dataSnapshot.child("hits").getValue(SearchEventsResponse.class);
                 if (responseEvents.getHits() != null) {
                     List<Hit> hits = responseEvents.getHits();
-                    mListener.searchResponseReady(hits);
+                    mListener.searchResponseReady(hits, query);
                 }
             }
 
@@ -103,6 +107,18 @@ public class SearchPresenter {
             }
         });
 
+    }
+
+    private String createQuery(String what, String where) {
+        String query = "";
+        if (!what.equals("") && !where.equals("")){
+            query = String.format("tags:%s, users:%s, eventname:%s, citystate:%s", what, what, what, where);
+        } else if (what.equals("") && !where.equals("")) {
+            query = String.format("citystate:%s", where);
+        } else if (!what.equals("") && where.equals("")) {
+            query = String.format("tags:%s, users:%s, eventname:%s", what, what, what);
+        }
+        return query;
     }
 
     public void setStartDate(String date) {
