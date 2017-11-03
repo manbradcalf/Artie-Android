@@ -22,16 +22,17 @@ import java.util.List;
 
 public class SearchActivity extends MainActivity implements SearchPresenter.SearchPresenterListener {
 
-    private RelativeLayout root;
     private SearchView searchViewWhat;
     private SearchView searchViewWhere;
     private Button fromButton;
     private Button toButton;
+    private Button searchButton;
     private SearchPresenter presenter;
     private List<Hit> results;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
+    private Boolean boolSearchEditable = false;
 
     public static final int FLAG_START_DATE = 0;
     public static final int FLAG_END_DATE = 1;
@@ -47,7 +48,6 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
 
     @Override
     void setLayout() {
-        root = (RelativeLayout) findViewById(R.id.search_activity_root);
         presenter = new SearchPresenter(this);
         recyclerView = (RecyclerView) findViewById(R.id.search_recycler_view);
         adapter = new resultsAdapter();
@@ -62,54 +62,58 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         fromButton.setVisibility(View.GONE);
         toButton = (Button) findViewById(R.id.to_button);
         toButton.setVisibility(View.GONE);
+        searchButton = (Button) findViewById(R.id.search_btn);
+        searchButton.setVisibility(View.GONE);
 
 
         /**
          * SearchView for What field
          */
-        searchViewWhat.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                presenter.executeSearch(db, query, searchViewWhere.getQuery().toString());
-                searchViewWhere.setVisibility((View.GONE));
-                fromButton.setVisibility(View.GONE);
-                toButton.setVisibility(View.GONE);
-                return true;
-            }
+//        searchViewWhat.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String Query) {
+//                presenter.executeSearch(db, Query, searchViewWhere.getQuery().toString());
+//                searchViewWhere.setVisibility((View.GONE));
+//                fromButton.setVisibility(View.GONE);
+//                toButton.setVisibility(View.GONE);
+//                return false;
+//            }
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
-
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//                return false;
+//            }
+//        });
+//
         searchViewWhat.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 searchViewWhere.setVisibility((View.VISIBLE));
                 fromButton.setVisibility(View.VISIBLE);
                 toButton.setVisibility(View.VISIBLE);
+                searchButton.setVisibility((View.VISIBLE));
+                searchButton.setText("Search!");
             }
         });
 
         /**
          * SearchView for Where field
          */
-        searchViewWhere.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                presenter.executeSearch(db, searchViewWhat.getQuery().toString(), query);
-                searchViewWhere.setVisibility((View.GONE));
-                fromButton.setVisibility(View.GONE);
-                toButton.setVisibility(View.GONE);
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
+//        searchViewWhere.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String Query) {
+//                presenter.executeSearch(db, searchViewWhat.getQuery().toString(), Query);
+//                searchViewWhere.setVisibility((View.GONE));
+//                fromButton.setVisibility(View.GONE);
+//                toButton.setVisibility(View.GONE);
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//                return false;
+//            }
+//        });
 
         /**
          * Buttons for "From" and "To" date fields
@@ -133,11 +137,36 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                 dialog.show(getFragmentManager(), "datePicker");
             }
         });
+
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!boolSearchEditable) {
+                    presenter.executeSearch(db,
+                            searchViewWhat.getQuery().toString(),
+                            searchViewWhere.getQuery().toString(),
+                            fromButton.getText().toString(),
+                            toButton.getText().toString());
+                    searchViewWhere.setVisibility((View.GONE));
+                    fromButton.setVisibility(View.GONE);
+                    toButton.setVisibility(View.GONE);
+                } else {
+                    boolSearchEditable = false;
+                    searchButton.setText("SEARCH!");
+                    searchViewWhere.setVisibility((View.VISIBLE));
+                    fromButton.setVisibility(View.VISIBLE);
+                    toButton.setVisibility(View.VISIBLE);
+                }
+            }
+        });
     }
 
+
     @Override
-    public void searchResponseReady(List<Hit> hits, String query) {
-        Snackbar.make(root, query, Snackbar.LENGTH_INDEFINITE).show();
+    public void searchResponseReady(List<Hit> hits) {
+//        Snackbar.make(root, Query, Snackbar.LENGTH_INDEFINITE).show();
+        boolSearchEditable = true;
+        searchButton.setText("Edit Search");
         results = hits;
         adapter.notifyDataSetChanged();
     }

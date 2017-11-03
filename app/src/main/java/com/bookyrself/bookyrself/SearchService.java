@@ -1,15 +1,18 @@
 package com.bookyrself.bookyrself;
 
+import com.bookyrself.bookyrself.models.searchrequest.SearchRequest;
 import com.bookyrself.bookyrself.models.searchresponse.Hit;
-import com.bookyrself.bookyrself.models.SearchRequest;
 
 import java.util.List;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
+import retrofit2.http.Query;
 
 /**
  * Created by benmedcalf on 8/11/17.
@@ -17,17 +20,36 @@ import retrofit2.http.POST;
 public class SearchService {
 
     private static String BASE_URL_BOOKYRSELF_FIREBASE = "https://bookyrself-staging.firebaseio.com/";
+//    private static String BASE_URL_ES = "https://nw2oflyn:qqrnk317w22lswh8@pine-4785036.us-east-1.bonsaisearch.net/";
 
     public interface SearchAPI {
         @POST("/search/request.json")
-        Call<List<Hit>> executeSearch(@Body SearchRequest request);
+        Call<List<Hit>> executeSearch(@Body SearchRequest query);
     }
 
     public SearchAPI getAPI(){
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+
        Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL_BOOKYRSELF_FIREBASE)
+                .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         return retrofit.create(SearchAPI.class);
     }
+
+//    public SearchAPI getESAPI(){
+//        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+//        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+//        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+//
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .baseUrl(BASE_URL_ES)
+//                .client(client)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//        return retrofit.create(SearchAPI.class);
+//    }
 }

@@ -49,7 +49,7 @@ public class DatePickerDialogFragment extends DialogFragment implements DatePick
     public void onDateSet(DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
         java.util.Calendar calendar = java.util.Calendar.getInstance();
         calendar.set(year, monthOfYear, dayOfMonth);
-        java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("MM-dd-yyyy", Locale.US);
 
         dateReady(flag, format.format(calendar.getTime()));
         }

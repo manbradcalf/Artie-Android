@@ -1,19 +1,24 @@
 package com.bookyrself.bookyrself.presenters;
 
-import android.widget.TextView;
+import android.util.Log;
 
-import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.SearchService;
-import com.bookyrself.bookyrself.models.SearchRequest;
+import com.bookyrself.bookyrself.models.searchrequest.Bool;
+import com.bookyrself.bookyrself.models.searchrequest.Match;
+import com.bookyrself.bookyrself.models.searchrequest.MultiMatch;
+import com.bookyrself.bookyrself.models.searchrequest.Must;
+import com.bookyrself.bookyrself.models.searchrequest.Query;
+import com.bookyrself.bookyrself.models.searchrequest.SearchRequest;
 import com.bookyrself.bookyrself.models.searchresponse.Hit;
 import com.bookyrself.bookyrself.models.searchresponse.SearchEventsResponse;
-import com.bookyrself.bookyrself.models.searchresponse._source;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -34,7 +39,7 @@ public class SearchPresenter {
      * Contract / Listener
      */
     public interface SearchPresenterListener {
-        void searchResponseReady(List<Hit> hits, String query);
+        void searchResponseReady(List<Hit> hits);
 
         void startDateChanged(String date);
 
@@ -53,13 +58,11 @@ public class SearchPresenter {
     /**
      * Methods
      */
-    //TODO: Add when
-    public void executeSearch(FirebaseDatabase db, String what, String where) {
+    public void executeSearch(FirebaseDatabase db, String what, String where, String fromWhen, String toWhen) {
+        final Query query = createQuery(what, where, fromWhen, toWhen);
         SearchRequest request = new SearchRequest();
-        final String query = createQuery(what, where);
-        request.setQ(query);
-        request.setIndex("firebase");
-        request.setType("events");
+        request.setmQuery(query);
+        // Set the request body
         mService
                 .getAPI()
                 .executeSearch(request)
@@ -79,10 +82,11 @@ public class SearchPresenter {
         childEventListener = dbref.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.i(this.toString(), dataSnapshot.toString());
                 SearchEventsResponse responseEvents = dataSnapshot.child("hits").getValue(SearchEventsResponse.class);
                 if (responseEvents.getHits() != null) {
                     List<Hit> hits = responseEvents.getHits();
-                    mListener.searchResponseReady(hits, query);
+                    mListener.searchResponseReady(hits);
                 }
             }
 
@@ -109,15 +113,34 @@ public class SearchPresenter {
 
     }
 
-    private String createQuery(String what, String where) {
-        String query = "";
-        if (!what.equals("") && !where.equals("")){
-            query = String.format("tags:%s, users:%s, eventname:%s, citystate:%s", what, what, what, where);
-        } else if (what.equals("") && !where.equals("")) {
-            query = String.format("citystate:%s", where);
-        } else if (!what.equals("") && where.equals("")) {
-            query = String.format("tags:%s, users:%s, eventname:%s", what, what, what);
-        }
+    private Query createQuery(String what, String where, String fromWhen, String toWhen) {
+        List<String> fields = Arrays.asList("username", "tags", "eventname");
+
+        Query query = new Query();
+        Bool bool = new Bool();
+        List<Must> must_list = new ArrayList<Must>() {
+        };
+        bool.setMust(must_list);
+        Must must = new Must();
+        must_list.add(must);
+        Match match = new Match();
+        MultiMatch multiMatch = new MultiMatch();
+        multiMatch.setQuery(what);
+        multiMatch.setFields(fields);
+        match.setCitystate(where);
+        must.setMatch(match);
+        must.setMultiMatch(multiMatch);
+        query.setBool(bool);
+
+        // Set the citystate
+
+        // Set the what
+//        Query.getBool().getMust().get(0).getMultiMatch().setFields(fields);
+//        Query.getBool().getMust().get(0).getMultiMatch().setQuery(what);
+        // Set the range
+//        Query.getBool().getFilter().getBool().getMust().get(0).getRange().getDate().setGte(fromWhen);
+//        Query.getBool().getFilter().getBool().getMust().get(0).getRange().getDate().setLte(toWhen);
+
         return query;
     }
 
