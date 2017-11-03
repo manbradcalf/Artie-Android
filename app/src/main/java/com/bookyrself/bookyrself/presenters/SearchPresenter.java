@@ -1,5 +1,6 @@
 package com.bookyrself.bookyrself.presenters;
 
+import android.util.Log;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
@@ -80,7 +81,8 @@ public class SearchPresenter {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 SearchEventsResponse responseEvents = dataSnapshot.child("hits").getValue(SearchEventsResponse.class);
-                if (responseEvents.getHits() != null) {
+                Log.i(this.getClass().toString(), dataSnapshot.toString());
+                if (responseEvents != null) {
                     List<Hit> hits = responseEvents.getHits();
                     mListener.searchResponseReady(hits, query);
                 }

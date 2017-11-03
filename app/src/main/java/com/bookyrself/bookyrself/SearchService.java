@@ -5,6 +5,8 @@ import com.bookyrself.bookyrself.models.SearchRequest;
 
 import java.util.List;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -24,8 +26,13 @@ public class SearchService {
     }
 
     public SearchAPI getAPI(){
-       Retrofit retrofit = new Retrofit.Builder()
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+
+        Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL_BOOKYRSELF_FIREBASE)
+                .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         return retrofit.create(SearchAPI.class);

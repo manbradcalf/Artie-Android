@@ -37,6 +37,7 @@ dependencies {
     compile 'javax.annotation:javax.annotation-api:1.2'
     compile 'com.squareup.retrofit2:converter-gson:2.3.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
 
 }
 
