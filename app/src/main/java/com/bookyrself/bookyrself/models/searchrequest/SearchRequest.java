@@ -1,20 +1,43 @@
+
 package com.bookyrself.bookyrself.models.searchrequest;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by benmedcalf on 11/1/17.
- */
-
 public class SearchRequest {
-    @SerializedName("query")
-    private Query mQuery;
 
-    public Query getmQuery() {
-        return mQuery;
+    @SerializedName("index")
+    @Expose
+    private String index;
+    @SerializedName("type")
+    @Expose
+    private String type;
+    @SerializedName("body")
+    @Expose
+    private Body body;
+
+    public String getIndex() {
+        return index;
     }
 
-    public void setmQuery(Query mQuery) {
-        this.mQuery = mQuery;
+    public void setIndex(String index) {
+        this.index = index;
     }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Body getBody() {
+        return body;
+    }
+
+    public void setBody(Body body) {
+        this.body = body;
+    }
+
 }

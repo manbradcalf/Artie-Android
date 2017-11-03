@@ -2,32 +2,32 @@
 package com.bookyrself.bookyrself.models.searchrequest;
 
 import java.util.List;
-import javax.annotation.Generated;
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-@Generated("net.hexar.json2pojo")
-@SuppressWarnings("unused")
 public class MultiMatch {
 
-    @SerializedName("fields")
-    private List<String> mFields;
     @SerializedName("query")
-    private String mQuery;
-
-    public List<String> getFields() {
-        return mFields;
-    }
-
-    public void setFields(List<String> fields) {
-        mFields = fields;
-    }
+    @Expose
+    private String query;
+    @SerializedName("fields")
+    @Expose
+    private List<String> fields = null;
 
     public String getQuery() {
-        return mQuery;
+        return query;
     }
 
     public void setQuery(String query) {
-        mQuery = query;
+        this.query = query;
+    }
+
+    public List<String> getFields() {
+        return fields;
+    }
+
+    public void setFields(List<String> fields) {
+        this.fields = fields;
     }
 
 }

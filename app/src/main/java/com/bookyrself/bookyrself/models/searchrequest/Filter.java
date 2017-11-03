@@ -1,22 +1,21 @@
 
 package com.bookyrself.bookyrself.models.searchrequest;
 
-import javax.annotation.Generated;
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-@Generated("net.hexar.json2pojo")
-@SuppressWarnings("unused")
 public class Filter {
 
     @SerializedName("bool")
-    private Bool mBool;
+    @Expose
+    private Bool_ bool;
 
-    public Bool getBool() {
-        return mBool;
+    public Bool_ getBool() {
+        return bool;
     }
 
-    public void setBool(Bool bool) {
-        mBool = bool;
+    public void setBool(Bool_ bool) {
+        this.bool = bool;
     }
 
 }

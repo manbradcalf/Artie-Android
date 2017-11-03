@@ -1,32 +1,32 @@
 
 package com.bookyrself.bookyrself.models.searchrequest;
 
-import javax.annotation.Generated;
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-@Generated("net.hexar.json2pojo")
-@SuppressWarnings("unused")
 public class Date {
 
     @SerializedName("gte")
-    private String mGte;
+    @Expose
+    private String gte;
     @SerializedName("lte")
-    private String mLte;
+    @Expose
+    private String lte;
 
     public String getGte() {
-        return mGte;
+        return gte;
     }
 
     public void setGte(String gte) {
-        mGte = gte;
+        this.gte = gte;
     }
 
     public String getLte() {
-        return mLte;
+        return lte;
     }
 
     public void setLte(String lte) {
-        mLte = lte;
+        this.lte = lte;
     }
 
 }

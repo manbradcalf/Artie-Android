@@ -2,32 +2,32 @@
 package com.bookyrself.bookyrself.models.searchrequest;
 
 import java.util.List;
-import javax.annotation.Generated;
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-@Generated("net.hexar.json2pojo")
-@SuppressWarnings("unused")
 public class Bool {
 
-    @SerializedName("filter")
-    private Filter mFilter;
     @SerializedName("must")
-    private List<Must> mMust;
-
-    public Filter getFilter() {
-        return mFilter;
-    }
-
-    public void setFilter(Filter filter) {
-        mFilter = filter;
-    }
+    @Expose
+    private List<Must> must = null;
+    @SerializedName("filter")
+    @Expose
+    private Filter filter;
 
     public List<Must> getMust() {
-        return mMust;
+        return must;
     }
 
     public void setMust(List<Must> must) {
-        mMust = must;
+        this.must = must;
+    }
+
+    public Filter getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Filter filter) {
+        this.filter = filter;
     }
 
 }

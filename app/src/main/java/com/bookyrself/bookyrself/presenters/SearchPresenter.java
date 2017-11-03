@@ -7,6 +7,7 @@ import com.bookyrself.bookyrself.models.searchrequest.Bool;
 import com.bookyrself.bookyrself.models.searchrequest.Match;
 import com.bookyrself.bookyrself.models.searchrequest.MultiMatch;
 import com.bookyrself.bookyrself.models.searchrequest.Must;
+import com.bookyrself.bookyrself.models.searchrequest.Body;
 import com.bookyrself.bookyrself.models.searchrequest.Query;
 import com.bookyrself.bookyrself.models.searchrequest.SearchRequest;
 import com.bookyrself.bookyrself.models.searchresponse.Hit;
@@ -60,9 +61,12 @@ public class SearchPresenter {
      */
     public void executeSearch(FirebaseDatabase db, String what, String where, String fromWhen, String toWhen) {
         final Query query = createQuery(what, where, fromWhen, toWhen);
+        final Body body = new Body();
+        body.setQuery(query);
         SearchRequest request = new SearchRequest();
-        request.setmQuery(query);
-        // Set the request body
+        request.setBody(body);
+        request.setIndex("event_search");
+        request.setType("events");
         mService
                 .getAPI()
                 .executeSearch(request)
@@ -115,28 +119,28 @@ public class SearchPresenter {
 
     private Query createQuery(String what, String where, String fromWhen, String toWhen) {
         List<String> fields = Arrays.asList("username", "tags", "eventname");
-
         Query query = new Query();
         Bool bool = new Bool();
-        List<Must> must_list = new ArrayList<Must>() {
-        };
-        bool.setMust(must_list);
-        Must must = new Must();
-        must_list.add(must);
-        Match match = new Match();
+        Must must1 = new Must();
+        Match match1 = new Match();
+        match1.setCitystate(where);
+        must1.setMatch(match1);
+        Must must2 = new Must();
         MultiMatch multiMatch = new MultiMatch();
-        multiMatch.setQuery(what);
         multiMatch.setFields(fields);
-        match.setCitystate(where);
-        must.setMatch(match);
-        must.setMultiMatch(multiMatch);
+        multiMatch.setQuery(what);
+        must2.setMultiMatch(multiMatch);
+        List<Must> musts = new ArrayList<>();
+        musts.add(must1);
+        musts.add(must2);
+        bool.setMust(musts);
         query.setBool(bool);
 
         // Set the citystate
 
         // Set the what
-//        Query.getBool().getMust().get(0).getMultiMatch().setFields(fields);
-//        Query.getBool().getMust().get(0).getMultiMatch().setQuery(what);
+        query.getBool().getMust().get(0).getMatch().setCitystate(where);
+        query.getBool().getMust().get(1).getMultiMatch().setQuery(what);
         // Set the range
 //        Query.getBool().getFilter().getBool().getMust().get(0).getRange().getDate().setGte(fromWhen);
 //        Query.getBool().getFilter().getBool().getMust().get(0).getRange().getDate().setLte(toWhen);
