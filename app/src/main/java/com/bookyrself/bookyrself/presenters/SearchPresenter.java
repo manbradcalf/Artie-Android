@@ -1,7 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
 import android.util.Log;
-
+import android.widget.TextView;
 import com.bookyrself.bookyrself.SearchService;
 import com.bookyrself.bookyrself.models.searchrequest.Bool;
 import com.bookyrself.bookyrself.models.searchrequest.Bool_;
@@ -68,6 +68,7 @@ public class SearchPresenter {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.i(this.toString(), dataSnapshot.toString());
                 SearchEventsResponse responseEvents = dataSnapshot.child("hits").getValue(SearchEventsResponse.class);
+                Log.i(this.getClass().toString(), dataSnapshot.toString());
                 if (responseEvents != null) {
                     List<Hit> hits = responseEvents.getHits();
                     mListener.searchResponseReady(hits);
