@@ -22,12 +22,10 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
         getWindow().setEnterTransition(null);
         FirebaseApp.initializeApp(this);
         setContentView(getContentViewId());
-        setLayout();
         db = FirebaseDatabase.getInstance("https://bookyrself-staging.firebaseio.com/");
-
-
         navigationView = (BottomNavigationView) findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(this);
+        setLayout();
     }
 
     // Remove inter-activity transition to avoid screen tossing on tapping bottom navigation items

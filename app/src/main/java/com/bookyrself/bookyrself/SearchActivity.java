@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -24,6 +25,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
 
     private SearchView searchViewWhat;
     private SearchView searchViewWhere;
+    private ProgressBar progressBar;
     private Button fromButton;
     private Button toButton;
     private Button searchButton;
@@ -48,7 +50,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
 
     @Override
     void setLayout() {
-        presenter = new SearchPresenter(this);
+        presenter = new SearchPresenter(this, db);
         recyclerView = (RecyclerView) findViewById(R.id.search_recycler_view);
         adapter = new resultsAdapter();
         recyclerView.setAdapter(adapter);
@@ -64,27 +66,13 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         toButton.setVisibility(View.GONE);
         searchButton = (Button) findViewById(R.id.search_btn);
         searchButton.setVisibility(View.GONE);
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        progressBar.setVisibility(View.GONE);
 
 
         /**
          * SearchView for What field
          */
-//        searchViewWhat.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//            @Override
-//            public boolean onQueryTextSubmit(String Query) {
-//                presenter.executeSearch(db, Query, searchViewWhere.getQuery().toString());
-//                searchViewWhere.setVisibility((View.GONE));
-//                fromButton.setVisibility(View.GONE);
-//                toButton.setVisibility(View.GONE);
-//                return false;
-//            }
-
-//            @Override
-//            public boolean onQueryTextChange(String newText) {
-//                return false;
-//            }
-//        });
-//
         searchViewWhat.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -95,25 +83,6 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                 searchButton.setText("Search!");
             }
         });
-
-        /**
-         * SearchView for Where field
-         */
-//        searchViewWhere.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//            @Override
-//            public boolean onQueryTextSubmit(String Query) {
-//                presenter.executeSearch(db, searchViewWhat.getQuery().toString(), Query);
-//                searchViewWhere.setVisibility((View.GONE));
-//                fromButton.setVisibility(View.GONE);
-//                toButton.setVisibility(View.GONE);
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean onQueryTextChange(String newText) {
-//                return false;
-//            }
-//        });
 
         /**
          * Buttons for "From" and "To" date fields
@@ -142,7 +111,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
             @Override
             public void onClick(View view) {
                 if (!boolSearchEditable) {
-                    presenter.executeSearch(db,
+                    presenter.executeSearch(
                             searchViewWhat.getQuery().toString(),
                             searchViewWhere.getQuery().toString(),
                             fromButton.getText().toString(),
@@ -164,11 +133,12 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
 
     @Override
     public void searchResponseReady(List<Hit> hits) {
-//        Snackbar.make(root, Query, Snackbar.LENGTH_INDEFINITE).show();
+        recyclerView.removeAllViewsInLayout();
         boolSearchEditable = true;
         searchButton.setText("Edit Search");
         results = hits;
         adapter.notifyDataSetChanged();
+        showProgressbar(false);
     }
 
     @Override
@@ -181,6 +151,15 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         toButton.setText(date);
     }
 
+    @Override
+    public void showProgressbar(Boolean bool) {
+        if (bool) {
+            progressBar.setVisibility(View.VISIBLE);
+        } else {
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
     /**
      * Adapter
      */
@@ -189,7 +168,6 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         public resultsAdapter() {
 
         }
-
 
         class ViewHolder extends RecyclerView.ViewHolder {
             public TextView cityStateTextView;
