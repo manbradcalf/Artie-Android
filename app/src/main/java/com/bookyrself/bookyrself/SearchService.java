@@ -1,7 +1,7 @@
 package com.bookyrself.bookyrself;
 
+import com.bookyrself.bookyrself.models.searchrequest.SearchRequest;
 import com.bookyrself.bookyrself.models.searchresponse.Hit;
-import com.bookyrself.bookyrself.models.SearchRequest;
 
 import java.util.List;
 
@@ -19,10 +19,10 @@ import retrofit2.http.POST;
 public class SearchService {
 
     private static String BASE_URL_BOOKYRSELF_FIREBASE = "https://bookyrself-staging.firebaseio.com/";
-
+  
     public interface SearchAPI {
         @POST("/search/request.json")
-        Call<List<Hit>> executeSearch(@Body SearchRequest request);
+        Call<List<Hit>> executeSearch(@Body SearchRequest query);
     }
 
     public SearchAPI getAPI(){
@@ -30,7 +30,8 @@ public class SearchService {
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
-        Retrofit retrofit = new Retrofit.Builder()
+
+       Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL_BOOKYRSELF_FIREBASE)
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
