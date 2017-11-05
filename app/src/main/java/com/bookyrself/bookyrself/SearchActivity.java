@@ -1,7 +1,5 @@
 package com.bookyrself.bookyrself;
 
-import android.app.DatePickerDialog;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -10,10 +8,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bookyrself.bookyrself.models.searchresponse.Hit;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
 import com.bookyrself.bookyrself.utils.DatePickerDialogFragment;
 import com.bookyrself.bookyrself.utils.RoundedTransformation;
@@ -30,7 +26,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     private Button toButton;
     private Button searchButton;
     private SearchPresenter presenter;
-    private List<Hit> results;
+    private List<com.bookyrself.bookyrself.models.searchresponse.Hit> results;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -132,7 +128,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
 
 
     @Override
-    public void searchResponseReady(List<Hit> hits) {
+    public void searchResponseReady(List<com.bookyrself.bookyrself.models.searchresponse.Hit> hits) {
         recyclerView.removeAllViewsInLayout();
         boolSearchEditable = true;
         searchButton.setText("Edit Search");

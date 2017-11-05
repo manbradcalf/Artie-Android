@@ -12,7 +12,7 @@ public class SearchRequest {
     @SerializedName("type")
     @Expose
     private String type;
-    @SerializedName("body")
+    @SerializedName("query")
     @Expose
     private Body body;
 
