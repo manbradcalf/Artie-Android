@@ -1,5 +1,7 @@
 package com.bookyrself.bookyrself;
 
+import android.content.res.ColorStateList;
+import android.os.Build;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -22,6 +24,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     private SearchView searchViewWhat;
     private SearchView searchViewWhere;
     private ProgressBar progressBar;
+    private TextView emptyStateText;
     private Button fromButton;
     private Button toButton;
     private Button searchButton;
@@ -64,6 +67,8 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         searchButton.setVisibility(View.GONE);
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.GONE);
+        emptyStateText = findViewById(R.id.search_empty_state);
+        emptyStateText.setVisibility(View.GONE);
 
 
         /**
@@ -135,6 +140,11 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         results = hits;
         adapter.notifyDataSetChanged();
         showProgressbar(false);
+        if (hits.isEmpty()) {
+            emptyStateText.setVisibility(View.VISIBLE);
+        } else {
+            emptyStateText.setVisibility(View.GONE);
+        }
     }
 
     @Override
