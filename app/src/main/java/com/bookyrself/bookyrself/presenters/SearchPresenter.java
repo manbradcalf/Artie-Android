@@ -1,7 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
 import android.util.Log;
-import android.widget.TextView;
+
 import com.bookyrself.bookyrself.SearchService;
 import com.bookyrself.bookyrself.models.searchrequest.Bool;
 import com.bookyrself.bookyrself.models.searchrequest.Bool_;
@@ -14,12 +14,8 @@ import com.bookyrself.bookyrself.models.searchrequest.Body;
 import com.bookyrself.bookyrself.models.searchrequest.Must_;
 import com.bookyrself.bookyrself.models.searchrequest.Query;
 import com.bookyrself.bookyrself.models.searchrequest.Range;
-import com.bookyrself.bookyrself.models.searchrequest.SearchRequest;
-import com.bookyrself.bookyrself.models.searchresponse.Hit;
-import com.bookyrself.bookyrself.models.searchresponse.SearchEventsResponse;
+import com.bookyrself.bookyrself.models.searchresponse.*;
 import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -46,7 +42,7 @@ public class SearchPresenter {
      * Contract / Listener
      */
     public interface SearchPresenterListener {
-        void searchResponseReady(List<Hit> hits);
+        void searchResponseReady(List<com.bookyrself.bookyrself.models.searchresponse.Hit> hits);
 
         void startDateChanged(String date);
 
@@ -62,40 +58,6 @@ public class SearchPresenter {
     public SearchPresenter(SearchPresenterListener listener, FirebaseDatabase db) {
         this.mListener = listener;
         this.mService = new SearchService();
-        this.dbref = db.getReference("search/response");
-        this.childEventListener = dbref.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.i(this.toString(), dataSnapshot.toString());
-                SearchEventsResponse responseEvents = dataSnapshot.child("hits").getValue(SearchEventsResponse.class);
-                Log.i(this.getClass().toString(), dataSnapshot.toString());
-                if (responseEvents != null) {
-                    List<Hit> hits = responseEvents.getHits();
-                    mListener.searchResponseReady(hits);
-                }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
     }
 
     /**
@@ -106,22 +68,23 @@ public class SearchPresenter {
         final Query query = createQuery(what, where, fromWhen, toWhen);
         final Body body = new Body();
         body.setQuery(query);
-        SearchRequest request = new SearchRequest();
-        request.setBody(body);
+        body.setSize(100);
         //TODO: Make the index and type toggleable to users
-        request.setIndex("event_search");
-        request.setType("events");
         mService
                 .getAPI()
-                .executeSearch(request)
-                .enqueue(new Callback<List<Hit>>() {
+                .executeSearch(body)
+                .enqueue(new Callback<SearchResponse2>() {
                     @Override
-                    public void onResponse(Call<List<Hit>> call, Response<List<Hit>> response) {
-
+                    public void onResponse(Call<SearchResponse2> call, Response<SearchResponse2> response) {
+                        Log.i(this.toString(), response.toString());
+                        if (response.body() != null) {
+                            List<com.bookyrself.bookyrself.models.searchresponse.Hit> hits = response.body().getHits().getHits();
+                            mListener.searchResponseReady(hits);
+                        }
                     }
 
                     @Override
-                    public void onFailure(Call<List<Hit>> call, Throwable t) {
+                    public void onFailure(Call<SearchResponse2> call, Throwable t) {
 
                     }
                 });
@@ -143,7 +106,7 @@ public class SearchPresenter {
         }
 
         // Set the "what"
-        if (!what.equals("")){
+        if (!what.equals("")) {
             Must must2 = new Must();
             MultiMatch multiMatch = new MultiMatch();
             multiMatch.setFields(fields);

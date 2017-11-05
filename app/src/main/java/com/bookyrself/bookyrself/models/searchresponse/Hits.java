@@ -3,12 +3,11 @@ package com.bookyrself.bookyrself.models.searchresponse;
 
 import java.util.List;
 import javax.annotation.Generated;
-
 import com.google.gson.annotations.SerializedName;
 
 @Generated("net.hexar.json2pojo")
 @SuppressWarnings("unused")
-public class SearchEventsResponse {
+public class Hits {
 
     @SerializedName("hits")
     private List<Hit> mHits;

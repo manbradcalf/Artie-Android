@@ -8,21 +8,25 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
 public abstract class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     protected BottomNavigationView navigationView;
     protected FirebaseDatabase db;
+    protected FirebaseAuth auth;
+    protected FirebaseApp firebaseApp;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setEnterTransition(null);
-        FirebaseApp.initializeApp(this);
+        firebaseApp = FirebaseApp.initializeApp(this);
         setContentView(getContentViewId());
         db = FirebaseDatabase.getInstance("https://bookyrself-staging.firebaseio.com/");
+        auth = FirebaseAuth.getInstance();
         navigationView = (BottomNavigationView) findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(this);
         setLayout();
@@ -32,7 +36,7 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
     @Override
     public void onPause() {
         super.onPause();
-//        overridePendingTransition(0, 0);
+        overridePendingTransition(0, 0);
         getWindow().setExitTransition(null);
     }
 

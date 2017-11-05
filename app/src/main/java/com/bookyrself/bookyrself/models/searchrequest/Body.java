@@ -10,12 +10,20 @@ public class Body {
     @Expose
     private Query query;
 
+    @SerializedName("size")
+    @Expose
+    private Integer size;
+
     public Query getQuery() {
         return query;
     }
 
     public void setQuery(Query query) {
         this.query = query;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
     }
 
 }
