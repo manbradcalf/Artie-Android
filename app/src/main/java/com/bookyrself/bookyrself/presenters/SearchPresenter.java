@@ -14,7 +14,7 @@ import com.bookyrself.bookyrself.models.searchrequest.Body;
 import com.bookyrself.bookyrself.models.searchrequest.Must_;
 import com.bookyrself.bookyrself.models.searchrequest.Query;
 import com.bookyrself.bookyrself.models.searchrequest.Range;
-import com.bookyrself.bookyrself.models.searchresponse.*;
+import com.bookyrself.bookyrself.models.SearchResponseEvents.*;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -42,7 +42,7 @@ public class SearchPresenter {
      * Contract / Listener
      */
     public interface SearchPresenterListener {
-        void searchResponseReady(List<com.bookyrself.bookyrself.models.searchresponse.Hit> hits);
+        void searchResponseReady(List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits);
 
         void startDateChanged(String date);
 
@@ -72,13 +72,13 @@ public class SearchPresenter {
         //TODO: Make the index and type toggleable to users
         mService
                 .getAPI()
-                .executeSearch(body)
+                .executeEventsSearch(body)
                 .enqueue(new Callback<SearchResponse2>() {
                     @Override
                     public void onResponse(Call<SearchResponse2> call, Response<SearchResponse2> response) {
                         Log.i(this.toString(), response.toString());
                         if (response.body() != null) {
-                            List<com.bookyrself.bookyrself.models.searchresponse.Hit> hits = response.body().getHits().getHits();
+                            List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits = response.body().getHits().getHits();
                             mListener.searchResponseReady(hits);
                         }
                     }

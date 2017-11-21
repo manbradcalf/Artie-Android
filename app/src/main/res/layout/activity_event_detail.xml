@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/event_detail_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nov 20th"
+        android:textAlignment="center"
+        android:textAppearance="@android:style/TextAppearance.Material.Display1"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:id="@+id/event_detail_hosted_by_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Hosted By"
+        android:textAlignment="center"
+        android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+        android:layout_marginBottom="8dp"/>
+
+    <include
+        android:id="@+id/event_detail_host_item"
+        layout="@layout/item_event_detail_user"
+        android:layout_width="244dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="32dp" />
+
+    <TextView
+        android:id="@+id/event_detail_with_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="With"
+        android:textAlignment="center"
+        android:textAppearance="@android:style/TextAppearance.Material.Subhead" />
+
+    <ListView
+        android:id="@+id/event_detail_users_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        
+    </ListView>
+
+</LinearLayout>

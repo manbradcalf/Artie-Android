@@ -1,9 +1,8 @@
 
-package com.bookyrself.bookyrself.models.searchresponse;
+package com.bookyrself.bookyrself.models.SearchResponseUsers;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.SerializedName;
-import com.bookyrself.bookyrself.models.searchresponse.*;
 
 @Generated("net.hexar.json2pojo")
 @SuppressWarnings("unused")
@@ -16,7 +15,7 @@ public class Hit {
     @SerializedName("_score")
     private Double m_score;
     @SerializedName("_source")
-    private _source m_source;
+    private com.bookyrself.bookyrself.models.SearchResponseUsers._source m_source;
     @SerializedName("_type")
     private String m_type;
 
@@ -44,11 +43,11 @@ public class Hit {
         m_score = _score;
     }
 
-    public _source get_source() {
+    public com.bookyrself.bookyrself.models.SearchResponseUsers._source get_source() {
         return m_source;
     }
 
-    public void set_source(_source _source) {
+    public void set_source(com.bookyrself.bookyrself.models.SearchResponseUsers._source _source) {
         m_source = _source;
     }
 

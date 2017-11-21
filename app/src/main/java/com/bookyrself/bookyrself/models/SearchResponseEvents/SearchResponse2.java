@@ -1,9 +1,8 @@
 
-package com.bookyrself.bookyrself.models.searchresponse;
+package com.bookyrself.bookyrself.models.SearchResponseEvents;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.SerializedName;
-import com.bookyrself.bookyrself.models.searchresponse.*;
 
 @Generated("net.hexar.json2pojo")
 @SuppressWarnings("unused")

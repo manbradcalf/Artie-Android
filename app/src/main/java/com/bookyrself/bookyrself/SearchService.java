@@ -1,6 +1,6 @@
 package com.bookyrself.bookyrself;
 
-import com.bookyrself.bookyrself.models.searchresponse.SearchResponse2;
+import com.bookyrself.bookyrself.models.SearchResponseEvents.SearchResponse2;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -20,8 +20,8 @@ public class SearchService {
 
 
     public interface SearchAPI {
-        @POST("/event_search/_search")
-        Call<SearchResponse2> executeSearch(@Body com.bookyrself.bookyrself.models.searchrequest.Body query);
+        @POST("/firebase/events/_search")
+        Call<SearchResponse2> executeEventsSearch(@Body com.bookyrself.bookyrself.models.searchrequest.Body query);
     }
 
     public SearchAPI getAPI(){

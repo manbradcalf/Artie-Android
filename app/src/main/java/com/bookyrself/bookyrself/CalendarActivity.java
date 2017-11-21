@@ -24,4 +24,9 @@ public class CalendarActivity extends MainActivity {
 
     }
 
+    @Override
+    void checkAuth() {
+
+    }
+
 }

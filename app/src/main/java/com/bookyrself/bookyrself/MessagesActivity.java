@@ -28,11 +28,20 @@ public class MessagesActivity extends MainActivity {
 
     @Override
     void setLayout() {
+
+    }
+
+    @Override
+    void checkAuth() {
         if (auth.getCurrentUser() != null) {
             //Signed in
         } else {
+            //TODO: SmartLock disabled only for testing. Remove this before committing.
             startActivityForResult(
-                    AuthUI.getInstance().createSignInIntentBuilder().build(),
+                    AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .setIsSmartLockEnabled(false, true)
+                            .build(),
                     RC_SIGN_IN
             );
 

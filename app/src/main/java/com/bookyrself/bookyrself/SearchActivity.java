@@ -1,7 +1,5 @@
 package com.bookyrself.bookyrself;
 
-import android.content.res.ColorStateList;
-import android.os.Build;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -29,7 +27,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     private Button toButton;
     private Button searchButton;
     private SearchPresenter presenter;
-    private List<com.bookyrself.bookyrself.models.searchresponse.Hit> results;
+    private List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> results;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -131,9 +129,14 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         });
     }
 
+    @Override
+    void checkAuth() {
+
+    }
+
 
     @Override
-    public void searchResponseReady(List<com.bookyrself.bookyrself.models.searchresponse.Hit> hits) {
+    public void searchResponseReady(List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits) {
         recyclerView.removeAllViewsInLayout();
         boolSearchEditable = true;
         searchButton.setText("Edit Search");
@@ -179,6 +182,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
             public TextView cityStateTextView;
             public TextView hostTextView;
             public TextView eventNameTextView;
+            public TextView userIdTextView;
             public ImageView profileImageThumb;
 
 
@@ -188,6 +192,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                 hostTextView = view.findViewById(R.id.event_host_search_result);
                 eventNameTextView = view.findViewById(R.id.eventname_search_result);
                 profileImageThumb = view.findViewById(R.id.user_image_search_result);
+                userIdTextView = view.findViewById(R.id.userid);
             }
         }
 
@@ -202,6 +207,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
             holder.eventNameTextView.setText(results.get(position).get_source().getEventname());
             holder.hostTextView.setText(results.get(position).get_source().getHost());
             holder.cityStateTextView.setText(results.get(position).get_source().getCitystate());
+            holder.userIdTextView.setText(results.get(position).get_source().getGuid());
             Picasso.with(getApplicationContext())
                     .load("https://pbs.twimg.com/profile_images/749059478146785281/_gziqED3.jpg")
                     .placeholder(R.drawable.ic_profile_black_24dp)

@@ -1,5 +1,5 @@
 
-package com.bookyrself.bookyrself.models.searchresponse;
+package com.bookyrself.bookyrself.models.SearchResponseEvents;
 
 import java.util.List;
 import javax.annotation.Generated;

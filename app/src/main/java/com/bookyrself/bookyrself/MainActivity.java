@@ -7,12 +7,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
 public abstract class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
+    private static final int RC_SIGN_IN = 123;
     protected BottomNavigationView navigationView;
     protected FirebaseDatabase db;
     protected FirebaseAuth auth;
@@ -90,5 +92,7 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
     abstract int getNavigationMenuItemId();
 
     abstract void setLayout();
+
+    abstract void checkAuth();
 
 }

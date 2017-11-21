@@ -1,13 +1,25 @@
 package com.bookyrself.bookyrself;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ButtonBarLayout;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.Button;
+
+import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.ErrorCodes;
+import com.firebase.ui.auth.IdpResponse;
 
 public class ProfileActivity extends MainActivity {
+
+    private static final int RC_SIGN_IN = 123;
+    private Button btnSignOut;
+    private CoordinatorLayout coordinatorLayout;
 
     @Override
     int getContentViewId() {
@@ -21,7 +33,73 @@ public class ProfileActivity extends MainActivity {
 
     @Override
     void setLayout() {
+//        btnSignOut = findViewById(R.id.btnSignOut);
+//        btnSignOut.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                auth.signOut();
+//            }
+//        });
+        coordinatorLayout = findViewById(R.id.coordinator_layout_profile_activity);
+        checkAuth();
+    }
 
+    @Override
+    void checkAuth() {
+        if (auth.getCurrentUser() != null) {
+            //Signed in
+        } else {
+            //TODO: SmartLock disabled only for testing. Remove this before committing.
+            startActivityForResult(
+                    AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .setIsSmartLockEnabled(false, true)
+                            .build(),
+                    RC_SIGN_IN
+            );
+
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // RC_SIGN_IN is the request code you passed into startActivityForResult(...) when starting the sign in flow.
+        if (requestCode == RC_SIGN_IN) {
+            IdpResponse response = IdpResponse.fromResultIntent(data);
+
+            // Successfully signed in
+            if (resultCode == RESULT_OK) {
+                showSnackbar("You did it!");
+                return;
+            } else {
+                // Sign in failed
+                if (response == null) {
+                    // User pressed back button
+                    showSnackbar("Canceled");
+                    return;
+                }
+
+                if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
+                    showSnackbar("No Connection");
+                    return;
+                }
+
+                if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+                    showSnackbar("Unknown Error");
+                    return;
+                }
+            }
+
+            showSnackbar("Idk");
+        }
+    }
+
+    private void showSnackbar(String message) {
+        Snackbar snackbar = Snackbar
+                .make(coordinatorLayout, message, Snackbar.LENGTH_SHORT);
+
+        snackbar.show();
     }
 
 }
