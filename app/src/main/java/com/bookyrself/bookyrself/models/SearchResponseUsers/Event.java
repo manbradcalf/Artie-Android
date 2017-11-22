@@ -12,6 +12,8 @@ public class Event {
     private String mDate;
     @SerializedName("eventname")
     private String mEventname;
+    @SerializedName("id")
+    private Long mId;
 
     public String getDate() {
         return mDate;
@@ -27,6 +29,14 @@ public class Event {
 
     public void setEventname(String eventname) {
         mEventname = eventname;
+    }
+
+    public Long getId() {
+        return mId;
+    }
+
+    public void setId(Long id) {
+        mId = id;
     }
 
 }

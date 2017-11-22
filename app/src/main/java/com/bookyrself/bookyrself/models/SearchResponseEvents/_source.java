@@ -15,16 +15,14 @@ public class _source {
     private String mDate;
     @SerializedName("eventname")
     private String mEventname;
-    @SerializedName("guid")
-    private String mGuid;
     @SerializedName("host")
-    private String mHost;
+    private List<Host> mHost;
     @SerializedName("picture")
     private String mPicture;
     @SerializedName("tags")
     private List<String> mTags;
     @SerializedName("users")
-    private List<String> mUsers;
+    private List<User> mUsers;
 
     public String getCitystate() {
         return mCitystate;
@@ -50,19 +48,11 @@ public class _source {
         mEventname = eventname;
     }
 
-    public String getGuid() {
-        return mGuid;
-    }
-
-    public void setGuid(String guid) {
-        mGuid = guid;
-    }
-
-    public String getHost() {
+    public List<Host> getHost() {
         return mHost;
     }
 
-    public void setHost(String host) {
+    public void setHost(List<Host> host) {
         mHost = host;
     }
 
@@ -82,11 +72,11 @@ public class _source {
         mTags = tags;
     }
 
-    public List<String> getUsers() {
+    public List<User> getUsers() {
         return mUsers;
     }
 
-    public void setUsers(List<String> users) {
+    public void setUsers(List<User> users) {
         mUsers = users;
     }
 

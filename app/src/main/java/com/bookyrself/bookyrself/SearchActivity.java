@@ -205,9 +205,9 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             holder.eventNameTextView.setText(results.get(position).get_source().getEventname());
-            holder.hostTextView.setText(results.get(position).get_source().getHost());
+            holder.hostTextView.setText(results.get(position).get_source().getHost().get(0).getUsername());
             holder.cityStateTextView.setText(results.get(position).get_source().getCitystate());
-            holder.userIdTextView.setText(results.get(position).get_source().getGuid());
+            holder.userIdTextView.setText(results.get(position).get_id());
             Picasso.with(getApplicationContext())
                     .load("https://pbs.twimg.com/profile_images/749059478146785281/_gziqED3.jpg")
                     .placeholder(R.drawable.ic_profile_black_24dp)

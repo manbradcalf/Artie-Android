@@ -20,7 +20,7 @@ public class SearchService {
 
 
     public interface SearchAPI {
-        @POST("/firebase/events/_search")
+        @POST("/events/_search")
         Call<SearchResponse2> executeEventsSearch(@Body com.bookyrself.bookyrself.models.searchrequest.Body query);
     }
 

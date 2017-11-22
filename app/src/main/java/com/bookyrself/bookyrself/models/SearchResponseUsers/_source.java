@@ -13,12 +13,14 @@ public class _source {
     private String mBio;
     @SerializedName("citystate")
     private String mCitystate;
+    @SerializedName("email")
+    private String mEmail;
     @SerializedName("events")
     private List<Event> mEvents;
-    @SerializedName("guid")
-    private String mGuid;
     @SerializedName("phone")
     private String mPhone;
+    @SerializedName("picture")
+    private String mPicture;
     @SerializedName("tags")
     private List<String> mTags;
     @SerializedName("username")
@@ -40,6 +42,14 @@ public class _source {
         mCitystate = citystate;
     }
 
+    public String getEmail() {
+        return mEmail;
+    }
+
+    public void setEmail(String email) {
+        mEmail = email;
+    }
+
     public List<Event> getEvents() {
         return mEvents;
     }
@@ -48,20 +58,20 @@ public class _source {
         mEvents = events;
     }
 
-    public String getGuid() {
-        return mGuid;
-    }
-
-    public void setGuid(String guid) {
-        mGuid = guid;
-    }
-
     public String getPhone() {
         return mPhone;
     }
 
     public void setPhone(String phone) {
         mPhone = phone;
+    }
+
+    public String getPicture() {
+        return mPicture;
+    }
+
+    public void setPicture(String picture) {
+        mPicture = picture;
     }
 
     public List<String> getTags() {
