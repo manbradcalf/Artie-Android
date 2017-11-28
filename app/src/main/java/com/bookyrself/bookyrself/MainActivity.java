@@ -21,6 +21,7 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
     protected FirebaseApp firebaseApp;
 
 
+    //TODO: I'm creating a firebase app, db and auth every time I start an activity? This feels wrong
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

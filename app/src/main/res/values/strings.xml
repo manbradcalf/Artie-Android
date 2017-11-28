@@ -12,4 +12,5 @@
     <string name="title_activity_calendar">CalendarActivity</string>
     <string name="title_activity_profile">ProfileActivity</string>
     <string name="search_empty_state">Your search returned no results :( \nPlease try a different search</string>
+    <string name="userUrl"></string>
 </resources>

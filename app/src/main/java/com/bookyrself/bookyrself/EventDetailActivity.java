@@ -1,0 +1,199 @@
+package com.bookyrself.bookyrself;
+
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
+import com.bookyrself.bookyrself.models.EventDetailResponse.Host;
+import com.bookyrself.bookyrself.models.EventDetailResponse.User;
+import com.bookyrself.bookyrself.presenters.EventDetailPresenter;
+import com.bookyrself.bookyrself.models.EventDetailResponse.Host;
+import com.bookyrself.bookyrself.utils.RoundedTransformation;
+import com.squareup.picasso.Picasso;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.w3c.dom.Text;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * Created by benmedcalf on 11/22/17.
+ */
+
+public class EventDetailActivity extends AppCompatActivity implements EventDetailPresenter.EventDetailPresenterListener {
+
+    private TextView DateView;
+    private TextView Host;
+    private TextView HostCityState;
+    private TextView HostUrlTextView;
+    private ImageView HostImageView;
+    private ListView usersListView;
+    private List<User> users;
+    private EventDetailPresenter presenter;
+    private HashMap<String, String> idAndThumbUrlMap = new HashMap<>();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        presenter = new EventDetailPresenter(this);
+        Intent intent = getIntent();
+        String eventId = intent.getStringExtra("eventId");
+        String imgUrl = intent.getStringExtra("imgUrl");
+        presenter.getEventDetailData(eventId, imgUrl);
+        setContentView(R.layout.activity_event_detail);
+    }
+
+    @Override
+    public void eventDataResponseReady(EventDetailResponse data, String imgUrl) {
+        String date = data.getDate();
+        Host host = data.getHost().get(0);
+        String hostUsername = host.getUsername();
+        String hostCityState = host.getCitystate();
+        String hostURL = host.getUrl();
+        String linkedText = String.format("<a href=\"%s\">%s</a>", ("http://" + hostURL), hostURL);
+
+        //TODO: Find a way to get the profile thumb...that hopefully doesn't involve another re-index :-|
+
+        HostUrlTextView = findViewById(R.id.item_event_detail_url);
+        HostUrlTextView.setClickable(true);
+        HostUrlTextView.setText(Html.fromHtml(linkedText));
+        HostUrlTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+        DateView = findViewById(R.id.event_detail_date);
+        DateView.setText("Date");
+        DateFormat inputformat = new SimpleDateFormat("yyyy-MM-dd");
+        Date d = null;
+        try {
+            d = inputformat.parse(date);
+            DateFormat outputFormat = new SimpleDateFormat("EEEE, MMMM dd, yyyy");
+            String formattedDate = outputFormat.format(d);
+            DateView.setText(formattedDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        Host = findViewById(R.id.item_event_detail_username);
+        Host.setText(hostUsername);
+        HostCityState = findViewById(R.id.item_event_detail_citystate);
+        HostCityState.setText(hostCityState);
+        HostImageView = findViewById(R.id.item_event_detail_userthumb);
+        Picasso.with(getApplicationContext())
+                .load(imgUrl)
+                .placeholder(R.drawable.ic_profile_black_24dp)
+                .error(R.drawable.ic_profile_black_24dp)
+                .transform(new RoundedTransformation(50, 4))
+                .into(HostImageView);
+
+        usersListView = findViewById(R.id.event_detail_users_list);
+        users = data.getUsers();
+
+        for (int i=0; i < users.size(); i++) {
+            String userId = users.get(i).getUserId().toString();
+            presenter.getUserThumbUrl(userId);
+        }
+    }
+
+    @Override
+    public void showProgressbar(Boolean bool) {
+
+    }
+
+    //TODO: Seems kinda hacky that I'm using this method to check map sizes and then attach adapter
+    @Override
+    public void userThumbReady(String response, String id) {
+
+        idAndThumbUrlMap.put(id, response);
+        if (idAndThumbUrlMap.size() == users.size()) {
+            UsersListAdapter adapter = new UsersListAdapter(this, users, idAndThumbUrlMap);
+            usersListView.setAdapter(adapter);
+        }
+
+    }
+
+    private static class UsersListAdapter extends BaseAdapter {
+
+        private HashMap mMap;
+        private Context mContext;
+        private List<User> mUsers;
+        private LayoutInflater mInflater;
+
+
+        private UsersListAdapter(Context context, List<User> users, HashMap idAndThumbUrlMap) {
+            mUsers = users;
+            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            mContext = context;
+            mMap = idAndThumbUrlMap;
+        }
+
+        @Override
+        public int getCount() {
+            return mUsers.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return mUsers.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View rowView = mInflater.inflate(R.layout.item_event_detail_user, parent, false);
+            ImageView userThumb = rowView.findViewById(R.id.item_event_detail_userthumb);
+            TextView userName = rowView.findViewById(R.id.item_event_detail_username);
+            TextView cityState = rowView.findViewById(R.id.item_event_detail_citystate);
+            TextView userUrl = rowView.findViewById(R.id.item_event_detail_url);
+
+            User user = (User) getItem(position);
+
+            userName.setText(user.getUsername());
+            cityState.setText(user.getCitystate());
+            userUrl.setClickable(true);
+            userUrl.setMovementMethod(LinkMovementMethod.getInstance());
+            userUrl.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.e(this.toString(), "Testing the text click");
+                }
+            });
+            String linkedText =
+                    String.format("<a href=\"%s\">%s</a> ", ("http://" + user.getUrl()), user.getUrl());
+            userUrl.setText(Html.fromHtml(linkedText));
+
+            String userId = user.getUserId().toString();
+
+            Picasso.with(mContext)
+                    .load(String.valueOf(mMap.get(userId)))
+                    .placeholder(R.drawable.ic_profile_black_24dp)
+                    .error(R.drawable.ic_profile_black_24dp)
+                    .transform(new RoundedTransformation(50, 4))
+                    .into(userThumb);
+
+            return rowView;
+        }
+    }
+}

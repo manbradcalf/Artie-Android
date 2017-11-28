@@ -2,7 +2,12 @@ package com.bookyrself.bookyrself.presenters;
 
 import android.util.Log;
 
+import com.bookyrself.bookyrself.FirebaseService;
 import com.bookyrself.bookyrself.SearchService;
+import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
+import com.bookyrself.bookyrself.models.SearchResponseEvents.Hit;
+import com.bookyrself.bookyrself.models.SearchResponseEvents.SearchResponse2;
+import com.bookyrself.bookyrself.models.searchrequest.Body;
 import com.bookyrself.bookyrself.models.searchrequest.Bool;
 import com.bookyrself.bookyrself.models.searchrequest.Bool_;
 import com.bookyrself.bookyrself.models.searchrequest.Date;
@@ -10,15 +15,17 @@ import com.bookyrself.bookyrself.models.searchrequest.Filter;
 import com.bookyrself.bookyrself.models.searchrequest.Match;
 import com.bookyrself.bookyrself.models.searchrequest.MultiMatch;
 import com.bookyrself.bookyrself.models.searchrequest.Must;
-import com.bookyrself.bookyrself.models.searchrequest.Body;
 import com.bookyrself.bookyrself.models.searchrequest.Must_;
 import com.bookyrself.bookyrself.models.searchrequest.Query;
 import com.bookyrself.bookyrself.models.searchrequest.Range;
-import com.bookyrself.bookyrself.models.SearchResponseEvents.*;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,12 +35,13 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Created by benmedcalf on 9/16/17.
+ * Created by benmedcalf on 11/22/17.
  */
 
-public class SearchPresenter {
-    private final SearchPresenterListener mListener;
-    private final SearchService mService;
+public class EventDetailPresenter {
+
+    private final EventDetailPresenterListener mListener;
+    private final FirebaseService mFirebaseService;
     private DatabaseReference dbref;
     private ChildEventListener childEventListener;
     private FirebaseDatabase db;
@@ -41,52 +49,56 @@ public class SearchPresenter {
     /**
      * Contract / Listener
      */
-    public interface SearchPresenterListener {
-        void searchResponseReady(List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits);
-
-        void startDateChanged(String date);
-
-        void endDateChanged(String date);
+    public interface EventDetailPresenterListener {
+        void eventDataResponseReady(EventDetailResponse data, String imgUrl);
 
         void showProgressbar(Boolean bool);
 
-        void itemSelected(String id, String imgUrl);
+        void userThumbReady(String response, String id);
     }
 
 
     /**
      * Constructor
      */
-    public SearchPresenter(SearchPresenterListener listener, FirebaseDatabase db) {
+    public EventDetailPresenter(EventDetailPresenterListener listener) {
         this.mListener = listener;
-        this.mService = new SearchService();
+        this.mFirebaseService = new FirebaseService();
     }
 
     /**
      * Methods
      */
-    public void executeSearch(String what, String where, String fromWhen, String toWhen) {
+    public void getEventDetailData(String id, final String imgUrl) {
         mListener.showProgressbar(true);
-        final Query query = createQuery(what, where, fromWhen, toWhen);
-        final Body body = new Body();
-        body.setQuery(query);
-        body.setSize(100);
         //TODO: Make the index and type toggleable to users
-        mService
-                .getAPI()
-                .executeEventsSearch(body)
-                .enqueue(new Callback<SearchResponse2>() {
+        mFirebaseService.getAPI().getEventData(id)
+                .enqueue(new Callback<EventDetailResponse>() {
                     @Override
-                    public void onResponse(Call<SearchResponse2> call, Response<SearchResponse2> response) {
-                        Log.i(this.toString(), response.toString());
-                        if (response.body() != null) {
-                            List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits = response.body().getHits().getHits();
-                            mListener.searchResponseReady(hits);
-                        }
+                    public void onResponse(Call<EventDetailResponse> call, Response<EventDetailResponse> response) {
+                        EventDetailResponse data = response.body();
+                        mListener.eventDataResponseReady(data, imgUrl);
                     }
 
                     @Override
-                    public void onFailure(Call<SearchResponse2> call, Throwable t) {
+                    public void onFailure(Call<EventDetailResponse> call, Throwable t) {
+
+                    }
+                });
+    }
+
+    //TODO: Will the final "id" variable here be stuck on the first id assigned?
+    public void getUserThumbUrl(final String id) {
+        mFirebaseService.getAPI().getUserThumbUrl(id)
+                .enqueue(new Callback<String>() {
+                    @Override
+                    public void onResponse(Call<String> call, Response<String> response) {
+                        String data = response.body();
+                        mListener.userThumbReady(data, id);
+                    }
+
+                    @Override
+                    public void onFailure(Call<String> call, Throwable t) {
 
                     }
                 });
@@ -140,13 +152,5 @@ public class SearchPresenter {
         }
 
         return query;
-    }
-
-    public void setStartDate(String date) {
-        mListener.startDateChanged(date);
-    }
-
-    public void setEndDate(String date) {
-        mListener.endDateChanged(date);
     }
 }

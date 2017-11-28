@@ -30,7 +30,12 @@
         <activity
             android:name=".ProfileActivity"
             android:label="@string/title_activity_profile"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".EventDetailActivity"
+            android:label="EventDetail"
+            android:theme="@style/AppTheme.NoActionBar"/>
+
     </application>
 
 </manifest>

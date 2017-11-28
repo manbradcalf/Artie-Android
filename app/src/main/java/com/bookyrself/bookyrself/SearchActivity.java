@@ -1,5 +1,6 @@
 package com.bookyrself.bookyrself;
 
+import android.content.Intent;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -169,6 +170,14 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         }
     }
 
+    @Override
+    public void itemSelected(String id, String imgUrl) {
+        Intent intent = new Intent(this, EventDetailActivity.class);
+        intent.putExtra("eventId", id);
+        intent.putExtra("imgUrl", imgUrl);
+        startActivity(intent);
+    }
+
     /**
      * Adapter
      */
@@ -202,20 +211,48 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
             return new ViewHolder(view);
         }
 
+        //TODO: The app crashes if any of the properties in _source are null. How to remedy this?
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            holder.eventNameTextView.setText(results.get(position).get_source().getEventname());
-            holder.hostTextView.setText(results.get(position).get_source().getHost().get(0).getUsername());
-            holder.cityStateTextView.setText(results.get(position).get_source().getCitystate());
-            holder.userIdTextView.setText(results.get(position).get_id());
-            Picasso.with(getApplicationContext())
-                    .load("https://pbs.twimg.com/profile_images/749059478146785281/_gziqED3.jpg")
-                    .placeholder(R.drawable.ic_profile_black_24dp)
-                    .error(R.drawable.ic_profile_black_24dp)
-                    .transform(new RoundedTransformation(50, 4))
-                    .resizeDimen(R.dimen.user_image_thumb_list_height, R.dimen.user_image_thumb_list_width)
-                    .centerCrop()
-                    .into(holder.profileImageThumb);
+        public void onBindViewHolder(ViewHolder holder, int position) {{
+                holder.eventNameTextView.setText(results
+                        .get(position)
+                        .get_source()
+                        .getEventname());
+                holder.hostTextView.setText(results.get(position)
+                        .get_source()
+                        .getHost()
+                        .get(0)
+                        .getUsername());
+                holder.cityStateTextView.setText(results
+                        .get(position)
+                        .get_source()
+                        .getCitystate());
+                holder.userIdTextView.setText(results
+                        .get(position)
+                        .get_id());
+                //TODO: Creating adapterPosition here to be used in onClick feels like a hack but isn't particularly egregious IMO.
+                final int adapterPosition = holder.getAdapterPosition();
+
+                Picasso.with(getApplicationContext())
+                        .load("https://pbs.twimg.com/profile_images/749059478146785281/_gziqED3.jpg")
+                        .placeholder(R.drawable.ic_profile_black_24dp)
+                        .error(R.drawable.ic_profile_black_24dp)
+                        .transform(new RoundedTransformation(50, 4))
+                        .resizeDimen(R.dimen.user_image_thumb_list_height, R.dimen.user_image_thumb_list_width)
+                        .centerCrop()
+                        .into(holder.profileImageThumb);
+
+                holder.profileImageThumb.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        itemSelected(results
+                                .get(adapterPosition)
+                                .get_id(), results.get(adapterPosition).get_source().getPicture());
+                    }
+                });
+
+
+            }
         }
 
         @Override
