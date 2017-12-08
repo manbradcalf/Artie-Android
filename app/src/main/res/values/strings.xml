@@ -13,4 +13,7 @@
     <string name="title_activity_profile">ProfileActivity</string>
     <string name="search_empty_state">Your search returned no results :( \nPlease try a different search</string>
     <string name="userUrl"></string>
+    <string name="search_what_query_hint">What are you looking for?</string>
+    <string name="search_where_query_hint">Where are you looking for it?</string>
+
 </resources>

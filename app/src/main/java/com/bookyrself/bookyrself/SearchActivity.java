@@ -1,6 +1,8 @@
 package com.bookyrself.bookyrself;
 
 import android.content.Intent;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -20,6 +22,7 @@ import java.util.List;
 
 public class SearchActivity extends MainActivity implements SearchPresenter.SearchPresenterListener {
 
+    private static final String LIST_STATE_KEY = "LIST_STATE";
     private SearchView searchViewWhat;
     private SearchView searchViewWhere;
     private ProgressBar progressBar;
@@ -33,6 +36,8 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private Boolean boolSearchEditable = false;
+    private Parcelable listState;
+
 
     public static final int FLAG_START_DATE = 0;
     public static final int FLAG_END_DATE = 1;
@@ -55,9 +60,10 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         searchViewWhat = (SearchView) findViewById(R.id.search_what);
-        searchViewWhat.setQueryHint("test");
+        searchViewWhat.setQueryHint(getString(R.string.search_what_query_hint));
         searchViewWhere = (SearchView) findViewById(R.id.search_where);
         searchViewWhere.setVisibility(View.GONE);
+        searchViewWhere.setQueryHint(getString(R.string.search_where_query_hint));
         fromButton = (Button) findViewById(R.id.from_button);
         fromButton.setVisibility(View.GONE);
         toButton = (Button) findViewById(R.id.to_button);
@@ -178,6 +184,32 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         startActivity(intent);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+
+        //Save list state
+        listState = layoutManager.onSaveInstanceState();
+        state.putParcelable(LIST_STATE_KEY, listState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle state) {
+        super.onRestoreInstanceState(state);
+        if (listState != null) {
+            layoutManager.onRestoreInstanceState(listState);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (listState != null) {
+            layoutManager.onRestoreInstanceState(listState);
+        }
+    }
+
     /**
      * Adapter
      */
@@ -213,7 +245,8 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
 
         //TODO: The app crashes if any of the properties in _source are null. How to remedy this?
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {{
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            {
                 holder.eventNameTextView.setText(results
                         .get(position)
                         .get_source()
