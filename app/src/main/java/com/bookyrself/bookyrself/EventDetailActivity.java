@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -46,6 +47,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     private TextView Host;
     private TextView HostCityState;
     private TextView HostUrlTextView;
+    private Toolbar Toolbar;
     private ImageView HostImageView;
     private ListView usersListView;
     private List<User> users;
@@ -55,12 +57,19 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_event_detail);
+
+        Toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(Toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         presenter = new EventDetailPresenter(this);
+
         Intent intent = getIntent();
         String eventId = intent.getStringExtra("eventId");
         String imgUrl = intent.getStringExtra("imgUrl");
         presenter.getEventDetailData(eventId, imgUrl);
-        setContentView(R.layout.activity_event_detail);
+
     }
 
     @Override
@@ -73,7 +82,6 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         String linkedText = String.format("<a href=\"%s\">%s</a>", ("http://" + hostURL), hostURL);
 
         //TODO: Find a way to get the profile thumb...that hopefully doesn't involve another re-index :-|
-
         HostUrlTextView = findViewById(R.id.item_event_detail_url);
         HostUrlTextView.setClickable(true);
         HostUrlTextView.setText(Html.fromHtml(linkedText));
@@ -107,7 +115,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         usersListView = findViewById(R.id.event_detail_users_list);
         users = data.getUsers();
 
-        for (int i=0; i < users.size(); i++) {
+        for (int i = 0; i < users.size(); i++) {
             String userId = users.get(i).getUserId().toString();
             presenter.getUserThumbUrl(userId);
         }
@@ -128,6 +136,12 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             usersListView.setAdapter(adapter);
         }
 
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     private static class UsersListAdapter extends BaseAdapter {
