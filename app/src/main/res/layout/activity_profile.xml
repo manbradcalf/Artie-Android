@@ -6,7 +6,7 @@
     android:id="@+id/coordinator_layout_profile_activity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.bookyrself.bookyrself.ProfileActivity">
+    tools:context="com.bookyrself.bookyrself.views.ProfileActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"

@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself;
+package com.bookyrself.bookyrself.views;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,24 +11,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
 import com.bookyrself.bookyrself.models.EventDetailResponse.Host;
 import com.bookyrself.bookyrself.models.EventDetailResponse.User;
 import com.bookyrself.bookyrself.presenters.EventDetailPresenter;
-import com.bookyrself.bookyrself.models.EventDetailResponse.Host;
 import com.bookyrself.bookyrself.utils.RoundedTransformation;
 import com.squareup.picasso.Picasso;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.text.DateFormat;
 import java.text.ParseException;

@@ -1,34 +1,10 @@
 package com.bookyrself.bookyrself.presenters;
 
-import android.util.Log;
-
-import com.bookyrself.bookyrself.FirebaseService;
-import com.bookyrself.bookyrself.SearchService;
+import com.bookyrself.bookyrself.services.FirebaseService;
 import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
-import com.bookyrself.bookyrself.models.SearchResponseEvents.Hit;
-import com.bookyrself.bookyrself.models.SearchResponseEvents.SearchResponse2;
-import com.bookyrself.bookyrself.models.searchrequest.Body;
-import com.bookyrself.bookyrself.models.searchrequest.Bool;
-import com.bookyrself.bookyrself.models.searchrequest.Bool_;
-import com.bookyrself.bookyrself.models.searchrequest.Date;
-import com.bookyrself.bookyrself.models.searchrequest.Filter;
-import com.bookyrself.bookyrself.models.searchrequest.Match;
-import com.bookyrself.bookyrself.models.searchrequest.MultiMatch;
-import com.bookyrself.bookyrself.models.searchrequest.Must;
-import com.bookyrself.bookyrself.models.searchrequest.Must_;
-import com.bookyrself.bookyrself.models.searchrequest.Query;
-import com.bookyrself.bookyrself.models.searchrequest.Range;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;

@@ -1,31 +1,26 @@
-package com.bookyrself.bookyrself;
+package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
+import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
 import com.bookyrself.bookyrself.utils.DatePickerDialogFragment;
 import com.bookyrself.bookyrself.utils.RoundedTransformation;
 import com.squareup.picasso.Picasso;
 
-import org.w3c.dom.Text;
-
-import java.io.IOException;
 import java.util.List;
 
 public class SearchActivity extends MainActivity implements SearchPresenter.SearchPresenterListener {

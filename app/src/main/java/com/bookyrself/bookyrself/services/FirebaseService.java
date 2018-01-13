@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself;
+package com.bookyrself.bookyrself.services;
 
 import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
 import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;

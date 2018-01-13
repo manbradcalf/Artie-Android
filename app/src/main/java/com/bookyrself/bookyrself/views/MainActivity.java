@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself;
+package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.firebase.ui.auth.AuthUI;
+import com.bookyrself.bookyrself.R;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;

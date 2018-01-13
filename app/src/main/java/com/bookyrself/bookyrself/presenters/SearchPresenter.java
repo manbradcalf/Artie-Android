@@ -2,9 +2,7 @@ package com.bookyrself.bookyrself.presenters;
 
 import android.util.Log;
 
-import com.bookyrself.bookyrself.FirebaseService;
-import com.bookyrself.bookyrself.SearchService;
-import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
+import com.bookyrself.bookyrself.services.SearchService;
 import com.bookyrself.bookyrself.models.SearchResponseUsers.SearchResponseUsers;
 import com.bookyrself.bookyrself.models.searchrequest.Bool;
 import com.bookyrself.bookyrself.models.searchrequest.Bool_;
@@ -19,13 +17,9 @@ import com.bookyrself.bookyrself.models.searchrequest.Query;
 import com.bookyrself.bookyrself.models.searchrequest.Range;
 import com.bookyrself.bookyrself.models.SearchResponseEvents.*;
 import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
