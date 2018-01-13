@@ -16,7 +16,6 @@ import retrofit2.http.POST;
  */
 public class SearchService {
 
-    private static String BASE_URL_BOOKYRSELF_FIREBASE = "https://bookyrself-staging.firebaseio.com/";
     private static String BASE_URL_ES = "https://pine-4785036.us-east-1.bonsaisearch.net/";
 
 
