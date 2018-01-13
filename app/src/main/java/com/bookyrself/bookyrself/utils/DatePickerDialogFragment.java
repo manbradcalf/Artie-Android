@@ -18,8 +18,8 @@ import java.util.Locale;
 
 public class DatePickerDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener, DatePickerDialogPresenter.DatePickerDialogPresenterListener {
 
-    public static final int FLAG_START_DATE = 0;
-    public static final int FLAG_END_DATE = 1;
+    public static final int FLAG_START_DATE = 2;
+    public static final int FLAG_END_DATE = 3;
     private int flag = 0;
     private SearchPresenter mSearchPresenter;
 

@@ -2,7 +2,10 @@ package com.bookyrself.bookyrself.presenters;
 
 import android.util.Log;
 
+import com.bookyrself.bookyrself.FirebaseService;
 import com.bookyrself.bookyrself.SearchService;
+import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
+import com.bookyrself.bookyrself.models.SearchResponseUsers.SearchResponseUsers;
 import com.bookyrself.bookyrself.models.searchrequest.Bool;
 import com.bookyrself.bookyrself.models.searchrequest.Bool_;
 import com.bookyrself.bookyrself.models.searchrequest.Date;
@@ -16,9 +19,13 @@ import com.bookyrself.bookyrself.models.searchrequest.Query;
 import com.bookyrself.bookyrself.models.searchrequest.Range;
 import com.bookyrself.bookyrself.models.SearchResponseEvents.*;
 import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,21 +44,26 @@ public class SearchPresenter {
     private DatabaseReference dbref;
     private ChildEventListener childEventListener;
     private FirebaseDatabase db;
+    private static final int USER_SEARCH_FLAG = 0;
+    private static final int EVENT_SEARCH_FLAG = 1;
 
-    /**
-     * Contract / Listener
-     */
-    public interface SearchPresenterListener {
-        void searchResponseReady(List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits);
+/**
+ * Contract / Listener
+ */
+public interface SearchPresenterListener {
+    void searchEventsResponseReady(List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits);
 
-        void startDateChanged(String date);
+    void searchUsersResponseReady(List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> hits);
 
-        void endDateChanged(String date);
+    void startDateChanged(String date);
 
-        void showProgressbar(Boolean bool);
+    void endDateChanged(String date);
 
-        void itemSelected(String id, String imgUrl);
-    }
+    void showProgressbar(Boolean bool);
+
+    void itemSelected(String id, String imgUrl);
+
+}
 
 
     /**
@@ -60,36 +72,59 @@ public class SearchPresenter {
     public SearchPresenter(SearchPresenterListener listener, FirebaseDatabase db) {
         this.mListener = listener;
         this.mService = new SearchService();
+
     }
 
     /**
      * Methods
      */
-    public void executeSearch(String what, String where, String fromWhen, String toWhen) {
+    public void executeSearch(int searchType, String what, String where, String fromWhen, String toWhen) {
         mListener.showProgressbar(true);
         final Query query = createQuery(what, where, fromWhen, toWhen);
         final Body body = new Body();
         body.setQuery(query);
         body.setSize(100);
         //TODO: Make the index and type toggleable to users
-        mService
-                .getAPI()
-                .executeEventsSearch(body)
-                .enqueue(new Callback<SearchResponse2>() {
-                    @Override
-                    public void onResponse(Call<SearchResponse2> call, Response<SearchResponse2> response) {
-                        Log.i(this.toString(), response.toString());
-                        if (response.body() != null) {
-                            List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits = response.body().getHits().getHits();
-                            mListener.searchResponseReady(hits);
+        if (searchType == EVENT_SEARCH_FLAG) {
+            mService
+                    .getAPI()
+                    .executeEventsSearch(body)
+                    .enqueue(new Callback<SearchResponse2>() {
+                        @Override
+                        public void onResponse(Call<SearchResponse2> call, Response<SearchResponse2> response) {
+                            Log.i(this.toString(), response.toString());
+                            if (response.body() != null) {
+                                List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits = response.body().getHits().getHits();
+                                mListener.searchEventsResponseReady(hits);
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onFailure(Call<SearchResponse2> call, Throwable t) {
+                        @Override
+                        public void onFailure(Call<SearchResponse2> call, Throwable t) {
+                            Log.e(getClass().toString(), call.request().body().toString());
+                            Log.e(getClass().toString(), t.getMessage());
+                        }
+                    });
+        } else {
+            mService
+                    .getAPI()
+                    .executeUsersSearch(body)
+                    .enqueue(new Callback<SearchResponseUsers>() {
+                        @Override
+                        public void onResponse(Call<SearchResponseUsers> call, Response<SearchResponseUsers> response) {
+                            if (response.body() != null) {
+                                List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> hits = response.body().getHits().getHits();
+                                mListener.searchUsersResponseReady(hits);
+                            }
+                        }
 
-                    }
-                });
+                        @Override
+                        public void onFailure(Call<SearchResponseUsers> call, Throwable t) {
+                            Log.e(getClass().toString(), call.request().body().toString());
+                            Log.e(getClass().toString(), t.getMessage());
+                        }
+                    });
+        }
     }
 
     private Query createQuery(String what, String where, String fromWhen, String toWhen) {

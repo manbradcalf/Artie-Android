@@ -177,7 +177,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View rowView = mInflater.inflate(R.layout.item_event_detail_user, parent, false);
-            ImageView userThumb = rowView.findViewById(R.id.item_event_detail_userthumb);
+            final ImageView userThumb = rowView.findViewById(R.id.item_event_detail_userthumb);
             TextView userName = rowView.findViewById(R.id.item_event_detail_username);
             TextView cityState = rowView.findViewById(R.id.item_event_detail_citystate);
             TextView userUrl = rowView.findViewById(R.id.item_event_detail_url);
@@ -206,6 +206,17 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                     .error(R.drawable.ic_profile_black_24dp)
                     .transform(new RoundedTransformation(50, 4))
                     .into(userThumb);
+
+            userThumb.setTag(R.id.item_event_detail_userthumb, user.getUserId());
+
+            userThumb.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(mContext, ProfileActivity.class);
+                    intent.putExtra("userId", (Long) userThumb.getTag(R.id.item_event_detail_userthumb));
+                    mContext.startActivity(intent);
+                }
+            });
 
             return rowView;
         }

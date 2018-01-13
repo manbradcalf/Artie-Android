@@ -1,7 +1,6 @@
 
 package com.bookyrself.bookyrself.models.SearchResponseUsers;
 
-import java.util.List;
 import javax.annotation.Generated;
 import com.google.gson.annotations.SerializedName;
 
@@ -10,34 +9,44 @@ import com.google.gson.annotations.SerializedName;
 public class SearchResponseUsers {
 
     @SerializedName("hits")
-    private List<Hit> mHits;
-    @SerializedName("max_score")
-    private Double mMaxScore;
-    @SerializedName("total")
-    private Long mTotal;
+    private Hits mHits;
+    @SerializedName("timed_out")
+    private Boolean mTimedOut;
+    @SerializedName("took")
+    private Long mTook;
+    @SerializedName("_shards")
+    private com.bookyrself.bookyrself.models.SearchResponseUsers._shards m_shards;
 
-    public List<Hit> getHits() {
+    public Hits getHits() {
         return mHits;
     }
 
-    public void setHits(List<Hit> hits) {
+    public void setHits(Hits hits) {
         mHits = hits;
     }
 
-    public Double getMaxScore() {
-        return mMaxScore;
+    public Boolean getTimedOut() {
+        return mTimedOut;
     }
 
-    public void setMaxScore(Double maxScore) {
-        mMaxScore = maxScore;
+    public void setTimedOut(Boolean timedOut) {
+        mTimedOut = timedOut;
     }
 
-    public Long getTotal() {
-        return mTotal;
+    public Long getTook() {
+        return mTook;
     }
 
-    public void setTotal(Long total) {
-        mTotal = total;
+    public void setTook(Long took) {
+        mTook = took;
+    }
+
+    public com.bookyrself.bookyrself.models.SearchResponseUsers._shards get_shards() {
+        return m_shards;
+    }
+
+    public void set_shards(com.bookyrself.bookyrself.models.SearchResponseUsers._shards _shards) {
+        m_shards = _shards;
     }
 
 }

@@ -65,6 +65,30 @@
 
         </LinearLayout>
 
+
+        <RadioGroup
+            android:id="@+id/radio_group_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/users_toggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Users" />
+
+            <RadioButton
+                android:id="@+id/events_toggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Events" />
+
+        </RadioGroup>
+
     </android.support.design.widget.AppBarLayout>
 
     <RelativeLayout
