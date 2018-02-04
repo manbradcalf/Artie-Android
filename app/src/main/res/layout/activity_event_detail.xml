@@ -13,6 +13,7 @@
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
+            android:text="Event Info"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
@@ -20,57 +21,58 @@
 
     </android.support.design.widget.AppBarLayout>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginTop="?attr/actionBarSize"
-    android:orientation="vertical"
-    android:id="@+id/event_detail_linearlayout">
-
-    <TextView
-        android:id="@+id/event_detail_date"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/event_detail_linearlayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="Nov 20th"
-        android:textAlignment="center"
-        android:textAppearance="@android:style/TextAppearance.Material.Title"
-        android:textSize="24sp" />
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/event_detail_hosted_by_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Hosted By"
-        android:textAlignment="center"
-        android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-        android:layout_marginBottom="8dp"/>
+        <TextView
+            android:id="@+id/event_detail_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="Nov 20th"
+            android:textAlignment="center"
+            android:textAppearance="@android:style/TextAppearance.Material.Title"
+            android:textSize="24sp" />
 
-    <include
-        android:id="@+id/event_detail_host_item"
-        layout="@layout/item_event_detail_user"
-        android:layout_width="400dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="32dp" />
+        <TextView
+            android:id="@+id/event_detail_hosted_by_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Hosted By"
+            android:textAlignment="center"
+            android:textAppearance="@android:style/TextAppearance.Material.Subhead" />
 
-    <TextView
-        android:id="@+id/event_detail_with_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="With"
-        android:textAlignment="center"
-        android:textAppearance="@android:style/TextAppearance.Material.Subhead" />
+        <include
+            android:id="@+id/event_detail_host_item"
+            layout="@layout/item_event_detail_user"
+            android:layout_width="400dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="32dp" />
 
-    <ListView
-        android:id="@+id/event_detail_users_list"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/event_detail_with_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="With"
+            android:textAlignment="center"
+            android:textAppearance="@android:style/TextAppearance.Material.Subhead" />
 
-    </ListView>
+        <ListView
+            android:id="@+id/event_detail_users_list"
+            android:layout_width="400dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
 
-</LinearLayout>
+        </ListView>
+
+    </LinearLayout>
 
 
 </android.support.design.widget.CoordinatorLayout>

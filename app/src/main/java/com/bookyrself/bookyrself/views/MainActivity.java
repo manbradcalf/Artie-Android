@@ -30,7 +30,7 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
         setContentView(getContentViewId());
         db = FirebaseDatabase.getInstance("https://bookyrself-staging.firebaseio.com/");
         auth = FirebaseAuth.getInstance();
-        navigationView = (BottomNavigationView) findViewById(R.id.navigation);
+        navigationView = findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(this);
         setLayout();
     }
