@@ -25,13 +25,11 @@ import java.util.List;
 
 public class SearchActivity extends MainActivity implements SearchPresenter.SearchPresenterListener {
 
+    public static final int FLAG_START_DATE = 2;
+    public static final int FLAG_END_DATE = 3;
     private static final String LIST_STATE_KEY = "LIST_STATE";
     private static final int USER_SEARCH_FLAG = 0;
     private static final int EVENT_SEARCH_FLAG = 1;
-    public static final int FLAG_START_DATE = 2;
-    public static final int FLAG_END_DATE = 3;
-
-    private int searchType;
     private SearchView searchViewWhat;
     private SearchView searchViewWhere;
     private ProgressBar progressBar;
@@ -46,7 +44,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     private List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> eventsResults;
     private List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> usersResults;
     private RecyclerView recyclerView;
-    private resultsAdapter adapter;
+    private ResultsAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private Boolean boolSearchEditable = false;
     private Parcelable listState;
@@ -62,9 +60,9 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
 
     @Override
     void setLayout() {
-        presenter = new SearchPresenter(this, db);
+        presenter = new SearchPresenter(this);
         recyclerView = (RecyclerView) findViewById(R.id.search_recycler_view);
-        adapter = new resultsAdapter();
+        adapter = new ResultsAdapter();
         recyclerView.setAdapter(adapter);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
@@ -91,14 +89,14 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         emptyStateText.setVisibility(View.GONE);
 
 
-                    /**
-                     * SearchView for What field
-                     */
-                    searchViewWhat.setOnSearchClickListener(new View.OnClickListener()
+        /**
+         * SearchView for What field
+         */
+        searchViewWhat.setOnSearchClickListener(new View.OnClickListener()
 
-            {
-                @Override
-                public void onClick (View view){
+        {
+            @Override
+            public void onClick(View view) {
                 searchViewWhere.setVisibility((View.VISIBLE));
                 fromButton.setVisibility(View.VISIBLE);
                 toButton.setVisibility(View.VISIBLE);
@@ -107,54 +105,56 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                 usersButton.setVisibility(View.VISIBLE);
                 searchButton.setText("Search!");
             }
-            });
+        });
 
-            /**
-             * Buttons for "From" and "To" date fields
-             */
+        /**
+         * Buttons for "From" and "To" date fields
+         */
         fromButton.setOnClickListener(new View.OnClickListener()
 
-            {
-                @Override
-                public void onClick (View view){
+        {
+            @Override
+            public void onClick(View view) {
                 DatePickerDialogFragment dialog = new DatePickerDialogFragment();
                 dialog.setFlag(FLAG_START_DATE);
                 dialog.setmSearchPresenter(presenter);
                 dialog.show(getFragmentManager(), "datePicker");
             }
-            });
+        });
 
         toButton.setOnClickListener(new View.OnClickListener()
 
-            {
-                @Override
-                public void onClick (View view){
+        {
+            @Override
+            public void onClick(View view) {
                 DatePickerDialogFragment dialog = new DatePickerDialogFragment();
                 dialog.setFlag(FLAG_END_DATE);
                 dialog.setmSearchPresenter(presenter);
                 dialog.show(getFragmentManager(), "datePicker");
             }
-            });
+        });
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
 
-            {
-                @Override
-                public void onCheckedChanged (RadioGroup group,int checkedId){
+        {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
 
             }
-            });
+        });
 
-            //TODO: I don't love the "search button". Could get rid of it? Could change it?
-            // Either way, the following code will be what happens when a user submits a search
-            // from the searchactivity
+        //TODO: I don't love the "search button". Could get rid of it? Could change it?
+        // Either way, the following code will be what happens when a user submits a search
+        // from the searchactivity
         searchButton.setOnClickListener(new View.OnClickListener()
 
-            {
-                @Override
-                public void onClick (View view){
+        {
+            @Override
+            public void onClick(View view) {
                 if (!boolSearchEditable) {
                     if (eventsButton.isChecked()) {
+                        eventsResults = null;
+                        usersResults = null;
                         presenter.executeSearch(
                                 EVENT_SEARCH_FLAG,
                                 searchViewWhat.getQuery().toString(),
@@ -166,9 +166,8 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                         toButton.setVisibility(View.GONE);
                         radioGroup.setVisibility(View.GONE);
                     } else if (usersButton.isChecked()) {
-                        // CLearing results member variables so getSize can work sanely
-//                        eventsResults = null;
-//                        usersResults = null;
+                        eventsResults = null;
+                        usersResults = null;
                         presenter.executeSearch(
                                 USER_SEARCH_FLAG,
                                 searchViewWhat.getQuery().toString(),
@@ -179,248 +178,300 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                         fromButton.setVisibility(View.GONE);
                         toButton.setVisibility(View.GONE);
                         radioGroup.setVisibility(View.GONE);
-
                     }
                 } else {
                     boolSearchEditable = false;
                     searchButton.setText("SEARCH!");
-                    searchViewWhere.setVisibility((View.VISIBLE));
-                    fromButton.setVisibility(View.VISIBLE);
-                    toButton.setVisibility(View.VISIBLE);
-                    radioGroup.setVisibility(View.VISIBLE);
-
+                    showSearchBar(true);
                 }
             }
-            });
+        });
+    }
+
+    @Override
+    void checkAuth() {
+
+    }
+
+
+    @Override
+    public void searchEventsResponseReady
+            (List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits) {
+
+        if (recyclerView.getVisibility() == View.GONE) {
+            recyclerView.setVisibility(View.VISIBLE);
+        }
+        eventsResults = hits;
+        adapter.setViewType(ResultsAdapter.EVENT_VIEW_TYPE);
+        boolSearchEditable = true;
+        searchButton.setText("Edit Search");
+        adapter.notifyDataSetChanged();
+        showProgressbar(false);
+        if (hits.isEmpty()) {
+            emptyStateText.setVisibility(View.VISIBLE);
+        } else {
+            emptyStateText.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void searchUsersResponseReady
+            (List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> hits) {
+
+        // I hide the recyclerview to show the error empty state
+        // If the previous search returned an error empty state, recyclerview
+        // will have a visibility of GONE here. Fix that
+        if (recyclerView.getVisibility() == View.GONE) {
+            recyclerView.setVisibility(View.VISIBLE);
+        }
+        usersResults = hits;
+        adapter.setViewType(ResultsAdapter.USER_VIEW_TYPE);
+        boolSearchEditable = true;
+        searchButton.setText("Edit Search");
+        adapter.notifyDataSetChanged();
+        showProgressbar(false);
+        if (hits.isEmpty()) {
+            emptyStateText.setText(R.string.search_empty_state);
+            showSearchBar(true);
+            emptyStateText.setVisibility(View.VISIBLE);
+        } else {
+            emptyStateText.setVisibility(View.GONE);
+        }
+    }
+
+    private void showSearchBar(Boolean bool) {
+        if (bool) {
+            searchViewWhat.setVisibility(View.VISIBLE);
+            searchViewWhere.setVisibility(View.VISIBLE);
+            toButton.setVisibility(View.VISIBLE);
+            fromButton.setVisibility(View.VISIBLE);
+            searchButton.setVisibility(View.VISIBLE);
+            searchButton.setText(R.string.title_search);
+            radioGroup.setVisibility(View.VISIBLE);
+        } else {
+            searchViewWhat.setVisibility(View.GONE);
+            searchViewWhere.setVisibility(View.GONE);
+            toButton.setVisibility(View.GONE);
+            fromButton.setVisibility(View.GONE);
+            searchButton.setVisibility(View.GONE);
+            radioGroup.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void startDateChanged(String date) {
+        fromButton.setText(date);
+    }
+
+    @Override
+    public void endDateChanged(String date) {
+        toButton.setText(date);
+    }
+
+    @Override
+    public void showProgressbar(Boolean bool) {
+        if (bool) {
+            progressBar.setVisibility(View.VISIBLE);
+        } else {
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void itemSelected(String id, String imgUrl) {
+        Intent intent = new Intent(this, EventDetailActivity.class);
+        intent.putExtra("eventId", id);
+        intent.putExtra("imgUrl", imgUrl);
+        startActivity(intent);
+    }
+
+    @Override
+    public void showError() {
+        recyclerView.setVisibility(View.GONE);
+        emptyStateText.setText(R.string.search_error);
+        progressBar.setVisibility(View.GONE);
+        emptyStateText.setVisibility(View.VISIBLE);
+        showSearchBar(true);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+
+        //Save list state
+        listState = layoutManager.onSaveInstanceState();
+        state.putParcelable(LIST_STATE_KEY, listState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle state) {
+        super.onRestoreInstanceState(state);
+        if (listState != null) {
+            layoutManager.onRestoreInstanceState(listState);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (listState != null) {
+            layoutManager.onRestoreInstanceState(listState);
+        }
+    }
+
+    /**
+     * Adapter
+     */
+    class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+        private static final int USER_VIEW_TYPE = 0;
+        private static final int EVENT_VIEW_TYPE = 1;
+        private int mViewType;
+
+
+        public ResultsAdapter() {
+
+        }
+
+        public void setViewType(int viewType) {
+            mViewType = viewType;
+        }
+
+
+        @Override
+        public int getItemViewType(int position) {
+            return mViewType;
         }
 
         @Override
-        void checkAuth () {
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        }
+            View view;
 
-
-        @Override
-        public void searchEventsResponseReady
-        (List < com.bookyrself.bookyrself.models.SearchResponseEvents.Hit > hits) {
-            recyclerView.removeAllViewsInLayout();
-            adapter.setViewType(1);
-            boolSearchEditable = true;
-            searchButton.setText("Edit Search");
-            eventsResults = hits;
-            adapter.notifyDataSetChanged();
-            showProgressbar(false);
-            if (hits.isEmpty()) {
-                emptyStateText.setVisibility(View.VISIBLE);
-            } else {
-                emptyStateText.setVisibility(View.GONE);
-            }
-        }
-
-        @Override
-        public void searchUsersResponseReady
-        (List < com.bookyrself.bookyrself.models.SearchResponseUsers.Hit > hits) {
-            recyclerView.removeAllViewsInLayout();
-            adapter.setViewType(0);
-            boolSearchEditable = true;
-            searchButton.setText("Edit Search");
-            usersResults = hits;
-            adapter.notifyDataSetChanged();
-            showProgressbar(false);
-            if (hits.isEmpty()) {
-                emptyStateText.setVisibility(View.VISIBLE);
-            } else {
-                emptyStateText.setVisibility(View.GONE);
-            }
-        }
-
-        @Override
-        public void startDateChanged (String date){
-            fromButton.setText(date);
-        }
-
-        @Override
-        public void endDateChanged (String date){
-            toButton.setText(date);
-        }
-
-        @Override
-        public void showProgressbar (Boolean bool){
-            if (bool) {
-                progressBar.setVisibility(View.VISIBLE);
-            } else {
-                progressBar.setVisibility(View.GONE);
-            }
-        }
-
-        @Override
-        public void itemSelected (String id, String imgUrl){
-            Intent intent = new Intent(this, EventDetailActivity.class);
-            intent.putExtra("eventId", id);
-            intent.putExtra("imgUrl", imgUrl);
-            startActivity(intent);
-        }
-
-        @Override
-        protected void onSaveInstanceState (Bundle state){
-            super.onSaveInstanceState(state);
-
-            //Save list state
-            listState = layoutManager.onSaveInstanceState();
-            state.putParcelable(LIST_STATE_KEY, listState);
-        }
-
-        @Override
-        protected void onRestoreInstanceState (Bundle state){
-            super.onRestoreInstanceState(state);
-            if (listState != null) {
-                layoutManager.onRestoreInstanceState(listState);
-            }
-        }
-
-        @Override
-        protected void onResume () {
-            super.onResume();
-
-            if (listState != null) {
-                layoutManager.onRestoreInstanceState(listState);
-            }
-        }
-
-        /**
-         * Adapter
-         */
-        class resultsAdapter extends RecyclerView.Adapter<resultsAdapter.ViewHolder> {
-
-            private static final int USER_VIEW_TYPE = 0;
-            private static final int EVENT_VIEW_TYPE = 1;
-            private int mViewType;
-
-
-            public resultsAdapter() {
-
-            }
-
-            public void setViewType(int viewType) {
-                mViewType = viewType;
-            }
-
-            class ViewHolder extends RecyclerView.ViewHolder {
-                public TextView eventCityStateTextView;
-                public TextView eventHostTextView;
-                public TextView eventNameTextView;
-                public TextView userIdTextView;
-                public ImageView eventImageThumb;
-
-                public TextView userCityStateTextView;
-                public TextView userNameTextView;
-                public ImageView userProfileImageThumb;
-
-
-                public ViewHolder(View view) {
-                    super(view);
-                    if (mViewType == EVENT_VIEW_TYPE) {
-                        eventCityStateTextView = view.findViewById(R.id.event_location_search_result);
-                        eventHostTextView = view.findViewById(R.id.event_host_search_result);
-                        eventNameTextView = view.findViewById(R.id.eventname_search_result);
-                        eventImageThumb = view.findViewById(R.id.event_image_search_result);
-                    } else {
-                        userCityStateTextView = view.findViewById(R.id.user_location_search_result);
-                        userNameTextView = view.findViewById(R.id.username_search_result);
-                        userProfileImageThumb = view.findViewById(R.id.user_image_search_result);
-                    }
-                }
-            }
-
-            @Override
-            public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-                View view;
-                ViewHolder vh;
-
-                if (mViewType == USER_VIEW_TYPE) {
+            switch (viewType) {
+                case 0:
                     view = getLayoutInflater().inflate(R.layout.item_user_search_result, parent, false);
-                    vh = new ViewHolder(view);
-                } else {
+                    return new ViewHolderUsers(view);
+                case 1:
                     view = getLayoutInflater().inflate(R.layout.item_event_search_result, parent, false);
-                    vh = new ViewHolder(view);
-                }
-                return vh;
+                    return new ViewHolderEvents(view);
+                default:
+                    return null;
             }
 
-            //TODO: The app crashes if any of the properties in _source are null. How to remedy this?
-            @Override
-            public void onBindViewHolder(ViewHolder holder, int position) {
-                {
-                    if (mViewType == EVENT_VIEW_TYPE) {
-                        holder.eventNameTextView.setText(eventsResults
-                                .get(position)
-                                .get_source()
-                                .getEventname());
-                        holder.eventHostTextView.setText(eventsResults
-                                .get(position)
-                                .get_source()
-                                .getHost()
-                                .get(0)
-                                .getUsername());
-                        holder.eventCityStateTextView.setText(eventsResults
-                                .get(position)
-                                .get_source()
-                                .getCitystate());
-                        //TODO: Creating adapterPosition here to be used in onClick feels like a hack but isn't particularly egregious IMO.
-                        final int adapterPosition = holder.getAdapterPosition();
+        }
 
-                        Picasso.with(getApplicationContext())
-                                .load("https://pbs.twimg.com/profile_images/749059478146785281/_gziqED3.jpg")
-                                .placeholder(R.drawable.ic_profile_black_24dp)
-                                .error(R.drawable.ic_profile_black_24dp)
-                                .transform(new RoundedTransformation(50, 4))
-                                .resizeDimen(R.dimen.user_image_thumb_list_height, R.dimen.user_image_thumb_list_width)
-                                .centerCrop()
-                                .into(holder.eventImageThumb);
+        //TODO: The app crashes if any of the properties in _source are null. How to remedy this?
+        @Override
+        public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
 
-                        holder.eventImageThumb.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                itemSelected(eventsResults
-                                        .get(adapterPosition)
-                                        .get_id(), eventsResults.get(adapterPosition).get_source().getPicture());
-                            }
-                        });
+            if (holder.getItemViewType() == USER_VIEW_TYPE) {
+                //TODO: Was getting index out of bounds errors here when toggling between Events and Users. Not sure how I feel about this check
+                if (usersResults.size() > position) {
+                    ViewHolderUsers viewHolderUsers = (ViewHolderUsers) holder;
+                    viewHolderUsers.userCityStateTextView.setText(usersResults
+                            .get(position)
+                            .get_source()
+                            .getCitystate());
 
+                    viewHolderUsers.userNameTextView.setText(usersResults
+                            .get(position)
+                            .get_source()
+                            .getUsername());
 
-                    } else if (mViewType == USER_VIEW_TYPE) {
-                        holder.userCityStateTextView.setText(usersResults
-                                .get(position)
-                                .get_source()
-                                .getCitystate());
+                    Picasso.with(getApplicationContext())
+                            .load("https://f4.bcbits.com/img/0009619513_10.jpg")
+                            .placeholder(R.drawable.ic_profile_black_24dp)
+                            .error(R.drawable.ic_profile_black_24dp)
+                            .transform(new RoundedTransformation(50, 4))
+                            .resizeDimen(R.dimen.user_image_thumb_list_height, R.dimen.user_image_thumb_list_width)
+                            .centerCrop()
+                            .into(viewHolderUsers.userProfileImageThumb);
+                }
+            } else {
+                if (eventsResults.size() > position) {
+                    ViewHolderEvents viewHolderEvents = (ViewHolderEvents) holder;
+                    viewHolderEvents.eventNameTextView.setText(eventsResults
+                            .get(position)
+                            .get_source()
+                            .getEventname());
+                    viewHolderEvents.eventHostTextView.setText(eventsResults
+                            .get(position)
+                            .get_source()
+                            .getHost()
+                            .get(0)
+                            .getUsername());
+                    viewHolderEvents.eventCityStateTextView.setText(eventsResults
+                            .get(position)
+                            .get_source()
+                            .getCitystate());
+                    //TODO: Creating adapterPosition here to be used in onClick feels like a hack but isn't particularly egregious IMO.
+                    final int adapterPosition = holder.getAdapterPosition();
 
-                        holder.userNameTextView.setText(usersResults
-                                .get(position)
-                                .get_source()
-                                .getUsername());
+                    Picasso.with(getApplicationContext())
+                            .load(eventsResults
+                                    .get(position)
+                                    .get_source()
+                                    .getPicture())
+                            .placeholder(R.drawable.ic_profile_black_24dp)
+                            .error(R.drawable.ic_profile_black_24dp)
+                            .transform(new RoundedTransformation(50, 4))
+                            .resizeDimen(R.dimen.user_image_thumb_list_height, R.dimen.user_image_thumb_list_width)
+                            .centerCrop()
+                            .into(viewHolderEvents.eventImageThumb);
 
-                        Picasso.with(getApplicationContext())
-                                .load("https://f4.bcbits.com/img/0009619513_10.jpg")
-                                .placeholder(R.drawable.ic_profile_black_24dp)
-                                .error(R.drawable.ic_profile_black_24dp)
-                                .transform(new RoundedTransformation(50, 4))
-                                .resizeDimen(R.dimen.user_image_thumb_list_height, R.dimen.user_image_thumb_list_width)
-                                .centerCrop()
-                                .into(holder.userProfileImageThumb);
-                    }
+                    viewHolderEvents.eventImageThumb.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            itemSelected(eventsResults
+                                    .get(adapterPosition)
+                                    .get_id(), eventsResults.get(adapterPosition).get_source().getPicture());
+                        }
+                    });
                 }
             }
+        }
 
-            @Override
-            public int getItemCount() {
-                if (eventsResults != null) {
-                    return eventsResults.size();
-                } else if (usersResults != null) {
-                    return usersResults.size();
-                } else {
-                    return 0;
-                }
+
+        @Override
+        public int getItemCount() {
+            if (eventsResults != null) {
+                return eventsResults.size();
+            } else if (usersResults != null) {
+                return usersResults.size();
+            } else {
+                return 0;
+            }
+        }
+
+        class ViewHolderEvents extends RecyclerView.ViewHolder {
+            public TextView eventCityStateTextView;
+            public TextView eventHostTextView;
+            public TextView eventNameTextView;
+            public ImageView eventImageThumb;
+
+            public ViewHolderEvents(View view) {
+                super(view);
+                eventCityStateTextView = view.findViewById(R.id.event_location_search_result);
+                eventHostTextView = view.findViewById(R.id.event_host_search_result);
+                eventNameTextView = view.findViewById(R.id.eventname_search_result);
+                eventImageThumb = view.findViewById(R.id.event_image_search_result);
+            }
+        }
+
+        class ViewHolderUsers extends RecyclerView.ViewHolder {
+            public TextView userCityStateTextView;
+            public TextView userNameTextView;
+            public ImageView userProfileImageThumb;
+
+
+            public ViewHolderUsers(View itemView) {
+                super(itemView);
+                userCityStateTextView = itemView.findViewById(R.id.user_location_search_result);
+                userNameTextView = itemView.findViewById(R.id.username_search_result);
+                userProfileImageThumb = itemView.findViewById(R.id.user_image_search_result);
             }
         }
     }
+}

@@ -57,13 +57,14 @@ public interface SearchPresenterListener {
 
     void itemSelected(String id, String imgUrl);
 
+    void showError();
 }
 
 
     /**
      * Constructor
      */
-    public SearchPresenter(SearchPresenterListener listener, FirebaseDatabase db) {
+    public SearchPresenter(SearchPresenterListener listener) {
         this.mListener = listener;
         this.mService = new SearchService();
 
@@ -97,6 +98,7 @@ public interface SearchPresenterListener {
                         public void onFailure(Call<SearchResponse2> call, Throwable t) {
                             Log.e(getClass().toString(), call.request().body().toString());
                             Log.e(getClass().toString(), t.getMessage());
+                            mListener.showError();
                         }
                     });
         } else {
@@ -116,6 +118,7 @@ public interface SearchPresenterListener {
                         public void onFailure(Call<SearchResponseUsers> call, Throwable t) {
                             Log.e(getClass().toString(), call.request().body().toString());
                             Log.e(getClass().toString(), t.getMessage());
+                            mListener.showError();
                         }
                     });
         }
