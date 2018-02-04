@@ -53,9 +53,10 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
 
-        Toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(Toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //TODO: Do I need this?
+//        Toolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(Toolbar);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         presenter = new EventDetailPresenter(this);
 

@@ -77,7 +77,7 @@
                             android:id="@+id/tags_user_detail_activity"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
+                            android:gravity="center_horizontal"
                             android:text="Tags, Tag, Ta"
                             android:textAppearance="@android:style/TextAppearance.Material.Body1" />
 
