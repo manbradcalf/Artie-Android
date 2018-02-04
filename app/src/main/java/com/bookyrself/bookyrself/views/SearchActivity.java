@@ -198,9 +198,20 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     public void searchEventsResponseReady
             (List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits) {
 
+        // I hide the recyclerview to show the error empty state
+        // If the previous search returned an error empty state, recyclerview
+        // will have a visibility of GONE here. Fix that
         if (recyclerView.getVisibility() == View.GONE) {
             recyclerView.setVisibility(View.VISIBLE);
         }
+
+        // If the last empty state was an error, make sure that it is now
+        // a generic failed search. No errors will hit this method, so this is
+        // safe.
+        if (emptyStateText.getText() == getString(R.string.search_error)) {
+            emptyStateText.setText(R.string.search_empty_state);
+        }
+
         eventsResults = hits;
         adapter.setViewType(ResultsAdapter.EVENT_VIEW_TYPE);
         boolSearchEditable = true;
@@ -224,6 +235,14 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         if (recyclerView.getVisibility() == View.GONE) {
             recyclerView.setVisibility(View.VISIBLE);
         }
+
+        // If the last empty state was an error, make sure that it is now
+        // a generic failed search. No errors will hit this method, so this is
+        // safe.
+        if (emptyStateText.getText() == getString(R.string.search_error)) {
+            emptyStateText.setText(R.string.search_empty_state);
+        }
+
         usersResults = hits;
         adapter.setViewType(ResultsAdapter.USER_VIEW_TYPE);
         boolSearchEditable = true;
@@ -277,12 +296,19 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         }
     }
 
+    //TODO: Is imgUrl needed as a param here?
     @Override
-    public void itemSelected(String id, String imgUrl) {
-        Intent intent = new Intent(this, EventDetailActivity.class);
-        intent.putExtra("eventId", id);
-        intent.putExtra("imgUrl", imgUrl);
-        startActivity(intent);
+    public void itemSelected(String id, String imgUrl, int flag) {
+        if (flag == EVENT_SEARCH_FLAG) {
+            Intent intent = new Intent(this, EventDetailActivity.class);
+            intent.putExtra("eventId", id);
+            intent.putExtra("imgUrl", imgUrl);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(this, UserDetailActivity.class);
+            intent.putExtra("userId", id);
+            startActivity(intent);
+        }
     }
 
     @Override
@@ -380,6 +406,8 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                             .get_source()
                             .getUsername());
 
+                    final int adapterPosition = holder.getAdapterPosition();
+
                     Picasso.with(getApplicationContext())
                             .load("https://f4.bcbits.com/img/0009619513_10.jpg")
                             .placeholder(R.drawable.ic_profile_black_24dp)
@@ -388,6 +416,15 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                             .resizeDimen(R.dimen.user_image_thumb_list_height, R.dimen.user_image_thumb_list_width)
                             .centerCrop()
                             .into(viewHolderUsers.userProfileImageThumb);
+
+                    viewHolderUsers.userProfileImageThumb.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            itemSelected(usersResults
+                            .get(adapterPosition)
+                            .get_id(), usersResults.get(adapterPosition).get_source().getPicture(), USER_VIEW_TYPE);
+                        }
+                    });
                 }
             } else {
                 if (eventsResults.size() > position) {
@@ -426,7 +463,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                         public void onClick(View v) {
                             itemSelected(eventsResults
                                     .get(adapterPosition)
-                                    .get_id(), eventsResults.get(adapterPosition).get_source().getPicture());
+                                    .get_id(), eventsResults.get(adapterPosition).get_source().getPicture(), EVENT_VIEW_TYPE);
                         }
                     });
                 }

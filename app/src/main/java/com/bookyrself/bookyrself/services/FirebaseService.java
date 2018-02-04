@@ -2,6 +2,7 @@ package com.bookyrself.bookyrself.services;
 
 import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
 import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
+import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 
 import java.util.List;
 
@@ -32,6 +33,9 @@ public class FirebaseService {
 
         @GET("/users/{id}/picture.json")
         Call<String> getUserThumbUrl(@Path("id") String userId);
+
+        @GET("/users/{id}.json")
+        Call<_source> getUserDetails(@Path("id") String userId);
 
         // Add event to user item
         // Passing in "eventArrayPosition" so ES doesn't break the mapping by accidentally creating

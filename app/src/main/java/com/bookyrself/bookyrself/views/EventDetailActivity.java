@@ -53,9 +53,10 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
 
-        Toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(Toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //TODO: Do I need this?
+//        Toolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(Toolbar);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         presenter = new EventDetailPresenter(this);
 
@@ -201,13 +202,13 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                     .transform(new RoundedTransformation(50, 4))
                     .into(userThumb);
 
-            userThumb.setTag(R.id.item_event_detail_userthumb, user.getUserId());
+            userThumb.setTag(R.id.item_event_detail_userthumb, user.getUserId().toString());
 
             userThumb.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(mContext, ProfileActivity.class);
-                    intent.putExtra("userId", (Long) userThumb.getTag(R.id.item_event_detail_userthumb));
+                    Intent intent = new Intent(mContext, UserDetailActivity.class);
+                    intent.putExtra("userId", (String) userThumb.getTag(R.id.item_event_detail_userthumb));
                     mContext.startActivity(intent);
                 }
             });
