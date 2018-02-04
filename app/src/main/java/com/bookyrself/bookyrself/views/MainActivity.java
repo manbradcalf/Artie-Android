@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself;
+package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,18 +7,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.bookyrself.bookyrself.R;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
 public abstract class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
+    private static final int RC_SIGN_IN = 123;
     protected BottomNavigationView navigationView;
     protected FirebaseDatabase db;
     protected FirebaseAuth auth;
     protected FirebaseApp firebaseApp;
 
 
+    //TODO: I'm creating a firebase app, db and auth every time I start an activity? This feels wrong
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,5 +93,7 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
     abstract int getNavigationMenuItemId();
 
     abstract void setLayout();
+
+    abstract void checkAuth();
 
 }

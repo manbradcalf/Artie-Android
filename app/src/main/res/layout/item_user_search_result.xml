@@ -15,7 +15,7 @@
         android:orientation="horizontal">
 
         <ImageView
-            android:id="@+id/event_image_search_result"
+            android:id="@+id/user_image_search_result"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -29,32 +29,19 @@
             android:padding="5dp">
 
             <TextView
-                android:id="@+id/eventname_search_result"
+                android:id="@+id/username_search_result"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="@android:style/TextAppearance.Material.Body1"
                 android:text="eventname" />
 
             <TextView
-                android:id="@+id/event_location_search_result"
+                android:id="@+id/user_location_search_result"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="@android:style/TextAppearance.Material.Body1"
                 android:text="city state" />
 
-            <TextView
-                android:id="@+id/event_host_search_result"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="@android:style/TextAppearance.Material.Body1"
-                android:text="hostName" />
-
-            <TextView
-                android:id="@+id/userid"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="@android:style/TextAppearance.Material.Body1"
-                android:text="userId" />
         </LinearLayout>
     </LinearLayout>
 

@@ -1,13 +1,12 @@
 
-package com.bookyrself.bookyrself.models.searchresponse;
+package com.bookyrself.bookyrself.models.SearchResponseUsers;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.SerializedName;
-import com.bookyrself.bookyrself.models.searchresponse.*;
 
 @Generated("net.hexar.json2pojo")
 @SuppressWarnings("unused")
-public class SearchResponse2 {
+public class SearchResponseUsers {
 
     @SerializedName("hits")
     private Hits mHits;
@@ -16,7 +15,7 @@ public class SearchResponse2 {
     @SerializedName("took")
     private Long mTook;
     @SerializedName("_shards")
-    private _shards m_shards;
+    private com.bookyrself.bookyrself.models.SearchResponseUsers._shards m_shards;
 
     public Hits getHits() {
         return mHits;
@@ -42,11 +41,11 @@ public class SearchResponse2 {
         mTook = took;
     }
 
-    public _shards get_shards() {
+    public com.bookyrself.bookyrself.models.SearchResponseUsers._shards get_shards() {
         return m_shards;
     }
 
-    public void set_shards(_shards _shards) {
+    public void set_shards(com.bookyrself.bookyrself.models.SearchResponseUsers._shards _shards) {
         m_shards = _shards;
     }
 

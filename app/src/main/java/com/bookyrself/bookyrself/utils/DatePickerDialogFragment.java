@@ -3,19 +3,14 @@ package com.bookyrself.bookyrself.utils;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.DatePickerDialog;
-import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.widget.DatePicker;
 
-import com.bookyrself.bookyrself.models.searchresponse.Hit;
 import com.bookyrself.bookyrself.presenters.DatePickerDialogPresenter;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
 
 import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
-
-import static android.R.attr.format;
 
 /**
  * Created by benmedcalf on 10/2/17.
@@ -23,8 +18,8 @@ import static android.R.attr.format;
 
 public class DatePickerDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener, DatePickerDialogPresenter.DatePickerDialogPresenterListener {
 
-    public static final int FLAG_START_DATE = 0;
-    public static final int FLAG_END_DATE = 1;
+    public static final int FLAG_START_DATE = 2;
+    public static final int FLAG_END_DATE = 3;
     private int flag = 0;
     private SearchPresenter mSearchPresenter;
 

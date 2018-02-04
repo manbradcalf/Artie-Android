@@ -1,5 +1,5 @@
 
-package com.bookyrself.bookyrself.models.searchresponse;
+package com.bookyrself.bookyrself.models.SearchResponseUsers;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.SerializedName;

@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".SearchActivity"
+            android:name=".views.SearchActivity"
             android:label="@string/title_activity_search"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -20,17 +20,27 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MessagesActivity"
+            android:name=".views.MessagesActivity"
             android:label="@string/title_activity_messages"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".CalendarActivity"
+            android:name=".views.CalendarActivity"
             android:label="@string/title_activity_calendar"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ProfileActivity"
+            android:name=".views.ProfileActivity"
             android:label="@string/title_activity_profile"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".views.EventDetailActivity"
+            android:label="EventDetail"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.bookyrself.bookyrself.views.SearchActivity"
+                />
+        </activity>
+
     </application>
 
 </manifest>
