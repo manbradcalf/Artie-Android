@@ -15,6 +15,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
@@ -131,6 +132,11 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             usersListView.setAdapter(adapter);
         }
 
+    }
+
+    @Override
+    public void present_error() {
+        Toast.makeText(this, "response was null because that id wasn't legit dumbass", Toast.LENGTH_LONG).show();
     }
 
     @Override

@@ -2,9 +2,11 @@ package com.bookyrself.bookyrself.views;
 
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.bookyrself.bookyrself.R;
@@ -63,5 +65,10 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         }
 
         tagsTextView.setText(listString.toString());
+    }
+
+    @Override
+    public void present_error() {
+        Toast.makeText(this, "response was null because that id wasn't legit dumbass", Toast.LENGTH_LONG).show();
     }
 }

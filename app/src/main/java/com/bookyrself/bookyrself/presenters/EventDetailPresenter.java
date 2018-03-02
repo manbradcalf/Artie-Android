@@ -1,10 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
-import com.bookyrself.bookyrself.services.FirebaseService;
 import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.bookyrself.bookyrself.services.FirebaseService;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -18,9 +15,6 @@ public class EventDetailPresenter {
 
     private final EventDetailPresenterListener mListener;
     private final FirebaseService mFirebaseService;
-    private DatabaseReference dbref;
-    private ChildEventListener childEventListener;
-    private FirebaseDatabase db;
 
     /**
      * Contract / Listener
@@ -31,6 +25,8 @@ public class EventDetailPresenter {
         void showProgressbar(Boolean bool);
 
         void userThumbReady(String response, String id);
+
+        void present_error();
     }
 
 
@@ -52,8 +48,13 @@ public class EventDetailPresenter {
                 .enqueue(new Callback<EventDetailResponse>() {
                     @Override
                     public void onResponse(Call<EventDetailResponse> call, Response<EventDetailResponse> response) {
-                        EventDetailResponse data = response.body();
-                        mListener.eventDataResponseReady(data, imgUrl);
+                        if (response.body() != null) {
+                            EventDetailResponse data = response.body();
+                            mListener.eventDataResponseReady(data, imgUrl);
+                        } else {
+                            mListener.present_error();
+                        }
+
                     }
 
                     @Override
