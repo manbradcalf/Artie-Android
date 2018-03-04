@@ -23,6 +23,8 @@ public class UserDetailPresenter {
         void userInfoReady(_source response);
 
         void present_error();
+
+        void email_user();
     }
 
     /**

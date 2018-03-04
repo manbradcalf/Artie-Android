@@ -208,7 +208,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                     .transform(new RoundedTransformation(50, 4))
                     .into(userThumb);
 
-            userThumb.setTag(R.id.item_event_detail_userthumb, user.getUserId().toString());
+            userThumb.setTag(R.id.item_event_detail_userthumb, user.getUserId());
 
             userThumb.setOnClickListener(new View.OnClickListener() {
                 @Override
