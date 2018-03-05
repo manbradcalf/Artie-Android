@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -27,6 +28,7 @@ import com.squareup.picasso.Picasso;
 
 public class UserDetailActivity extends AppCompatActivity implements UserDetailPresenter.UserDetailPresenterListener {
 
+    private CardView emailUserCardview;
     private TextView usernameTextView;
     private TextView cityStateTextView;
     private TextView tagsTextView;
@@ -53,13 +55,13 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         userDetailPresenter = new UserDetailPresenter(this);
         userDetailPresenter.getUserInfo(getIntent().getStringExtra("userId"));
         emailUserTextView = findViewById(R.id.message_user_detail_activity_text);
-        emailUserTextView.setOnClickListener(new View.OnClickListener() {
+        emailUserCardview = findViewById(R.id.message_user_detail_activity_card);
+        emailUserCardview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 email_user();
             }
         });
-
     }
 
     @Override
@@ -111,8 +113,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             intent.putExtra(Intent.EXTRA_EMAIL, new String[]{userEmailAddress});
             if (intent.resolveActivity(getPackageManager()) != null) {
                 startActivity(intent);
-            }
-            else {
+            } else {
                 present_error();
             }
         }
