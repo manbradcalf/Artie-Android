@@ -13,7 +13,7 @@ public class Event {
     @SerializedName("eventname")
     private String mEventname;
     @SerializedName("id")
-    private Long mId;
+    private String mId;
 
     public String getDate() {
         return mDate;
@@ -31,11 +31,11 @@ public class Event {
         mEventname = eventname;
     }
 
-    public Long getId() {
+    public String getId() {
         return mId;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         mId = id;
     }
 

@@ -22,6 +22,9 @@ public class UserDetailPresenter {
     public interface UserDetailPresenterListener {
         void userInfoReady(_source response);
 
+        void present_error();
+
+        void email_user();
     }
 
     /**
@@ -40,7 +43,12 @@ public class UserDetailPresenter {
         mService.getAPI().getUserDetails(id).enqueue(new Callback<_source>() {
             @Override
             public void onResponse(Call<_source> call, Response<_source> response) {
-                mListener.userInfoReady(response.body());
+                if (response.body() != null) {
+                    mListener.userInfoReady(response.body());
+                } else {
+                    mListener.present_error();
+                }
+
             }
 
             @Override

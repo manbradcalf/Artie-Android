@@ -9,6 +9,7 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 /**
@@ -16,7 +17,7 @@ import retrofit2.http.POST;
  */
 public class SearchService {
 
-    private static String BASE_URL_ES = "https://pine-4785036.us-east-1.bonsaisearch.net/";
+    private static String BASE_URL_ES = "https://dogwood-9512546.us-east-1.bonsaisearch.net";
 
 
     public interface SearchAPI {

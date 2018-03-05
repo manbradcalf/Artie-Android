@@ -15,6 +15,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
@@ -134,6 +135,11 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     }
 
     @Override
+    public void present_error() {
+        Toast.makeText(this, "response was null because that id wasn't legit dumbass", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
@@ -193,7 +199,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                     String.format("<a href=\"%s\">%s</a> ", ("http://" + user.getUrl()), user.getUrl());
             userUrl.setText(Html.fromHtml(linkedText));
 
-            String userId = user.getUserId().toString();
+            String userId = user.getUserId();
 
             Picasso.with(mContext)
                     .load(String.valueOf(mMap.get(userId)))
@@ -202,7 +208,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                     .transform(new RoundedTransformation(50, 4))
                     .into(userThumb);
 
-            userThumb.setTag(R.id.item_event_detail_userthumb, user.getUserId().toString());
+            userThumb.setTag(R.id.item_event_detail_userthumb, user.getUserId());
 
             userThumb.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -13,7 +13,7 @@ public class User {
     @SerializedName("url")
     private String mUrl;
     @SerializedName("userId")
-    private Long mUserId;
+    private String mUserId;
     @SerializedName("username")
     private String mUsername;
 
@@ -33,11 +33,11 @@ public class User {
         mUrl = url;
     }
 
-    public Long getUserId() {
+    public String getUserId() {
         return mUserId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(String userId) {
         mUserId = userId;
     }
 
