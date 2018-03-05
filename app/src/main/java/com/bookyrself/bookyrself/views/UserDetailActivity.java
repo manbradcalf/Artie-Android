@@ -1,17 +1,24 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.presenters.UserDetailPresenter;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -27,6 +34,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     private TextView bioTextView;
     private ImageView profileImage;
     private UserDetailPresenter userDetailPresenter;
+    private ProgressBar profileImageProgressbar;
     private TextView emailUserTextView;
     private String userEmailAddress;
 
@@ -40,6 +48,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         tagsTextView = findViewById(R.id.tags_user_detail_activity);
         urlTextView = findViewById(R.id.user_url_user_detail_activity);
         profileImage = findViewById(R.id.profile_image_user_detail_activity);
+        profileImageProgressbar = findViewById(R.id.profile_image_loading_progressbar);
         bioTextView = findViewById(R.id.bio_body_user_detail_activity);
         userDetailPresenter = new UserDetailPresenter(this);
         userDetailPresenter.getUserInfo(getIntent().getStringExtra("userId"));
@@ -63,7 +72,22 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         userEmailAddress = response.getEmail();
         Picasso.with(this)
                 .load(response.getPicture())
-                .into(profileImage);
+                .into(profileImage, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Bitmap imageBitmap = ((BitmapDrawable) profileImage.getDrawable()).getBitmap();
+                        RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(getResources(), imageBitmap);
+                        imageDrawable.setCircular(true);
+                        imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
+                        profileImage.setImageDrawable(imageDrawable);
+                        profileImageProgressbar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onError() {
+                        Log.e(this.getClass().toString(), "didn't load image");
+                    }
+                });
         for (String s : response.getTags()) {
             listString.append(s + ", ");
         }
@@ -77,6 +101,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         Toast.makeText(this, "response was null because that id wasn't legit dumbass", Toast.LENGTH_LONG).show();
     }
 
+    //TODO: I am using this method in both UserDetailActivity and EventDetailActivity presenters. I should consolidate
     @Override
     public void email_user() {
 

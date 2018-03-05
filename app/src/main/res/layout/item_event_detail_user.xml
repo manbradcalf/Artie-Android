@@ -46,16 +46,6 @@
                 android:textAppearance="@android:style/TextAppearance.Material.Body1" />
         </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/item_event_detail_messagebutton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:layout_margin="8dp"
-            android:background="@drawable/ic_messages_black_24dp" />
-
-
     </RelativeLayout>
 
 

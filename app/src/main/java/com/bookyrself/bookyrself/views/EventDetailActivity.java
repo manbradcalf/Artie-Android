@@ -199,7 +199,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                     String.format("<a href=\"%s\">%s</a> ", ("http://" + user.getUrl()), user.getUrl());
             userUrl.setText(Html.fromHtml(linkedText));
 
-            String userId = user.getUserId().toString();
+            String userId = user.getUserId();
 
             Picasso.with(mContext)
                     .load(String.valueOf(mMap.get(userId)))
