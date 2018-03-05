@@ -35,12 +35,12 @@
             android:name=".views.EventDetailActivity"
             android:label="EventDetail"
             android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.bookyrself.bookyrself.views.SearchActivity"
-                />
         </activity>
-        <activity android:name=".views.UserDetailActivity" />
+        <activity
+            android:name=".views.UserDetailActivity"
+            android:label="EventDetail"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
 
     </application>
 

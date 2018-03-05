@@ -16,6 +16,8 @@
     <string name="search_what_query_hint">What are you looking for?</string>
     <string name="search_where_query_hint">Where are you looking for it?</string>
     <string name="search_error">Oh no! Something went wrong.\nPlease try your search again or change your search criteria.</string>
+    <string name="event_detail_toolbar">Event Details</string>
+    <string name="user_detail_toolbar"> %s\'s Profile</string>
 
 
 </resources>

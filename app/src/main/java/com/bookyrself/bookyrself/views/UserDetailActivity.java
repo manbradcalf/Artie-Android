@@ -9,6 +9,7 @@ import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -39,6 +40,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     private ProgressBar profileImageProgressbar;
     private TextView emailUserTextView;
     private String userEmailAddress;
+    private Toolbar Toolbar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,10 +64,17 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                 email_user();
             }
         });
+        Toolbar = findViewById(R.id.toolbar_user_detail);
     }
 
     @Override
     public void userInfoReady(_source response) {
+
+        setSupportActionBar(Toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        String toolbarText = getString(R.string.user_detail_toolbar, response.getUsername());
+        getSupportActionBar().setTitle(toolbarText);
+
         StringBuilder listString = new StringBuilder();
         usernameTextView.setText(response.getUsername());
         cityStateTextView.setText(response.getCitystate());
@@ -95,6 +104,12 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         }
 
         tagsTextView.setText(listString.toString());
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     @Override

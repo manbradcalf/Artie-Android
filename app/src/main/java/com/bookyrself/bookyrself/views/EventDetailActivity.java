@@ -55,23 +55,22 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
-
-        //TODO: Do I need this?
-//        Toolbar = findViewById(R.id.toolbar);
-//        setSupportActionBar(Toolbar);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         presenter = new EventDetailPresenter(this);
-
         Intent intent = getIntent();
         String eventId = intent.getStringExtra("eventId");
         String imgUrl = intent.getStringExtra("imgUrl");
         presenter.getEventDetailData(eventId, imgUrl);
-
+        Toolbar = findViewById(R.id.toolbar_event_detail);
     }
 
     @Override
     public void eventDataResponseReady(final EventDetailResponse data, String imgUrl) {
+
+
+        setSupportActionBar(Toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.event_detail_toolbar);
+
         String date = data.getDate();
         Host host = data.getHost().get(0);
         String hostUsername = host.getUsername();
@@ -150,6 +149,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     public void present_error() {
         Toast.makeText(this, "response was null because that id wasn't legit dumbass", Toast.LENGTH_LONG).show();
     }
+
 
     @Override
     public boolean onSupportNavigateUp() {
