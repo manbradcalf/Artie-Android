@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -42,6 +43,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     private TextView Host;
     private TextView HostCityState;
     private TextView HostUrlTextView;
+    private CardView HostcardView;
     private Toolbar Toolbar;
     private ImageView HostImageView;
     private ListView usersListView;
@@ -69,7 +71,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     }
 
     @Override
-    public void eventDataResponseReady(EventDetailResponse data, String imgUrl) {
+    public void eventDataResponseReady(final EventDetailResponse data, String imgUrl) {
         String date = data.getDate();
         Host host = data.getHost().get(0);
         String hostUsername = host.getUsername();
@@ -86,7 +88,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         DateView = findViewById(R.id.event_detail_date);
         DateView.setText("Date");
         DateFormat inputformat = new SimpleDateFormat("yyyy-MM-dd");
-        Date d = null;
+        Date d;
         try {
             d = inputformat.parse(date);
             DateFormat outputFormat = new SimpleDateFormat("EEEE, MMMM dd, yyyy");
@@ -112,9 +114,19 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         users = data.getUsers();
 
         for (int i = 0; i < users.size(); i++) {
-            String userId = users.get(i).getUserId().toString();
+            String userId = users.get(i).getUserId();
             presenter.getUserThumbUrl(userId);
         }
+
+        HostcardView = findViewById(R.id.event_detail_host_item);
+        HostcardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HostcardView.getContext(), UserDetailActivity.class);
+                intent.putExtra("userId", data.getHost().get(0).getUserId());
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -210,7 +222,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
 
             userThumb.setTag(R.id.item_event_detail_userthumb, user.getUserId());
 
-            userThumb.setOnClickListener(new View.OnClickListener() {
+            rowView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(mContext, UserDetailActivity.class);
