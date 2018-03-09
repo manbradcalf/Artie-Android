@@ -1,6 +1,7 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
@@ -33,7 +35,6 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     private SearchView searchViewWhat;
     private SearchView searchViewWhere;
     private ProgressBar progressBar;
-    private TextView emptyStateText;
     private Button fromButton;
     private Button toButton;
     private Button searchButton;
@@ -48,6 +49,9 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     private RecyclerView.LayoutManager layoutManager;
     private Boolean boolSearchEditable = false;
     private Parcelable listState;
+    private View emptyState;
+    private TextView emptyStateText;
+    private ImageView emptyStateImage;
 
     int getContentViewId() {
         return R.layout.activity_search;
@@ -61,19 +65,19 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     @Override
     void setLayout() {
         presenter = new SearchPresenter(this);
-        recyclerView = (RecyclerView) findViewById(R.id.search_recycler_view);
+        recyclerView = findViewById(R.id.search_recycler_view);
         adapter = new ResultsAdapter();
         recyclerView.setAdapter(adapter);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        searchViewWhat = (SearchView) findViewById(R.id.search_what);
+        searchViewWhat = findViewById(R.id.search_what);
         searchViewWhat.setQueryHint(getString(R.string.search_what_query_hint));
-        searchViewWhere = (SearchView) findViewById(R.id.search_where);
+        searchViewWhere = findViewById(R.id.search_where);
         searchViewWhere.setVisibility(View.GONE);
         searchViewWhere.setQueryHint(getString(R.string.search_where_query_hint));
-        fromButton = (Button) findViewById(R.id.from_button);
+        fromButton = findViewById(R.id.from_button);
         fromButton.setVisibility(View.GONE);
-        toButton = (Button) findViewById(R.id.to_button);
+        toButton =  findViewById(R.id.to_button);
         toButton.setVisibility(View.GONE);
         usersButton = findViewById(R.id.users_toggle);
         usersButton.setVisibility(View.GONE);
@@ -81,12 +85,13 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         eventsButton.setVisibility(View.GONE);
         radioGroup = findViewById(R.id.radio_group_search);
         radioGroup.check(R.id.users_toggle);
-        searchButton = (Button) findViewById(R.id.search_btn);
+        searchButton = findViewById(R.id.search_btn);
         searchButton.setVisibility(View.GONE);
-        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        progressBar = findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.GONE);
-        emptyStateText = findViewById(R.id.search_empty_state);
-        emptyStateText.setVisibility(View.GONE);
+        emptyState = findViewById(R.id.empty_state_search);
+        emptyStateText = findViewById(R.id.empty_state_text);
+        emptyStateImage = findViewById(R.id.empty_state_image);
 
 
         /**
@@ -208,8 +213,9 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         // If the last empty state was an error, make sure that it is now
         // a generic failed search. No errors will hit this method, so this is
         // safe.
-        if (emptyStateText.getText() == getString(R.string.search_error)) {
-            emptyStateText.setText(R.string.search_empty_state);
+        if (hits.size() == 0) {
+            emptyStateText.setText(R.string.search_activity_no_results);
+            emptyStateImage.setImageDrawable(getDrawable(R.drawable.ic_binoculars));
         }
 
         eventsResults = hits;
@@ -219,9 +225,9 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         adapter.notifyDataSetChanged();
         showProgressbar(false);
         if (hits.isEmpty()) {
-            emptyStateText.setVisibility(View.VISIBLE);
+            emptyState.setVisibility(View.VISIBLE);
         } else {
-            emptyStateText.setVisibility(View.GONE);
+            emptyState.setVisibility(View.GONE);
         }
     }
 
@@ -239,9 +245,9 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         // If the last empty state was an error, make sure that it is now
         // a generic failed search. No errors will hit this method, so this is
         // safe.
-        if (emptyStateText.getText() == getString(R.string.search_error)) {
-            emptyStateText.setText(R.string.search_empty_state);
-        }
+//        if (emptyStateText.getText() == getString(R.string.search_error)) {
+//            emptyStateText.setText(R.string.empty_state);
+//        }
 
         usersResults = hits;
         adapter.setViewType(ResultsAdapter.USER_VIEW_TYPE);
@@ -250,11 +256,10 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         adapter.notifyDataSetChanged();
         showProgressbar(false);
         if (hits.isEmpty()) {
-            emptyStateText.setText(R.string.search_empty_state);
+            emptyState.setVisibility(View.VISIBLE);
             showSearchBar(true);
-            emptyStateText.setVisibility(View.VISIBLE);
         } else {
-            emptyStateText.setVisibility(View.GONE);
+            emptyState.setVisibility(View.GONE);
         }
     }
 
@@ -314,9 +319,8 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     @Override
     public void showError() {
         recyclerView.setVisibility(View.GONE);
-        emptyStateText.setText(R.string.search_error);
         progressBar.setVisibility(View.GONE);
-        emptyStateText.setVisibility(View.VISIBLE);
+        emptyState.setVisibility(View.VISIBLE);
         showSearchBar(true);
     }
 
@@ -433,16 +437,16 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                             .get(position)
                             .get_source()
                             .getEventname());
-                    viewHolderEvents.eventHostTextView.setText(eventsResults
-                            .get(position)
+                    viewHolderEvents.eventHostTextView.setText(getString(R.string.event_item_hosted_by,
+                            eventsResults.get(position)
                             .get_source()
                             .getHost()
                             .get(0)
-                            .getUsername());
-                    viewHolderEvents.eventCityStateTextView.setText(eventsResults
-                            .get(position)
+                            .getUsername()));
+                    viewHolderEvents.eventCityStateTextView.setText(getString(R.string.event_item_citystate,
+                            eventsResults.get(position)
                             .get_source()
-                            .getCitystate());
+                            .getCitystate()));
                     //TODO: Creating adapterPosition here to be used in onClick feels like a hack but isn't particularly egregious IMO.
                     final int adapterPosition = holder.getAdapterPosition();
 

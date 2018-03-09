@@ -24,6 +24,8 @@ public class UserDetailPresenter {
 
         void present_error();
 
+        void loading_state();
+
         void email_user();
     }
 

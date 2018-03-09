@@ -14,8 +14,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
@@ -38,24 +38,46 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     private ImageView profileImage;
     private UserDetailPresenter userDetailPresenter;
     private ProgressBar profileImageProgressbar;
+    private ProgressBar contentProgressBar;
     private TextView emailUserTextView;
     private String userEmailAddress;
     private Toolbar Toolbar;
+    //TODO: figure out a consistent strategy for empty states when i dont have a headache
+//    private RelativeLayout emptyState;
+//    private TextView emptyStateTextView;
+//    private ImageView emptyStateImageView;
+    private RelativeLayout contentView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_detail);
+        userDetailPresenter = new UserDetailPresenter(this);
+        userDetailPresenter.getUserInfo(getIntent().getStringExtra("userId"));
+//        emptyState = findViewById(R.id.empty_state_user_detail);
+//        emptyStateTextView = findViewById(R.id.empty_state_text);
+//        emptyStateTextView.setText("error loading user details");
+//        emptyStateImageView = findViewById(R.id.empty_state_image);
+//        emptyStateImageView.setImageDrawable(getDrawable(R.drawable.ic_binoculars));
+//        emptyState.setVisibility(View.GONE);
+        Toolbar = findViewById(R.id.toolbar_user_detail);
+        Toolbar.setTitle("User Details");
+//        contentProgressBar = findViewById(R.id.content_loading_progressbar);
+        loading_state();
+    }
 
+    @Override
+    public void userInfoReady(_source response) {
+
+//        contentProgressBar.setVisibility(View.GONE);
+        // Show the user details now that they're loaded
         usernameTextView = findViewById(R.id.username_user_detail_activity);
         cityStateTextView = findViewById(R.id.city_state_user_detail_activity);
         tagsTextView = findViewById(R.id.tags_user_detail_activity);
         urlTextView = findViewById(R.id.user_url_user_detail_activity);
+        profileImageProgressbar = findViewById(R.id.profile_image_progressbar);
         profileImage = findViewById(R.id.profile_image_user_detail_activity);
-        profileImageProgressbar = findViewById(R.id.profile_image_loading_progressbar);
         bioTextView = findViewById(R.id.bio_body_user_detail_activity);
-        userDetailPresenter = new UserDetailPresenter(this);
-        userDetailPresenter.getUserInfo(getIntent().getStringExtra("userId"));
         emailUserTextView = findViewById(R.id.message_user_detail_activity_text);
         emailUserCardview = findViewById(R.id.message_user_detail_activity_card);
         emailUserCardview.setOnClickListener(new View.OnClickListener() {
@@ -64,11 +86,6 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                 email_user();
             }
         });
-        Toolbar = findViewById(R.id.toolbar_user_detail);
-    }
-
-    @Override
-    public void userInfoReady(_source response) {
 
         setSupportActionBar(Toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -90,8 +107,8 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                         RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(getResources(), imageBitmap);
                         imageDrawable.setCircular(true);
                         imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
-                        profileImage.setImageDrawable(imageDrawable);
                         profileImageProgressbar.setVisibility(View.GONE);
+                        profileImage.setImageDrawable(imageDrawable);
                     }
 
                     @Override
@@ -104,6 +121,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         }
 
         tagsTextView.setText(listString.toString());
+        contentView.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -115,7 +133,13 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     @Override
     public void present_error() {
         //TODO: This should be a legit empty state
-        Toast.makeText(this, "response was null because that id wasn't legit dumbass", Toast.LENGTH_LONG).show();
+//        emptyState.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void loading_state() {
+        contentView = findViewById(R.id.user_detail_content);
+        contentView.setVisibility(View.GONE);
     }
 
     //TODO: I am using this method in both UserDetailActivity and EventDetailActivity presenters. I should consolidate

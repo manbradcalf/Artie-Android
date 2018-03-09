@@ -25,23 +25,40 @@
         </android.support.design.widget.AppBarLayout>
 
         <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/user_detail_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="?attr/actionBarSize">
 
+            <!--<LinearLayout-->
+                <!--android:orientation="vertical"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_centerInParent="true">-->
+                <!--<ProgressBar-->
+                    <!--android:layout_marginTop="?attr/actionBarSize"-->
+                    <!--android:id='@+id/content_loading_progressbar'-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content" />-->
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:id="@+id/user_detail_loading_text"-->
+                    <!--android:text="Loading user details"/>-->
+            <!--</LinearLayout>-->
+
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/profile_image_progressbar"
+                android:layout_centerHorizontal="true"/>
 
             <ImageView
                 android:id='@+id/profile_image_user_detail_activity'
                 android:layout_width="128dp"
                 android:layout_height="128dp"
                 android:layout_centerHorizontal="true" />
-
-            <ProgressBar
-                android:paddingTop="16dp"
-                android:id='@+id/profile_image_loading_progressbar'
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"/>
 
             <TextView
                 android:id="@+id/username_user_detail_activity"

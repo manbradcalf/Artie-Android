@@ -126,6 +126,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                 startActivity(intent);
             }
         });
+        Toolbar.setTitle(data.getEventname());
     }
 
     @Override
