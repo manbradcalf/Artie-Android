@@ -30,13 +30,15 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true" />
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
+        <com.prolificinteractive.materialcalendarview.MaterialCalendarView
+            android:id="@+id/events_calendar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:layout_marginBottom="242dp"
-            android:text="CalendarActivity" />
+            android:layout_centerVertical="true"
+            app:mcv_selectionColor="@color/colorAccent"
+            app:mcv_showOtherDates="all" />
+
     </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>
