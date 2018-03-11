@@ -33,7 +33,6 @@ public class CalendarActivity extends MainActivity implements OnDateSelectedList
     @Override
     void setLayout() {
         calendarView = findViewById(R.id.events_calendar);
-//        new ApiSimulator().executeOnExecutor(Executors.newSingleThreadExecutor());
         Calendar calendar = Calendar.getInstance();
         Calendar calendar1 = Calendar.getInstance();
         Calendar calendar2 = Calendar.getInstance();
@@ -63,38 +62,5 @@ public class CalendarActivity extends MainActivity implements OnDateSelectedList
     @Override
     public void onDateSelected(@NonNull MaterialCalendarView materialCalendarView, @NonNull CalendarDay calendarDay, boolean b) {
 
-    }
-
-    private class ApiSimulator extends AsyncTask<Void, Void, List<CalendarDay>> {
-
-        @Override
-        protected List<CalendarDay> doInBackground(@NonNull Void... voids) {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.MONTH, -2);
-            ArrayList<CalendarDay> dates = new ArrayList<>();
-            for (int i = 0; i < 30; i++) {
-                CalendarDay day = CalendarDay.from(calendar);
-                dates.add(day);
-                calendar.add(Calendar.DATE, 5);
-            }
-
-            return dates;
-        }
-
-        @Override
-        protected void onPostExecute(@NonNull List<CalendarDay> calendarDays) {
-            super.onPostExecute(calendarDays);
-
-            if (isFinishing()) {
-                return;
-            }
-
-            calendarView.addDecorator(new EventDecorator(Color.RED, calendarDays, CalendarActivity.this));
-        }
     }
 }
