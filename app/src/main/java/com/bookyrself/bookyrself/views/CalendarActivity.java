@@ -64,7 +64,6 @@ public class CalendarActivity extends MainActivity implements OnDateSelectedList
         List<CalendarDay> calendarDays = new ArrayList<>();
 
         for (int i = 0; i < events.size(); i++) {
-            Calendar calendar = Calendar.getInstance();
             String[] s = events.get(i).getDate().split("-");
             int year = Integer.parseInt(s[0]);
             // I have to do weird logic on the month because months are 0 indexed
