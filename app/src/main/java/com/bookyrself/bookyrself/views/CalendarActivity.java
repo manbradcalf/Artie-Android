@@ -5,6 +5,8 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
 import com.bookyrself.bookyrself.R;
+import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
+import com.bookyrself.bookyrself.presenters.CalendarPresenter;
 import com.bookyrself.bookyrself.services.FirebaseService;
 import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
@@ -16,9 +18,9 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.Executors;
 
-public class CalendarActivity extends MainActivity implements OnDateSelectedListener {
+public class CalendarActivity extends MainActivity implements OnDateSelectedListener, CalendarPresenter.CalendarPresenterListener {
     private MaterialCalendarView calendarView;
-    private List<CalendarDay> events;
+    private CalendarPresenter presenter;
 
     @Override
     int getContentViewId() {
@@ -32,26 +34,9 @@ public class CalendarActivity extends MainActivity implements OnDateSelectedList
 
     @Override
     void setLayout() {
+        presenter = new CalendarPresenter(this);
+        presenter.loadUserCalender("20");
         calendarView = findViewById(R.id.events_calendar);
-        Calendar calendar = Calendar.getInstance();
-        Calendar calendar1 = Calendar.getInstance();
-        Calendar calendar2 = Calendar.getInstance();
-        Calendar calendar3 = Calendar.getInstance();
-        calendar.set(2018, 2, 22);
-        calendar1.set(2018, 2, 23);
-        calendar2.set(2018, 2, 24);
-        calendar3.set(2018, 3, 2);
-        CalendarDay day = CalendarDay.from(calendar);
-        CalendarDay day1 = CalendarDay.from(calendar1);
-        CalendarDay day2 = CalendarDay.from(calendar2);
-        CalendarDay day3 = CalendarDay.from(calendar3);
-        ArrayList<CalendarDay> days = new ArrayList<>();
-        days.add(day);
-        days.add(day1);
-        days.add(day2);
-        days.add(day3);
-        calendarView.addDecorator(new EventDecorator(Color.BLUE, days, this));
-
     }
 
     @Override
@@ -62,5 +47,36 @@ public class CalendarActivity extends MainActivity implements OnDateSelectedList
     @Override
     public void onDateSelected(@NonNull MaterialCalendarView materialCalendarView, @NonNull CalendarDay calendarDay, boolean b) {
 
+    }
+
+    @Override
+    public void selectEventonCalendar(String eventId) {
+
+    }
+
+    @Override
+    public void goToEventDetail(String eventId) {
+
+    }
+
+    @Override
+    public void calendarReady(List<Event> events) {
+        List<CalendarDay> calendarDays = new ArrayList<>();
+
+        for (int i = 0; i < events.size(); i++) {
+            Calendar calendar = Calendar.getInstance();
+            String[] s = events.get(i).getDate().split("-");
+            int year = Integer.parseInt(s[0]);
+            // I have to do weird logic on the month because months are 0 indexed
+            // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
+            int month = Integer.parseInt(s[1]) - 1;
+            int day = Integer.parseInt(s[2]);
+//            calendar.set(year, month, day);
+            CalendarDay calendarDay = CalendarDay.from(year, month, day);
+            calendarDays.add(calendarDay);
+        }
+        if (calendarDays.size() == events.size()) {
+            calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this));
+        }
     }
 }
