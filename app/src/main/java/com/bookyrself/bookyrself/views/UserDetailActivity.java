@@ -30,6 +30,7 @@ import com.squareup.picasso.Picasso;
 public class UserDetailActivity extends AppCompatActivity implements UserDetailPresenter.UserDetailPresenterListener {
 
     private CardView emailUserCardview;
+    private CardView addUserToContactsCardview;
     private TextView usernameTextView;
     private TextView cityStateTextView;
     private TextView tagsTextView;
@@ -40,6 +41,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     private ProgressBar profileImageProgressbar;
     private ProgressBar contentProgressBar;
     private TextView emailUserTextView;
+    private TextView addUserToContactsTextView;
     private String userEmailAddress;
     private Toolbar Toolbar;
     //TODO: figure out a consistent strategy for empty states when i dont have a headache
@@ -87,6 +89,15 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             }
         });
 
+        addUserToContactsCardview = findViewById(R.id.add_user_to_contacts_card);
+        addUserToContactsTextView = findViewById(R.id.add_user_to_contacts_textview);
+        addUserToContactsTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: Add code that adds a user to your contacts list
+            }
+        });
+
         setSupportActionBar(Toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         String toolbarText = getString(R.string.user_detail_toolbar, response.getUsername());
@@ -96,7 +107,8 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         usernameTextView.setText(response.getUsername());
         cityStateTextView.setText(response.getCitystate());
         bioTextView.setText(response.getBio());
-        emailUserTextView.setText("Email " + response.getUsername() + "!");
+        emailUserTextView.setText(getString(R.string.email_user, response.getUsername()));
+        addUserToContactsTextView.setText(getString(R.string.add_user_to_contacts, response.getUsername()));
         userEmailAddress = response.getEmail();
         Picasso.with(this)
                 .load(response.getPicture())

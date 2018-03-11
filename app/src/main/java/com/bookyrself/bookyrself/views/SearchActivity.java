@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.media.Image;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -216,6 +217,10 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         if (hits.size() == 0) {
             emptyStateText.setText(R.string.search_activity_no_results);
             emptyStateImage.setImageDrawable(getDrawable(R.drawable.ic_binoculars));
+            emptyState.setVisibility(View.VISIBLE);
+            showSearchBar(true);
+        } else {
+            emptyState.setVisibility(View.GONE);
         }
 
         eventsResults = hits;
@@ -224,11 +229,6 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         searchButton.setText("Edit Search");
         adapter.notifyDataSetChanged();
         showProgressbar(false);
-        if (hits.isEmpty()) {
-            emptyState.setVisibility(View.VISIBLE);
-        } else {
-            emptyState.setVisibility(View.GONE);
-        }
     }
 
     @Override
@@ -242,12 +242,16 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
             recyclerView.setVisibility(View.VISIBLE);
         }
 
-        // If the last empty state was an error, make sure that it is now
-        // a generic failed search. No errors will hit this method, so this is
-        // safe.
-//        if (emptyStateText.getText() == getString(R.string.search_error)) {
-//            emptyStateText.setText(R.string.empty_state);
-//        }
+        // If there are no results, update the empty state to show the binoculars and no results copy
+        // If there are results, set the empty state to invisible
+        if (hits.size() == 0) {
+            emptyStateText.setText(R.string.search_activity_no_results);
+            emptyStateImage.setImageDrawable(getDrawable(R.drawable.ic_binoculars));
+            emptyState.setVisibility(View.VISIBLE);
+            showSearchBar(true);
+        } else {
+            emptyState.setVisibility(View.GONE);
+        }
 
         usersResults = hits;
         adapter.setViewType(ResultsAdapter.USER_VIEW_TYPE);
@@ -255,12 +259,6 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         searchButton.setText("Edit Search");
         adapter.notifyDataSetChanged();
         showProgressbar(false);
-        if (hits.isEmpty()) {
-            emptyState.setVisibility(View.VISIBLE);
-            showSearchBar(true);
-        } else {
-            emptyState.setVisibility(View.GONE);
-        }
     }
 
     private void showSearchBar(Boolean bool) {
@@ -320,6 +318,8 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     public void showError() {
         recyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
+        emptyStateText.setText(R.string.search_error);
+        emptyStateImage.setImageDrawable(getDrawable(R.drawable.ic_error_empty_state));
         emptyState.setVisibility(View.VISIBLE);
         showSearchBar(true);
     }
@@ -421,7 +421,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                             .centerCrop()
                             .into(viewHolderUsers.userProfileImageThumb);
 
-                    viewHolderUsers.userProfileImageThumb.setOnClickListener(new View.OnClickListener() {
+                    viewHolderUsers.userCardView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             itemSelected(usersResults
@@ -462,7 +462,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                             .centerCrop()
                             .into(viewHolderEvents.eventImageThumb);
 
-                    viewHolderEvents.eventImageThumb.setOnClickListener(new View.OnClickListener() {
+                    viewHolderEvents.eventCardView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             itemSelected(eventsResults
@@ -487,6 +487,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         }
 
         class ViewHolderEvents extends RecyclerView.ViewHolder {
+            public CardView eventCardView;
             public TextView eventCityStateTextView;
             public TextView eventHostTextView;
             public TextView eventNameTextView;
@@ -494,6 +495,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
 
             public ViewHolderEvents(View view) {
                 super(view);
+                eventCardView = view.findViewById(R.id.search_result_card_events);
                 eventCityStateTextView = view.findViewById(R.id.event_location_search_result);
                 eventHostTextView = view.findViewById(R.id.event_host_search_result);
                 eventNameTextView = view.findViewById(R.id.eventname_search_result);
@@ -502,6 +504,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         }
 
         class ViewHolderUsers extends RecyclerView.ViewHolder {
+            public CardView userCardView;
             public TextView userCityStateTextView;
             public TextView userNameTextView;
             public ImageView userProfileImageThumb;
@@ -509,6 +512,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
 
             public ViewHolderUsers(View itemView) {
                 super(itemView);
+                userCardView = itemView.findViewById(R.id.search_result_card_users);
                 userCityStateTextView = itemView.findViewById(R.id.user_location_search_result);
                 userNameTextView = itemView.findViewById(R.id.username_search_result);
                 userProfileImageThumb = itemView.findViewById(R.id.user_image_search_result);

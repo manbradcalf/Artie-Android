@@ -111,6 +111,8 @@ public interface SearchPresenterListener {
                             if (response.body() != null) {
                                 List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> hits = response.body().getHits().getHits();
                                 mListener.searchUsersResponseReady(hits);
+                            } else if (response.errorBody() != null) {
+                                mListener.showError();
                             }
                         }
 

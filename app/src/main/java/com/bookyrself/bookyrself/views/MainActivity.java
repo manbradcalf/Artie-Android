@@ -59,7 +59,7 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
                 if (itemId == R.id.navigation_search) {
                     startActivity(new Intent(getApplicationContext(), SearchActivity.class));
                 } else if (itemId == R.id.navigation_messages) {
-                    startActivity(new Intent(getApplicationContext(), MessagesActivity.class));
+                    startActivity(new Intent(getApplicationContext(), ContactsActivity.class));
                 } else if (itemId == R.id.navigation_calendar) {
                     startActivity(new Intent(getApplicationContext(), CalendarActivity.class));
                 } else if (itemId == R.id.navigation_profile) {
