@@ -3,6 +3,7 @@ package com.bookyrself.bookyrself.views;
 import android.content.Intent;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.view.View;
 import android.widget.Button;
 
 import com.bookyrself.bookyrself.R;
@@ -28,13 +29,13 @@ public class ProfileActivity extends MainActivity {
 
     @Override
     void setLayout() {
-//        btnSignOut = findViewById(R.id.btnSignOut);
-//        btnSignOut.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                auth.signOut();
-//            }
-//        });
+        btnSignOut = findViewById(R.id.btnSignOut);
+        btnSignOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                auth.signOut();
+            }
+        });
         coordinatorLayout = findViewById(R.id.coordinator_layout_profile_activity);
         checkAuth();
     }

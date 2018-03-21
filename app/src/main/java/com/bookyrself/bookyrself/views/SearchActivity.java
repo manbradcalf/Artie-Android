@@ -20,8 +20,8 @@ import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
+import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.DatePickerDialogFragment;
-import com.bookyrself.bookyrself.utils.RoundedTransformation;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -410,15 +410,24 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                             .get_source()
                             .getUsername());
 
+                    StringBuilder listString = new StringBuilder();
+                    for (String s : usersResults.get(position).get_source().getTags()) {
+                        listString.append(s+", ");
+                    }
+
+                    viewHolderUsers.userTagsTextView.setText(listString.toString());
+
                     final int adapterPosition = holder.getAdapterPosition();
 
                     Picasso.with(getApplicationContext())
-                            .load("https://f4.bcbits.com/img/0009619513_10.jpg")
-                            .placeholder(R.drawable.ic_profile_black_24dp)
-                            .error(R.drawable.ic_profile_black_24dp)
-                            .transform(new RoundedTransformation(50, 4))
-                            .resizeDimen(R.dimen.user_image_thumb_list_height, R.dimen.user_image_thumb_list_width)
-                            .centerCrop()
+                            .load(usersResults
+                                    .get(position)
+                                    .get_source()
+                                    .getPicture())
+                            .placeholder(R.drawable.round)
+                            .error(R.drawable.round)
+                            .transform(new CircleTransform())
+                            .resize(100,100)
                             .into(viewHolderUsers.userProfileImageThumb);
 
                     viewHolderUsers.userCardView.setOnClickListener(new View.OnClickListener() {
@@ -455,9 +464,9 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                                     .get(position)
                                     .get_source()
                                     .getPicture())
-                            .placeholder(R.drawable.ic_profile_black_24dp)
-                            .error(R.drawable.ic_profile_black_24dp)
-                            .transform(new RoundedTransformation(50, 4))
+                            .placeholder(R.drawable.round)
+                            .error(R.drawable.round)
+                            .transform(new CircleTransform())
                             .resizeDimen(R.dimen.user_image_thumb_list_height, R.dimen.user_image_thumb_list_width)
                             .centerCrop()
                             .into(viewHolderEvents.eventImageThumb);
@@ -507,6 +516,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
             public CardView userCardView;
             public TextView userCityStateTextView;
             public TextView userNameTextView;
+            public TextView userTagsTextView;
             public ImageView userProfileImageThumb;
 
 
@@ -515,6 +525,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                 userCardView = itemView.findViewById(R.id.search_result_card_users);
                 userCityStateTextView = itemView.findViewById(R.id.user_location_search_result);
                 userNameTextView = itemView.findViewById(R.id.username_search_result);
+                userTagsTextView = itemView.findViewById(R.id.user_tag_search_result);
                 userProfileImageThumb = itemView.findViewById(R.id.user_image_search_result);
             }
         }

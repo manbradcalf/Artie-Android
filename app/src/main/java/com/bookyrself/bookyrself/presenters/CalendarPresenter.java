@@ -24,7 +24,7 @@ public class CalendarPresenter {
      * Contract / Listener
      */
     public interface CalendarPresenterListener {
-        void selectEventonCalendar(String eventId);
+        void selectEventOnCalendar(String eventId);
 
         void goToEventDetail(String eventId);
 

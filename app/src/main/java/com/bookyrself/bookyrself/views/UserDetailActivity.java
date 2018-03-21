@@ -185,7 +185,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     }
 
     @Override
-    public void selectEventonCalendar(String eventId) {
+    public void selectEventOnCalendar(String eventId) {
 
     }
 

@@ -1,8 +1,14 @@
 package com.bookyrself.bookyrself.views;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.v4.app.Fragment;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
@@ -12,6 +18,8 @@ import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
+import com.ramotion.paperonboarding.PaperOnboardingFragment;
+import com.ramotion.paperonboarding.PaperOnboardingPage;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -21,6 +29,8 @@ import java.util.concurrent.Executors;
 public class CalendarActivity extends MainActivity implements OnDateSelectedListener, CalendarPresenter.CalendarPresenterListener {
     private MaterialCalendarView calendarView;
     private CalendarPresenter presenter;
+    private android.support.v4.app.FragmentManager fm;
+    private FrameLayout fragmentContainer;
 
     @Override
     int getContentViewId() {
@@ -34,6 +44,7 @@ public class CalendarActivity extends MainActivity implements OnDateSelectedList
 
     @Override
     void setLayout() {
+
         presenter = new CalendarPresenter(this);
         presenter.loadUserCalender("20");
         calendarView = findViewById(R.id.events_calendar);
@@ -50,7 +61,7 @@ public class CalendarActivity extends MainActivity implements OnDateSelectedList
     }
 
     @Override
-    public void selectEventonCalendar(String eventId) {
+    public void selectEventOnCalendar(String eventId) {
 
     }
 

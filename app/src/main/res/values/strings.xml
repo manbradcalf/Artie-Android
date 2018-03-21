@@ -23,6 +23,7 @@
     <string name="search_activity_no_results">No results found :(\n Try another search!</string>
     <string name="email_user">Email %s\!</string>
     <string name="add_user_to_contacts">Save %s to your contacts!</string>
+    <string name="title_activity_onboarding">Onboarding</string>
 
 
 </resources>

@@ -25,7 +25,6 @@ public class EventDecorator implements DayViewDecorator {
         this.color = color;
         this.dates = new HashSet<>(dates);
         this.context = context;
-
     }
 
 

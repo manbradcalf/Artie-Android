@@ -1,0 +1,60 @@
+package com.bookyrself.bookyrself.views;
+
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
+import android.widget.FrameLayout;
+
+import com.bookyrself.bookyrself.R;
+import com.ramotion.paperonboarding.PaperOnboardingFragment;
+import com.ramotion.paperonboarding.PaperOnboardingPage;
+import com.ramotion.paperonboarding.listeners.PaperOnboardingOnRightOutListener;
+
+import java.util.ArrayList;
+
+public class Onboarding extends AppCompatActivity {
+
+    FrameLayout fragmentContainer;
+    FragmentManager fm;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_onboarding);
+
+        fragmentContainer = findViewById(R.id.onboarding_fragment);
+        fm = getSupportFragmentManager();
+        PaperOnboardingPage scr1 = new PaperOnboardingPage("Find Artists",
+                "Search artists by tags, location and availability",
+                Color.parseColor("#FFFFFF"), R.drawable.ic_search_onboarding, R.drawable.ic_search_24dp_tryagain);
+        PaperOnboardingPage scr2 = new PaperOnboardingPage("Find Events",
+                "Search for dates available for booking your shows.",
+                Color.parseColor("#FFFFFF"), R.drawable.ic_calendar, R.drawable.ic_calendar);
+        PaperOnboardingPage scr3 = new PaperOnboardingPage("Tours",
+                "Use the venues, artists and friends you find to book your tour!",
+                Color.parseColor("#FFFFFF"), R.drawable.ic_map_location, R.drawable.ic_map_location);
+
+        ArrayList<PaperOnboardingPage> elements = new ArrayList<>();
+        elements.add(scr1);
+        elements.add(scr2);
+        elements.add(scr3);
+        PaperOnboardingFragment onBoardingFragment = PaperOnboardingFragment.newInstance(elements);
+        android.support.v4.app.FragmentTransaction fragmentTransaction = fm.beginTransaction();
+        fragmentTransaction.add(R.id.onboarding_fragment, onBoardingFragment);
+        fragmentTransaction.commit();
+        onBoardingFragment.setOnRightOutListener(new PaperOnboardingOnRightOutListener() {
+            @Override
+            public void onRightOut() {
+                Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+
+
+}
