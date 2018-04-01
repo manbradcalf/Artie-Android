@@ -2,6 +2,7 @@ package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,18 +19,27 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
+import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.presenters.CalendarPresenter;
 import com.bookyrself.bookyrself.presenters.UserDetailPresenter;
+import com.bookyrself.bookyrself.utils.EventDecorator;
+import com.prolificinteractive.materialcalendarview.CalendarDay;
+import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by benmedcalf on 1/13/18.
  */
 
-public class UserDetailActivity extends AppCompatActivity implements UserDetailPresenter.UserDetailPresenterListener {
+public class UserDetailActivity extends AppCompatActivity implements UserDetailPresenter.UserDetailPresenterListener, CalendarPresenter.CalendarPresenterListener {
 
     private CardView emailUserCardview;
+    private CardView addUserToContactsCardview;
     private TextView usernameTextView;
     private TextView cityStateTextView;
     private TextView tagsTextView;
@@ -40,8 +50,11 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     private ProgressBar profileImageProgressbar;
     private ProgressBar contentProgressBar;
     private TextView emailUserTextView;
+    private TextView addUserToContactsTextView;
     private String userEmailAddress;
     private Toolbar Toolbar;
+    private CalendarPresenter calendarPresenter;
+    private MaterialCalendarView calendarView;
     //TODO: figure out a consistent strategy for empty states when i dont have a headache
 //    private RelativeLayout emptyState;
 //    private TextView emptyStateTextView;
@@ -54,6 +67,8 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         setContentView(R.layout.activity_user_detail);
         userDetailPresenter = new UserDetailPresenter(this);
         userDetailPresenter.getUserInfo(getIntent().getStringExtra("userId"));
+        calendarPresenter = new CalendarPresenter(this);
+        calendarPresenter.loadUserCalender(getIntent().getStringExtra("userId"));
 //        emptyState = findViewById(R.id.empty_state_user_detail);
 //        emptyStateTextView = findViewById(R.id.empty_state_text);
 //        emptyStateTextView.setText("error loading user details");
@@ -63,13 +78,14 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         Toolbar = findViewById(R.id.toolbar_user_detail);
         Toolbar.setTitle("User Details");
 //        contentProgressBar = findViewById(R.id.content_loading_progressbar);
+        calendarView = findViewById(R.id.user_detail_calendar);
         loading_state();
     }
 
     @Override
     public void userInfoReady(_source response) {
 
-//        contentProgressBar.setVisibility(View.GONE);
+        // contentProgressBar.setVisibility(View.GONE);
         // Show the user details now that they're loaded
         usernameTextView = findViewById(R.id.username_user_detail_activity);
         cityStateTextView = findViewById(R.id.city_state_user_detail_activity);
@@ -87,6 +103,15 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             }
         });
 
+        addUserToContactsCardview = findViewById(R.id.add_user_to_contacts_card);
+        addUserToContactsTextView = findViewById(R.id.add_user_to_contacts_textview);
+        addUserToContactsTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: Add code that adds a user to your contacts list
+            }
+        });
+
         setSupportActionBar(Toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         String toolbarText = getString(R.string.user_detail_toolbar, response.getUsername());
@@ -96,7 +121,8 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         usernameTextView.setText(response.getUsername());
         cityStateTextView.setText(response.getCitystate());
         bioTextView.setText(response.getBio());
-        emailUserTextView.setText("Email " + response.getUsername() + "!");
+        emailUserTextView.setText(getString(R.string.email_user, response.getUsername()));
+        addUserToContactsTextView.setText(getString(R.string.add_user_to_contacts, response.getUsername()));
         userEmailAddress = response.getEmail();
         Picasso.with(this)
                 .load(response.getPicture())
@@ -155,6 +181,35 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             } else {
                 present_error();
             }
+        }
+    }
+
+    @Override
+    public void selectEventOnCalendar(String eventId) {
+
+    }
+
+    @Override
+    public void goToEventDetail(String eventId) {
+
+    }
+
+    @Override
+    public void calendarReady(List<Event> events) {
+        List<CalendarDay> calendarDays = new ArrayList<>();
+
+        for (int i = 0; i < events.size(); i++) {
+            String[] s = events.get(i).getDate().split("-");
+            int year = Integer.parseInt(s[0]);
+            // I have to do weird logic on the month because months are 0 indexed
+            // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
+            int month = Integer.parseInt(s[1]) - 1;
+            int day = Integer.parseInt(s[2]);
+            CalendarDay calendarDay = CalendarDay.from(year, month, day);
+            calendarDays.add(calendarDay);
+        }
+        if (calendarDays.size() == events.size()) {
+            calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this));
         }
     }
 }
