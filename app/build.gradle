@@ -39,6 +39,7 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
     compile 'com.firebaseui:firebase-ui-auth:3.1.0'
+    compile 'com.prolificinteractive:material-calendarview:1.4.3'
 }
 
 apply plugin: 'com.google.gms.google-services'
