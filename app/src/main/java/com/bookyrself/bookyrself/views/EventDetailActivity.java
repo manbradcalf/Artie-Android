@@ -23,7 +23,7 @@ import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
 import com.bookyrself.bookyrself.models.EventDetailResponse.Host;
 import com.bookyrself.bookyrself.models.EventDetailResponse.User;
 import com.bookyrself.bookyrself.presenters.EventDetailPresenter;
-import com.bookyrself.bookyrself.utils.RoundedTransformation;
+import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
@@ -104,9 +104,9 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         HostImageView = findViewById(R.id.item_event_detail_userthumb);
         Picasso.with(getApplicationContext())
                 .load(imgUrl)
-                .placeholder(R.drawable.ic_profile_black_24dp)
-                .error(R.drawable.ic_profile_black_24dp)
-                .transform(new RoundedTransformation(50, 4))
+                .placeholder(R.drawable.round)
+                .error(R.drawable.round)
+                .transform(new CircleTransform())
                 .into(HostImageView);
 
         usersListView = findViewById(R.id.event_detail_users_list);
@@ -126,6 +126,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                 startActivity(intent);
             }
         });
+        Toolbar.setTitle(data.getEventname());
     }
 
     @Override
@@ -215,9 +216,9 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
 
             Picasso.with(mContext)
                     .load(String.valueOf(mMap.get(userId)))
-                    .placeholder(R.drawable.ic_profile_black_24dp)
-                    .error(R.drawable.ic_profile_black_24dp)
-                    .transform(new RoundedTransformation(50, 4))
+                    .placeholder(R.drawable.round)
+                    .error(R.drawable.round)
+                    .transform(new CircleTransform())
                     .into(userThumb);
 
             userThumb.setTag(R.id.item_event_detail_userthumb, user.getUserId());

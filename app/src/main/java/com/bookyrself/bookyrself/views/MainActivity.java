@@ -1,16 +1,25 @@
 package com.bookyrself.bookyrself.views;
 
+import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.FragmentContainer;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 
 import com.bookyrself.bookyrself.R;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
+import com.ramotion.paperonboarding.PaperOnboardingFragment;
+import com.ramotion.paperonboarding.PaperOnboardingPage;
+
+import java.util.ArrayList;
 
 public abstract class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
@@ -19,11 +28,14 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
     protected FirebaseDatabase db;
     protected FirebaseAuth auth;
     protected FirebaseApp firebaseApp;
+    private FrameLayout fragmentContainer;
+    private FragmentManager fm;
 
 
     //TODO: I'm creating a firebase app, db and auth every time I start an activity? This feels wrong
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         getWindow().setEnterTransition(null);
         firebaseApp = FirebaseApp.initializeApp(this);
@@ -59,7 +71,7 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
                 if (itemId == R.id.navigation_search) {
                     startActivity(new Intent(getApplicationContext(), SearchActivity.class));
                 } else if (itemId == R.id.navigation_messages) {
-                    startActivity(new Intent(getApplicationContext(), MessagesActivity.class));
+                    startActivity(new Intent(getApplicationContext(), ContactsActivity.class));
                 } else if (itemId == R.id.navigation_calendar) {
                     startActivity(new Intent(getApplicationContext(), CalendarActivity.class));
                 } else if (itemId == R.id.navigation_profile) {

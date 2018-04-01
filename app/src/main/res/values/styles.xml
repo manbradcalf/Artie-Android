@@ -25,7 +25,7 @@
 
     <style name="SearchViewStyleWhat" parent="Widget.AppCompat.SearchView">
         <item name="submitBackground">@color/cardview_light_background</item>
-        <item name="searchIcon">@drawable/ic_search_black_24dp</item>
+        <item name="searchIcon">@drawable/ic_search_24dp_tryagain</item>
         <item name="closeIcon">@drawable/ic_close_black_24dp</item>
     </style>
 
@@ -37,8 +37,35 @@
 
     <style name="SearchViewStyleWhere" parent="Widget.AppCompat.SearchView">
         <item name="submitBackground">@color/cardview_light_background</item>
-        <item name="searchIcon">@drawable/ic_map_black_24dp</item>
+        <item name="searchIcon">@drawable/ic_location_search</item>
         <item name="closeIcon">@drawable/ic_close_black_24dp</item>
     </style>
+
+    <!--You can use any theme here as parent theme -->
+    <style name="OnboardingTheme" parent="AppTheme">
+        <item name="android:textViewStyle">@style/myTextViewStyle</item>
+    </style>
+
+    <style name="myTextViewStyle" parent="@android:style/TextAppearance">
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
+    <style name="UserItemLine1Text" parent="@android:style/TextAppearance">
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">Roboto Regular</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="UserItemLine2Text" parent="@android:style/TextAppearance">
+        <item name="android:fontFamily">Roboto Regular</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="UserItemLine3Text" parent="@android:style/TextAppearance">
+        <item name="android:fontFamily">Roboto Regular</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+
 
 </resources>

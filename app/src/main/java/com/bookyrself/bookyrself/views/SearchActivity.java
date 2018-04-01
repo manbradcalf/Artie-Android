@@ -1,8 +1,10 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -13,12 +15,13 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
+import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.DatePickerDialogFragment;
-import com.bookyrself.bookyrself.utils.RoundedTransformation;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -33,7 +36,6 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     private SearchView searchViewWhat;
     private SearchView searchViewWhere;
     private ProgressBar progressBar;
-    private TextView emptyStateText;
     private Button fromButton;
     private Button toButton;
     private Button searchButton;
@@ -48,6 +50,9 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     private RecyclerView.LayoutManager layoutManager;
     private Boolean boolSearchEditable = false;
     private Parcelable listState;
+    private View emptyState;
+    private TextView emptyStateText;
+    private ImageView emptyStateImage;
 
     int getContentViewId() {
         return R.layout.activity_search;
@@ -61,19 +66,19 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     @Override
     void setLayout() {
         presenter = new SearchPresenter(this);
-        recyclerView = (RecyclerView) findViewById(R.id.search_recycler_view);
+        recyclerView = findViewById(R.id.search_recycler_view);
         adapter = new ResultsAdapter();
         recyclerView.setAdapter(adapter);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        searchViewWhat = (SearchView) findViewById(R.id.search_what);
+        searchViewWhat = findViewById(R.id.search_what);
         searchViewWhat.setQueryHint(getString(R.string.search_what_query_hint));
-        searchViewWhere = (SearchView) findViewById(R.id.search_where);
+        searchViewWhere = findViewById(R.id.search_where);
         searchViewWhere.setVisibility(View.GONE);
         searchViewWhere.setQueryHint(getString(R.string.search_where_query_hint));
-        fromButton = (Button) findViewById(R.id.from_button);
+        fromButton = findViewById(R.id.from_button);
         fromButton.setVisibility(View.GONE);
-        toButton = (Button) findViewById(R.id.to_button);
+        toButton =  findViewById(R.id.to_button);
         toButton.setVisibility(View.GONE);
         usersButton = findViewById(R.id.users_toggle);
         usersButton.setVisibility(View.GONE);
@@ -81,12 +86,13 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         eventsButton.setVisibility(View.GONE);
         radioGroup = findViewById(R.id.radio_group_search);
         radioGroup.check(R.id.users_toggle);
-        searchButton = (Button) findViewById(R.id.search_btn);
+        searchButton = findViewById(R.id.search_btn);
         searchButton.setVisibility(View.GONE);
-        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        progressBar = findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.GONE);
-        emptyStateText = findViewById(R.id.search_empty_state);
-        emptyStateText.setVisibility(View.GONE);
+        emptyState = findViewById(R.id.empty_state_search);
+        emptyStateText = findViewById(R.id.empty_state_text);
+        emptyStateImage = findViewById(R.id.empty_state_image);
 
 
         /**
@@ -208,8 +214,13 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         // If the last empty state was an error, make sure that it is now
         // a generic failed search. No errors will hit this method, so this is
         // safe.
-        if (emptyStateText.getText() == getString(R.string.search_error)) {
-            emptyStateText.setText(R.string.search_empty_state);
+        if (hits.size() == 0) {
+            emptyStateText.setText(R.string.search_activity_no_results);
+            emptyStateImage.setImageDrawable(getDrawable(R.drawable.ic_binoculars));
+            emptyState.setVisibility(View.VISIBLE);
+            showSearchBar(true);
+        } else {
+            emptyState.setVisibility(View.GONE);
         }
 
         eventsResults = hits;
@@ -218,11 +229,6 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         searchButton.setText("Edit Search");
         adapter.notifyDataSetChanged();
         showProgressbar(false);
-        if (hits.isEmpty()) {
-            emptyStateText.setVisibility(View.VISIBLE);
-        } else {
-            emptyStateText.setVisibility(View.GONE);
-        }
     }
 
     @Override
@@ -236,11 +242,15 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
             recyclerView.setVisibility(View.VISIBLE);
         }
 
-        // If the last empty state was an error, make sure that it is now
-        // a generic failed search. No errors will hit this method, so this is
-        // safe.
-        if (emptyStateText.getText() == getString(R.string.search_error)) {
-            emptyStateText.setText(R.string.search_empty_state);
+        // If there are no results, update the empty state to show the binoculars and no results copy
+        // If there are results, set the empty state to invisible
+        if (hits.size() == 0) {
+            emptyStateText.setText(R.string.search_activity_no_results);
+            emptyStateImage.setImageDrawable(getDrawable(R.drawable.ic_binoculars));
+            emptyState.setVisibility(View.VISIBLE);
+            showSearchBar(true);
+        } else {
+            emptyState.setVisibility(View.GONE);
         }
 
         usersResults = hits;
@@ -249,13 +259,6 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         searchButton.setText("Edit Search");
         adapter.notifyDataSetChanged();
         showProgressbar(false);
-        if (hits.isEmpty()) {
-            emptyStateText.setText(R.string.search_empty_state);
-            showSearchBar(true);
-            emptyStateText.setVisibility(View.VISIBLE);
-        } else {
-            emptyStateText.setVisibility(View.GONE);
-        }
     }
 
     private void showSearchBar(Boolean bool) {
@@ -314,9 +317,10 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     @Override
     public void showError() {
         recyclerView.setVisibility(View.GONE);
-        emptyStateText.setText(R.string.search_error);
         progressBar.setVisibility(View.GONE);
-        emptyStateText.setVisibility(View.VISIBLE);
+        emptyStateText.setText(R.string.search_error);
+        emptyStateImage.setImageDrawable(getDrawable(R.drawable.ic_error_empty_state));
+        emptyState.setVisibility(View.VISIBLE);
         showSearchBar(true);
     }
 
@@ -406,18 +410,27 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                             .get_source()
                             .getUsername());
 
+                    StringBuilder listString = new StringBuilder();
+                    for (String s : usersResults.get(position).get_source().getTags()) {
+                        listString.append(s+", ");
+                    }
+
+                    viewHolderUsers.userTagsTextView.setText(listString.toString());
+
                     final int adapterPosition = holder.getAdapterPosition();
 
                     Picasso.with(getApplicationContext())
-                            .load("https://f4.bcbits.com/img/0009619513_10.jpg")
-                            .placeholder(R.drawable.ic_profile_black_24dp)
-                            .error(R.drawable.ic_profile_black_24dp)
-                            .transform(new RoundedTransformation(50, 4))
-                            .resizeDimen(R.dimen.user_image_thumb_list_height, R.dimen.user_image_thumb_list_width)
-                            .centerCrop()
+                            .load(usersResults
+                                    .get(position)
+                                    .get_source()
+                                    .getPicture())
+                            .placeholder(R.drawable.round)
+                            .error(R.drawable.round)
+                            .transform(new CircleTransform())
+                            .resize(100,100)
                             .into(viewHolderUsers.userProfileImageThumb);
 
-                    viewHolderUsers.userProfileImageThumb.setOnClickListener(new View.OnClickListener() {
+                    viewHolderUsers.userCardView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             itemSelected(usersResults
@@ -433,16 +446,16 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                             .get(position)
                             .get_source()
                             .getEventname());
-                    viewHolderEvents.eventHostTextView.setText(eventsResults
-                            .get(position)
+                    viewHolderEvents.eventHostTextView.setText(getString(R.string.event_item_hosted_by,
+                            eventsResults.get(position)
                             .get_source()
                             .getHost()
                             .get(0)
-                            .getUsername());
-                    viewHolderEvents.eventCityStateTextView.setText(eventsResults
-                            .get(position)
+                            .getUsername()));
+                    viewHolderEvents.eventCityStateTextView.setText(getString(R.string.event_item_citystate,
+                            eventsResults.get(position)
                             .get_source()
-                            .getCitystate());
+                            .getCitystate()));
                     //TODO: Creating adapterPosition here to be used in onClick feels like a hack but isn't particularly egregious IMO.
                     final int adapterPosition = holder.getAdapterPosition();
 
@@ -451,14 +464,14 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                                     .get(position)
                                     .get_source()
                                     .getPicture())
-                            .placeholder(R.drawable.ic_profile_black_24dp)
-                            .error(R.drawable.ic_profile_black_24dp)
-                            .transform(new RoundedTransformation(50, 4))
+                            .placeholder(R.drawable.round)
+                            .error(R.drawable.round)
+                            .transform(new CircleTransform())
                             .resizeDimen(R.dimen.user_image_thumb_list_height, R.dimen.user_image_thumb_list_width)
                             .centerCrop()
                             .into(viewHolderEvents.eventImageThumb);
 
-                    viewHolderEvents.eventImageThumb.setOnClickListener(new View.OnClickListener() {
+                    viewHolderEvents.eventCardView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             itemSelected(eventsResults
@@ -483,6 +496,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         }
 
         class ViewHolderEvents extends RecyclerView.ViewHolder {
+            public CardView eventCardView;
             public TextView eventCityStateTextView;
             public TextView eventHostTextView;
             public TextView eventNameTextView;
@@ -490,6 +504,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
 
             public ViewHolderEvents(View view) {
                 super(view);
+                eventCardView = view.findViewById(R.id.search_result_card_events);
                 eventCityStateTextView = view.findViewById(R.id.event_location_search_result);
                 eventHostTextView = view.findViewById(R.id.event_host_search_result);
                 eventNameTextView = view.findViewById(R.id.eventname_search_result);
@@ -498,15 +513,19 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         }
 
         class ViewHolderUsers extends RecyclerView.ViewHolder {
+            public CardView userCardView;
             public TextView userCityStateTextView;
             public TextView userNameTextView;
+            public TextView userTagsTextView;
             public ImageView userProfileImageThumb;
 
 
             public ViewHolderUsers(View itemView) {
                 super(itemView);
+                userCardView = itemView.findViewById(R.id.search_result_card_users);
                 userCityStateTextView = itemView.findViewById(R.id.user_location_search_result);
                 userNameTextView = itemView.findViewById(R.id.username_search_result);
+                userTagsTextView = itemView.findViewById(R.id.user_tag_search_result);
                 userProfileImageThumb = itemView.findViewById(R.id.user_image_search_result);
             }
         }

@@ -3,7 +3,7 @@ package com.bookyrself.bookyrself.views;
 import com.bookyrself.bookyrself.R;
 import com.firebase.ui.auth.AuthUI;
 
-public class MessagesActivity extends MainActivity {
+public class ContactsActivity extends MainActivity {
 
     private static final int RC_SIGN_IN = 123;
 

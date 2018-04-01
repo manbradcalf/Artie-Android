@@ -1,5 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
+import android.support.annotation.NonNull;
+
 import com.bookyrself.bookyrself.models.SearchResponseUsers.SearchResponseUsers;
 import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.services.FirebaseService;
@@ -24,6 +26,8 @@ public class UserDetailPresenter {
 
         void present_error();
 
+        void loading_state();
+
         void email_user();
     }
 
@@ -42,7 +46,7 @@ public class UserDetailPresenter {
     public void getUserInfo(String id) {
         mService.getAPI().getUserDetails(id).enqueue(new Callback<_source>() {
             @Override
-            public void onResponse(Call<_source> call, Response<_source> response) {
+            public void onResponse(@NonNull Call<_source> call,@NonNull Response<_source> response) {
                 if (response.body() != null) {
                     mListener.userInfoReady(response.body());
                 } else {
