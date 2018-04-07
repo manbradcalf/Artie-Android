@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.bookyrself.bookyrself.views.CalendarActivity">
+    tools:context="com.bookyrself.bookyrself.views.ContactsFragment">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -24,26 +24,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <FrameLayout
-            android:id="@+id/fragment_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
         <include
             layout="@layout/element_bottom_nav"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true" />
 
-        <com.prolificinteractive.materialcalendarview.MaterialCalendarView
-            android:id="@+id/events_calendar"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:layout_centerVertical="true"
-            app:mcv_selectionColor="@color/colorAccent"
-            app:mcv_showOtherDates="all" />
-
+            android:layout_marginBottom="242dp"
+            android:text="MessagesActivity" />
     </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

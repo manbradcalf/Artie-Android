@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.bookyrself.bookyrself.views.ContactsActivity">
+    tools:context="com.bookyrself.bookyrself.views.CalendarFragment">
 
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
@@ -20,23 +21,14 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <include
-            layout="@layout/element_bottom_nav"
+        <com.prolificinteractive.materialcalendarview.MaterialCalendarView
+            android:id="@+id/events_calendar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true" />
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:layout_marginBottom="242dp"
-            android:text="MessagesActivity" />
-    </RelativeLayout>
+            android:layout_centerVertical="true"
+            app:layout_constraintTop_toBottomOf="@id/appBarLayout"
+            app:mcv_selectionColor="@color/colorAccent"
+            app:mcv_showOtherDates="all" />
 
-</android.support.design.widget.CoordinatorLayout>
+</android.support.constraint.ConstraintLayout>

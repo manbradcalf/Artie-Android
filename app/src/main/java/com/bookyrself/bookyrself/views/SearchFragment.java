@@ -1,13 +1,15 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
-import android.os.Parcelable;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -15,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
@@ -26,11 +27,10 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class SearchActivity extends MainActivity implements SearchPresenter.SearchPresenterListener {
+public class SearchFragment extends Fragment implements SearchPresenter.SearchPresenterListener {
 
     public static final int FLAG_START_DATE = 2;
     public static final int FLAG_END_DATE = 3;
-    private static final String LIST_STATE_KEY = "LIST_STATE";
     private static final int USER_SEARCH_FLAG = 0;
     private static final int EVENT_SEARCH_FLAG = 1;
     private SearchView searchViewWhat;
@@ -47,52 +47,72 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     private List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> usersResults;
     private RecyclerView recyclerView;
     private ResultsAdapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
     private Boolean boolSearchEditable = false;
-    private Parcelable listState;
     private View emptyState;
     private TextView emptyStateText;
     private ImageView emptyStateImage;
 
-    int getContentViewId() {
-        return R.layout.activity_search;
+//    int getContentViewId() {
+//        return R.layout.fragment_search;
+//    }
+//
+//    int getNavigationMenuItemId() {
+//        return R.id.navigation_search;
+//    }
+//
+//    @Override
+//    public void onCreate(Bundle savedInstanceState){
+//        super.onCreate(savedInstanceState);
+//    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_search, container, false);
     }
 
     @Override
-    int getNavigationMenuItemId() {
-        return R.id.navigation_search;
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        if (savedInstanceState == null) {
+            setLayout(view);
+        }
     }
 
-    @Override
-    void setLayout() {
-        presenter = new SearchPresenter(this);
-        recyclerView = findViewById(R.id.search_recycler_view);
-        adapter = new ResultsAdapter();
+    //TODO: This is being called every time the framgent is loaded
+    // I need to update this logic
+    private void setLayout(View view) {
+        if (presenter == null) {
+            presenter = new SearchPresenter(this);
+        }
+        recyclerView = view.findViewById(R.id.search_recycler_view);
+        if (adapter == null) {
+            adapter = new ResultsAdapter();
+        }
         recyclerView.setAdapter(adapter);
-        layoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
-        searchViewWhat = findViewById(R.id.search_what);
+        searchViewWhat = view.findViewById(R.id.search_what);
         searchViewWhat.setQueryHint(getString(R.string.search_what_query_hint));
-        searchViewWhere = findViewById(R.id.search_where);
+        searchViewWhere = view.findViewById(R.id.search_where);
         searchViewWhere.setVisibility(View.GONE);
         searchViewWhere.setQueryHint(getString(R.string.search_where_query_hint));
-        fromButton = findViewById(R.id.from_button);
+        fromButton = view.findViewById(R.id.from_button);
         fromButton.setVisibility(View.GONE);
-        toButton =  findViewById(R.id.to_button);
+        toButton = view.findViewById(R.id.to_button);
         toButton.setVisibility(View.GONE);
-        usersButton = findViewById(R.id.users_toggle);
+        usersButton = view.findViewById(R.id.users_toggle);
         usersButton.setVisibility(View.GONE);
-        eventsButton = findViewById(R.id.events_toggle);
+        eventsButton = view.findViewById(R.id.events_toggle);
         eventsButton.setVisibility(View.GONE);
-        radioGroup = findViewById(R.id.radio_group_search);
+        radioGroup = view.findViewById(R.id.radio_group_search);
         radioGroup.check(R.id.users_toggle);
-        searchButton = findViewById(R.id.search_btn);
+        searchButton = view.findViewById(R.id.search_btn);
         searchButton.setVisibility(View.GONE);
-        progressBar = findViewById(R.id.progress_bar);
+        progressBar = view.findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.GONE);
-        emptyState = findViewById(R.id.empty_state_search);
-        emptyStateText = findViewById(R.id.empty_state_text);
-        emptyStateImage = findViewById(R.id.empty_state_image);
+        emptyState = view.findViewById(R.id.empty_state_search);
+        emptyStateText = view.findViewById(R.id.empty_state_text);
+        emptyStateImage = view.findViewById(R.id.empty_state_image);
 
 
         /**
@@ -124,7 +144,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                 DatePickerDialogFragment dialog = new DatePickerDialogFragment();
                 dialog.setFlag(FLAG_START_DATE);
                 dialog.setmSearchPresenter(presenter);
-                dialog.show(getFragmentManager(), "datePicker");
+                dialog.show(getActivity().getFragmentManager(), "datePicker");
             }
         });
 
@@ -136,7 +156,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                 DatePickerDialogFragment dialog = new DatePickerDialogFragment();
                 dialog.setFlag(FLAG_END_DATE);
                 dialog.setmSearchPresenter(presenter);
-                dialog.show(getFragmentManager(), "datePicker");
+                dialog.show(getActivity().getFragmentManager(), "datePicker");
             }
         });
 
@@ -192,9 +212,9 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                 }
             }
         });
+
     }
 
-    @Override
     void checkAuth() {
 
     }
@@ -216,7 +236,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         // safe.
         if (hits.size() == 0) {
             emptyStateText.setText(R.string.search_activity_no_results);
-            emptyStateImage.setImageDrawable(getDrawable(R.drawable.ic_binoculars));
+            emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_binoculars));
             emptyState.setVisibility(View.VISIBLE);
             showSearchBar(true);
         } else {
@@ -246,7 +266,7 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         // If there are results, set the empty state to invisible
         if (hits.size() == 0) {
             emptyStateText.setText(R.string.search_activity_no_results);
-            emptyStateImage.setImageDrawable(getDrawable(R.drawable.ic_binoculars));
+            emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_binoculars));
             emptyState.setVisibility(View.VISIBLE);
             showSearchBar(true);
         } else {
@@ -303,12 +323,12 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
     @Override
     public void itemSelected(String id, String imgUrl, int flag) {
         if (flag == EVENT_SEARCH_FLAG) {
-            Intent intent = new Intent(this, EventDetailActivity.class);
+            Intent intent = new Intent(getActivity(), EventDetailActivity.class);
             intent.putExtra("eventId", id);
             intent.putExtra("imgUrl", imgUrl);
             startActivity(intent);
         } else {
-            Intent intent = new Intent(this, UserDetailActivity.class);
+            Intent intent = new Intent(getActivity(), UserDetailActivity.class);
             intent.putExtra("userId", id);
             startActivity(intent);
         }
@@ -319,36 +339,36 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         recyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
         emptyStateText.setText(R.string.search_error);
-        emptyStateImage.setImageDrawable(getDrawable(R.drawable.ic_error_empty_state));
+        emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_error_empty_state));
         emptyState.setVisibility(View.VISIBLE);
         showSearchBar(true);
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle state) {
-        super.onSaveInstanceState(state);
+//    @Override
+//    protected void onSaveInstanceState(Bundle state) {
+//        super.onSaveInstanceState(state);
+//
+//        //Save list state
+//        listState = layoutManager.onSaveInstanceState();
+//        state.putParcelable(LIST_STATE_KEY, listState);
+//    }
 
-        //Save list state
-        listState = layoutManager.onSaveInstanceState();
-        state.putParcelable(LIST_STATE_KEY, listState);
-    }
+//    @Override
+//    protected void onRestoreInstanceState(Bundle state) {
+//        super.onRestoreInstanceState(state);
+//        if (listState != null) {
+//            layoutManager.onRestoreInstanceState(listState);
+//        }
+//    }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle state) {
-        super.onRestoreInstanceState(state);
-        if (listState != null) {
-            layoutManager.onRestoreInstanceState(listState);
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (listState != null) {
-            layoutManager.onRestoreInstanceState(listState);
-        }
-    }
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//
+//        if (listState != null) {
+//            layoutManager.onRestoreInstanceState(listState);
+//        }
+//    }
 
     /**
      * Adapter
@@ -396,9 +416,9 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
         @Override
         public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
 
-            if (holder.getItemViewType() == USER_VIEW_TYPE) {
-                //TODO: Was getting index out of bounds errors here when toggling between Events and Users. Not sure how I feel about this check
+            if (usersResults != null && holder.getItemViewType() == USER_VIEW_TYPE) {
                 if (usersResults.size() > position) {
+                    //TODO: Was getting index out of bounds errors here when toggling between Events and Users. Not sure how I feel about this check
                     ViewHolderUsers viewHolderUsers = (ViewHolderUsers) holder;
                     viewHolderUsers.userCityStateTextView.setText(usersResults
                             .get(position)
@@ -412,14 +432,14 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
 
                     StringBuilder listString = new StringBuilder();
                     for (String s : usersResults.get(position).get_source().getTags()) {
-                        listString.append(s+", ");
+                        listString.append(s + ", ");
                     }
 
                     viewHolderUsers.userTagsTextView.setText(listString.toString());
 
                     final int adapterPosition = holder.getAdapterPosition();
 
-                    Picasso.with(getApplicationContext())
+                    Picasso.with(getActivity().getApplicationContext())
                             .load(usersResults
                                     .get(position)
                                     .get_source()
@@ -427,19 +447,19 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                             .placeholder(R.drawable.round)
                             .error(R.drawable.round)
                             .transform(new CircleTransform())
-                            .resize(100,100)
+                            .resize(100, 100)
                             .into(viewHolderUsers.userProfileImageThumb);
 
                     viewHolderUsers.userCardView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             itemSelected(usersResults
-                            .get(adapterPosition)
-                            .get_id(), usersResults.get(adapterPosition).get_source().getPicture(), USER_VIEW_TYPE);
+                                    .get(adapterPosition)
+                                    .get_id(), usersResults.get(adapterPosition).get_source().getPicture(), USER_VIEW_TYPE);
                         }
                     });
                 }
-            } else {
+            } else if (eventsResults != null && holder.getItemViewType() == EVENT_VIEW_TYPE) {
                 if (eventsResults.size() > position) {
                     ViewHolderEvents viewHolderEvents = (ViewHolderEvents) holder;
                     viewHolderEvents.eventNameTextView.setText(eventsResults
@@ -448,18 +468,18 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                             .getEventname());
                     viewHolderEvents.eventHostTextView.setText(getString(R.string.event_item_hosted_by,
                             eventsResults.get(position)
-                            .get_source()
-                            .getHost()
-                            .get(0)
-                            .getUsername()));
+                                    .get_source()
+                                    .getHost()
+                                    .get(0)
+                                    .getUsername()));
                     viewHolderEvents.eventCityStateTextView.setText(getString(R.string.event_item_citystate,
                             eventsResults.get(position)
-                            .get_source()
-                            .getCitystate()));
+                                    .get_source()
+                                    .getCitystate()));
                     //TODO: Creating adapterPosition here to be used in onClick feels like a hack but isn't particularly egregious IMO.
                     final int adapterPosition = holder.getAdapterPosition();
 
-                    Picasso.with(getApplicationContext())
+                    Picasso.with(getActivity().getApplicationContext())
                             .load(eventsResults
                                     .get(position)
                                     .get_source()
@@ -480,6 +500,8 @@ public class SearchActivity extends MainActivity implements SearchPresenter.Sear
                         }
                     });
                 }
+            } else {
+                Log.e(this.getClass().toString(), "Provided neither Event or User viewholder type");
             }
         }
 
