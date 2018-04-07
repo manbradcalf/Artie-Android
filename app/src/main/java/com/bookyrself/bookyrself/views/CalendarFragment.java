@@ -1,58 +1,46 @@
 package com.bookyrself.bookyrself.views;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.graphics.Color;
-import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.CoordinatorLayout;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.FrameLayout;
+import android.view.ViewGroup;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.presenters.CalendarPresenter;
-import com.bookyrself.bookyrself.services.FirebaseService;
 import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
-import com.ramotion.paperonboarding.PaperOnboardingFragment;
-import com.ramotion.paperonboarding.PaperOnboardingPage;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.Executors;
 
-public class CalendarActivity extends MainActivity implements OnDateSelectedListener, CalendarPresenter.CalendarPresenterListener {
+public class CalendarFragment extends Fragment implements OnDateSelectedListener, CalendarPresenter.CalendarPresenterListener {
     private MaterialCalendarView calendarView;
     private CalendarPresenter presenter;
-    private android.support.v4.app.FragmentManager fm;
-    private FrameLayout fragmentContainer;
 
     @Override
-    int getContentViewId() {
-        return R.layout.activity_calendar;
+    public void onCreate(Bundle savedInsanceState) {
+        super.onCreate(savedInsanceState);
     }
 
     @Override
-    int getNavigationMenuItemId() {
-        return R.id.navigation_calendar;
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_calendar, container, false);
+
     }
 
     @Override
-    void setLayout() {
-
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         presenter = new CalendarPresenter(this);
         presenter.loadUserCalender("20");
-        calendarView = findViewById(R.id.events_calendar);
-    }
-
-    @Override
-    void checkAuth() {
-
+        calendarView = view.findViewById(R.id.events_calendar);
     }
 
     @Override
@@ -86,7 +74,7 @@ public class CalendarActivity extends MainActivity implements OnDateSelectedList
             calendarDays.add(calendarDay);
         }
         if (calendarDays.size() == events.size()) {
-            calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this));
+            calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, getActivity()));
         }
     }
 }

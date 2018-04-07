@@ -1,18 +1,24 @@
 package com.bookyrself.bookyrself.views;
 
+import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentContainer;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 
 import com.bookyrself.bookyrself.R;
+import com.bookyrself.bookyrself.utils.FragmentViewPager;
+import com.bookyrself.bookyrself.utils.FragmentViewPagerAdapter;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
@@ -20,16 +26,19 @@ import com.ramotion.paperonboarding.PaperOnboardingFragment;
 import com.ramotion.paperonboarding.PaperOnboardingPage;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public abstract class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends FragmentActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     private static final int RC_SIGN_IN = 123;
-    protected BottomNavigationView navigationView;
-    protected FirebaseDatabase db;
-    protected FirebaseAuth auth;
-    protected FirebaseApp firebaseApp;
-    private FrameLayout fragmentContainer;
+    private BottomNavigationView navigationView;
+    public FirebaseDatabase db;
+    public FirebaseAuth auth;
+    public FirebaseApp firebaseApp;
     private FragmentManager fm;
+    private List<android.support.v4.app.Fragment> fragments = new ArrayList<>();
+    FragmentViewPagerAdapter adapter;
+    FragmentViewPager viewPager;
 
 
     //TODO: I'm creating a firebase app, db and auth every time I start an activity? This feels wrong
@@ -39,12 +48,12 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
         super.onCreate(savedInstanceState);
         getWindow().setEnterTransition(null);
         firebaseApp = FirebaseApp.initializeApp(this);
-        setContentView(getContentViewId());
+        setContentView(R.layout.activity_main);
         db = FirebaseDatabase.getInstance("https://bookyrself-staging.firebaseio.com/");
         auth = FirebaseAuth.getInstance();
         navigationView = findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(this);
-        setLayout();
+        buildFragmentsList();
     }
 
     // Remove inter-activity transition to avoid screen tossing on tapping bottom navigation items
@@ -58,54 +67,34 @@ public abstract class MainActivity extends AppCompatActivity implements BottomNa
     @Override
     protected void onStart() {
         super.onStart();
-        updateNavigationBarState();
     }
 
     @Override
-    public boolean onNavigationItemSelected(final MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
 
-        navigationView.postDelayed(new Runnable() {
-            @Override
-            public void run() {
                 int itemId = item.getItemId();
                 if (itemId == R.id.navigation_search) {
-                    startActivity(new Intent(getApplicationContext(), SearchActivity.class));
-                } else if (itemId == R.id.navigation_messages) {
-                    startActivity(new Intent(getApplicationContext(), ContactsActivity.class));
+                    viewPager.setCurrentItem(0);
                 } else if (itemId == R.id.navigation_calendar) {
-                    startActivity(new Intent(getApplicationContext(), CalendarActivity.class));
+                    viewPager.setCurrentItem(1);
+                } else if (itemId == R.id.navigation_messages) {
+                    viewPager.setCurrentItem(2);
                 } else if (itemId == R.id.navigation_profile) {
-                    startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+                    viewPager.setCurrentItem(3);
                 }
-                finish();
+                return true;
             }
-        }, 300);
-        return true;
+
+    private void buildFragmentsList() {
+
+        viewPager = findViewById(R.id.view_pager);
+        adapter = new FragmentViewPagerAdapter(this.getSupportFragmentManager());
+        adapter.addFragment(new SearchFragment(), "Search");
+        adapter.addFragment(new CalendarFragment(), "Calendar");
+        adapter.addFragment(new ContactsFragment(), "Contacts");
+        adapter.addFragment(new ProfileFragment(), "Profile");
+        viewPager.setAdapter(adapter);
     }
 
-    private void updateNavigationBarState() {
-        int actionId = getNavigationMenuItemId();
-        selectBottomNavigationBarItem(actionId);
-    }
-
-    void selectBottomNavigationBarItem(int itemId) {
-        Menu menu = navigationView.getMenu();
-        for (int i = 0, size = menu.size(); i < size; i++) {
-            MenuItem item = menu.getItem(i);
-            boolean shouldBeChecked = item.getItemId() == itemId;
-            if (shouldBeChecked) {
-                item.setChecked(true);
-                break;
-            }
-        }
-    }
-
-    abstract int getContentViewId();
-
-    abstract int getNavigationMenuItemId();
-
-    abstract void setLayout();
-
-    abstract void checkAuth();
 
 }
