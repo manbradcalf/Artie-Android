@@ -5,6 +5,8 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 
 import com.bookyrself.bookyrself.R;
 import com.firebase.ui.auth.AuthUI;
@@ -15,7 +17,7 @@ public class ProfileActivity extends MainActivity {
 
     private static final int RC_SIGN_IN = 123;
     private Button btnSignOut;
-    private CoordinatorLayout coordinatorLayout;
+    private ScrollView scrollView;
 
     @Override
     int getContentViewId() {
@@ -36,7 +38,7 @@ public class ProfileActivity extends MainActivity {
                 auth.signOut();
             }
         });
-        coordinatorLayout = findViewById(R.id.coordinator_layout_profile_activity);
+        scrollView = findViewById(R.id.user_detail_scrollview);
         checkAuth();
     }
 
@@ -93,7 +95,7 @@ public class ProfileActivity extends MainActivity {
 
     private void showSnackbar(String message) {
         Snackbar snackbar = Snackbar
-                .make(coordinatorLayout, message, Snackbar.LENGTH_SHORT);
+                .make(scrollView, message, Snackbar.LENGTH_SHORT);
 
         snackbar.show();
     }
