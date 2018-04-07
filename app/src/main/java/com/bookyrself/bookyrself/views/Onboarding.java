@@ -52,6 +52,7 @@ public class Onboarding extends AppCompatActivity {
             public void onRightOut() {
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
     }
