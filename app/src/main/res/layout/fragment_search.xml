@@ -62,7 +62,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="@color/colorAccent"
-                android:text="Search!" />
+                android:text="Search!"
+                android:textColor="@android:color/white"/>
 
         </LinearLayout>
 
@@ -77,15 +78,21 @@
             <RadioButton
                 android:id="@+id/users_toggle"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="32dp"
                 android:layout_weight="1"
-                android:text="Users" />
+                android:button="@android:color/transparent"
+                android:background="@drawable/radio_button_background"
+                android:text="Users"
+                android:textAlignment="center"/>
 
             <RadioButton
                 android:id="@+id/events_toggle"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="32dp"
                 android:layout_weight="1"
+                android:button="@android:color/transparent"
+                android:background="@drawable/radio_button_background"
+                android:textAlignment="center"
                 android:text="Events" />
 
         </RadioGroup>

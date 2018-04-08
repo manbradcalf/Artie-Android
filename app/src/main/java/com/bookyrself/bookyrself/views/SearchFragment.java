@@ -52,19 +52,6 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     private TextView emptyStateText;
     private ImageView emptyStateImage;
 
-//    int getContentViewId() {
-//        return R.layout.fragment_search;
-//    }
-//
-//    int getNavigationMenuItemId() {
-//        return R.id.navigation_search;
-//    }
-//
-//    @Override
-//    public void onCreate(Bundle savedInstanceState){
-//        super.onCreate(savedInstanceState);
-//    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -321,11 +308,10 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
     //TODO: Is imgUrl needed as a param here?
     @Override
-    public void itemSelected(String id, String imgUrl, int flag) {
+    public void itemSelected(String id, int flag) {
         if (flag == EVENT_SEARCH_FLAG) {
             Intent intent = new Intent(getActivity(), EventDetailActivity.class);
             intent.putExtra("eventId", id);
-            intent.putExtra("imgUrl", imgUrl);
             startActivity(intent);
         } else {
             Intent intent = new Intent(getActivity(), UserDetailActivity.class);
@@ -344,32 +330,6 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         showSearchBar(true);
     }
 
-//    @Override
-//    protected void onSaveInstanceState(Bundle state) {
-//        super.onSaveInstanceState(state);
-//
-//        //Save list state
-//        listState = layoutManager.onSaveInstanceState();
-//        state.putParcelable(LIST_STATE_KEY, listState);
-//    }
-
-//    @Override
-//    protected void onRestoreInstanceState(Bundle state) {
-//        super.onRestoreInstanceState(state);
-//        if (listState != null) {
-//            layoutManager.onRestoreInstanceState(listState);
-//        }
-//    }
-
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//
-//        if (listState != null) {
-//            layoutManager.onRestoreInstanceState(listState);
-//        }
-//    }
-
     /**
      * Adapter
      */
@@ -380,11 +340,11 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         private int mViewType;
 
 
-        public ResultsAdapter() {
+        ResultsAdapter() {
 
         }
 
-        public void setViewType(int viewType) {
+        void setViewType(int viewType) {
             mViewType = viewType;
         }
 
@@ -455,7 +415,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         public void onClick(View v) {
                             itemSelected(usersResults
                                     .get(adapterPosition)
-                                    .get_id(), usersResults.get(adapterPosition).get_source().getPicture(), USER_VIEW_TYPE);
+                                    .get_id(), USER_VIEW_TYPE);
                         }
                     });
                 }
@@ -496,7 +456,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         public void onClick(View v) {
                             itemSelected(eventsResults
                                     .get(adapterPosition)
-                                    .get_id(), eventsResults.get(adapterPosition).get_source().getPicture(), EVENT_VIEW_TYPE);
+                                    .get_id(), EVENT_VIEW_TYPE);
                         }
                     });
                 }
@@ -517,14 +477,17 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             }
         }
 
+        /**
+         * ViewHolder for events
+         */
         class ViewHolderEvents extends RecyclerView.ViewHolder {
-            public CardView eventCardView;
-            public TextView eventCityStateTextView;
-            public TextView eventHostTextView;
-            public TextView eventNameTextView;
-            public ImageView eventImageThumb;
+            CardView eventCardView;
+            TextView eventCityStateTextView;
+            TextView eventHostTextView;
+            TextView eventNameTextView;
+            ImageView eventImageThumb;
 
-            public ViewHolderEvents(View view) {
+            ViewHolderEvents(View view) {
                 super(view);
                 eventCardView = view.findViewById(R.id.search_result_card_events);
                 eventCityStateTextView = view.findViewById(R.id.event_location_search_result);
@@ -534,15 +497,18 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             }
         }
 
+        /**
+         * ViewHolder for users
+         */
         class ViewHolderUsers extends RecyclerView.ViewHolder {
-            public CardView userCardView;
-            public TextView userCityStateTextView;
-            public TextView userNameTextView;
-            public TextView userTagsTextView;
-            public ImageView userProfileImageThumb;
+            CardView userCardView;
+            TextView userCityStateTextView;
+            TextView userNameTextView;
+            TextView userTagsTextView;
+            ImageView userProfileImageThumb;
 
 
-            public ViewHolderUsers(View itemView) {
+            ViewHolderUsers(View itemView) {
                 super(itemView);
                 userCardView = itemView.findViewById(R.id.search_result_card_users);
                 userCityStateTextView = itemView.findViewById(R.id.user_location_search_result);
