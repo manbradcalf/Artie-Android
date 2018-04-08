@@ -55,7 +55,7 @@ public interface SearchPresenterListener {
 
     void showProgressbar(Boolean bool);
 
-    void itemSelected(String id, String imgUrl, int flag);
+    void itemSelected(String id, int flag);
 
     void showError();
 }
