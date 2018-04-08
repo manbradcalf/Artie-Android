@@ -11,7 +11,7 @@
     <string name="title_activity_messages">MessagesActivity</string>
     <string name="title_activity_calendar">CalendarActivity</string>
     <string name="title_activity_profile">ProfileActivity</string>
-    <string name="search_empty_state">Get to the gig!\nTap the search bar above to find events and artists.</string>
+    <string name="search_empty_state_subheader">Tap the search bar above to find events and artists.</string>
     <string name="userUrl"></string>
     <string name="search_what_query_hint">What are you looking for?</string>
     <string name="search_where_query_hint">Where are you looking for it?</string>
@@ -20,10 +20,16 @@
     <string name="user_detail_toolbar"> %s\'s Profile</string>
     <string name="event_item_citystate">In %s</string>
     <string name="event_item_hosted_by">Hosted by %s</string>
-    <string name="search_activity_no_results">No results found :(\n Try another search!</string>
+    <string name="search_activity_no_results_header">No results found 😞 </string>
+    <string name="search_activity_no_results_subheader">Try another search!</string>
     <string name="email_user">Email %s\!</string>
     <string name="add_user_to_contacts">Save %s to your contacts!</string>
     <string name="title_activity_onboarding">Onboarding</string>
+    <string name="search_empty_state_header">Get To The Gig!</string>
+    <string name="search_error_header">Oh no! Something went wrong</string>
+    <string name="search_error_subheader">We\'re looking into it!</string>
+    <string name="preference_file_key">com.bookyrself.bookyrself.PREFERENCE_FILE_KEY</string>
+    <string name="has_seen_onboarding_key">HAS_SEEN_ONBOARDING_KEY</string>
 
 
 </resources>

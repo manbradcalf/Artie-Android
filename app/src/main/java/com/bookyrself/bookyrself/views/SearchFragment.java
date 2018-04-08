@@ -49,7 +49,8 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     private ResultsAdapter adapter;
     private Boolean boolSearchEditable = false;
     private View emptyState;
-    private TextView emptyStateText;
+    private TextView emptyStateTextHeader;
+    private TextView emptyStateTextSubHeader;
     private ImageView emptyStateImage;
 
     @Override
@@ -97,10 +98,13 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         searchButton.setVisibility(View.GONE);
         progressBar = view.findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.GONE);
-        emptyState = view.findViewById(R.id.empty_state_search);
-        emptyStateText = view.findViewById(R.id.empty_state_text);
-        emptyStateImage = view.findViewById(R.id.empty_state_image);
-
+        if (adapter.getItemCount() == 0) {
+            emptyState = view.findViewById(R.id.empty_state_search);
+            emptyStateTextHeader = view.findViewById(R.id.empty_state_text_header);
+            emptyStateTextSubHeader = view.findViewById(R.id.empty_state_text_subheader);
+            emptyStateImage = view.findViewById(R.id.empty_state_image);
+            emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_concert));
+        }
 
         /**
          * SearchView for What field
@@ -222,7 +226,8 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         // a generic failed search. No errors will hit this method, so this is
         // safe.
         if (hits.size() == 0) {
-            emptyStateText.setText(R.string.search_activity_no_results);
+            emptyStateTextHeader.setText(R.string.search_activity_no_results_header);
+            emptyStateTextSubHeader.setText(R.string.search_activity_no_results_subheader);
             emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_binoculars));
             emptyState.setVisibility(View.VISIBLE);
             showSearchBar(true);
@@ -252,7 +257,8 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         // If there are no results, update the empty state to show the binoculars and no results copy
         // If there are results, set the empty state to invisible
         if (hits.size() == 0) {
-            emptyStateText.setText(R.string.search_activity_no_results);
+            emptyStateTextHeader.setText(R.string.search_activity_no_results_header);
+            emptyStateTextSubHeader.setText(R.string.search_activity_no_results_subheader);
             emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_binoculars));
             emptyState.setVisibility(View.VISIBLE);
             showSearchBar(true);
@@ -324,7 +330,8 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     public void showError() {
         recyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
-        emptyStateText.setText(R.string.search_error);
+        emptyStateTextHeader.setText(R.string.search_error_header);
+        emptyStateTextSubHeader.setText(R.string.search_error_subheader);
         emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_error_empty_state));
         emptyState.setVisibility(View.VISIBLE);
         showSearchBar(true);
