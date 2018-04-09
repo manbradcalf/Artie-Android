@@ -1,0 +1,16 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item
+        android:drawable="@drawable/selected_radio_state"
+        android:state_checked="true"
+        android:textColor="@android:color/white" />
+    <item
+        android:drawable="@drawable/selected_radio_state"
+        android:state_pressed="true"
+        android:textColor="@android:color/white"/>
+    <item
+        android:drawable="@drawable/selected_radio_state"
+        android:state_checked="true"
+        android:textColor="@android:color/white"/>
+    <item
+        android:drawable="@drawable/regular_radio_state" />
+</selector>

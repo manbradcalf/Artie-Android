@@ -28,7 +28,7 @@ public class CalendarPresenter {
 
         void goToEventDetail(String eventId);
 
-        void calendarReady(List<Event> events);
+        void eventsReady(List<Event> events);
     }
 
     /**
@@ -42,11 +42,11 @@ public class CalendarPresenter {
     /**
      * Methods
      */
-    public void loadUserCalender(String userId) {
+    public void loadUserEvents(String userId) {
         service.getAPI().getUserEvents(userId).enqueue(new Callback<List<Event>>() {
             @Override
             public void onResponse(@NonNull Call<List<Event>> call, @NonNull Response<List<Event>> response) {
-                listener.calendarReady(response.body());
+                listener.eventsReady(response.body());
             }
 
             @Override

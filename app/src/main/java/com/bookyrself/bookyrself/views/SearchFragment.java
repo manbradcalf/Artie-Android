@@ -49,21 +49,9 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     private ResultsAdapter adapter;
     private Boolean boolSearchEditable = false;
     private View emptyState;
-    private TextView emptyStateText;
+    private TextView emptyStateTextHeader;
+    private TextView emptyStateTextSubHeader;
     private ImageView emptyStateImage;
-
-//    int getContentViewId() {
-//        return R.layout.fragment_search;
-//    }
-//
-//    int getNavigationMenuItemId() {
-//        return R.id.navigation_search;
-//    }
-//
-//    @Override
-//    public void onCreate(Bundle savedInstanceState){
-//        super.onCreate(savedInstanceState);
-//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -110,10 +98,15 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         searchButton.setVisibility(View.GONE);
         progressBar = view.findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.GONE);
-        emptyState = view.findViewById(R.id.empty_state_search);
-        emptyStateText = view.findViewById(R.id.empty_state_text);
-        emptyStateImage = view.findViewById(R.id.empty_state_image);
-
+        if (adapter.getItemCount() == 0) {
+            emptyState = view.findViewById(R.id.empty_state_search);
+            emptyStateTextHeader = view.findViewById(R.id.empty_state_text_header);
+            emptyStateTextHeader.setText(getString(R.string.search_empty_state_header));
+            emptyStateTextSubHeader = view.findViewById(R.id.empty_state_text_subheader);
+            emptyStateTextSubHeader.setText(getString(R.string.search_empty_state_subheader));
+            emptyStateImage = view.findViewById(R.id.empty_state_image);
+            emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_minivan));
+        }
 
         /**
          * SearchView for What field
@@ -187,10 +180,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                                 searchViewWhere.getQuery().toString(),
                                 fromButton.getText().toString(),
                                 toButton.getText().toString());
-                        searchViewWhere.setVisibility((View.GONE));
-                        fromButton.setVisibility(View.GONE);
-                        toButton.setVisibility(View.GONE);
-                        radioGroup.setVisibility(View.GONE);
+                        showFullSearchBar(false);
                     } else if (usersButton.isChecked()) {
                         eventsResults = null;
                         usersResults = null;
@@ -200,15 +190,12 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                                 searchViewWhere.getQuery().toString(),
                                 fromButton.getText().toString(),
                                 toButton.getText().toString());
-                        searchViewWhere.setVisibility((View.GONE));
-                        fromButton.setVisibility(View.GONE);
-                        toButton.setVisibility(View.GONE);
-                        radioGroup.setVisibility(View.GONE);
+                        showFullSearchBar(false);
                     }
                 } else {
                     boolSearchEditable = false;
                     searchButton.setText("SEARCH!");
-                    showSearchBar(true);
+                    showFullSearchBar(true);
                 }
             }
         });
@@ -235,10 +222,11 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         // a generic failed search. No errors will hit this method, so this is
         // safe.
         if (hits.size() == 0) {
-            emptyStateText.setText(R.string.search_activity_no_results);
+            emptyStateTextHeader.setText(R.string.search_activity_no_results_header);
+            emptyStateTextSubHeader.setText(R.string.search_activity_no_results_subheader);
             emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_binoculars));
             emptyState.setVisibility(View.VISIBLE);
-            showSearchBar(true);
+            showFullSearchBar(false);
         } else {
             emptyState.setVisibility(View.GONE);
         }
@@ -265,10 +253,11 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         // If there are no results, update the empty state to show the binoculars and no results copy
         // If there are results, set the empty state to invisible
         if (hits.size() == 0) {
-            emptyStateText.setText(R.string.search_activity_no_results);
+            emptyStateTextHeader.setText(R.string.search_activity_no_results_header);
+            emptyStateTextSubHeader.setText(R.string.search_activity_no_results_subheader);
             emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_binoculars));
             emptyState.setVisibility(View.VISIBLE);
-            showSearchBar(true);
+            showFullSearchBar(false);
         } else {
             emptyState.setVisibility(View.GONE);
         }
@@ -281,8 +270,9 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         showProgressbar(false);
     }
 
-    private void showSearchBar(Boolean bool) {
+    private void showFullSearchBar(Boolean bool) {
         if (bool) {
+            boolSearchEditable = false;
             searchViewWhat.setVisibility(View.VISIBLE);
             searchViewWhere.setVisibility(View.VISIBLE);
             toButton.setVisibility(View.VISIBLE);
@@ -291,11 +281,10 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             searchButton.setText(R.string.title_search);
             radioGroup.setVisibility(View.VISIBLE);
         } else {
-            searchViewWhat.setVisibility(View.GONE);
+            boolSearchEditable = true;
             searchViewWhere.setVisibility(View.GONE);
             toButton.setVisibility(View.GONE);
             fromButton.setVisibility(View.GONE);
-            searchButton.setVisibility(View.GONE);
             radioGroup.setVisibility(View.GONE);
         }
     }
@@ -321,11 +310,10 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
     //TODO: Is imgUrl needed as a param here?
     @Override
-    public void itemSelected(String id, String imgUrl, int flag) {
+    public void itemSelected(String id, int flag) {
         if (flag == EVENT_SEARCH_FLAG) {
             Intent intent = new Intent(getActivity(), EventDetailActivity.class);
             intent.putExtra("eventId", id);
-            intent.putExtra("imgUrl", imgUrl);
             startActivity(intent);
         } else {
             Intent intent = new Intent(getActivity(), UserDetailActivity.class);
@@ -338,37 +326,12 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     public void showError() {
         recyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
-        emptyStateText.setText(R.string.search_error);
+        emptyStateTextHeader.setText(R.string.search_error_header);
+        emptyStateTextSubHeader.setText(R.string.search_error_subheader);
         emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_error_empty_state));
         emptyState.setVisibility(View.VISIBLE);
-        showSearchBar(true);
+        showFullSearchBar(false);
     }
-
-//    @Override
-//    protected void onSaveInstanceState(Bundle state) {
-//        super.onSaveInstanceState(state);
-//
-//        //Save list state
-//        listState = layoutManager.onSaveInstanceState();
-//        state.putParcelable(LIST_STATE_KEY, listState);
-//    }
-
-//    @Override
-//    protected void onRestoreInstanceState(Bundle state) {
-//        super.onRestoreInstanceState(state);
-//        if (listState != null) {
-//            layoutManager.onRestoreInstanceState(listState);
-//        }
-//    }
-
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//
-//        if (listState != null) {
-//            layoutManager.onRestoreInstanceState(listState);
-//        }
-//    }
 
     /**
      * Adapter
@@ -380,11 +343,11 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         private int mViewType;
 
 
-        public ResultsAdapter() {
+        ResultsAdapter() {
 
         }
 
-        public void setViewType(int viewType) {
+        void setViewType(int viewType) {
             mViewType = viewType;
         }
 
@@ -455,7 +418,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         public void onClick(View v) {
                             itemSelected(usersResults
                                     .get(adapterPosition)
-                                    .get_id(), usersResults.get(adapterPosition).get_source().getPicture(), USER_VIEW_TYPE);
+                                    .get_id(), USER_VIEW_TYPE);
                         }
                     });
                 }
@@ -496,7 +459,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         public void onClick(View v) {
                             itemSelected(eventsResults
                                     .get(adapterPosition)
-                                    .get_id(), eventsResults.get(adapterPosition).get_source().getPicture(), EVENT_VIEW_TYPE);
+                                    .get_id(), EVENT_VIEW_TYPE);
                         }
                     });
                 }
@@ -517,14 +480,17 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             }
         }
 
+        /**
+         * ViewHolder for events
+         */
         class ViewHolderEvents extends RecyclerView.ViewHolder {
-            public CardView eventCardView;
-            public TextView eventCityStateTextView;
-            public TextView eventHostTextView;
-            public TextView eventNameTextView;
-            public ImageView eventImageThumb;
+            CardView eventCardView;
+            TextView eventCityStateTextView;
+            TextView eventHostTextView;
+            TextView eventNameTextView;
+            ImageView eventImageThumb;
 
-            public ViewHolderEvents(View view) {
+            ViewHolderEvents(View view) {
                 super(view);
                 eventCardView = view.findViewById(R.id.search_result_card_events);
                 eventCityStateTextView = view.findViewById(R.id.event_location_search_result);
@@ -534,15 +500,18 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             }
         }
 
+        /**
+         * ViewHolder for users
+         */
         class ViewHolderUsers extends RecyclerView.ViewHolder {
-            public CardView userCardView;
-            public TextView userCityStateTextView;
-            public TextView userNameTextView;
-            public TextView userTagsTextView;
-            public ImageView userProfileImageThumb;
+            CardView userCardView;
+            TextView userCityStateTextView;
+            TextView userNameTextView;
+            TextView userTagsTextView;
+            ImageView userProfileImageThumb;
 
 
-            public ViewHolderUsers(View itemView) {
+            ViewHolderUsers(View itemView) {
                 super(itemView);
                 userCardView = itemView.findViewById(R.id.search_result_card_users);
                 userCityStateTextView = itemView.findViewById(R.id.user_location_search_result);

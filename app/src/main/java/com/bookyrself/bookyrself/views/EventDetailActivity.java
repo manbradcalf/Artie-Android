@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by benmedcalf on 11/22/17.
@@ -58,13 +59,12 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         presenter = new EventDetailPresenter(this);
         Intent intent = getIntent();
         String eventId = intent.getStringExtra("eventId");
-        String imgUrl = intent.getStringExtra("imgUrl");
-        presenter.getEventDetailData(eventId, imgUrl);
+        presenter.getEventDetailData(eventId);
         Toolbar = findViewById(R.id.toolbar_event_detail);
     }
 
     @Override
-    public void eventDataResponseReady(final EventDetailResponse data, String imgUrl) {
+    public void eventDataResponseReady(final EventDetailResponse data) {
 
 
         setSupportActionBar(Toolbar);
@@ -86,11 +86,11 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
 
         DateView = findViewById(R.id.event_detail_date);
         DateView.setText("Date");
-        DateFormat inputformat = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat inputformat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         Date d;
         try {
             d = inputformat.parse(date);
-            DateFormat outputFormat = new SimpleDateFormat("EEEE, MMMM dd, yyyy");
+            DateFormat outputFormat = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
             String formattedDate = outputFormat.format(d);
             DateView.setText(formattedDate);
         } catch (ParseException e) {
@@ -103,7 +103,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         HostCityState.setText(hostCityState);
         HostImageView = findViewById(R.id.item_event_detail_userthumb);
         Picasso.with(getApplicationContext())
-                .load(imgUrl)
+                .load(hostURL)
                 .placeholder(R.drawable.round)
                 .error(R.drawable.round)
                 .transform(new CircleTransform())

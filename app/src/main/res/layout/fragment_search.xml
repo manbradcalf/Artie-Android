@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/search_activity_root"
     android:layout_width="match_parent"
@@ -44,17 +43,23 @@
 
             <Button
                 android:id="@+id/from_button"
+                style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="From" />
+                android:backgroundTint="@color/cardview_light_background"
+                android:text="From"
+                android:textColor="@android:color/black" />
 
             <Button
                 android:id="@+id/to_button"
+                style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="To" />
+                android:backgroundTint="@color/cardview_light_background"
+                android:text="To"
+                android:textColor="@android:color/black" />
 
             <Button
                 android:id="@+id/search_btn"
@@ -62,9 +67,14 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="@color/colorAccent"
-                android:text="Search!" />
+                android:text="Search!"
+                android:textColor="@android:color/white" />
 
         </LinearLayout>
+
+        <!--<Shape-->
+        <!--android:si-->
+        <!--/>-->
 
 
         <RadioGroup
@@ -76,17 +86,25 @@
 
             <RadioButton
                 android:id="@+id/users_toggle"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="42dp"
                 android:layout_weight="1"
-                android:text="Users" />
+                android:background="@drawable/radio_button_background"
+                android:button="@android:color/transparent"
+                android:text="Users"
+                android:textAlignment="center" />
 
             <RadioButton
                 android:id="@+id/events_toggle"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="42dp"
                 android:layout_weight="1"
-                android:text="Events" />
+                android:background="@drawable/radio_button_background"
+                android:button="@android:color/transparent"
+                android:text="Events"
+                android:textAlignment="center" />
 
         </RadioGroup>
 
@@ -105,39 +123,18 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true" />
 
-        <RelativeLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/empty_state_search"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:id="@+id/empty_state_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                app:srcCompat="@drawable/ic_concert" />
-
-            <TextView
-                android:layout_below="@id/empty_state_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/empty_state_text"
-                android:layout_centerHorizontal="true"
-                android:textAlignment="center"
-                android:layout_marginTop="8dp"
-                android:text="@string/search_empty_state"/>
-        </RelativeLayout>
+        <include layout="@layout/empty_state_template"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/search_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_above="@+id/navigation"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_above="@+id/navigation"
             android:scrollbars="vertical" />
 
         <include

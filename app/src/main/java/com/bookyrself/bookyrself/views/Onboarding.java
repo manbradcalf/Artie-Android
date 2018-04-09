@@ -1,6 +1,8 @@
 package com.bookyrself.bookyrself.views;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -26,6 +28,9 @@ public class Onboarding extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_onboarding);
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+
 
         fragmentContainer = findViewById(R.id.onboarding_fragment);
         fm = getSupportFragmentManager();
@@ -50,6 +55,8 @@ public class Onboarding extends AppCompatActivity {
         onBoardingFragment.setOnRightOutListener(new PaperOnboardingOnRightOutListener() {
             @Override
             public void onRightOut() {
+                editor.putBoolean(getString(R.string.has_seen_onboarding_key), true);
+                editor.apply();
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(intent);
                 finish();

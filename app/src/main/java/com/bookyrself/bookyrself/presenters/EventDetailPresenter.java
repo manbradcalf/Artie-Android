@@ -1,7 +1,10 @@
 package com.bookyrself.bookyrself.presenters;
 
+import android.support.annotation.NonNull;
+
 import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
 import com.bookyrself.bookyrself.services.FirebaseService;
+import com.bookyrself.bookyrself.views.CalendarFragment;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -20,7 +23,7 @@ public class EventDetailPresenter {
      * Contract / Listener
      */
     public interface EventDetailPresenterListener {
-        void eventDataResponseReady(EventDetailResponse data, String imgUrl);
+        void eventDataResponseReady(EventDetailResponse data);
 
         void showProgressbar(Boolean bool);
 
@@ -41,16 +44,16 @@ public class EventDetailPresenter {
     /**
      * Methods
      */
-    public void getEventDetailData(String id, final String imgUrl) {
+    public void getEventDetailData(String id) {
         mListener.showProgressbar(true);
         //TODO: Make the index and type toggleable to users
         mFirebaseService.getAPI().getEventData(id)
                 .enqueue(new Callback<EventDetailResponse>() {
                     @Override
-                    public void onResponse(Call<EventDetailResponse> call, Response<EventDetailResponse> response) {
+                    public void onResponse(@NonNull Call<EventDetailResponse> call, @NonNull Response<EventDetailResponse> response) {
                         if (response.body() != null) {
                             EventDetailResponse data = response.body();
-                            mListener.eventDataResponseReady(data, imgUrl);
+                            mListener.eventDataResponseReady(data);
                         } else {
                             mListener.present_error();
                         }
@@ -58,7 +61,7 @@ public class EventDetailPresenter {
                     }
 
                     @Override
-                    public void onFailure(Call<EventDetailResponse> call, Throwable t) {
+                    public void onFailure(@NonNull Call<EventDetailResponse> call, @NonNull Throwable t) {
 
                     }
                 });
@@ -69,13 +72,13 @@ public class EventDetailPresenter {
         mFirebaseService.getAPI().getUserThumbUrl(id)
                 .enqueue(new Callback<String>() {
                     @Override
-                    public void onResponse(Call<String> call, Response<String> response) {
+                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                         String data = response.body();
                         mListener.userThumbReady(data, id);
                     }
 
                     @Override
-                    public void onFailure(Call<String> call, Throwable t) {
+                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
 
                     }
                 });
