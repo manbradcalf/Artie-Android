@@ -11,7 +11,7 @@ public class ContactsFragment extends Fragment {
 
 //    @Override
 //    int getContentViewId() {
-//        return R.layout.fragment_messages;
+//        return R.layout.fragment_contacts;
 //    }
 //
 //    @Override

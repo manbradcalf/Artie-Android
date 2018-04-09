@@ -101,9 +101,11 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         if (adapter.getItemCount() == 0) {
             emptyState = view.findViewById(R.id.empty_state_search);
             emptyStateTextHeader = view.findViewById(R.id.empty_state_text_header);
+            emptyStateTextHeader.setText(getString(R.string.search_empty_state_header));
             emptyStateTextSubHeader = view.findViewById(R.id.empty_state_text_subheader);
+            emptyStateTextSubHeader.setText(getString(R.string.search_empty_state_subheader));
             emptyStateImage = view.findViewById(R.id.empty_state_image);
-            emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_concert));
+            emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_minivan));
         }
 
         /**
@@ -178,10 +180,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                                 searchViewWhere.getQuery().toString(),
                                 fromButton.getText().toString(),
                                 toButton.getText().toString());
-                        searchViewWhere.setVisibility((View.GONE));
-                        fromButton.setVisibility(View.GONE);
-                        toButton.setVisibility(View.GONE);
-                        radioGroup.setVisibility(View.GONE);
+                        showFullSearchBar(false);
                     } else if (usersButton.isChecked()) {
                         eventsResults = null;
                         usersResults = null;
@@ -191,15 +190,12 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                                 searchViewWhere.getQuery().toString(),
                                 fromButton.getText().toString(),
                                 toButton.getText().toString());
-                        searchViewWhere.setVisibility((View.GONE));
-                        fromButton.setVisibility(View.GONE);
-                        toButton.setVisibility(View.GONE);
-                        radioGroup.setVisibility(View.GONE);
+                        showFullSearchBar(false);
                     }
                 } else {
                     boolSearchEditable = false;
                     searchButton.setText("SEARCH!");
-                    showSearchBar(true);
+                    showFullSearchBar(true);
                 }
             }
         });
@@ -230,7 +226,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             emptyStateTextSubHeader.setText(R.string.search_activity_no_results_subheader);
             emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_binoculars));
             emptyState.setVisibility(View.VISIBLE);
-            showSearchBar(true);
+            showFullSearchBar(false);
         } else {
             emptyState.setVisibility(View.GONE);
         }
@@ -261,7 +257,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             emptyStateTextSubHeader.setText(R.string.search_activity_no_results_subheader);
             emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_binoculars));
             emptyState.setVisibility(View.VISIBLE);
-            showSearchBar(true);
+            showFullSearchBar(false);
         } else {
             emptyState.setVisibility(View.GONE);
         }
@@ -274,8 +270,9 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         showProgressbar(false);
     }
 
-    private void showSearchBar(Boolean bool) {
+    private void showFullSearchBar(Boolean bool) {
         if (bool) {
+            boolSearchEditable = false;
             searchViewWhat.setVisibility(View.VISIBLE);
             searchViewWhere.setVisibility(View.VISIBLE);
             toButton.setVisibility(View.VISIBLE);
@@ -284,11 +281,10 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             searchButton.setText(R.string.title_search);
             radioGroup.setVisibility(View.VISIBLE);
         } else {
-            searchViewWhat.setVisibility(View.GONE);
+            boolSearchEditable = true;
             searchViewWhere.setVisibility(View.GONE);
             toButton.setVisibility(View.GONE);
             fromButton.setVisibility(View.GONE);
-            searchButton.setVisibility(View.GONE);
             radioGroup.setVisibility(View.GONE);
         }
     }
@@ -334,7 +330,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         emptyStateTextSubHeader.setText(R.string.search_error_subheader);
         emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_error_empty_state));
         emptyState.setVisibility(View.VISIBLE);
-        showSearchBar(true);
+        showFullSearchBar(false);
     }
 
     /**

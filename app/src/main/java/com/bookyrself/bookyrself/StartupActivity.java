@@ -23,5 +23,6 @@ public class StartupActivity extends Activity {
             Intent intent = new Intent(this, Onboarding.class);
             startActivity(intent);
         }
+        finish();
     }
 }
