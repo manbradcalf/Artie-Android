@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
@@ -45,7 +44,7 @@ public class CalendarFragment extends Fragment implements OnDateSelectedListener
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         presenter = new CalendarPresenter(this);
-        presenter.loadUserCalender("20");
+        presenter.loadUserEvents("20");
         calendarView = view.findViewById(R.id.events_calendar);
         calendarView.setOnDateChangedListener(this);
         calendarDaysWithEventIds = new HashMap<>();
@@ -55,7 +54,6 @@ public class CalendarFragment extends Fragment implements OnDateSelectedListener
     public void onDateSelected(@NonNull MaterialCalendarView materialCalendarView, @NonNull CalendarDay calendarDay, boolean b) {
         Log.i("calendarDay = ", calendarDay.toString());
         if (calendarDays.contains(calendarDay)) {
-//            Toast.makeText(getActivity(), "u did it!", Toast.LENGTH_LONG).show();
             Intent intent = new Intent(getActivity(), EventDetailActivity.class);
             intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
             intent.putExtra("imgUrl", "https://image.flaticon.com/icons/svg/223/223222.svg");
@@ -74,7 +72,7 @@ public class CalendarFragment extends Fragment implements OnDateSelectedListener
     }
 
     @Override
-    public void calendarReady(List<Event> events) {
+    public void eventsReady(List<Event> events) {
 
         for (int i = 0; i < events.size(); i++) {
             String[] s = events.get(i).getDate().split("-");
