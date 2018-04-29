@@ -61,9 +61,13 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        if (savedInstanceState == null) {
             setLayout(view);
-        }
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        setRetainInstance(true);
+        super.onCreate(savedInstanceState);
     }
 
     //TODO: This is being called every time the framgent is loaded
