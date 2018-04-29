@@ -106,11 +106,20 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             emptyStateTextSubHeader.setText(getString(R.string.search_empty_state_subheader));
             emptyStateImage = view.findViewById(R.id.empty_state_image);
             emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_minivan));
+        } else {
+            // Hit this else clause if the fragment is restarted with data already.
+            // We need to show the edit search button and unselect the search view
+            // TODO: Fix this, this is gross. Maybe utilize savedInstanceState?
+            searchButton.setVisibility(View.VISIBLE);
+            searchButton.setText("Edit Search!");
+            searchViewWhat.clearFocus();
+            searchViewWhat.setSelected(false);
+            searchViewWhat.setIconified(false);
+            if (searchViewWhere.getQuery() != null) {
+                searchViewWhere.setVisibility(View.VISIBLE);
+            }
         }
 
-        /**
-         * SearchView for What field
-         */
         searchViewWhat.setOnSearchClickListener(new View.OnClickListener()
 
         {
@@ -126,9 +135,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             }
         });
 
-        /**
-         * Buttons for "From" and "To" date fields
-         */
+
         fromButton.setOnClickListener(new View.OnClickListener()
 
         {

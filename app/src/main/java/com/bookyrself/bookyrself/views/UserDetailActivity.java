@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
@@ -26,26 +27,32 @@ import com.bookyrself.bookyrself.presenters.UserDetailPresenter;
 import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
  * Created by benmedcalf on 1/13/18.
  */
 
-public class UserDetailActivity extends AppCompatActivity implements UserDetailPresenter.UserDetailPresenterListener, CalendarPresenter.CalendarPresenterListener {
+public class UserDetailActivity extends AppCompatActivity implements UserDetailPresenter.UserDetailPresenterListener,
+        CalendarPresenter.CalendarPresenterListener, OnDateSelectedListener {
 
     private CardView emailUserCardview;
     private CardView addUserToContactsCardview;
+    private List<CalendarDay> calendarDays = new ArrayList<>();
+    private HashMap<CalendarDay, String> calendarDaysWithEventIds;
     private TextView usernameTextView;
     private TextView cityStateTextView;
     private TextView tagsTextView;
     private TextView urlTextView;
     private TextView bioTextView;
     private ImageView profileImage;
+
     private UserDetailPresenter userDetailPresenter;
     private ProgressBar profileImageProgressbar;
     private ProgressBar contentProgressBar;
@@ -55,10 +62,6 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     private Toolbar Toolbar;
     private CalendarPresenter calendarPresenter;
     private MaterialCalendarView calendarView;
-    //TODO: figure out a consistent strategy for empty states when i dont have a headache
-//    private RelativeLayout emptyState;
-//    private TextView emptyStateTextView;
-//    private ImageView emptyStateImageView;
     private RelativeLayout contentView;
 
     @Override
@@ -68,24 +71,18 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         userDetailPresenter = new UserDetailPresenter(this);
         userDetailPresenter.getUserInfo(getIntent().getStringExtra("userId"));
         calendarPresenter = new CalendarPresenter(this);
-        calendarPresenter.loadUserCalender(getIntent().getStringExtra("userId"));
-//        emptyState = findViewById(R.id.empty_state_user_detail);
-//        emptyStateTextView = findViewById(R.id.empty_state_text);
-//        emptyStateTextView.setText("error loading user details");
-//        emptyStateImageView = findViewById(R.id.empty_state_image);
-//        emptyStateImageView.setImageDrawable(getDrawable(R.drawable.ic_binoculars));
-//        emptyState.setVisibility(View.GONE);
+        calendarPresenter.loadUserEvents(getIntent().getStringExtra("userId"));
         Toolbar = findViewById(R.id.toolbar_user_detail);
         Toolbar.setTitle("User Details");
-//        contentProgressBar = findViewById(R.id.content_loading_progressbar);
         calendarView = findViewById(R.id.user_detail_calendar);
+        calendarView.setOnDateChangedListener(this);
+        calendarDaysWithEventIds = new HashMap<>();
         loading_state();
     }
 
     @Override
     public void userInfoReady(_source response) {
 
-        // contentProgressBar.setVisibility(View.GONE);
         // Show the user details now that they're loaded
         usernameTextView = findViewById(R.id.username_user_detail_activity);
         cityStateTextView = findViewById(R.id.city_state_user_detail_activity);
@@ -195,9 +192,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     }
 
     @Override
-    public void calendarReady(List<Event> events) {
-        List<CalendarDay> calendarDays = new ArrayList<>();
-
+    public void eventsReady(List<Event> events) {
         for (int i = 0; i < events.size(); i++) {
             String[] s = events.get(i).getDate().split("-");
             int year = Integer.parseInt(s[0]);
@@ -207,9 +202,20 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             int day = Integer.parseInt(s[2]);
             CalendarDay calendarDay = CalendarDay.from(year, month, day);
             calendarDays.add(calendarDay);
+            calendarDaysWithEventIds.put(calendarDay, events.get(i).getId());
         }
         if (calendarDays.size() == events.size()) {
             calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this));
+        }
+
+    }
+
+    @Override
+    public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
+        if (calendarDays.contains(date)) {
+            Intent intent = new Intent(this, EventDetailActivity.class);
+            intent.putExtra("eventId", calendarDaysWithEventIds.get(date));
+            startActivity(intent);
         }
     }
 }
