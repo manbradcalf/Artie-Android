@@ -77,7 +77,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         calendarView = findViewById(R.id.user_detail_calendar);
         calendarView.setOnDateChangedListener(this);
         calendarDaysWithEventIds = new HashMap<>();
-        loading_state();
+        loadingState();
     }
 
     @Override
@@ -96,7 +96,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         emailUserCardview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                email_user();
+                emailUser();
             }
         });
 
@@ -154,20 +154,20 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     }
 
     @Override
-    public void present_error() {
+    public void presentError() {
         //TODO: This should be a legit empty state
 //        emptyState.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void loading_state() {
+    public void loadingState() {
         contentView = findViewById(R.id.user_detail_content);
         contentView.setVisibility(View.GONE);
     }
 
     //TODO: I am using this method in both UserDetailActivity and EventDetailActivity presenters. I should consolidate
     @Override
-    public void email_user() {
+    public void emailUser() {
 
         if (userEmailAddress != null) {
             Intent intent = new Intent(Intent.ACTION_SENDTO);
@@ -176,7 +176,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             if (intent.resolveActivity(getPackageManager()) != null) {
                 startActivity(intent);
             } else {
-                present_error();
+                presentError();
             }
         }
     }

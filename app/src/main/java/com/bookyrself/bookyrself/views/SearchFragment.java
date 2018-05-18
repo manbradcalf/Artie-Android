@@ -61,7 +61,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-            setLayout(view);
+        setLayout(view);
     }
 
     @Override

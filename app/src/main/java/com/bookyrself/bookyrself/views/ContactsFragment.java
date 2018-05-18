@@ -28,13 +28,7 @@ public class ContactsFragment extends Fragment {
 //        if (auth.getCurrentUser() != null) {
 //            //Signed in
 //        } else {
-//            //TODO: SmartLock disabled only for testing. Remove this before committing.
-//            startActivityForResult(
-//                    AuthUI.getInstance()
-//                            .createSignInIntentBuilder()
-//                            .setIsSmartLockEnabled(false, true)
-//                            .build(),
-//                    RC_SIGN_IN
+
 //            );
 //
 //        }

@@ -2,7 +2,6 @@ package com.bookyrself.bookyrself.presenters;
 
 import android.support.annotation.NonNull;
 
-import com.bookyrself.bookyrself.models.SearchResponseUsers.SearchResponseUsers;
 import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
@@ -24,11 +23,11 @@ public class UserDetailPresenter {
     public interface UserDetailPresenterListener {
         void userInfoReady(_source response);
 
-        void present_error();
+        void presentError();
 
-        void loading_state();
+        void loadingState();
 
-        void email_user();
+        void emailUser();
     }
 
     /**
@@ -50,7 +49,7 @@ public class UserDetailPresenter {
                 if (response.body() != null) {
                     mListener.userInfoReady(response.body());
                 } else {
-                    mListener.present_error();
+                    mListener.presentError();
                 }
 
             }
