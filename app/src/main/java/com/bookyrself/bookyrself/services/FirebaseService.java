@@ -3,6 +3,7 @@ package com.bookyrself.bookyrself.services;
 import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
 import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.User.User;
 
 import java.util.List;
 
@@ -14,6 +15,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.PATCH;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 /**
@@ -43,6 +46,9 @@ public class FirebaseService {
         // This is my solution to https://github.com/firebase/flashlight/issues/178
         @PATCH("/users/{userId}/events/{eventArrayPosition}.json")
         Call<Event> addEventToUser(@Body Event event, @Path("userId") String userId, @Path("eventArrayPosition") Long userArrayPosition);
+
+        @PUT("/users/{userId}.json")
+        Call<User> addUser(@Body User user, @Path("userId") String userId);
     }
 
     public FirebaseService.FirebaseApi getAPI(){
