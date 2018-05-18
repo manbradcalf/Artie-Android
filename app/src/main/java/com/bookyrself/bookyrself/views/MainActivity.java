@@ -1,29 +1,21 @@
 package com.bookyrself.bookyrself.views;
 
-import android.app.Fragment;
-import android.app.FragmentTransaction;
-import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentContainer;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.FrameLayout;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.utils.FragmentViewPager;
 import com.bookyrself.bookyrself.utils.FragmentViewPagerAdapter;
+import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
-import com.ramotion.paperonboarding.PaperOnboardingFragment;
-import com.ramotion.paperonboarding.PaperOnboardingPage;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,12 +23,16 @@ import java.util.List;
 public class MainActivity extends FragmentActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     private static final int RC_SIGN_IN = 123;
+    private static final int SEARCH_FRAGMENT_INDEX = 0;
+    private static final int CALENDAR_FRAGMENT_INDEX = 1;
+    private static final int CONTACTS_FRAGMENT_INDEX = 2;
+    private static final int PROFILE_FRAGMENT_INDEX = 3;
+
+
     private BottomNavigationView navigationView;
     public FirebaseDatabase db;
     public FirebaseAuth auth;
     public FirebaseApp firebaseApp;
-    private FragmentManager fm;
-    private List<android.support.v4.app.Fragment> fragments = new ArrayList<>();
     FragmentViewPagerAdapter adapter;
     FragmentViewPager viewPager;
 
@@ -54,6 +50,7 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
         navigationView = findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(this);
         buildFragmentsList();
+
     }
 
     // Remove inter-activity transition to avoid screen tossing on tapping bottom navigation items
@@ -72,29 +69,52 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
     @Override
     public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
 
-                int itemId = item.getItemId();
-                if (itemId == R.id.navigation_search) {
-                    viewPager.setCurrentItem(0);
-                } else if (itemId == R.id.navigation_calendar) {
-                    viewPager.setCurrentItem(1);
-                } else if (itemId == R.id.navigation_messages) {
-                    viewPager.setCurrentItem(2);
-                } else if (itemId == R.id.navigation_profile) {
-                    viewPager.setCurrentItem(3);
-                }
-                return true;
-            }
+        int itemId = item.getItemId();
+        if (itemId == R.id.navigation_search) {
+            viewPager.setCurrentItem(SEARCH_FRAGMENT_INDEX);
+        } else if (itemId == R.id.navigation_calendar) {
+            viewPager.setCurrentItem(CALENDAR_FRAGMENT_INDEX);
+        } else if (itemId == R.id.navigation_messages) {
+            viewPager.setCurrentItem(CONTACTS_FRAGMENT_INDEX);
+        } else if (itemId == R.id.navigation_profile) {
+            viewPager.setCurrentItem(PROFILE_FRAGMENT_INDEX);
+        }
+        return true;
+    }
 
     private void buildFragmentsList() {
+        final ProfileFragment profileFragment = new ProfileFragment();
+        SearchFragment searchFragment = new SearchFragment();
+        CalendarFragment calendarFragment = new CalendarFragment();
+        ContactsFragment contactsFragment = new ContactsFragment();
 
         viewPager = findViewById(R.id.view_pager);
         adapter = new FragmentViewPagerAdapter(this.getSupportFragmentManager());
-        adapter.addFragment(new SearchFragment(), "Search");
-        adapter.addFragment(new CalendarFragment(), "Calendar");
-        adapter.addFragment(new ContactsFragment(), "Contacts");
-        adapter.addFragment(new ProfileFragment(), "Profile");
+        adapter.addFragment(searchFragment, "Search");
+        adapter.addFragment(calendarFragment, "Calendar");
+        adapter.addFragment(contactsFragment, "Contacts");
+        adapter.addFragment(profileFragment, "Profile");
         viewPager.setAdapter(adapter);
-    }
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            //TODO: Refactor this? Activity and fragment shouldn't know eachother's state
+            @Override
+            public void onPageSelected(int position) {
+                if (position == PROFILE_FRAGMENT_INDEX) {
+                    profileFragment.checkAuth();
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+    }
 
 }
