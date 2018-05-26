@@ -41,6 +41,12 @@
             android:label="EventDetail"
             android:theme="@style/AppTheme.NoActionBar"/>
 
+        <activity
+            android:name=".views.ProfileCreationActivity"
+            android:label="ProfileCreation"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

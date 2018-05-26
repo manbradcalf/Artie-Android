@@ -25,6 +25,8 @@ public class ProfilePresenter {
         void loadingState();
 
         void successfulAuth();
+
+        void userFetched(_source user);
     }
 
     /**
@@ -48,6 +50,20 @@ public class ProfilePresenter {
             @Override
             public void onFailure(Call<User> call, Throwable t) {
                 // failure
+            }
+        });
+    }
+
+    public void getUser(String UID) {
+        service.getAPI().getUserDetails(UID).enqueue(new Callback<_source>() {
+            @Override
+            public void onResponse(Call<_source> call, Response<_source> response) {
+                listener.userFetched(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<_source> call, Throwable t) {
+
             }
         });
     }
