@@ -40,7 +40,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.5.2'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
     implementation 'com.firebaseui:firebase-ui-auth:3.3.1'
-    implementation 'com.prolificinteractive:material-calendarview:1.4.3'
+    implementation 'com.github.prolificinteractive:material-calendarview:1.5.0'
     implementation 'com.ramotion.paperonboarding:paper-onboarding:1.1.1'
     testImplementation 'junit:junit:4.12'
 }
@@ -50,5 +50,8 @@ repositories {
     maven {
         url 'https://maven.google.com/'
         name 'Google'
+    }
+    maven {
+        url 'https://jitpack.io'
     }
 }
