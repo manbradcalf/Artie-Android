@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,10 +32,18 @@ public class ProfileCreationActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent returnIntent = new Intent();
-                returnIntent.putExtra("username", username.getText());
-                returnIntent.putExtra("bio", bio.getText().toString());
-                returnIntent.putExtra("location", location.getText());
-                returnIntent.putExtra("tags", tags.getText().toString());
+                if (!TextUtils.isEmpty(username.getText().toString())) {
+                    returnIntent.putExtra("username", username.getText().toString());
+                }
+                if (!TextUtils.isEmpty(bio.getText().toString())) {
+                    returnIntent.putExtra("bio", bio.getText().toString());
+                }
+                if (!TextUtils.isEmpty(location.getText().toString())) {
+                    returnIntent.putExtra("location", location.getText().toString());
+                }
+                if (!TextUtils.isEmpty(tags.getText().toString())) {
+                    returnIntent.putExtra("tags", tags.getText().toString());
+                }
                 setResult(Activity.RESULT_OK, returnIntent);
                 finish();
             }

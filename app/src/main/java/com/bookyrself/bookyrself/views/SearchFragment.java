@@ -404,25 +404,30 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                             .get_source()
                             .getUsername());
 
-                    StringBuilder listString = new StringBuilder();
-                    for (String s : usersResults.get(position).get_source().getTags()) {
-                        listString.append(s + ", ");
-                    }
+                    //TODO Are null catches the solution here?
+                    if (usersResults.get(position).get_source().getTags() != null) {
+                        StringBuilder listString = new StringBuilder();
+                        for (String s : usersResults.get(position).get_source().getTags()) {
+                            listString.append(s + ", ");
+                        }
 
-                    viewHolderUsers.userTagsTextView.setText(listString.toString());
+                        viewHolderUsers.userTagsTextView.setText(listString.toString());
+                    }
 
                     final int adapterPosition = holder.getAdapterPosition();
 
-                    Picasso.with(getActivity().getApplicationContext())
-                            .load(usersResults
-                                    .get(position)
-                                    .get_source()
-                                    .getPicture())
-                            .placeholder(R.drawable.round)
-                            .error(R.drawable.round)
-                            .transform(new CircleTransform())
-                            .resize(100, 100)
-                            .into(viewHolderUsers.userProfileImageThumb);
+                    if (usersResults.get(position).get_source().getPicture() != null) {
+                        Picasso.with(getActivity().getApplicationContext())
+                                .load(usersResults
+                                        .get(position)
+                                        .get_source()
+                                        .getPicture())
+                                .placeholder(R.drawable.round)
+                                .error(R.drawable.round)
+                                .transform(new CircleTransform())
+                                .resize(100, 100)
+                                .into(viewHolderUsers.userProfileImageThumb);
+                    }
 
                     viewHolderUsers.userCardView.setOnClickListener(new View.OnClickListener() {
                         @Override
