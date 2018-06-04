@@ -51,7 +51,7 @@ public class EventCreationPresenter {
             @Override
             public void onResponse(@NonNull Call<List<Event>> call, @NonNull Response<List<Event>> response) {
                 if (response.body() != null) {
-                    userEventCountHashMap.put(userid, Long.valueOf(response.body().size()));
+                    userEventCountHashMap.put(userid, (long) response.body().size());
                 }
             }
 
@@ -64,7 +64,7 @@ public class EventCreationPresenter {
 
     public void createEvent(Event event) {
 
-        // Iterate through the hashmap of user's and their events array size.
+        // Iterate through the hashmap of users and their events array size.
         // For each user in the hashmpap, add the event to their
         for (String userId : userEventCountHashMap.keySet()) {
             mService.getAPI().addEventToUser(event, userId, userEventCountHashMap.get(userId));
