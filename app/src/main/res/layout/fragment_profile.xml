@@ -47,13 +47,21 @@
                 android:layout_centerHorizontal="true"
                 android:text="sign out yo" />
 
-            <TextView
-                android:id="@+id/username_profile_activity"
+            <Button
+                android:id="@+id/btnEditProfile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/profile_image"
+                android:layout_below="@id/btnSignOut"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="66dp"
+                android:text="edit profile" />
+
+            <TextView
+                android:id="@+id/username_profile_fragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/btnEditProfile"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="16dp"
                 android:text="User Name"
                 android:textAppearance="@android:style/TextAppearance.Material.Display1"
                 android:textColor="@color/common_google_signin_btn_text_dark_focused" />
@@ -62,7 +70,7 @@
                 android:id="@+id/linearLayout"
                 android:layout_width="400dp"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/username_profile_activity"
+                android:layout_below="@id/username_profile_fragment"
                 android:layout_centerInParent="true"
                 android:layout_marginTop="16dp"
                 android:orientation="vertical">
