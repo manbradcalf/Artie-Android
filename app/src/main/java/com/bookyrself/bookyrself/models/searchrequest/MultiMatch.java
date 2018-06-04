@@ -1,5 +1,5 @@
 
-package com.bookyrself.bookyrself.models.searchrequest;
+package com.bookyrself.bookyrself.models.SearchRequest;
 
 import java.util.List;
 import com.google.gson.annotations.Expose;
