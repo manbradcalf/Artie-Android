@@ -1,5 +1,6 @@
 package com.bookyrself.bookyrself.presenters;
 
+import com.bookyrself.bookyrself.models.SearchResponseUsers.Hit;
 import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.services.FirebaseService;
 import com.bookyrself.bookyrself.models.User.*;
@@ -25,8 +26,6 @@ public class ProfilePresenter {
         void loadingState();
 
         void successfulAuth();
-
-        void userFetched(_source user);
     }
 
     /**
@@ -40,15 +39,31 @@ public class ProfilePresenter {
     /**
      * Methods
      */
-    public void createUser(User user, String UID) {
-        service.getAPI().addUser(user, UID).enqueue(new Callback<User>() {
+    public void createUser(_source user, String UID) {
+        service.getAPI().addUser(user, UID).enqueue(new Callback<_source>() {
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
+            public void onResponse(Call<_source> call, Response<_source> response) {
                 // response
+                listener.profileInfoReady(response.body());
             }
 
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(Call<_source> call, Throwable t) {
+                // failure
+            }
+        });
+    }
+
+    public void patchUser(_source user, String UID) {
+        service.getAPI().patchUser(user, UID).enqueue(new Callback<_source>() {
+            @Override
+            public void onResponse(Call<_source> call, Response<_source> response) {
+                // response
+                listener.profileInfoReady(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<_source> call, Throwable t) {
                 // failure
             }
         });
@@ -58,7 +73,7 @@ public class ProfilePresenter {
         service.getAPI().getUserDetails(UID).enqueue(new Callback<_source>() {
             @Override
             public void onResponse(Call<_source> call, Response<_source> response) {
-                listener.userFetched(response.body());
+                listener.profileInfoReady(response.body());
             }
 
             @Override

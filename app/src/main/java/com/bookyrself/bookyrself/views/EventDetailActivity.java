@@ -78,7 +78,6 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         String hostURL = host.getUrl();
         String linkedText = String.format("<a href=\"%s\">%s</a>", ("http://" + hostURL), hostURL);
 
-        //TODO: Find a way to get the profile thumb...that hopefully doesn't involve another re-index :-|
         HostUrlTextView = findViewById(R.id.item_event_detail_url);
         HostUrlTextView.setClickable(true);
         HostUrlTextView.setText(Html.fromHtml(linkedText));
