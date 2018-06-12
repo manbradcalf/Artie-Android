@@ -82,28 +82,6 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
         adapter.addFragment(contactsFragment, "Contacts");
         adapter.addFragment(profileFragment, "Profile");
         viewPager.setAdapter(adapter);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-
-            //TODO: Refactor this? Activity and fragment shouldn't know eachother's state
-            @Override
-            public void onPageSelected(int position) {
-                switch (position) {
-                    case PROFILE_FRAGMENT_INDEX:
-                        profileFragment.checkAuth();
-                        break;
-                }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
     }
 
 }

@@ -17,7 +17,6 @@ public class ProfilePresenter {
      * Contract / Listener
      */
     public interface ProfilePresenterListener {
-        void checkAuth();
 
         void profileInfoReady(_source response);
 

@@ -2,6 +2,7 @@ package com.bookyrself.bookyrself.services;
 
 import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
 import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
+import com.bookyrself.bookyrself.models.SearchResponseUsers.Hit;
 import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 
 import java.util.List;

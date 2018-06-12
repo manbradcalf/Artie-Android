@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".views.AuthValPropActivity">
+
+    <LinearLayout
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/auth_val_prop_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_user"
+        app:layout_constraintBottom_toTopOf="@id/auth_val_prop_textview" />
+
+    <TextView
+        android:id="@+id/auth_val_prop_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign up because its cool!"
+        app:layout_constraintBottom_toTopOf="@id/auth_val_prop_button"
+        />
+
+    <Button
+        android:id="@+id/auth_val_prop_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Sign In"
+        app:layout_constraintTop_toBottomOf="@id/auth_val_prop_textview" />
+
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

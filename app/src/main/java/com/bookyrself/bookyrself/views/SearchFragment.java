@@ -52,6 +52,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     private TextView emptyStateTextHeader;
     private TextView emptyStateTextSubHeader;
     private ImageView emptyStateImage;
+    private Button emptyStateButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -103,13 +104,15 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         progressBar = view.findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.GONE);
         if (adapter.getItemCount() == 0) {
-            emptyState = view.findViewById(R.id.empty_state_search);
+            emptyState = view.findViewById(R.id.empty_state_view);
             emptyStateTextHeader = view.findViewById(R.id.empty_state_text_header);
             emptyStateTextHeader.setText(getString(R.string.search_empty_state_header));
             emptyStateTextSubHeader = view.findViewById(R.id.empty_state_text_subheader);
             emptyStateTextSubHeader.setText(getString(R.string.search_empty_state_subheader));
             emptyStateImage = view.findViewById(R.id.empty_state_image);
             emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_minivan));
+            emptyStateButton = view.findViewById(R.id.empty_state_button);
+            emptyStateButton.setVisibility(View.GONE);
         } else {
             // Hit this else clause if the fragment is restarted with data already.
             // We need to show the edit search button and unselect the search view
@@ -210,10 +213,6 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                 }
             }
         });
-
-    }
-
-    void checkAuth() {
 
     }
 
@@ -319,7 +318,6 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         }
     }
 
-    //TODO: Is imgUrl needed as a param here?
     @Override
     public void itemSelected(String id, int flag) {
         if (flag == EVENT_SEARCH_FLAG) {

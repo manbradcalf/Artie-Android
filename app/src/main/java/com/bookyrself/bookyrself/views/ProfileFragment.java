@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +34,9 @@ import com.squareup.picasso.Picasso;
 import java.util.Arrays;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static android.app.Activity.RESULT_OK;
 
 public class ProfileFragment extends Fragment implements ProfilePresenter.ProfilePresenterListener {
@@ -40,53 +44,68 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     private static final int RC_SIGN_IN = 123;
     private static final int RC_PROFILE_CREATION = 456;
     private static final int RC_PHOTO_SELECT = 789;
-    private Button btnSignOut;
-    private Button btnEditProfile;
-    private TextView userNameTextView;
-    private TextView bioTextView;
     private ProfilePresenter presenter;
-    private ImageView profileImage;
     private StorageReference storageReference;
     private _source user;
+    @BindView(R.id.profile_content) RelativeLayout profileContent;
+    @BindView(R.id.btnSignOut)Button btnSignOut;
+    @BindView(R.id.btnEditProfile)Button btnEditProfile;
+    @BindView(R.id.bio_body_profile_activity)TextView bioTextView;
+    @BindView(R.id.profile_image)ImageView profileImage;
+    @BindView(R.id.city_state_profile_activity) TextView cityStateTextView;
+    @BindView(R.id.tags_profile_activity) TextView tagsTextView;
+    @BindView(R.id.user_url_profile_activity) TextView urlTextView;
+    @BindView(R.id.username_profile_fragment) TextView userNameTextView;
+    @BindView(R.id.profile_empty_state) View emptyState;
+    @BindView(R.id.empty_state_text_header) TextView emptyStateTextHeader;
+    @BindView(R.id.empty_state_image) ImageView emptyStateImage;
+    @BindView(R.id.empty_state_text_subheader) TextView emptyStateTextSubHeader;
+    @BindView(R.id.empty_state_button) Button emptyStateButton;
+
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+        ButterKnife.bind(this, view);
+        return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
         user = new _source();
         presenter = new ProfilePresenter(this);
         storageReference = FirebaseStorage.getInstance().getReference();
-        userNameTextView = getActivity().findViewById(R.id.username_profile_fragment);
-        btnSignOut = getActivity().findViewById(R.id.btnSignOut);
-        btnEditProfile = getActivity().findViewById(R.id.btnEditProfile);
-        bioTextView = getActivity().findViewById(R.id.bio_body_profile_activity);
-        profileImage = getActivity().findViewById(R.id.profile_image);
+
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
-                    new AuthUI.IdpConfig.EmailBuilder().build());
-            // Authenticate
-            btnSignOut.setVisibility(View.GONE);
-            startActivityForResult(
-                    AuthUI.getInstance()
-                            .createSignInIntentBuilder()
-                            .setIsSmartLockEnabled(false, true)
-                            .setAvailableProviders(providers)
-                            .build(),
-                    RC_SIGN_IN);
+            profileContent.setVisibility(View.GONE);
+            emptyStateTextHeader.setText(getString(R.string.auth_val_prop_header));
+            emptyStateTextSubHeader.setText(getString(R.string.auth_val_prop_subheader));
+            emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+            emptyStateButton.setText("Join Now");
+            emptyState.setVisibility(View.VISIBLE);
+            emptyStateButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                            new AuthUI.IdpConfig.EmailBuilder().build());
+                    // Authenticate
+                    btnSignOut.setVisibility(View.GONE);
+                    startActivityForResult(
+                            AuthUI.getInstance()
+                                    .createSignInIntentBuilder()
+                                    .setIsSmartLockEnabled(false, true)
+                                    .setAvailableProviders(providers)
+                                    .build(),
+                            RC_SIGN_IN);
+                }
+            });
         } else {
             // Get user data
             presenter.getUser(FirebaseAuth.getInstance().getCurrentUser().getUid());
         }
-    }
-
-    @Override
-    public void checkAuth() {
-
     }
 
     @Override
@@ -112,6 +131,8 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     public void setLayout(_source user) {
 
         if (user != null) {
+            emptyState.setVisibility(View.GONE);
+            profileContent.setVisibility(View.VISIBLE);
             userNameTextView.setText(user.getUsername());
             bioTextView.setText(user.getBio());
             StorageReference profileImageReference = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
@@ -136,6 +157,13 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
                 }
             });
             //TODO: Set image, city state, tags, etc
+            if (user.getTags() != null) {
+                tagsTextView.setText(user.getTags().toString());
+            }
+            if (user.getCitystate() != null) {
+                cityStateTextView.setText(user.getCitystate());
+            }
+
         } else {
             userNameTextView.setText("user not in fb db");
         }
@@ -192,7 +220,7 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
                     }
                     if (user != null) {
                         presenter.patchUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
-                        showToast("Updating Profile!");
+                        showToast("Updated Profile!");
                     }
                     return;
                 case RC_PHOTO_SELECT:

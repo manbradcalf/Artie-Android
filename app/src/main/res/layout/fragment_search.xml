@@ -72,11 +72,6 @@
 
         </LinearLayout>
 
-        <!--<Shape-->
-        <!--android:si-->
-        <!--/>-->
-
-
         <RadioGroup
             android:id="@+id/radio_group_search"
             android:layout_width="match_parent"
