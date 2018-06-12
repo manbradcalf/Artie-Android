@@ -34,20 +34,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by benmedcalf on 11/22/17.
  */
 
 public class EventDetailActivity extends AppCompatActivity implements EventDetailPresenter.EventDetailPresenterListener {
 
-    private TextView DateView;
-    private TextView Host;
-    private TextView HostCityState;
-    private TextView HostUrlTextView;
-    private CardView HostcardView;
-    private Toolbar Toolbar;
-    private ImageView HostImageView;
-    private ListView usersListView;
+    @BindView(R.id.event_detail_date)
+    TextView DateView;
+    @BindView(R.id.item_event_detail_username)
+    TextView HostUsernameTextview;
+    @BindView(R.id.item_event_detail_citystate)
+    TextView HostCityState;
+    @BindView(R.id.item_event_detail_url)
+    TextView HostUrlTextView;
+    @BindView(R.id.event_detail_host_item)
+    CardView HostcardView;
+    @BindView(R.id.toolbar_event_detail)
+    Toolbar Toolbar;
+    @BindView(R.id.item_event_detail_userthumb)
+    ImageView HostImageView;
+    @BindView(R.id.event_detail_users_list)
+    ListView usersListView;
+
     private List<User> users;
     private EventDetailPresenter presenter;
     private HashMap<String, String> idAndThumbUrlMap = new HashMap<>();
@@ -56,20 +68,20 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
-        presenter = new EventDetailPresenter(this);
+        ButterKnife.bind(this);
         Intent intent = getIntent();
         String eventId = intent.getStringExtra("eventId");
+        presenter = new EventDetailPresenter(this);
         presenter.getEventDetailData(eventId);
-        Toolbar = findViewById(R.id.toolbar_event_detail);
     }
 
     @Override
     public void eventDataResponseReady(final EventDetailResponse data) {
 
 
-        setSupportActionBar(Toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(R.string.event_detail_toolbar);
+//        setSupportActionBar(Toolbar);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setTitle(R.string.event_detail_toolbar);
 
         String date = data.getDate();
         Host host = data.getHost().get(0);
@@ -78,13 +90,10 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         String hostURL = host.getUrl();
         String linkedText = String.format("<a href=\"%s\">%s</a>", ("http://" + hostURL), hostURL);
 
-        //TODO: Find a way to get the profile thumb...that hopefully doesn't involve another re-index :-|
-        HostUrlTextView = findViewById(R.id.item_event_detail_url);
         HostUrlTextView.setClickable(true);
         HostUrlTextView.setText(Html.fromHtml(linkedText));
         HostUrlTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
-        DateView = findViewById(R.id.event_detail_date);
         DateView.setText("Date");
         DateFormat inputformat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         Date d;
@@ -97,11 +106,11 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             e.printStackTrace();
         }
 
-        Host = findViewById(R.id.item_event_detail_username);
-        Host.setText(hostUsername);
-        HostCityState = findViewById(R.id.item_event_detail_citystate);
+
+        HostUsernameTextview.setText(hostUsername);
+
         HostCityState.setText(hostCityState);
-        HostImageView = findViewById(R.id.item_event_detail_userthumb);
+
         Picasso.with(getApplicationContext())
                 .load(hostURL)
                 .placeholder(R.drawable.round)
@@ -109,7 +118,6 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                 .transform(new CircleTransform())
                 .into(HostImageView);
 
-        usersListView = findViewById(R.id.event_detail_users_list);
         users = data.getUsers();
 
         for (int i = 0; i < users.size(); i++) {
@@ -117,7 +125,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             presenter.getUserThumbUrl(userId);
         }
 
-        HostcardView = findViewById(R.id.event_detail_host_item);
+
         HostcardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

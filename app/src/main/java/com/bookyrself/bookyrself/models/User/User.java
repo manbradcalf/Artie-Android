@@ -1,5 +1,5 @@
 
-package com.bookyrself.bookyrself.models.SearchResponseUsers;
+package com.bookyrself.bookyrself.models.User;
 
 import java.util.List;
 import javax.annotation.Generated;
@@ -7,14 +7,10 @@ import com.google.gson.annotations.SerializedName;
 
 @Generated("net.hexar.json2pojo")
 @SuppressWarnings("unused")
-//TODO: Rename this class? This is being used as a user most places
-//TODO: Add URL property to this model and to the ES mapping
-public class _source {
+public class User {
 
     @SerializedName("bio")
     private String mBio;
-    @SerializedName("citystate")
-    private String mCitystate;
     @SerializedName("email")
     private String mEmail;
     @SerializedName("events")
@@ -34,14 +30,6 @@ public class _source {
 
     public void setBio(String bio) {
         mBio = bio;
-    }
-
-    public String getCitystate() {
-        return mCitystate;
-    }
-
-    public void setCitystate(String citystate) {
-        mCitystate = citystate;
     }
 
     public String getEmail() {

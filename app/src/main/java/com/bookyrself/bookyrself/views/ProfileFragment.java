@@ -1,94 +1,278 @@
 package com.bookyrself.bookyrself.views;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ScrollView;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
+import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.presenters.ProfilePresenter;
+import com.bookyrself.bookyrself.utils.CircleTransform;
+import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.ErrorCodes;
+import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUserMetadata;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
-public class ProfileFragment extends Fragment {
+import java.util.Arrays;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+import static android.app.Activity.RESULT_OK;
+
+public class ProfileFragment extends Fragment implements ProfilePresenter.ProfilePresenterListener {
 
     private static final int RC_SIGN_IN = 123;
-    private Button btnSignOut;
-    private ScrollView scrollView;
+    private static final int RC_PROFILE_CREATION = 456;
+    private static final int RC_PHOTO_SELECT = 789;
+    private ProfilePresenter presenter;
+    private StorageReference storageReference;
+    private _source user;
+    @BindView(R.id.profile_content) RelativeLayout profileContent;
+    @BindView(R.id.btnSignOut)Button btnSignOut;
+    @BindView(R.id.btnEditProfile)Button btnEditProfile;
+    @BindView(R.id.bio_body_profile_activity)TextView bioTextView;
+    @BindView(R.id.profile_image)ImageView profileImage;
+    @BindView(R.id.city_state_profile_activity) TextView cityStateTextView;
+    @BindView(R.id.tags_profile_activity) TextView tagsTextView;
+    @BindView(R.id.user_url_profile_activity) TextView urlTextView;
+    @BindView(R.id.username_profile_fragment) TextView userNameTextView;
+    @BindView(R.id.profile_empty_state) View emptyState;
+    @BindView(R.id.empty_state_text_header) TextView emptyStateTextHeader;
+    @BindView(R.id.empty_state_image) ImageView emptyStateImage;
+    @BindView(R.id.empty_state_text_subheader) TextView emptyStateTextSubHeader;
+    @BindView(R.id.empty_state_button) Button emptyStateButton;
+
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+        ButterKnife.bind(this, view);
+        return view;
     }
 
-    void setLayout() {
-        btnSignOut = getActivity().findViewById(R.id.btnSignOut);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
+        user = new _source();
+        presenter = new ProfilePresenter(this);
+        storageReference = FirebaseStorage.getInstance().getReference();
+
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            profileContent.setVisibility(View.GONE);
+            emptyStateTextHeader.setText(getString(R.string.auth_val_prop_header));
+            emptyStateTextSubHeader.setText(getString(R.string.auth_val_prop_subheader));
+            emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+            emptyStateButton.setText("Join Now");
+            emptyState.setVisibility(View.VISIBLE);
+            emptyStateButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                            new AuthUI.IdpConfig.EmailBuilder().build());
+                    // Authenticate
+                    btnSignOut.setVisibility(View.GONE);
+                    startActivityForResult(
+                            AuthUI.getInstance()
+                                    .createSignInIntentBuilder()
+                                    .setIsSmartLockEnabled(false, true)
+                                    .setAvailableProviders(providers)
+                                    .build(),
+                            RC_SIGN_IN);
+                }
+            });
+        } else {
+            // Get user data
+            presenter.getUser(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        }
+    }
+
+    @Override
+    public void profileInfoReady(_source response) {
+        setLayout(response);
+    }
+
+    @Override
+    public void presentToast(String message) {
+
+    }
+
+    @Override
+    public void loadingState() {
+
+    }
+
+    @Override
+    public void successfulAuth() {
+
+    }
+
+    public void setLayout(_source user) {
+
+        if (user != null) {
+            emptyState.setVisibility(View.GONE);
+            profileContent.setVisibility(View.VISIBLE);
+            userNameTextView.setText(user.getUsername());
+            bioTextView.setText(user.getBio());
+            StorageReference profileImageReference = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
+            profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    Picasso.with(getActivity().getApplicationContext())
+                            .load(uri)
+                            .resize(148, 148)
+                            .centerCrop()
+                            .transform(new CircleTransform())
+                            .into(profileImage);
+                }
+            });
+            profileImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(intent, "Choose Picture"), RC_PHOTO_SELECT);
+                }
+            });
+            //TODO: Set image, city state, tags, etc
+            if (user.getTags() != null) {
+                tagsTextView.setText(user.getTags().toString());
+            }
+            if (user.getCitystate() != null) {
+                cityStateTextView.setText(user.getCitystate());
+            }
+
+        } else {
+            userNameTextView.setText("user not in fb db");
+        }
+        btnSignOut.setVisibility(View.VISIBLE);
         btnSignOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
             }
         });
-        scrollView = getActivity().findViewById(R.id.user_detail_scrollview);
+        btnEditProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), ProfileCreationActivity.class);
+                startActivityForResult(intent, RC_PROFILE_CREATION);
+            }
+        });
+
     }
 
-    //TODO: find out how to give fragments access to auth and db objects
-//    void checkAuth() {
-//        if (auth.getCurrentUser() != null) {
-//            //Signed in
-//        } else {
-//            //TODO: SmartLock disabled only for testing. Remove this before committing.
-//            startActivityForResult(
-//                    AuthUI.getInstance()
-//                            .createSignInIntentBuilder()
-//                            .setIsSmartLockEnabled(false, true)
-//                            .build(),
-//                    RC_SIGN_IN
-//            );
-//
-//        }
-//    }
-//
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        // RC_SIGN_IN is the request code you passed into startActivityForResult(...) when starting the sign in flow.
-//        if (requestCode == RC_SIGN_IN) {
-//            IdpResponse response = IdpResponse.fromResultIntent(data);
-//
-//            // Successfully signed in
-//            if (resultCode == RESULT_OK) {
-//                showSnackbar("You did it!");
-//                return;
-//            } else {
-//                // Sign in failed
-//                if (response == null) {
-//                    // User pressed back button
-//                    showSnackbar("Canceled");
-//                    return;
-//                }
-//
-//                if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
-//                    showSnackbar("No Connection");
-//                    return;
-//                }
-//
-//                if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
-//                    showSnackbar("Unknown Error");
-//                    return;
-//                }
-//            }
-//
-//            showSnackbar("Idk");
-//        }
-//    }
-//
-//    private void showSnackbar(String message) {
-//        Snackbar snackbar = Snackbar
-//                .make(scrollView, message, Snackbar.LENGTH_SHORT);
-//
-//        snackbar.show();
-//    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        IdpResponse response = IdpResponse.fromResultIntent(data);
+        // RC_SIGN_IN is the request code you passed into startActivityForResult(...) when starting the sign in flow.
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case RC_SIGN_IN:
+                    if (isNewSignUp()) {
+                        // Successfully signed up
+                        // Creating user object to push to FB DB
+                        user.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                        user.setUsername(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+                        presenter.createUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
+                        showToast("Signing Up!");
+                    } else {
+                        // Successfully signed in
+                        presenter.getUser(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                        showToast("Signing In!");
+                    }
+                    return;
+                case RC_PROFILE_CREATION:
+                    //TODO: This creation logic probably shouldn't be in the fragment?
+                    //TODO: Should I pass the Intent to the presenter?
+                    //TODO: *Vomit emoji* do i really need to null check everything?
+                    if (data.getStringExtra("bio") != null) {
+                        user.setBio(data.getStringExtra("bio"));
+                    }
+                    if (data.getStringExtra("username") != null) {
+                        user.setUsername(data.getStringExtra("username"));
+                    }
+                    if (data.getStringExtra("location") != null) {
+                        user.setCitystate(data.getStringExtra("location"));
+                    }
+                    if (user != null) {
+                        presenter.patchUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
+                        showToast("Updated Profile!");
+                    }
+                    return;
+                case RC_PHOTO_SELECT:
+                    Uri selectedimg = data.getData();
 
+                    // Set the image to the profileImageThumb
+                    Picasso.with(getActivity().getApplicationContext())
+                            .load(selectedimg)
+                            .resize(148, 148)
+                            .centerCrop()
+                            .transform(new CircleTransform())
+                            .into(profileImage);
+
+                    // Upload to firebase
+                    StorageReference profilePhotoRef = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    UploadTask uploadTask = profilePhotoRef.putFile(selectedimg);
+                    uploadTask.addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            presentToast("upload failed");
+                            Picasso.with(getActivity().getApplicationContext()).load(R.drawable.ic_user).into(profileImage);
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            presentToast("upload succeeded");
+                        }
+                    });
+            }
+        } else {
+            if (response == null) {
+                // User pressed back button
+                showToast("Canceled");
+                return;
+            }
+            if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
+                showToast("No Connection");
+                return;
+            }
+            if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+                showToast("Unknown Error");
+            }
+
+        }
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+    }
+
+    public boolean isNewSignUp() {
+        FirebaseUserMetadata metadata = FirebaseAuth.getInstance().getCurrentUser().getMetadata();
+        return metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp();
+    }
 }

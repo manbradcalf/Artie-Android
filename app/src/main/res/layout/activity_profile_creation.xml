@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profile_creation_scrollview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/profile_creation_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="username"/>
+
+        <EditText
+            android:id="@+id/profile_creation_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="location"/>
+
+        <EditText
+            android:id="@+id/profile_creation_tags"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="tags"/>
+
+        <EditText
+            android:id="@+id/profile_creation_bio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="bio"/>
+
+        <Button
+            android:id="@+id/profile_creation_submit_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="submit"/>
+
+    </LinearLayout>
+
+
+</ScrollView>

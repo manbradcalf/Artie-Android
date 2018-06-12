@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
@@ -25,6 +26,7 @@ import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.presenters.CalendarPresenter;
 import com.bookyrself.bookyrself.presenters.UserDetailPresenter;
 import com.bookyrself.bookyrself.utils.EventDecorator;
+import com.google.firebase.auth.FirebaseAuth;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
@@ -59,6 +61,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     private TextView emailUserTextView;
     private TextView addUserToContactsTextView;
     private String userEmailAddress;
+    private String userID;
     private Toolbar Toolbar;
     private CalendarPresenter calendarPresenter;
     private MaterialCalendarView calendarView;
@@ -69,15 +72,16 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_detail);
         userDetailPresenter = new UserDetailPresenter(this);
-        userDetailPresenter.getUserInfo(getIntent().getStringExtra("userId"));
+        userID = getIntent().getStringExtra("userId");
+        userDetailPresenter.getUserInfo(userID);
         calendarPresenter = new CalendarPresenter(this);
-        calendarPresenter.loadUserEvents(getIntent().getStringExtra("userId"));
+        calendarPresenter.loadUserEvents(userID);
         Toolbar = findViewById(R.id.toolbar_user_detail);
         Toolbar.setTitle("User Details");
         calendarView = findViewById(R.id.user_detail_calendar);
         calendarView.setOnDateChangedListener(this);
         calendarDaysWithEventIds = new HashMap<>();
-        loading_state();
+        loadingState();
     }
 
     @Override
@@ -96,23 +100,32 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         emailUserCardview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                email_user();
+                emailUser();
             }
         });
 
         addUserToContactsCardview = findViewById(R.id.add_user_to_contacts_card);
         addUserToContactsTextView = findViewById(R.id.add_user_to_contacts_textview);
-        addUserToContactsTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO: Add code that adds a user to your contacts list
-            }
-        });
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            addUserToContactsCardview.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //TODO: Add code that adds a user to your contacts list
+                    userDetailPresenter.addContact(FirebaseAuth.getInstance().getCurrentUser().getUid(), userID);
+                }
+            });
+        } else {
+            addUserToContactsTextView.setText("Log in to add this user to your contacts!");
+        }
+
 
         setSupportActionBar(Toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        String toolbarText = getString(R.string.user_detail_toolbar, response.getUsername());
-        getSupportActionBar().setTitle(toolbarText);
+        if (response.getUsername() != null) {
+            String toolbarText = getString(R.string.user_detail_toolbar, response.getUsername());
+            getSupportActionBar().setTitle(toolbarText);
+        }
+
 
         StringBuilder listString = new StringBuilder();
         usernameTextView.setText(response.getUsername());
@@ -139,11 +152,12 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                         Log.e(this.getClass().toString(), "didn't load image");
                     }
                 });
-        for (String s : response.getTags()) {
-            listString.append(s + ", ");
+        if (response.getTags() != null) {
+            for (String s : response.getTags()) {
+                listString.append(s + ", ");
+            }
+            tagsTextView.setText(listString.toString());
         }
-
-        tagsTextView.setText(listString.toString());
         contentView.setVisibility(View.VISIBLE);
     }
 
@@ -154,20 +168,20 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     }
 
     @Override
-    public void present_error() {
+    public void presentError() {
         //TODO: This should be a legit empty state
 //        emptyState.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void loading_state() {
+    public void loadingState() {
         contentView = findViewById(R.id.user_detail_content);
         contentView.setVisibility(View.GONE);
     }
 
     //TODO: I am using this method in both UserDetailActivity and EventDetailActivity presenters. I should consolidate
     @Override
-    public void email_user() {
+    public void emailUser() {
 
         if (userEmailAddress != null) {
             Intent intent = new Intent(Intent.ACTION_SENDTO);
@@ -176,9 +190,14 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             if (intent.resolveActivity(getPackageManager()) != null) {
                 startActivity(intent);
             } else {
-                present_error();
+                presentError();
             }
         }
+    }
+
+    @Override
+    public void presentSuccess(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -193,21 +212,22 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
 
     @Override
     public void eventsReady(List<Event> events) {
-        for (int i = 0; i < events.size(); i++) {
-            String[] s = events.get(i).getDate().split("-");
-            int year = Integer.parseInt(s[0]);
-            // I have to do weird logic on the month because months are 0 indexed
-            // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
-            int month = Integer.parseInt(s[1]) - 1;
-            int day = Integer.parseInt(s[2]);
-            CalendarDay calendarDay = CalendarDay.from(year, month, day);
-            calendarDays.add(calendarDay);
-            calendarDaysWithEventIds.put(calendarDay, events.get(i).getId());
+        if (events != null) {
+            for (int i = 0; i < events.size(); i++) {
+                String[] s = events.get(i).getDate().split("-");
+                int year = Integer.parseInt(s[0]);
+                // I have to do weird logic on the month because months are 0 indexed
+                // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
+                int month = Integer.parseInt(s[1]) - 1;
+                int day = Integer.parseInt(s[2]);
+                CalendarDay calendarDay = CalendarDay.from(year, month, day);
+                calendarDays.add(calendarDay);
+                calendarDaysWithEventIds.put(calendarDay, events.get(i).getId());
+            }
+            if (calendarDays.size() == events.size()) {
+                calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this));
+            }
         }
-        if (calendarDays.size() == events.size()) {
-            calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this));
-        }
-
     }
 
     @Override

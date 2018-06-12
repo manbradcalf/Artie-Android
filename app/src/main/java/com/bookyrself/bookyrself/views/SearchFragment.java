@@ -52,6 +52,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     private TextView emptyStateTextHeader;
     private TextView emptyStateTextSubHeader;
     private ImageView emptyStateImage;
+    private Button emptyStateButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -61,7 +62,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-            setLayout(view);
+        setLayout(view);
     }
 
     @Override
@@ -103,13 +104,15 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         progressBar = view.findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.GONE);
         if (adapter.getItemCount() == 0) {
-            emptyState = view.findViewById(R.id.empty_state_search);
+            emptyState = view.findViewById(R.id.empty_state_view);
             emptyStateTextHeader = view.findViewById(R.id.empty_state_text_header);
             emptyStateTextHeader.setText(getString(R.string.search_empty_state_header));
             emptyStateTextSubHeader = view.findViewById(R.id.empty_state_text_subheader);
             emptyStateTextSubHeader.setText(getString(R.string.search_empty_state_subheader));
             emptyStateImage = view.findViewById(R.id.empty_state_image);
             emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_minivan));
+            emptyStateButton = view.findViewById(R.id.empty_state_button);
+            emptyStateButton.setVisibility(View.GONE);
         } else {
             // Hit this else clause if the fragment is restarted with data already.
             // We need to show the edit search button and unselect the search view
@@ -210,10 +213,6 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                 }
             }
         });
-
-    }
-
-    void checkAuth() {
 
     }
 
@@ -319,7 +318,6 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         }
     }
 
-    //TODO: Is imgUrl needed as a param here?
     @Override
     public void itemSelected(String id, int flag) {
         if (flag == EVENT_SEARCH_FLAG) {
@@ -404,25 +402,30 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                             .get_source()
                             .getUsername());
 
-                    StringBuilder listString = new StringBuilder();
-                    for (String s : usersResults.get(position).get_source().getTags()) {
-                        listString.append(s + ", ");
-                    }
+                    //TODO Are null catches the solution here?
+                    if (usersResults.get(position).get_source().getTags() != null) {
+                        StringBuilder listString = new StringBuilder();
+                        for (String s : usersResults.get(position).get_source().getTags()) {
+                            listString.append(s + ", ");
+                        }
 
-                    viewHolderUsers.userTagsTextView.setText(listString.toString());
+                        viewHolderUsers.userTagsTextView.setText(listString.toString());
+                    }
 
                     final int adapterPosition = holder.getAdapterPosition();
 
-                    Picasso.with(getActivity().getApplicationContext())
-                            .load(usersResults
-                                    .get(position)
-                                    .get_source()
-                                    .getPicture())
-                            .placeholder(R.drawable.round)
-                            .error(R.drawable.round)
-                            .transform(new CircleTransform())
-                            .resize(100, 100)
-                            .into(viewHolderUsers.userProfileImageThumb);
+                    if (usersResults.get(position).get_source().getPicture() != null) {
+                        Picasso.with(getActivity().getApplicationContext())
+                                .load(usersResults
+                                        .get(position)
+                                        .get_source()
+                                        .getPicture())
+                                .placeholder(R.drawable.round)
+                                .error(R.drawable.round)
+                                .transform(new CircleTransform())
+                                .resize(100, 100)
+                                .into(viewHolderUsers.userProfileImageThumb);
+                    }
 
                     viewHolderUsers.userCardView.setOnClickListener(new View.OnClickListener() {
                         @Override

@@ -9,7 +9,6 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 /**
@@ -22,10 +21,10 @@ public class SearchService {
 
     public interface SearchAPI {
         @POST("/events/_search")
-        Call<SearchResponse2> executeEventsSearch(@Body com.bookyrself.bookyrself.models.searchrequest.Body query);
+        Call<SearchResponse2> executeEventsSearch(@Body com.bookyrself.bookyrself.models.SearchRequest.Body query);
 
         @POST("/users/_search")
-        Call<SearchResponseUsers> executeUsersSearch(@Body com.bookyrself.bookyrself.models.searchrequest.Body query);
+        Call<SearchResponseUsers> executeUsersSearch(@Body com.bookyrself.bookyrself.models.SearchRequest.Body query);
     }
 
     public SearchAPI getAPI(){
