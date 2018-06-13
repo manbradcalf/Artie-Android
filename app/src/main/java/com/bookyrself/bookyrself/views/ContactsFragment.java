@@ -8,12 +8,12 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.support.v7.widget.Toolbar;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
@@ -33,8 +33,10 @@ import butterknife.ButterKnife;
 public class ContactsFragment extends Fragment implements ContactsPresenter.ContactsPresenterListener {
 
     private static final int RC_SIGN_IN = 123;
-    @BindView(R.id.contacts_recyclerview) RecyclerView recyclerView;
-    @BindView(R.id.toolbar_contacts_fragment) Toolbar toolbar;
+    @BindView(R.id.contacts_recyclerview)
+    RecyclerView recyclerView;
+    @BindView(R.id.toolbar_contacts_fragment)
+    Toolbar toolbar;
     ContactsAdapter adapter;
     ContactsPresenter presenter;
     RecyclerView.LayoutManager layoutManager;

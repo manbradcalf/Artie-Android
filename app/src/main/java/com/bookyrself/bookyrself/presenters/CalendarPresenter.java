@@ -21,17 +21,6 @@ public class CalendarPresenter {
     private final FirebaseService service;
 
     /**
-     * Contract / Listener
-     */
-    public interface CalendarPresenterListener {
-        void selectEventOnCalendar(String eventId);
-
-        void goToEventDetail(String eventId);
-
-        void eventsReady(List<Event> events);
-    }
-
-    /**
      * Constructor
      */
     public CalendarPresenter(CalendarPresenterListener listener) {
@@ -54,6 +43,17 @@ public class CalendarPresenter {
 
             }
         });
+    }
+
+    /**
+     * Contract / Listener
+     */
+    public interface CalendarPresenterListener {
+        void selectEventOnCalendar(String eventId);
+
+        void goToEventDetail(String eventId);
+
+        void eventsReady(List<Event> events);
     }
 
 }

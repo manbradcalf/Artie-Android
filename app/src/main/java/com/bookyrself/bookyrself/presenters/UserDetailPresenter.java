@@ -22,21 +22,6 @@ public class UserDetailPresenter {
     private final FirebaseService mService;
 
     /**
-     * Contract / Listener
-     */
-    public interface UserDetailPresenterListener {
-        void userInfoReady(_source response);
-
-        void presentError();
-
-        void loadingState();
-
-        void emailUser();
-
-        void presentSuccess(String message);
-    }
-
-    /**
      * Constructor
      */
 
@@ -51,7 +36,7 @@ public class UserDetailPresenter {
     public void getUserInfo(String id) {
         mService.getAPI().getUserDetails(id).enqueue(new Callback<_source>() {
             @Override
-            public void onResponse(@NonNull Call<_source> call,@NonNull Response<_source> response) {
+            public void onResponse(@NonNull Call<_source> call, @NonNull Response<_source> response) {
                 if (response.body() != null) {
                     mListener.userInfoReady(response.body());
                 } else {
@@ -73,7 +58,8 @@ public class UserDetailPresenter {
             public void onResponse(Call<List<String>> call, Response<List<String>> response) {
                 long size = 0;
                 if (response.body() != null) {
-                    size = response.body().size();}
+                    size = response.body().size();
+                }
 
                 actuallyAddContact(userId, contactId, size);
             }
@@ -91,14 +77,29 @@ public class UserDetailPresenter {
         request.put(Long.toString(index), contactId);
         mService.getAPI().addContactToUser(request, userId).enqueue(new Callback<Map<String, String>>() {
             @Override
-            public void onResponse(Call<Map<String,String>> call, Response<Map<String,String>> response) {
+            public void onResponse(Call<Map<String, String>> call, Response<Map<String, String>> response) {
                 mListener.presentSuccess("added to contacts!");
             }
 
             @Override
-            public void onFailure(Call<Map<String,String>> call, Throwable t) {
+            public void onFailure(Call<Map<String, String>> call, Throwable t) {
 
             }
         });
+    }
+
+    /**
+     * Contract / Listener
+     */
+    public interface UserDetailPresenterListener {
+        void userInfoReady(_source response);
+
+        void presentError();
+
+        void loadingState();
+
+        void emailUser();
+
+        void presentSuccess(String message);
     }
 }

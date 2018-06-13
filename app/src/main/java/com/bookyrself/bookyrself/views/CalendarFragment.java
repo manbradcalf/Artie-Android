@@ -24,10 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 
 public class CalendarFragment extends Fragment implements OnDateSelectedListener, CalendarPresenter.CalendarPresenterListener {
-    private MaterialCalendarView calendarView;
-    private CalendarPresenter presenter;
     List<CalendarDay> calendarDays = new ArrayList<>();
     HashMap<CalendarDay, String> calendarDaysWithEventIds;
+    private MaterialCalendarView calendarView;
+    private CalendarPresenter presenter;
 
     @Override
     public void onCreate(Bundle savedInsanceState) {

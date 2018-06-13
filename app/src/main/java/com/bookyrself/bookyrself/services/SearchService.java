@@ -18,6 +18,19 @@ public class SearchService {
 
     private static String BASE_URL_ES = "https://dogwood-9512546.us-east-1.bonsaisearch.net";
 
+    public SearchAPI getAPI() {
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL_ES)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        return retrofit.create(SearchAPI.class);
+    }
 
     public interface SearchAPI {
         @POST("/events/_search")
@@ -25,19 +38,5 @@ public class SearchService {
 
         @POST("/users/_search")
         Call<SearchResponseUsers> executeUsersSearch(@Body com.bookyrself.bookyrself.models.SearchRequest.Body query);
-    }
-
-    public SearchAPI getAPI(){
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
-
-
-       Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL_ES)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        return retrofit.create(SearchAPI.class);
     }
 }

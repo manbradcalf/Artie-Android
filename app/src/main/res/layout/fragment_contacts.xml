@@ -29,8 +29,8 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_below="@+id/appBarLayout"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:layout_marginBottom="?attr/actionBarSize"/>
+        android:layout_marginBottom="?attr/actionBarSize"
+        android:layout_marginTop="?attr/actionBarSize" />
 
     <include
         layout="@layout/element_bottom_nav"

@@ -44,25 +44,37 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     private static final int RC_SIGN_IN = 123;
     private static final int RC_PROFILE_CREATION = 456;
     private static final int RC_PHOTO_SELECT = 789;
+    @BindView(R.id.profile_content)
+    RelativeLayout profileContent;
+    @BindView(R.id.btnSignOut)
+    Button btnSignOut;
+    @BindView(R.id.btnEditProfile)
+    Button btnEditProfile;
+    @BindView(R.id.bio_body_profile_activity)
+    TextView bioTextView;
+    @BindView(R.id.profile_image)
+    ImageView profileImage;
+    @BindView(R.id.city_state_profile_activity)
+    TextView cityStateTextView;
+    @BindView(R.id.tags_profile_activity)
+    TextView tagsTextView;
+    @BindView(R.id.user_url_profile_activity)
+    TextView urlTextView;
+    @BindView(R.id.username_profile_fragment)
+    TextView userNameTextView;
+    @BindView(R.id.profile_empty_state)
+    View emptyState;
+    @BindView(R.id.empty_state_text_header)
+    TextView emptyStateTextHeader;
+    @BindView(R.id.empty_state_image)
+    ImageView emptyStateImage;
+    @BindView(R.id.empty_state_text_subheader)
+    TextView emptyStateTextSubHeader;
+    @BindView(R.id.empty_state_button)
+    Button emptyStateButton;
     private ProfilePresenter presenter;
     private StorageReference storageReference;
     private _source user;
-    @BindView(R.id.profile_content) RelativeLayout profileContent;
-    @BindView(R.id.btnSignOut)Button btnSignOut;
-    @BindView(R.id.btnEditProfile)Button btnEditProfile;
-    @BindView(R.id.bio_body_profile_activity)TextView bioTextView;
-    @BindView(R.id.profile_image)ImageView profileImage;
-    @BindView(R.id.city_state_profile_activity) TextView cityStateTextView;
-    @BindView(R.id.tags_profile_activity) TextView tagsTextView;
-    @BindView(R.id.user_url_profile_activity) TextView urlTextView;
-    @BindView(R.id.username_profile_fragment) TextView userNameTextView;
-    @BindView(R.id.profile_empty_state) View emptyState;
-    @BindView(R.id.empty_state_text_header) TextView emptyStateTextHeader;
-    @BindView(R.id.empty_state_image) ImageView emptyStateImage;
-    @BindView(R.id.empty_state_text_subheader) TextView emptyStateTextSubHeader;
-    @BindView(R.id.empty_state_button) Button emptyStateButton;
-
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

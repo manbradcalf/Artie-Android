@@ -74,6 +74,8 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     //TODO: This is being called every time the framgent is loaded
     // I need to update this logic
     private void setLayout(View view) {
+        emptyStateButton = view.findViewById(R.id.empty_state_button);
+        emptyStateButton.setVisibility(View.GONE);
         if (presenter == null) {
             presenter = new SearchPresenter(this);
         }
@@ -111,8 +113,6 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             emptyStateTextSubHeader.setText(getString(R.string.search_empty_state_subheader));
             emptyStateImage = view.findViewById(R.id.empty_state_image);
             emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_minivan));
-            emptyStateButton = view.findViewById(R.id.empty_state_button);
-            emptyStateButton.setVisibility(View.GONE);
         } else {
             // Hit this else clause if the fragment is restarted with data already.
             // We need to show the edit search button and unselect the search view
@@ -412,8 +412,6 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         viewHolderUsers.userTagsTextView.setText(listString.toString());
                     }
 
-                    final int adapterPosition = holder.getAdapterPosition();
-
                     if (usersResults.get(position).get_source().getPicture() != null) {
                         Picasso.with(getActivity().getApplicationContext())
                                 .load(usersResults
@@ -431,7 +429,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         @Override
                         public void onClick(View v) {
                             itemSelected(usersResults
-                                    .get(adapterPosition)
+                                    .get(position)
                                     .get_id(), USER_VIEW_TYPE);
                         }
                     });
@@ -453,8 +451,6 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                             eventsResults.get(position)
                                     .get_source()
                                     .getCitystate()));
-                    //TODO: Creating adapterPosition here to be used in onClick feels like a hack but isn't particularly egregious IMO.
-                    final int adapterPosition = holder.getAdapterPosition();
 
                     Picasso.with(getActivity().getApplicationContext())
                             .load(eventsResults
@@ -472,7 +468,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         @Override
                         public void onClick(View v) {
                             itemSelected(eventsResults
-                                    .get(adapterPosition)
+                                    .get(position)
                                     .get_id(), EVENT_VIEW_TYPE);
                         }
                     });

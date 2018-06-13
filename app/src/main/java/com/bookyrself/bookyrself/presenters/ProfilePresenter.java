@@ -1,9 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
-import com.bookyrself.bookyrself.models.SearchResponseUsers.Hit;
 import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.services.FirebaseService;
-import com.bookyrself.bookyrself.models.User.*;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -12,20 +10,6 @@ import retrofit2.Response;
 public class ProfilePresenter {
     private final ProfilePresenterListener listener;
     private final FirebaseService service;
-
-    /**
-     * Contract / Listener
-     */
-    public interface ProfilePresenterListener {
-
-        void profileInfoReady(_source response);
-
-        void presentToast(String message);
-
-        void loadingState();
-
-        void successfulAuth();
-    }
 
     /**
      * Construction
@@ -104,6 +88,20 @@ public class ProfilePresenter {
 
     public void updateBio() {
 
+    }
+
+    /**
+     * Contract / Listener
+     */
+    public interface ProfilePresenterListener {
+
+        void profileInfoReady(_source response);
+
+        void presentToast(String message);
+
+        void loadingState();
+
+        void successfulAuth();
     }
 
 

@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 
 import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
 import com.bookyrself.bookyrself.services.FirebaseService;
-import com.bookyrself.bookyrself.views.CalendarFragment;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -18,20 +17,6 @@ public class EventDetailPresenter {
 
     private final EventDetailPresenterListener mListener;
     private final FirebaseService mFirebaseService;
-
-    /**
-     * Contract / Listener
-     */
-    public interface EventDetailPresenterListener {
-        void eventDataResponseReady(EventDetailResponse data);
-
-        void showProgressbar(Boolean bool);
-
-        void userThumbReady(String response, String id);
-
-        void present_error();
-    }
-
 
     /**
      * Constructor
@@ -82,5 +67,18 @@ public class EventDetailPresenter {
 
                     }
                 });
+    }
+
+    /**
+     * Contract / Listener
+     */
+    public interface EventDetailPresenterListener {
+        void eventDataResponseReady(EventDetailResponse data);
+
+        void showProgressbar(Boolean bool);
+
+        void userThumbReady(String response, String id);
+
+        void present_error();
     }
 }

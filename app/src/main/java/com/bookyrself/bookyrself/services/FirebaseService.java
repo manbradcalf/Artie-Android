@@ -2,7 +2,6 @@ package com.bookyrself.bookyrself.services;
 
 import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
 import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
-import com.bookyrself.bookyrself.models.SearchResponseUsers.Hit;
 import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 
 import java.util.List;
@@ -26,6 +25,20 @@ import retrofit2.http.Path;
 public class FirebaseService {
 
     private static String BASE_URL_BOOKYRSELF_FIREBASE = "https://bookyrself-staging.firebaseio.com/";
+
+    public FirebaseService.FirebaseApi getAPI() {
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL_BOOKYRSELF_FIREBASE)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        return retrofit.create(FirebaseService.FirebaseApi.class);
+    }
 
     public interface FirebaseApi {
         @GET("/events/{id}.json")
@@ -64,19 +77,5 @@ public class FirebaseService {
         // This is my solution to https://github.com/firebase/flashlight/issues/178
         @PATCH("/users/{userId}/contacts.json")
         Call<Map<String, String>> addContactToUser(@Body Map<String, String> request, @Path("userId") String userId);
-    }
-
-    public FirebaseService.FirebaseApi getAPI(){
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
-
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL_BOOKYRSELF_FIREBASE)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        return retrofit.create(FirebaseService.FirebaseApi.class);
     }
 }
