@@ -27,37 +27,58 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class SearchFragment extends Fragment implements SearchPresenter.SearchPresenterListener {
 
     public static final int FLAG_START_DATE = 2;
     public static final int FLAG_END_DATE = 3;
     private static final int USER_SEARCH_FLAG = 0;
     private static final int EVENT_SEARCH_FLAG = 1;
-    private SearchView searchViewWhat;
-    private SearchView searchViewWhere;
-    private ProgressBar progressBar;
-    private Button fromButton;
-    private Button toButton;
-    private Button searchButton;
-    private RadioButton eventsButton;
-    private RadioButton usersButton;
-    private RadioGroup radioGroup;
-    private SearchPresenter presenter;
-    private List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> eventsResults;
-    private List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> usersResults;
-    private RecyclerView recyclerView;
-    private ResultsAdapter adapter;
-    private Boolean boolSearchEditable = false;
-    private View emptyState;
-    private TextView emptyStateTextHeader;
-    private TextView emptyStateTextSubHeader;
-    private ImageView emptyStateImage;
-    private Button emptyStateButton;
+    @BindView(R.id.search_what)
+    SearchView searchViewWhat;
+    @BindView(R.id.search_where)
+    SearchView searchViewWhere;
+    @BindView(R.id.progress_bar)
+    ProgressBar progressBar;
+    @BindView(R.id.from_button)
+    Button fromButton;
+    @BindView(R.id.to_button)
+    Button toButton;
+    @BindView(R.id.search_btn)
+    Button searchButton;
+    @BindView(R.id.events_toggle)
+    RadioButton eventsButton;
+    @BindView(R.id.users_toggle)
+    RadioButton usersButton;
+    @BindView(R.id.radio_group_search)
+    RadioGroup radioGroup;
+    @BindView(R.id.empty_state_view)
+    View emptyState;
+    @BindView(R.id.empty_state_text_header)
+    TextView emptyStateTextHeader;
+    @BindView(R.id.empty_state_text_subheader)
+    TextView emptyStateTextSubHeader;
+    @BindView(R.id.empty_state_image)
+    ImageView emptyStateImage;
+    @BindView(R.id.empty_state_button)
+    Button emptyStateButton;
+    @BindView(R.id.search_recycler_view)
+    RecyclerView recyclerView;
+    SearchPresenter presenter;
+    List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> eventsResults;
+    List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> usersResults;
+    ResultsAdapter adapter;
+    Boolean boolSearchEditable = false;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_search, container, false);
+        View view = inflater.inflate(R.layout.fragment_search, container, false);
+        ButterKnife.bind(this, view);
+        return view;
     }
 
     @Override
@@ -74,44 +95,29 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     //TODO: This is being called every time the framgent is loaded
     // I need to update this logic
     private void setLayout(View view) {
-        emptyStateButton = view.findViewById(R.id.empty_state_button);
         emptyStateButton.setVisibility(View.GONE);
         if (presenter == null) {
             presenter = new SearchPresenter(this);
         }
-        recyclerView = view.findViewById(R.id.search_recycler_view);
         if (adapter == null) {
             adapter = new ResultsAdapter();
         }
         recyclerView.setAdapter(adapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
-        searchViewWhat = view.findViewById(R.id.search_what);
         searchViewWhat.setQueryHint(getString(R.string.search_what_query_hint));
-        searchViewWhere = view.findViewById(R.id.search_where);
         searchViewWhere.setVisibility(View.GONE);
         searchViewWhere.setQueryHint(getString(R.string.search_where_query_hint));
-        fromButton = view.findViewById(R.id.from_button);
         fromButton.setVisibility(View.GONE);
-        toButton = view.findViewById(R.id.to_button);
         toButton.setVisibility(View.GONE);
-        usersButton = view.findViewById(R.id.users_toggle);
         usersButton.setVisibility(View.GONE);
-        eventsButton = view.findViewById(R.id.events_toggle);
         eventsButton.setVisibility(View.GONE);
-        radioGroup = view.findViewById(R.id.radio_group_search);
         radioGroup.check(R.id.users_toggle);
-        searchButton = view.findViewById(R.id.search_btn);
         searchButton.setVisibility(View.GONE);
-        progressBar = view.findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.GONE);
         if (adapter.getItemCount() == 0) {
-            emptyState = view.findViewById(R.id.empty_state_view);
-            emptyStateTextHeader = view.findViewById(R.id.empty_state_text_header);
             emptyStateTextHeader.setText(getString(R.string.search_empty_state_header));
-            emptyStateTextSubHeader = view.findViewById(R.id.empty_state_text_subheader);
             emptyStateTextSubHeader.setText(getString(R.string.search_empty_state_subheader));
-            emptyStateImage = view.findViewById(R.id.empty_state_image);
             emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_minivan));
         } else {
             // Hit this else clause if the fragment is restarted with data already.
