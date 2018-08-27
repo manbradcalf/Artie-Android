@@ -1,7 +1,9 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
@@ -18,12 +20,19 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
+import com.bookyrself.bookyrself.models.SearchResponseEvents.User;
+import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.DatePickerDialogFragment;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.List;
 
@@ -71,6 +80,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> usersResults;
     ResultsAdapter adapter;
     Boolean boolSearchEditable = false;
+    private StorageReference storageReference;
 
 
     @Override
@@ -90,6 +100,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     public void onCreate(Bundle savedInstanceState) {
         setRetainInstance(true);
         super.onCreate(savedInstanceState);
+        storageReference = FirebaseStorage.getInstance().getReference();
     }
 
     //TODO: This is being called every time the framgent is loaded
@@ -397,7 +408,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             if (usersResults != null && holder.getItemViewType() == USER_VIEW_TYPE) {
                 if (usersResults.size() > position) {
                     //TODO: Was getting index out of bounds errors here when toggling between Events and Users. Not sure how I feel about this check
-                    ViewHolderUsers viewHolderUsers = (ViewHolderUsers) holder;
+                    final ViewHolderUsers viewHolderUsers = (ViewHolderUsers) holder;
                     viewHolderUsers.userCityStateTextView.setText(usersResults
                             .get(position)
                             .get_source()
@@ -418,18 +429,25 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         viewHolderUsers.userTagsTextView.setText(listString.toString());
                     }
 
-                    if (usersResults.get(position).get_source().getPicture() != null) {
-                        Picasso.with(getActivity().getApplicationContext())
-                                .load(usersResults
-                                        .get(position)
-                                        .get_source()
-                                        .getPicture())
-                                .placeholder(R.drawable.round)
-                                .error(R.drawable.round)
-                                .transform(new CircleTransform())
-                                .resize(100, 100)
-                                .into(viewHolderUsers.userProfileImageThumb);
-                    }
+
+                    final StorageReference profileImageReference = storageReference.child("images/" + usersResults.get(position).get_id());
+                    profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            Picasso.with(getContext())
+                                    .load(uri)
+                                    .resize(148, 148)
+                                    .centerCrop()
+                                    .transform(new CircleTransform())
+                                    .into(viewHolderUsers.userProfileImageThumb);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Handle any errors
+                            viewHolderUsers.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_profile_black_24dp));
+                        }
+                    });
 
                     viewHolderUsers.userCardView.setOnClickListener(new View.OnClickListener() {
                         @Override
