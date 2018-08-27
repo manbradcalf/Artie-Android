@@ -25,8 +25,13 @@ import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.presenters.CalendarPresenter;
 import com.bookyrself.bookyrself.presenters.UserDetailPresenter;
+import com.bookyrself.bookyrself.utils.CircleTransform;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
@@ -66,6 +71,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     private CalendarPresenter calendarPresenter;
     private MaterialCalendarView calendarView;
     private RelativeLayout contentView;
+    private StorageReference storageReference;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,6 +87,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         calendarView = findViewById(R.id.user_detail_calendar);
         calendarView.setOnDateChangedListener(this);
         calendarDaysWithEventIds = new HashMap<>();
+        storageReference = FirebaseStorage.getInstance().getReference();
         loadingState();
     }
 
@@ -134,24 +141,31 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         emailUserTextView.setText(getString(R.string.email_user, response.getUsername()));
         addUserToContactsTextView.setText(getString(R.string.add_user_to_contacts, response.getUsername()));
         userEmailAddress = response.getEmail();
-        Picasso.with(this)
-                .load(response.getPicture())
-                .into(profileImage, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        Bitmap imageBitmap = ((BitmapDrawable) profileImage.getDrawable()).getBitmap();
-                        RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(getResources(), imageBitmap);
-                        imageDrawable.setCircular(true);
-                        imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
-                        profileImageProgressbar.setVisibility(View.GONE);
-                        profileImage.setImageDrawable(imageDrawable);
-                    }
 
-                    @Override
-                    public void onError() {
-                        Log.e(this.getClass().toString(), "didn't load image");
-                    }
-                });
+        // Android Studio or gradle is being weird and not recognizing Task
+        // However everything compiles and runs fine
+        final StorageReference profileImageReference = storageReference.child("images/" + userID);
+        profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Picasso.with(getApplicationContext())
+                        .load(uri)
+                        .resize(148, 148)
+                        .centerCrop()
+                        .transform(new CircleTransform())
+                        .into(profileImage);
+                profileImageProgressbar.setVisibility(View.GONE);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+                Toast.makeText(getApplicationContext(), "image not dowloaded", Toast.LENGTH_SHORT).show();
+                profileImage.setImageDrawable(getDrawable(R.drawable.ic_profile_black_24dp));
+                profileImageProgressbar.setVisibility(View.GONE);
+            }
+        });
+
         if (response.getTags() != null) {
             for (String s : response.getTags()) {
                 listString.append(s + ", ");

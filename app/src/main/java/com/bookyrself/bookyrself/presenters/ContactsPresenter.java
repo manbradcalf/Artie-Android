@@ -14,21 +14,6 @@ public class ContactsPresenter {
     private final FirebaseService service;
 
     /**
-     * Contract / Listener
-     */
-    public interface ContactsPresenterListener {
-
-        void presentError();
-
-        void loadingState();
-
-        void contactsReturned(List<String> ids);
-
-        void userReturned(String id, _source user);
-
-    }
-
-    /**
      * Constructor
      */
     public ContactsPresenter(ContactsPresenterListener listener) {
@@ -70,5 +55,20 @@ public class ContactsPresenter {
                 });
             }
         }
+    }
+
+    /**
+     * Contract / Listener
+     */
+    public interface ContactsPresenterListener {
+
+        void presentError();
+
+        void loadingState();
+
+        void contactsReturned(List<String> ids);
+
+        void userReturned(String id, _source user);
+
     }
 }

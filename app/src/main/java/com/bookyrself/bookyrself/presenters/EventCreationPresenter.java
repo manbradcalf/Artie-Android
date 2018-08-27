@@ -23,24 +23,12 @@ public class EventCreationPresenter {
     private FirebaseService mService;
 
     /**
-     * Contract / Listener
-     */
-    public interface EventCreationPresenterListener {
-        void createEvent(String[] userIds);
-
-        void addToPotentialUsers(String userId);
-
-        void removeFromPotentialUsers(String userId);
-    }
-
-    /**
      * Constructor
      */
     public EventCreationPresenter(EventCreationPresenterListener listener) {
         this.mListener = listener;
         this.mService = new FirebaseService();
     }
-
 
     /**
      * Methods
@@ -69,5 +57,16 @@ public class EventCreationPresenter {
         for (String userId : userEventCountHashMap.keySet()) {
             mService.getAPI().addEventToUser(event, userId, userEventCountHashMap.get(userId));
         }
+    }
+
+    /**
+     * Contract / Listener
+     */
+    public interface EventCreationPresenterListener {
+        void createEvent(String[] userIds);
+
+        void addToPotentialUsers(String userId);
+
+        void removeFromPotentialUsers(String userId);
     }
 }

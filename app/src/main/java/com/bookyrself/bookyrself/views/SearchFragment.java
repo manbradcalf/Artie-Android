@@ -1,7 +1,9 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
@@ -18,14 +20,24 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
+import com.bookyrself.bookyrself.models.SearchResponseEvents.User;
+import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.DatePickerDialogFragment;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class SearchFragment extends Fragment implements SearchPresenter.SearchPresenterListener {
 
@@ -33,31 +45,50 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     public static final int FLAG_END_DATE = 3;
     private static final int USER_SEARCH_FLAG = 0;
     private static final int EVENT_SEARCH_FLAG = 1;
-    private SearchView searchViewWhat;
-    private SearchView searchViewWhere;
-    private ProgressBar progressBar;
-    private Button fromButton;
-    private Button toButton;
-    private Button searchButton;
-    private RadioButton eventsButton;
-    private RadioButton usersButton;
-    private RadioGroup radioGroup;
-    private SearchPresenter presenter;
-    private List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> eventsResults;
-    private List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> usersResults;
-    private RecyclerView recyclerView;
-    private ResultsAdapter adapter;
-    private Boolean boolSearchEditable = false;
-    private View emptyState;
-    private TextView emptyStateTextHeader;
-    private TextView emptyStateTextSubHeader;
-    private ImageView emptyStateImage;
-    private Button emptyStateButton;
+    @BindView(R.id.search_what)
+    SearchView searchViewWhat;
+    @BindView(R.id.search_where)
+    SearchView searchViewWhere;
+    @BindView(R.id.progress_bar)
+    ProgressBar progressBar;
+    @BindView(R.id.from_button)
+    Button fromButton;
+    @BindView(R.id.to_button)
+    Button toButton;
+    @BindView(R.id.search_btn)
+    Button searchButton;
+    @BindView(R.id.events_toggle)
+    RadioButton eventsButton;
+    @BindView(R.id.users_toggle)
+    RadioButton usersButton;
+    @BindView(R.id.radio_group_search)
+    RadioGroup radioGroup;
+    @BindView(R.id.empty_state_view)
+    View emptyState;
+    @BindView(R.id.empty_state_text_header)
+    TextView emptyStateTextHeader;
+    @BindView(R.id.empty_state_text_subheader)
+    TextView emptyStateTextSubHeader;
+    @BindView(R.id.empty_state_image)
+    ImageView emptyStateImage;
+    @BindView(R.id.empty_state_button)
+    Button emptyStateButton;
+    @BindView(R.id.search_recycler_view)
+    RecyclerView recyclerView;
+    SearchPresenter presenter;
+    List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> eventsResults;
+    List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> usersResults;
+    ResultsAdapter adapter;
+    Boolean boolSearchEditable = false;
+    private StorageReference storageReference;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_search, container, false);
+        View view = inflater.inflate(R.layout.fragment_search, container, false);
+        ButterKnife.bind(this, view);
+        return view;
     }
 
     @Override
@@ -69,50 +100,36 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     public void onCreate(Bundle savedInstanceState) {
         setRetainInstance(true);
         super.onCreate(savedInstanceState);
+        storageReference = FirebaseStorage.getInstance().getReference();
     }
 
     //TODO: This is being called every time the framgent is loaded
     // I need to update this logic
     private void setLayout(View view) {
+        emptyStateButton.setVisibility(View.GONE);
         if (presenter == null) {
             presenter = new SearchPresenter(this);
         }
-        recyclerView = view.findViewById(R.id.search_recycler_view);
         if (adapter == null) {
             adapter = new ResultsAdapter();
         }
         recyclerView.setAdapter(adapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
-        searchViewWhat = view.findViewById(R.id.search_what);
         searchViewWhat.setQueryHint(getString(R.string.search_what_query_hint));
-        searchViewWhere = view.findViewById(R.id.search_where);
         searchViewWhere.setVisibility(View.GONE);
         searchViewWhere.setQueryHint(getString(R.string.search_where_query_hint));
-        fromButton = view.findViewById(R.id.from_button);
         fromButton.setVisibility(View.GONE);
-        toButton = view.findViewById(R.id.to_button);
         toButton.setVisibility(View.GONE);
-        usersButton = view.findViewById(R.id.users_toggle);
         usersButton.setVisibility(View.GONE);
-        eventsButton = view.findViewById(R.id.events_toggle);
         eventsButton.setVisibility(View.GONE);
-        radioGroup = view.findViewById(R.id.radio_group_search);
         radioGroup.check(R.id.users_toggle);
-        searchButton = view.findViewById(R.id.search_btn);
         searchButton.setVisibility(View.GONE);
-        progressBar = view.findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.GONE);
         if (adapter.getItemCount() == 0) {
-            emptyState = view.findViewById(R.id.empty_state_view);
-            emptyStateTextHeader = view.findViewById(R.id.empty_state_text_header);
             emptyStateTextHeader.setText(getString(R.string.search_empty_state_header));
-            emptyStateTextSubHeader = view.findViewById(R.id.empty_state_text_subheader);
             emptyStateTextSubHeader.setText(getString(R.string.search_empty_state_subheader));
-            emptyStateImage = view.findViewById(R.id.empty_state_image);
             emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_minivan));
-            emptyStateButton = view.findViewById(R.id.empty_state_button);
-            emptyStateButton.setVisibility(View.GONE);
         } else {
             // Hit this else clause if the fragment is restarted with data already.
             // We need to show the edit search button and unselect the search view
@@ -391,7 +408,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             if (usersResults != null && holder.getItemViewType() == USER_VIEW_TYPE) {
                 if (usersResults.size() > position) {
                     //TODO: Was getting index out of bounds errors here when toggling between Events and Users. Not sure how I feel about this check
-                    ViewHolderUsers viewHolderUsers = (ViewHolderUsers) holder;
+                    final ViewHolderUsers viewHolderUsers = (ViewHolderUsers) holder;
                     viewHolderUsers.userCityStateTextView.setText(usersResults
                             .get(position)
                             .get_source()
@@ -412,26 +429,31 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         viewHolderUsers.userTagsTextView.setText(listString.toString());
                     }
 
-                    final int adapterPosition = holder.getAdapterPosition();
 
-                    if (usersResults.get(position).get_source().getPicture() != null) {
-                        Picasso.with(getActivity().getApplicationContext())
-                                .load(usersResults
-                                        .get(position)
-                                        .get_source()
-                                        .getPicture())
-                                .placeholder(R.drawable.round)
-                                .error(R.drawable.round)
-                                .transform(new CircleTransform())
-                                .resize(100, 100)
-                                .into(viewHolderUsers.userProfileImageThumb);
-                    }
+                    final StorageReference profileImageReference = storageReference.child("images/" + usersResults.get(position).get_id());
+                    profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            Picasso.with(getContext())
+                                    .load(uri)
+                                    .resize(148, 148)
+                                    .centerCrop()
+                                    .transform(new CircleTransform())
+                                    .into(viewHolderUsers.userProfileImageThumb);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Handle any errors
+                            viewHolderUsers.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_profile_black_24dp));
+                        }
+                    });
 
                     viewHolderUsers.userCardView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             itemSelected(usersResults
-                                    .get(adapterPosition)
+                                    .get(position)
                                     .get_id(), USER_VIEW_TYPE);
                         }
                     });
@@ -453,8 +475,6 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                             eventsResults.get(position)
                                     .get_source()
                                     .getCitystate()));
-                    //TODO: Creating adapterPosition here to be used in onClick feels like a hack but isn't particularly egregious IMO.
-                    final int adapterPosition = holder.getAdapterPosition();
 
                     Picasso.with(getActivity().getApplicationContext())
                             .load(eventsResults
@@ -472,7 +492,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         @Override
                         public void onClick(View v) {
                             itemSelected(eventsResults
-                                    .get(adapterPosition)
+                                    .get(position)
                                     .get_id(), EVENT_VIEW_TYPE);
                         }
                     });

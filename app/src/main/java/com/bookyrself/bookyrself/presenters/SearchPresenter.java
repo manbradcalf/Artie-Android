@@ -2,8 +2,7 @@ package com.bookyrself.bookyrself.presenters;
 
 import android.util.Log;
 
-import com.bookyrself.bookyrself.services.SearchService;
-import com.bookyrself.bookyrself.models.SearchResponseUsers.SearchResponseUsers;
+import com.bookyrself.bookyrself.models.SearchRequest.Body;
 import com.bookyrself.bookyrself.models.SearchRequest.Bool;
 import com.bookyrself.bookyrself.models.SearchRequest.Bool_;
 import com.bookyrself.bookyrself.models.SearchRequest.Date;
@@ -11,11 +10,12 @@ import com.bookyrself.bookyrself.models.SearchRequest.Filter;
 import com.bookyrself.bookyrself.models.SearchRequest.Match;
 import com.bookyrself.bookyrself.models.SearchRequest.MultiMatch;
 import com.bookyrself.bookyrself.models.SearchRequest.Must;
-import com.bookyrself.bookyrself.models.SearchRequest.Body;
 import com.bookyrself.bookyrself.models.SearchRequest.Must_;
 import com.bookyrself.bookyrself.models.SearchRequest.Query;
 import com.bookyrself.bookyrself.models.SearchRequest.Range;
-import com.bookyrself.bookyrself.models.SearchResponseEvents.*;
+import com.bookyrself.bookyrself.models.SearchResponseEvents.SearchResponse2;
+import com.bookyrself.bookyrself.models.SearchResponseUsers.SearchResponseUsers;
+import com.bookyrself.bookyrself.services.SearchService;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -33,33 +33,13 @@ import retrofit2.Response;
  */
 
 public class SearchPresenter {
+    private static final int USER_SEARCH_FLAG = 0;
+    private static final int EVENT_SEARCH_FLAG = 1;
     private final SearchPresenterListener mListener;
     private final SearchService mService;
     private DatabaseReference dbref;
     private ChildEventListener childEventListener;
     private FirebaseDatabase db;
-    private static final int USER_SEARCH_FLAG = 0;
-    private static final int EVENT_SEARCH_FLAG = 1;
-
-/**
- * Contract / Listener
- */
-public interface SearchPresenterListener {
-    void searchEventsResponseReady(List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits);
-
-    void searchUsersResponseReady(List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> hits);
-
-    void startDateChanged(String date);
-
-    void endDateChanged(String date);
-
-    void showProgressbar(Boolean bool);
-
-    void itemSelected(String id, int flag);
-
-    void showError();
-}
-
 
     /**
      * Constructor
@@ -182,5 +162,24 @@ public interface SearchPresenterListener {
 
     public void setEndDate(String date) {
         mListener.endDateChanged(date);
+    }
+
+    /**
+     * Contract / Listener
+     */
+    public interface SearchPresenterListener {
+        void searchEventsResponseReady(List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits);
+
+        void searchUsersResponseReady(List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> hits);
+
+        void startDateChanged(String date);
+
+        void endDateChanged(String date);
+
+        void showProgressbar(Boolean bool);
+
+        void itemSelected(String id, int flag);
+
+        void showError();
     }
 }

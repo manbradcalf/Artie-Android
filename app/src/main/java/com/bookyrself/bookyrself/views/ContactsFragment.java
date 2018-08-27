@@ -8,12 +8,12 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.support.v7.widget.Toolbar;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
@@ -33,8 +33,10 @@ import butterknife.ButterKnife;
 public class ContactsFragment extends Fragment implements ContactsPresenter.ContactsPresenterListener {
 
     private static final int RC_SIGN_IN = 123;
-    @BindView(R.id.contacts_recyclerview) RecyclerView recyclerView;
-    @BindView(R.id.toolbar_contacts_fragment) Toolbar toolbar;
+    @BindView(R.id.contacts_recyclerview)
+    RecyclerView recyclerView;
+    @BindView(R.id.toolbar_contacts_fragment)
+    Toolbar toolbar;
     ContactsAdapter adapter;
     ContactsPresenter presenter;
     RecyclerView.LayoutManager layoutManager;
@@ -111,9 +113,16 @@ public class ContactsFragment extends Fragment implements ContactsPresenter.Cont
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
             ViewHolderContacts viewHolderContacts = (ViewHolderContacts) holder;
+            if (contacts.get(position).getTags() != null) {
+                StringBuilder listString = new StringBuilder();
+                for (String s : contacts.get(position).getTags()) {
+                    listString.append(s + ", ");
+                }
+                viewHolderContacts.userTagsTextView.setText(listString.toString());
+
+            }
             viewHolderContacts.userNameTextView.setText(contacts.get(position).getUsername());
             viewHolderContacts.userCityStateTextView.setText(contacts.get(position).getCitystate());
-            viewHolderContacts.userTagsTextView.setText(contacts.get(position).getTags().toString());
             Picasso.with(getActivity())
                     .load("https://img.etsystatic.com/il/9a1dbd/1358791570/il_570xN.1358791570_ib1c.jpg")
                     .placeholder(R.drawable.round)

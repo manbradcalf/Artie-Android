@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.ViewPager;
 import android.view.MenuItem;
 
 import com.bookyrself.bookyrself.R;
@@ -20,13 +19,11 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
     private static final int CALENDAR_FRAGMENT_INDEX = 1;
     private static final int CONTACTS_FRAGMENT_INDEX = 2;
     private static final int PROFILE_FRAGMENT_INDEX = 3;
-
-
-    private BottomNavigationView navigationView;
     public FirebaseDatabase db;
     public FirebaseApp firebaseApp;
     FragmentViewPagerAdapter adapter;
     FragmentViewPager viewPager;
+    private BottomNavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

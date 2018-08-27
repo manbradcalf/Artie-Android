@@ -5,14 +5,7 @@ package com.bookyrself.bookyrself.presenters;
  */
 
 public class DatePickerDialogPresenter {
-     private final DatePickerDialogPresenterListener mListener;
-
-    /**
-     * Contract / Listener
-     */
-    public interface DatePickerDialogPresenterListener {
-        void dateReady(int flag, String date);
-    }
+    private final DatePickerDialogPresenterListener mListener;
 
     /**
      * Constructor
@@ -20,6 +13,13 @@ public class DatePickerDialogPresenter {
     //TODO: Currently not needed as I can use the SearchPresenter. It's late, I probably should use the dialogfragmentpresenter?
     public DatePickerDialogPresenter(DatePickerDialogPresenterListener listener) {
         mListener = listener;
+    }
+
+    /**
+     * Contract / Listener
+     */
+    public interface DatePickerDialogPresenterListener {
+        void dateReady(int flag, String date);
     }
 
     /**

@@ -118,10 +118,11 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true" />
 
-        <include layout="@layout/empty_state_template"
-            android:layout_centerInParent="true"
+        <include
+            layout="@layout/empty_state_template"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/search_recycler_view"

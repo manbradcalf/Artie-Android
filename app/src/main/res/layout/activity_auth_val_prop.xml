@@ -7,33 +7,32 @@
     tools:context=".views.AuthValPropActivity">
 
     <LinearLayout
-        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/auth_val_prop_img"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_user"
-        app:layout_constraintBottom_toTopOf="@id/auth_val_prop_textview" />
+        <ImageView
+            android:id="@+id/auth_val_prop_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_user"
+            app:layout_constraintBottom_toTopOf="@id/auth_val_prop_textview" />
 
-    <TextView
-        android:id="@+id/auth_val_prop_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Sign up because its cool!"
-        app:layout_constraintBottom_toTopOf="@id/auth_val_prop_button"
-        />
+        <TextView
+            android:id="@+id/auth_val_prop_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sign up because its cool!"
+            app:layout_constraintBottom_toTopOf="@id/auth_val_prop_button" />
 
-    <Button
-        android:id="@+id/auth_val_prop_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Sign In"
-        app:layout_constraintTop_toBottomOf="@id/auth_val_prop_textview" />
+        <Button
+            android:id="@+id/auth_val_prop_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Sign In"
+            app:layout_constraintTop_toBottomOf="@id/auth_val_prop_textview" />
 
     </LinearLayout>
 

@@ -1,8 +1,8 @@
 package com.bookyrself.bookyrself.utils;
 
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.widget.DatePicker;
 
@@ -47,7 +47,7 @@ public class DatePickerDialogFragment extends DialogFragment implements DatePick
         java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
         dateReady(flag, format.format(calendar.getTime()));
-        }
+    }
 
 
     @Override

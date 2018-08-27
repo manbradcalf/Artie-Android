@@ -1,4 +1,3 @@
-
 package com.bookyrself.bookyrself.models.SearchRequest;
 
 import com.google.gson.annotations.Expose;
