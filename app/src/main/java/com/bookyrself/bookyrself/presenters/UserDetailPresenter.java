@@ -33,7 +33,7 @@ public class UserDetailPresenter {
     /**
      * Methods
      */
-    public void getUserInfo(String id) {
+    public void getUserInfo(final String id) {
         mService.getAPI().getUserDetails(id).enqueue(new Callback<_source>() {
             @Override
             public void onResponse(@NonNull Call<_source> call, @NonNull Response<_source> response) {
