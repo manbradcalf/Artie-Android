@@ -79,9 +79,9 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     public void eventDataResponseReady(final EventDetailResponse data) {
 
 
-//        setSupportActionBar(Toolbar);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//        getSupportActionBar().setTitle(R.string.event_detail_toolbar);
+        setSupportActionBar(Toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.event_detail_toolbar);
 
         String date = data.getDate();
         Host host = data.getHost().get(0);
