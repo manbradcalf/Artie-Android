@@ -31,6 +31,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -229,6 +230,10 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
                     }
                     if (data.getStringExtra("location") != null) {
                         user.setCitystate(data.getStringExtra("location"));
+                    }
+                    if (data.getStringExtra("tags") != null) {
+                        List<String> tagsList = Arrays.asList(data.getStringExtra("tags").split(", "));
+                        user.setTags(tagsList);
                     }
                     if (user != null) {
                         presenter.patchUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
