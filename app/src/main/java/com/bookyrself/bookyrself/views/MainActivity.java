@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.bookyrself.bookyrself.R;
@@ -12,7 +13,7 @@ import com.bookyrself.bookyrself.utils.FragmentViewPagerAdapter;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class MainActivity extends FragmentActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     private static final int RC_SIGN_IN = 123;
     private static final int SEARCH_FRAGMENT_INDEX = 0;
