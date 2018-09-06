@@ -181,7 +181,7 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
             profileContent.setVisibility(View.VISIBLE);
             userNameTextView.setText(user.getUsername());
             bioTextView.setText(user.getBio());
-            StorageReference profileImageReference = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
+            final StorageReference profileImageReference = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
             profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                 @Override
                 public void onSuccess(Uri uri) {
@@ -191,8 +191,16 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
                             .centerCrop()
                             .transform(new CircleTransform())
                             .into(profileImage);
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle any errors
+                    profileImage.setImageDrawable(getContext().getDrawable((R.drawable.ic_profile_black_24dp)));
                 }
             });
+
             profileImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

@@ -12,7 +12,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
@@ -35,8 +37,21 @@ public class ContactsFragment extends Fragment implements ContactsPresenter.Cont
     private static final int RC_SIGN_IN = 123;
     @BindView(R.id.contacts_recyclerview)
     RecyclerView recyclerView;
+
     @BindView(R.id.toolbar_contacts_fragment)
     Toolbar toolbar;
+
+    @BindView(R.id.contacts_empty_state)
+    LinearLayout emptyState;
+    @BindView(R.id.empty_state_text_header)
+    TextView emptyStateTextHeader;
+    @BindView(R.id.empty_state_image)
+    ImageView emptyStateImage;
+    @BindView(R.id.empty_state_text_subheader)
+    TextView emptyStateTextSubHeader;
+    @BindView(R.id.empty_state_button)
+    Button emptyStateButton;
+
     ContactsAdapter adapter;
     ContactsPresenter presenter;
     RecyclerView.LayoutManager layoutManager;
@@ -63,6 +78,7 @@ public class ContactsFragment extends Fragment implements ContactsPresenter.Cont
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
+        emptyState.setVisibility(View.GONE);
         presenter.getContactIds(FirebaseAuth.getInstance().getUid());
     }
 
@@ -85,6 +101,7 @@ public class ContactsFragment extends Fragment implements ContactsPresenter.Cont
         presenter.getUsers(ids);
     }
 
+    //TODO: Do what?
     //  When I've iterated through all the ids, I notify the adapter of a change
     // Also I am adding to a map of userId with userInfo so I can start a UserDetail activity with the id
     // since the id isn't on the _source object
@@ -95,6 +112,16 @@ public class ContactsFragment extends Fragment implements ContactsPresenter.Cont
         if (contacts.size() == contactIds.size()) {
             adapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void noUsersReturned() {
+        emptyState.setVisibility(View.VISIBLE);
+        emptyStateTextHeader.setText(R.string.contacts_empty_state_header);
+        emptyStateTextSubHeader.setText(R.string.contacts_empty_state_subheader);
+        emptyStateButton.setText(R.string.contacts_empty_state_button_text);
+        emptyStateImage.setImageDrawable(getContext().getDrawable(R.drawable.ic_person_add_black_24dp));
+
     }
 
     class ContactsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

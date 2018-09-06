@@ -36,6 +36,9 @@
     <string name="contacts_toolbar">Your Contacts</string>
     <string name="edit_profile">Edit Profile</string>
     <string name="sign_out">Sign Out</string>
+    <string name="contacts_empty_state_header">You have no contacts!</string>
+    <string name="contacts_empty_state_subheader">Add contacts by clicking \"Add Contact\" on user profiles</string>
+    <string name="contacts_empty_state_button_text">This button does nada</string>
 
 
 </resources>

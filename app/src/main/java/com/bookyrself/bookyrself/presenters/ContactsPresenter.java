@@ -1,5 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
+import android.util.Log;
+
 import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
@@ -50,10 +52,12 @@ public class ContactsPresenter {
 
                     @Override
                     public void onFailure(Call<_source> call, Throwable t) {
-
+                        Log.e("ContactsPresenter: ", t.getMessage());
                     }
                 });
             }
+        } else {
+            listener.noUsersReturned();
         }
     }
 
@@ -69,6 +73,8 @@ public class ContactsPresenter {
         void contactsReturned(List<String> ids);
 
         void userReturned(String id, _source user);
+
+        void noUsersReturned();
 
     }
 }
