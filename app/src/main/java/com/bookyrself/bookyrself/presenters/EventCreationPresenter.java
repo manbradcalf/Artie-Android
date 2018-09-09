@@ -2,7 +2,11 @@ package com.bookyrself.bookyrself.presenters;
 
 import android.support.annotation.NonNull;
 
-import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
+import com.bookyrself.bookyrself.interactors.ContactsInteractor;
+import com.bookyrself.bookyrself.interactors.EventsInteractor;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetailResponse.EventDetailResponse;
+import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
+import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
 import java.util.HashMap;
@@ -16,18 +20,20 @@ import retrofit2.Response;
  * Created by benmedcalf on 3/9/18.
  */
 
-public class EventCreationPresenter {
+public class EventCreationPresenter implements ContactsInteractor.ContactsInteractorListener, EventsInteractor.EventsInteractorListener {
 
     private HashMap<String, Long> userEventCountHashMap;
-    private EventCreationPresenterListener mListener;
-    private FirebaseService mService;
+    private EventCreationPresenterListener presenterListener;
+    private ContactsInteractor contactsInteractor;
+    private EventsInteractor eventsInteractor;
 
     /**
      * Constructor
      */
     public EventCreationPresenter(EventCreationPresenterListener listener) {
-        this.mListener = listener;
-        this.mService = new FirebaseService();
+        this.contactsInteractor = new ContactsInteractor(this);
+        this.eventsInteractor = new EventsInteractor(this);
+        this.presenterListener = listener;
     }
 
     /**
@@ -57,6 +63,46 @@ public class EventCreationPresenter {
         for (String userId : userEventCountHashMap.keySet()) {
             mService.getAPI().addEventToUser(event, userId, userEventCountHashMap.get(userId));
         }
+    }
+
+
+    /**
+     * ContactsInteractor Listeners
+     */
+    @Override
+    public void contactsReturned(List<String> ids) {
+        for (String id : ids) {
+            addToUserEventsCountHashMap(id);
+        }
+    }
+
+    @Override
+    public void userReturned(String id, _source user) {
+
+    }
+
+    @Override
+    public void noUsersReturned() {
+
+    }
+
+    /**
+     * EventsInteractorListener
+     */
+
+    @Override
+    public void eventDetailReturned(EventDetailResponse event) {
+
+    }
+
+    @Override
+    public void usersEventsReturned(List<Event> events) {
+
+    }
+
+    @Override
+    public void presentError(String error) {
+
     }
 
     /**

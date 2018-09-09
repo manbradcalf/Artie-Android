@@ -20,11 +20,8 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SearchResponseEvents.User;
-import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.DatePickerDialogFragment;
@@ -76,8 +73,8 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     @BindView(R.id.search_recycler_view)
     RecyclerView recyclerView;
     SearchPresenter presenter;
-    List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> eventsResults;
-    List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> usersResults;
+    List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents.Hit> eventsResults;
+    List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Hit> usersResults;
     ResultsAdapter adapter;
     Boolean boolSearchEditable = false;
     private StorageReference storageReference;
@@ -236,7 +233,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
     @Override
     public void searchEventsResponseReady
-            (List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits) {
+            (List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents.Hit> hits) {
 
         // I hide the recyclerview to show the error empty state
         // If the previous search returned an error empty state, recyclerview
@@ -268,7 +265,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
     @Override
     public void searchUsersResponseReady
-            (List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> hits) {
+            (List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Hit> hits) {
 
         // I hide the recyclerview to show the error empty state
         // If the previous search returned an error empty state, recyclerview

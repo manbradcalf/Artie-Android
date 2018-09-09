@@ -2,7 +2,7 @@ package com.bookyrself.bookyrself.presenters;
 
 import android.support.annotation.NonNull;
 
-import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
 import java.util.HashMap;

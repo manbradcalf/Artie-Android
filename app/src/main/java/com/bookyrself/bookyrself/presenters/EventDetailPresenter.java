@@ -2,7 +2,7 @@ package com.bookyrself.bookyrself.presenters;
 
 import android.support.annotation.NonNull;
 
-import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetailResponse.EventDetailResponse;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
 import retrofit2.Call;

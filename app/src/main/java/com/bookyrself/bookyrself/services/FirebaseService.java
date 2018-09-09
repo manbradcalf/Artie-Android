@@ -1,8 +1,8 @@
 package com.bookyrself.bookyrself.services;
 
-import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
-import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
-import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetailResponse.EventDetailResponse;
+import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
+import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
 
 import java.util.List;
 import java.util.Map;

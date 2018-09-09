@@ -20,7 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.presenters.ProfilePresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.firebase.ui.auth.AuthUI;

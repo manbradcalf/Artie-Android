@@ -3,7 +3,6 @@ package com.bookyrself.bookyrself.views;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
@@ -70,13 +69,13 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     private void buildFragmentsList() {
         final ProfileFragment profileFragment = new ProfileFragment();
         final SearchFragment searchFragment = new SearchFragment();
-        final CalendarFragment calendarFragment = new CalendarFragment();
+        final EventsFragment eventsFragment = new EventsFragment();
         final ContactsFragment contactsFragment = new ContactsFragment();
 
         viewPager = findViewById(R.id.view_pager);
         adapter = new FragmentViewPagerAdapter(this.getSupportFragmentManager());
         adapter.addFragment(searchFragment, "Search");
-        adapter.addFragment(calendarFragment, "Calendar");
+        adapter.addFragment(eventsFragment, "Events");
         adapter.addFragment(contactsFragment, "Contacts");
         adapter.addFragment(profileFragment, "Profile");
         viewPager.setAdapter(adapter);

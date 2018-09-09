@@ -18,8 +18,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
-import com.bookyrself.bookyrself.presenters.ContactsPresenter;
+import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.presenters.ContactsActivityPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
@@ -32,7 +32,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ContactsFragment extends Fragment implements ContactsPresenter.ContactsPresenterListener {
+public class ContactsFragment extends Fragment implements ContactsActivityPresenter.ContactsPresenterListener {
 
     private static final int RC_SIGN_IN = 123;
     @BindView(R.id.contacts_recyclerview)
@@ -53,7 +53,7 @@ public class ContactsFragment extends Fragment implements ContactsPresenter.Cont
     Button emptyStateButton;
 
     ContactsAdapter adapter;
-    ContactsPresenter presenter;
+    ContactsActivityPresenter presenter;
     RecyclerView.LayoutManager layoutManager;
     List<String> contactIds;
     List<_source> contacts;
@@ -67,7 +67,7 @@ public class ContactsFragment extends Fragment implements ContactsPresenter.Cont
         toolbar.setTitle(R.string.contacts_toolbar);
         contactsMap = new HashMap<>();
         contacts = new ArrayList<>();
-        presenter = new ContactsPresenter(this);
+        presenter = new ContactsActivityPresenter(this);
         adapter = new ContactsAdapter();
         recyclerView.setAdapter(adapter);
         layoutManager = new LinearLayoutManager(getActivity());

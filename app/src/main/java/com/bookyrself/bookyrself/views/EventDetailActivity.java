@@ -19,9 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
-import com.bookyrself.bookyrself.models.EventDetailResponse.Host;
-import com.bookyrself.bookyrself.models.EventDetailResponse.User;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetailResponse.EventDetailResponse;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetailResponse.Host;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetailResponse.User;
 import com.bookyrself.bookyrself.presenters.EventDetailPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.squareup.picasso.Picasso;
