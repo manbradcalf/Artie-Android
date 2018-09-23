@@ -24,7 +24,6 @@ import android.widget.TextView;
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
-import com.bookyrself.bookyrself.utils.DatePickerDialogFragment;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
@@ -495,7 +494,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                     });
                 }
             } else {
-                Log.e(this.getClass().toString(), "Provided neither Event or User viewholder type");
+                Log.e(this.getClass().toString(), "Provided neither MiniEvent or User viewholder type");
             }
         }
 

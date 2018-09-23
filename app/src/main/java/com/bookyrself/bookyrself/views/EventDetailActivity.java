@@ -19,9 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetailResponse.EventDetailResponse;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetailResponse.Host;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetailResponse.User;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.Host;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.User;
 import com.bookyrself.bookyrself.presenters.EventDetailPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.squareup.picasso.Picasso;
@@ -76,7 +76,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     }
 
     @Override
-    public void eventDataResponseReady(final EventDetailResponse data) {
+    public void eventDataResponseReady(final EventDetail data) {
 
 
         setSupportActionBar(Toolbar);
