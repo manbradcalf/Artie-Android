@@ -6,14 +6,16 @@ import javax.annotation.Generated;
 
 @Generated("net.hexar.json2pojo")
 @SuppressWarnings("unused")
-public class Event {
+public class MiniEvent {
 
     @SerializedName("date")
     private String mDate;
     @SerializedName("eventname")
     private String mEventname;
     @SerializedName("id")
-    private Long mId;
+    private String mId;
+    @SerializedName("isInviteAccepted")
+    private Boolean mIsInviteAccepted;
 
     public String getDate() {
         return mDate;
@@ -31,12 +33,20 @@ public class Event {
         mEventname = eventname;
     }
 
-    public Long getId() {
+    public String getId() {
         return mId;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         mId = id;
+    }
+
+    public Boolean getmIsInviteAccepted() {
+        return mIsInviteAccepted;
+    }
+
+    public void setmIsInviteAccepted(Boolean isInviteAccepted) {
+        mIsInviteAccepted = isInviteAccepted;
     }
 
 }

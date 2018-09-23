@@ -15,7 +15,7 @@ public class User {
     @SerializedName("email")
     private String mEmail;
     @SerializedName("events")
-    private List<Event> mEvents;
+    private List<MiniEvent> mMiniEvents;
     @SerializedName("phone")
     private String mPhone;
     @SerializedName("picture")
@@ -41,12 +41,12 @@ public class User {
         mEmail = email;
     }
 
-    public List<Event> getEvents() {
-        return mEvents;
+    public List<MiniEvent> getEvents() {
+        return mMiniEvents;
     }
 
-    public void setEvents(List<Event> events) {
-        mEvents = events;
+    public void setEvents(List<MiniEvent> miniEvents) {
+        mMiniEvents = miniEvents;
     }
 
     public String getPhone() {

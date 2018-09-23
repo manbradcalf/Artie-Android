@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.models.SerializedModels.EventDetailResponse;
+package com.bookyrself.bookyrself.models.SerializedModels.EventDetail;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -8,7 +8,7 @@ import javax.annotation.Generated;
 
 @Generated("net.hexar.json2pojo")
 @SuppressWarnings("unused")
-public class EventDetailResponse {
+public class EventDetail {
 
     @SerializedName("citystate")
     private String mCitystate;
