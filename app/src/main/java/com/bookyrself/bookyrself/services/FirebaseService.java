@@ -1,11 +1,11 @@
 package com.bookyrself.bookyrself.services;
 
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetailResponse.EventDetailResponse;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Bool;
+import com.bookyrself.bookyrself.models.SerializedModels.EventCreationResponse;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.SerializedModels.User.MiniEvent;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +45,7 @@ public class FirebaseService {
 
     public interface FirebaseApi {
         @GET("/events/{id}.json")
-        Call<EventDetailResponse> getEventData(@Path("id") String eventId);
+        Call<EventDetail> getEventData(@Path("id") String eventId);
 
         @GET("/users/{id}/events.json")
         Call<List<Event>> getUserEvents(@Path("id") String userId);
@@ -66,9 +66,9 @@ public class FirebaseService {
         // Passing in "eventArrayPosition" so ES doesn't break the mapping by accidentally creating
         // an object in firebase instead of maintaining the array.
         // This is my solution to https://github.com/firebase/flashlight/issues/178
-        //TODO: Revisit this one. Does it actually work? I was getting invalid jsonobject errors befre. look at addContact call for example of one thatworks
-        @PATCH("/users/{userId}/events/{eventArrayPosition}.json")
-        Call<Event> addEventToUser(@Body Event event, @Path("userId") String userId, @Path("eventArrayPosition") Long userArrayPosition);
+//        //TODO: Revisit this one. Does it actually work? I was getting invalid jsonobject errors befre. look at addContact call for example of one thatworks
+//        @PATCH("/users/{userId}/events/{eventArrayPosition}.json")
+//        Call<MiniEvent> addEventToUser(@Body MiniEvent event, @Path("userId") String userId, @Path("eventArrayPosition") Long userArrayPosition);
 
 
         @PATCH("/users/{userId}.json")
@@ -81,11 +81,15 @@ public class FirebaseService {
         @PATCH("/users/{userId}/contacts.json")
         Call<Map<String, String>> addContactToUser(@Body Map<String, String> request, @Path("userId") String userId);
 
-        //TODO: Rename EventDetailResponse to Event or something more broad, since it is the JSON that represents not only the response but the actual event object in the db
-        @POST("/events/")
-        Call<EventDetailResponse> createEvent(@Body EventDetailResponse request);
+        //TODO: Rename EventDetail to MiniEvent or something more broad, since it is the JSON that represents not only the response but the actual event object in the db
+        @POST("/events.json")
+        Call<EventCreationResponse> createEvent(@Body EventDetail request);
 
         @POST("/users/{userId}/invites/events/{eventId}.json")
         Call<Boolean> sendInviteToUserForEvent(@Body Boolean isAccepted, @Path("userId") String userId, @Path("eventId") String eventId);
+
+        //TODO: Clean this up. Find a way to minify the MiniEvent name
+        @PUT("/users/{userId}/events/{eventId}.json")
+        Call<MiniEvent> addEventToUser(@Body MiniEvent miniEvent, @Path("userId") String userId, @Path("eventId") String eventId);
     }
 }
