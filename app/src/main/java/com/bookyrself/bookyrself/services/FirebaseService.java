@@ -1,9 +1,11 @@
 package com.bookyrself.bookyrself.services;
 
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetailResponse.EventDetailResponse;
+import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Bool;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +17,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.PATCH;
+import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
@@ -77,5 +80,12 @@ public class FirebaseService {
         // This is my solution to https://github.com/firebase/flashlight/issues/178
         @PATCH("/users/{userId}/contacts.json")
         Call<Map<String, String>> addContactToUser(@Body Map<String, String> request, @Path("userId") String userId);
+
+        //TODO: Rename EventDetailResponse to Event or something more broad, since it is the JSON that represents not only the response but the actual event object in the db
+        @POST("/events/")
+        Call<EventDetailResponse> createEvent(@Body EventDetailResponse request);
+
+        @POST("/users/{userId}/invites/events/{eventId}.json")
+        Call<Boolean> sendInviteToUserForEvent(@Body Boolean isAccepted, @Path("userId") String userId, @Path("eventId") String eventId);
     }
 }
