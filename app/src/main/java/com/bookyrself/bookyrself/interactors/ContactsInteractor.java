@@ -42,14 +42,14 @@ public class ContactsInteractor {
         });
     }
 
-    public void getUsers(final List<String> ids) {
-        if (ids != null) {
-            for (int user = 0; user < ids.size(); user++) {
+    public void getUsers(final List<String> userIds) {
+        if (userIds != null) {
+            for (int user = 0; user < userIds.size(); user++) {
                 final int position = user;
-                service.getAPI().getUserDetails(ids.get(user)).enqueue(new Callback<_source>() {
+                service.getAPI().getUserDetails(userIds.get(user)).enqueue(new Callback<_source>() {
                     @Override
                     public void onResponse(Call<_source> call, Response<_source> response) {
-                        listener.userReturned(ids.get(position), response.body());
+                        listener.userReturned(userIds.get(position), response.body());
                     }
 
                     @Override
