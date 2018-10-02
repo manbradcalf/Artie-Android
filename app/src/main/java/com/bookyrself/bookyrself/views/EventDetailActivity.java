@@ -21,7 +21,7 @@ import android.widget.Toast;
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.Host;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.User;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.MiniUser;
 import com.bookyrself.bookyrself.presenters.EventDetailPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.squareup.picasso.Picasso;
@@ -60,7 +60,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     @BindView(R.id.event_detail_users_list)
     ListView usersListView;
 
-    private List<User> users;
+    private List<MiniUser> miniUsers;
     private EventDetailPresenter presenter;
     private HashMap<String, String> idAndThumbUrlMap = new HashMap<>();
 
@@ -118,10 +118,10 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                 .transform(new CircleTransform())
                 .into(HostImageView);
 
-        users = data.getUsers();
+        miniUsers = data.getUsers();
 
-        for (int i = 0; i < users.size(); i++) {
-            String userId = users.get(i).getUserId();
+        for (int i = 0; i < miniUsers.size(); i++) {
+            String userId = miniUsers.get(i).getUserId();
             presenter.getUserThumbUrl(userId);
         }
 
@@ -147,8 +147,8 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     public void userThumbReady(String response, String id) {
 
         idAndThumbUrlMap.put(id, response);
-        if (idAndThumbUrlMap.size() == users.size()) {
-            UsersListAdapter adapter = new UsersListAdapter(this, users, idAndThumbUrlMap);
+        if (idAndThumbUrlMap.size() == miniUsers.size()) {
+            UsersListAdapter adapter = new UsersListAdapter(this, miniUsers, idAndThumbUrlMap);
             usersListView.setAdapter(adapter);
         }
 
@@ -170,12 +170,12 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
 
         private HashMap mMap;
         private Context mContext;
-        private List<User> mUsers;
+        private List<MiniUser> mMiniUsers;
         private LayoutInflater mInflater;
 
 
-        private UsersListAdapter(Context context, List<User> users, HashMap idAndThumbUrlMap) {
-            mUsers = users;
+        private UsersListAdapter(Context context, List<MiniUser> miniUsers, HashMap idAndThumbUrlMap) {
+            mMiniUsers = miniUsers;
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mContext = context;
             mMap = idAndThumbUrlMap;
@@ -183,12 +183,12 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
 
         @Override
         public int getCount() {
-            return mUsers.size();
+            return mMiniUsers.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return mUsers.get(position);
+            return mMiniUsers.get(position);
         }
 
         @Override
@@ -204,10 +204,10 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             TextView cityState = rowView.findViewById(R.id.item_event_detail_citystate);
             TextView userUrl = rowView.findViewById(R.id.item_event_detail_url);
 
-            User user = (User) getItem(position);
+            MiniUser miniUser = (MiniUser) getItem(position);
 
-            userName.setText(user.getUsername());
-            cityState.setText(user.getCitystate());
+            userName.setText(miniUser.getUsername());
+            cityState.setText(miniUser.getCitystate());
             userUrl.setClickable(true);
             userUrl.setMovementMethod(LinkMovementMethod.getInstance());
             userUrl.setOnClickListener(new View.OnClickListener() {
@@ -217,10 +217,10 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                 }
             });
             String linkedText =
-                    String.format("<a href=\"%s\">%s</a> ", ("http://" + user.getUrl()), user.getUrl());
+                    String.format("<a href=\"%s\">%s</a> ", ("http://" + miniUser.getUrl()), miniUser.getUrl());
             userUrl.setText(Html.fromHtml(linkedText));
 
-            String userId = user.getUserId();
+            String userId = miniUser.getUserId();
 
             Picasso.with(mContext)
                     .load(String.valueOf(mMap.get(userId)))
@@ -229,7 +229,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                     .transform(new CircleTransform())
                     .into(userThumb);
 
-            userThumb.setTag(R.id.item_event_detail_userthumb, user.getUserId());
+            userThumb.setTag(R.id.item_event_detail_userthumb, miniUser.getUserId());
 
             rowView.setOnClickListener(new View.OnClickListener() {
                 @Override

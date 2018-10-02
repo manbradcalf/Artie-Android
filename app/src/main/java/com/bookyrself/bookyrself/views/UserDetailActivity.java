@@ -77,7 +77,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         eventsPresenter = new EventsPresenter(this);
         eventsPresenter.loadUserEvents(userID);
         Toolbar = findViewById(R.id.toolbar_user_detail);
-        Toolbar.setTitle("User Details");
+        Toolbar.setTitle("MiniUser Details");
         calendarView = findViewById(R.id.user_detail_calendar);
         calendarView.setOnDateChangedListener(this);
         calendarDaysWithEventIds = new HashMap<>();

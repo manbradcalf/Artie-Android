@@ -296,7 +296,7 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
             }
         } else {
             if (response == null) {
-                // User pressed back button
+                // MiniUser pressed back button
                 showToast("Canceled");
                 return;
             }

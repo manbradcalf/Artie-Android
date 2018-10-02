@@ -45,7 +45,7 @@
             <!--android:layout_width="wrap_content"-->
             <!--android:layout_height="wrap_content"-->
             <!--android:id="@+id/user_detail_loading_text"-->
-            <!--android:text="Loading user details"/>-->
+            <!--android:text="Loading miniUser details"/>-->
             <!--</LinearLayout>-->
 
 
@@ -125,7 +125,7 @@
                 </android.support.v7.widget.CardView>
 
 
-                <!-- Message User Card -->
+                <!-- Message MiniUser Card -->
                 <android.support.v7.widget.CardView
                     android:id="@+id/message_user_detail_activity_card"
                     android:layout_width="match_parent"
@@ -152,7 +152,7 @@
 
                 </android.support.v7.widget.CardView>
 
-                <!-- Message User Card -->
+                <!-- Message MiniUser Card -->
                 <android.support.v7.widget.CardView
                     android:id="@+id/add_user_to_contacts_card"
                     android:layout_width="match_parent"

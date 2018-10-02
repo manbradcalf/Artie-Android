@@ -23,7 +23,7 @@ public class EventDetail {
     @SerializedName("tags")
     private List<String> mTags;
     @SerializedName("users")
-    private List<User> mUsers;
+    private List<MiniUser> mMiniUsers;
 
     public String getCitystate() {
         return mCitystate;
@@ -73,12 +73,12 @@ public class EventDetail {
         mTags = tags;
     }
 
-    public List<User> getUsers() {
-        return mUsers;
+    public List<MiniUser> getUsers() {
+        return mMiniUsers;
     }
 
-    public void setUsers(List<User> users) {
-        mUsers = users;
+    public void setUsers(List<MiniUser> miniUsers) {
+        mMiniUsers = miniUsers;
     }
 
 }

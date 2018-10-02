@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.bookyrself.bookyrself.models.SerializedModels.EventCreationResponse;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.User;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.MiniUser;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.models.SerializedModels.User.MiniEvent;
 import com.bookyrself.bookyrself.services.FirebaseService;
@@ -33,7 +33,7 @@ public class EventsInteractor {
                 //TODO: Revisit this logic
                 if (response.body() != null) {
                     if (response.body().isEmpty()) {
-                        listener.presentError("User has no events!");
+                        listener.presentError("MiniUser has no events!");
                     } else {
                         listener.usersEventsReturned(response.body());
                     }
@@ -95,7 +95,7 @@ public class EventsInteractor {
 
         void usersEventsReturned(List<Event> events);
 
-        void eventCreated(String eventId, MiniEvent miniEvent, List<User> usersToInvite);
+        void eventCreated(String eventId, MiniEvent miniEvent, List<MiniUser> usersToInvite);
 
         void presentError(String error);
     }

@@ -3,10 +3,10 @@ package com.bookyrself.bookyrself.models.SerializedModels.EventDetail;
 import com.google.gson.annotations.SerializedName;
 
 import javax.annotation.Generated;
-
+//TODO: Rename this to "MiniUser" or something similar?
 @Generated("net.hexar.json2pojo")
 @SuppressWarnings("unused")
-public class User {
+public class MiniUser {
 
     @SerializedName("citystate")
     private String mCitystate;
