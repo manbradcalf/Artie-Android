@@ -35,7 +35,10 @@ public class EventsPresenter {
         service.getAPI().getUserEvents(userId).enqueue(new Callback<List<Event>>() {
             @Override
             public void onResponse(@NonNull Call<List<Event>> call, @NonNull Response<List<Event>> response) {
-                listener.eventsReady(response.body());
+                if (response.body() != null) {
+                    listener.eventsReady(response.body());
+                }
+
             }
 
             @Override
