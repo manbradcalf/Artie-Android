@@ -441,7 +441,8 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         @Override
                         public void onFailure(@NonNull Exception exception) {
                             // Handle any errors
-                            viewHolderUsers.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_profile_black_24dp));
+                            viewHolderUsers.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_person_white_16dp));
+                            Log.e("ProfileImage not loaded", exception.getLocalizedMessage());
                         }
                     });
 
@@ -494,7 +495,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                     });
                 }
             } else {
-                Log.e(this.getClass().toString(), "Provided neither MiniEvent or User viewholder type");
+                Log.e(this.getClass().toString(), "Provided neither MiniEvent or MiniUser viewholder type");
             }
         }
 
