@@ -4,15 +4,17 @@ import com.bookyrself.bookyrself.interactors.ContactsInteractor;
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.interactors.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.User;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.MiniUser;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.models.SerializedModels.User.MiniEvent;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by benmedcalf on 3/9/18.
@@ -25,6 +27,9 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     private ContactsInteractor contactsInteractor;
     private EventsInteractor eventsInteractor;
     private UsersInteractor usersInteractor;
+    List<String> contactIds;
+    List<_source> contactsList;
+    Map<_source, String> usersIdAndDetailMap;
 
     /**
      * Constructor
@@ -34,34 +39,24 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
         this.eventsInteractor = new EventsInteractor(this);
         this.usersInteractor = new UsersInteractor(this);
         this.presenterListener = listener;
+        contactsList = new ArrayList<>();
+        usersIdAndDetailMap = new HashMap<>();
     }
 
     /**
      * Methods
      */
 
-    //TODO: I may not need this mularkey if I can keep ES from automapping
-//    public void addToUserEventsCountHashMap(final String userid) {
-//
-//        mService.getAPI().getUserEvents(userid).enqueue(new Callback<List<MiniEvent>>() {
-//            @Override
-//            public void onResponse(@NonNull Call<List<MiniEvent>> call, @NonNull Response<List<MiniEvent>> response) {
-//                if (response.body() != null) {
-//                    userEventCountHashMap.put(userid, (long) response.body().size());
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<List<MiniEvent>> call, Throwable t) {
-//
-//            }
-//        });
-//    }
     public void createEvent(EventDetail event) {
 
         // Iterate through the hashmap of users and their events array size.
         // For each user in the hashmpap, add the event to their
         eventsInteractor.createEvent(event);
+    }
+
+    public void getContacts(String userId) {
+
+        contactsInteractor.getContactIds(userId);
     }
 
 
@@ -70,15 +65,19 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
      */
     @Override
     public void contactsReturned(List<String> ids) {
-        //TODO: I may not need this mularkey if I can keep ES from automapping
-//        for (String id : ids) {
-//            addToUserEventsCountHashMap(id);
-//        }
+        contactIds = ids;
+        contactsInteractor.getUsers(contactIds);
     }
 
     @Override
     public void userReturned(String id, _source user) {
 
+        usersIdAndDetailMap.put(user, id);
+        contactsList.add(user);
+
+        if (usersIdAndDetailMap.size() == contactIds.size()) {
+            presenterListener.contactsReturned(usersIdAndDetailMap, contactsList);
+        }
     }
 
     @Override
@@ -101,8 +100,8 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     }
 
     @Override
-    public void eventCreated(String eventId, MiniEvent miniEvent, List<User> usersToInvite) {
-        //        for (User user : usersToInvite) {
+    public void eventCreated(String eventId, MiniEvent miniEvent, List<MiniUser> usersToInvite) {
+        //        for (MiniUser user : usersToInvite) {
 //              //TODO: Fix the value of eventId. Needs to be string across the board
 //            usersInteractor.addEventToUser(miniEvent, user.getUserId(), String.valueOf(miniEvent.getId()));
 //        }
@@ -126,9 +125,11 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
      * Contract / Listener
      */
     public interface EventCreationPresenterListener {
-        void eventCreated();
-
         void addToPotentialUsers(String userId);
+
+        void contactsReturned(Map<_source, String> usersMap, List<_source> contactsList);
+
+        void eventCreated();
 
         void removeFromPotentialUsers(String userId);
     }
