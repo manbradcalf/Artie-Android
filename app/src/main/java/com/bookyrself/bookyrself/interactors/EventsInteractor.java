@@ -6,10 +6,12 @@ import com.bookyrself.bookyrself.models.SerializedModels.EventCreationResponse;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.MiniUser;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
-import com.bookyrself.bookyrself.models.SerializedModels.User.MiniEvent;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,32 +28,12 @@ public class EventsInteractor {
         this.listener = listener;
     }
 
-    public void getUsersEvents(String userId) {
-        service.getAPI().getUserEvents(userId).enqueue(new Callback<List<Event>>() {
-            @Override
-            public void onResponse(Call<List<Event>> call, Response<List<Event>> response) {
-                //TODO: Revisit this logic
-                if (response.body() != null) {
-                    if (response.body().isEmpty()) {
-                        listener.presentError("MiniUser has no events!");
-                    } else {
-                        listener.usersEventsReturned(response.body());
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<Event>> call, Throwable t) {
-                listener.presentError(t.getMessage());
-            }
-        });
-    }
-
-    public void getEventDetails(String eventId) {
+    public void getEventDetail(String eventId) {
         service.getAPI().getEventData(eventId).enqueue(new Callback<EventDetail>() {
             @Override
             public void onResponse(Call<EventDetail> call, Response<EventDetail> response) {
                 if (response.body() != null) {
+
                     listener.eventDetailReturned(response.body());
                 }
             }
@@ -63,13 +45,40 @@ public class EventsInteractor {
         });
     }
 
+    public void getMultipleEventDetails(final List<String> eventIds) {
+        for (final String id : eventIds) {
+            service.getAPI().getEventData(id).enqueue(new Callback<EventDetail>() {
+                @Override
+                public void onResponse(Call<EventDetail> call, Response<EventDetail> response) {
+                    if (response.body() != null) {
+                        listener.oneEventDetailOfManyReturned(response.body(), eventIds, id);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<EventDetail> call, Throwable t) {
+                    listener.presentError(t.getMessage());
+                }
+            });
+
+        }
+    }
+
     public void createEvent(final EventDetail event) {
+
+        // Create the list of userIds of attendees
+        // We'll use this list of ids to add the event to the users.
+        // An event's users are stored as a hashmap due to Firebase DB limitations
+        final List<String> userIds = new ArrayList<>();
+        for (String key : event.getUsers().keySet()) {
+            userIds.add(key);
+        }
+
         service.getAPI().createEvent(event).enqueue(new Callback<EventCreationResponse>() {
             @Override
             public void onResponse(Call<EventCreationResponse> call, Response<EventCreationResponse> response) {
                 String eventId = response.body().getName();
-                MiniEvent miniEvent = createMiniEventFromFullEvent(event);
-                listener.eventCreated(eventId, miniEvent, event.getUsers());
+                listener.eventCreated(eventId, userIds);
             }
 
             @Override
@@ -79,25 +88,17 @@ public class EventsInteractor {
         });
     }
 
-
-    private MiniEvent createMiniEventFromFullEvent(EventDetail fullEvent) {
-        MiniEvent miniEvent = new MiniEvent();
-        miniEvent.setDate(fullEvent.getDate());
-        miniEvent.setEventname(fullEvent.getEventname());
-        miniEvent.setmIsInviteAccepted(false);
-        //TODO: Id needs to change from Long to String. Big job. Need ES remapping and new jSON fb data
-        return miniEvent;
-    }
-
     public interface EventsInteractorListener {
 
         void eventDetailReturned(EventDetail event);
 
         void usersEventsReturned(List<Event> events);
 
-        void eventCreated(String eventId, MiniEvent miniEvent, List<MiniUser> usersToInvite);
+        void eventCreated(String eventId, List<String> usersToInvite);
 
         void presentError(String error);
+
+        void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId);
     }
 
 
