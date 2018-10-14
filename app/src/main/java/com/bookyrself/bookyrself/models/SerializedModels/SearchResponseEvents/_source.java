@@ -3,6 +3,7 @@ package com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Generated;
 
@@ -17,7 +18,7 @@ public class _source {
     @SerializedName("eventname")
     private String mEventname;
     @SerializedName("host")
-    private List<Host> mHost;
+    private Host mHost;
     @SerializedName("picture")
     private String mPicture;
     @SerializedName("tags")
@@ -49,11 +50,11 @@ public class _source {
         mEventname = eventname;
     }
 
-    public List<Host> getHost() {
+    public Host getHost() {
         return mHost;
     }
 
-    public void setHost(List<Host> host) {
+    public void setHost(Host host) {
         mHost = host;
     }
 

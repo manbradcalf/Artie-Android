@@ -8,30 +8,10 @@ import javax.annotation.Generated;
 @SuppressWarnings("unused")
 public class Host {
 
-    @SerializedName("citystate")
-    private String mCitystate;
-    @SerializedName("url")
-    private String mUrl;
     @SerializedName("userId")
     private String mUserId;
     @SerializedName("username")
     private String mUsername;
-
-    public String getCitystate() {
-        return mCitystate;
-    }
-
-    public void setCitystate(String citystate) {
-        mCitystate = citystate;
-    }
-
-    public String getUrl() {
-        return mUrl;
-    }
-
-    public void setUrl(String url) {
-        mUrl = url;
-    }
 
     public String getUserId() {
         return mUserId;

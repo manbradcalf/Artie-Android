@@ -1,8 +1,11 @@
 package com.bookyrself.bookyrself.models.SerializedModels.EventDetail;
 
+import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Bool;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Generated;
 
@@ -17,13 +20,13 @@ public class EventDetail {
     @SerializedName("eventname")
     private String mEventname;
     @SerializedName("host")
-    private List<Host> mHost;
+    private Host mHost;
     @SerializedName("picture")
     private String mPicture;
     @SerializedName("tags")
     private List<String> mTags;
     @SerializedName("users")
-    private List<MiniUser> mMiniUsers;
+    private HashMap<String, Boolean> mUserIds;
 
     public String getCitystate() {
         return mCitystate;
@@ -49,11 +52,11 @@ public class EventDetail {
         mEventname = eventname;
     }
 
-    public List<Host> getHost() {
+    public Host getHost() {
         return mHost;
     }
 
-    public void setHost(List<Host> host) {
+    public void setHost(Host host) {
         mHost = host;
     }
 
@@ -73,12 +76,12 @@ public class EventDetail {
         mTags = tags;
     }
 
-    public List<MiniUser> getUsers() {
-        return mMiniUsers;
+    public HashMap<String,Boolean> getUsers() {
+        return mUserIds;
     }
 
-    public void setUsers(List<MiniUser> miniUsers) {
-        mMiniUsers = miniUsers;
+    public void setUsers(HashMap<String, Boolean> userIds) {
+        userIds = mUserIds;
     }
 
 }

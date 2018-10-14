@@ -1,7 +1,9 @@
+
 package com.bookyrself.bookyrself.models.SerializedModels.User;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.HashMap;
 import java.util.List;
 
 import javax.annotation.Generated;
@@ -12,14 +14,14 @@ public class User {
 
     @SerializedName("bio")
     private String mBio;
+    @SerializedName("citystate")
+    private String mCitystate;
     @SerializedName("email")
     private String mEmail;
+    @SerializedName("url")
+    private String mUrl;
     @SerializedName("events")
-    private List<MiniEvent> mMiniEvents;
-    @SerializedName("phone")
-    private String mPhone;
-    @SerializedName("picture")
-    private String mPicture;
+    private HashMap<String, EventInfo> mEvents;
     @SerializedName("tags")
     private List<String> mTags;
     @SerializedName("username")
@@ -33,6 +35,14 @@ public class User {
         mBio = bio;
     }
 
+    public String getCitystate() {
+        return mCitystate;
+    }
+
+    public void setCitystate(String citystate) {
+        mCitystate = citystate;
+    }
+
     public String getEmail() {
         return mEmail;
     }
@@ -41,28 +51,12 @@ public class User {
         mEmail = email;
     }
 
-    public List<MiniEvent> getEvents() {
-        return mMiniEvents;
+    public HashMap<String, EventInfo> getEvents() {
+        return mEvents;
     }
 
-    public void setEvents(List<MiniEvent> miniEvents) {
-        mMiniEvents = miniEvents;
-    }
-
-    public String getPhone() {
-        return mPhone;
-    }
-
-    public void setPhone(String phone) {
-        mPhone = phone;
-    }
-
-    public String getPicture() {
-        return mPicture;
-    }
-
-    public void setPicture(String picture) {
-        mPicture = picture;
+    public void setEvents(HashMap<String, EventInfo> events) {
+        mEvents = events;
     }
 
     public List<String> getTags() {
@@ -79,6 +73,14 @@ public class User {
 
     public void setUsername(String username) {
         mUsername = username;
+    }
+
+    public String getUrl() {
+        return mUrl;
+    }
+
+    public void setUrl(String url) {
+        this.mUrl = url;
     }
 
 }
