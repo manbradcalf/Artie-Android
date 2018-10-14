@@ -2,7 +2,8 @@ package com.bookyrself.bookyrself.interactors;
 
 import android.util.Log;
 
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.BasePresenter;
 import com.bookyrself.bookyrself.presenters.ContactsActivityPresenter;
 import com.bookyrself.bookyrself.services.FirebaseService;
@@ -46,14 +47,14 @@ public class ContactsInteractor {
         if (userIds != null) {
             for (int user = 0; user < userIds.size(); user++) {
                 final int position = user;
-                service.getAPI().getUserDetails(userIds.get(user)).enqueue(new Callback<_source>() {
+                service.getAPI().getUserDetails(userIds.get(user)).enqueue(new Callback<User>() {
                     @Override
-                    public void onResponse(Call<_source> call, Response<_source> response) {
+                    public void onResponse(Call<User> call, Response<User> response) {
                         listener.userReturned(userIds.get(position), response.body());
                     }
 
                     @Override
-                    public void onFailure(Call<_source> call, Throwable t) {
+                    public void onFailure(Call<User> call, Throwable t) {
                         Log.e("ContactsInteractor", t.getMessage());
                     }
                 });
@@ -67,7 +68,7 @@ public class ContactsInteractor {
 
         void contactsReturned(List<String> ids);
 
-        void userReturned(String id, _source user);
+        void userReturned(String id, User user);
 
         void noUsersReturned();
 

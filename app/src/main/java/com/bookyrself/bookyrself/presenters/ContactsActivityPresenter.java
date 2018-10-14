@@ -5,6 +5,7 @@ import android.util.Log;
 import com.bookyrself.bookyrself.interactors.BaseInteractor;
 import com.bookyrself.bookyrself.interactors.ContactsInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
 import java.util.List;
@@ -47,7 +48,7 @@ public class ContactsActivityPresenter extends BasePresenter implements Contacts
     }
 
     @Override
-    public void userReturned(String id, _source user) {
+    public void userReturned(String id, User user) {
         presenterListener.userReturned(id, user);
     }
 
@@ -72,7 +73,7 @@ public class ContactsActivityPresenter extends BasePresenter implements Contacts
 
         void contactsReturned(List<String> ids);
 
-        void userReturned(String id, _source user);
+        void userReturned(String id, User user);
 
         void noUsersReturned();
 

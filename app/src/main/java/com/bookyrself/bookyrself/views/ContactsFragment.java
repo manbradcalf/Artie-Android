@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.ContactsActivityPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.google.firebase.auth.FirebaseAuth;
@@ -56,8 +57,8 @@ public class ContactsFragment extends Fragment implements ContactsActivityPresen
     ContactsActivityPresenter presenter;
     RecyclerView.LayoutManager layoutManager;
     List<String> contactIds;
-    List<_source> contacts;
-    Map<_source, String> contactsMap;
+    List<User> contacts;
+    Map<User, String> contactsMap;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -106,7 +107,7 @@ public class ContactsFragment extends Fragment implements ContactsActivityPresen
     // Also I am adding to a map of userId with userInfo so I can start a UserDetail activity with the id
     // since the id isn't on the _source object
     @Override
-    public void userReturned(String id, _source user) {
+    public void userReturned(String id, User user) {
         contacts.add(user);
         contactsMap.put(user, id);
         if (contacts.size() == contactIds.size()) {
