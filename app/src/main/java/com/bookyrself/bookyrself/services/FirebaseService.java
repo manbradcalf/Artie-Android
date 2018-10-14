@@ -3,9 +3,10 @@ package com.bookyrself.bookyrself.services;
 import com.bookyrself.bookyrself.models.SerializedModels.EventCreationResponse;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
-import com.bookyrself.bookyrself.models.SerializedModels.User.MiniEvent;
+import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,19 +49,19 @@ public class FirebaseService {
         Call<EventDetail> getEventData(@Path("id") String eventId);
 
         @GET("/users/{id}/events.json")
-        Call<List<Event>> getUserEvents(@Path("id") String userId);
+        Call<HashMap<String, EventInfo>> getUserEvents(@Path("id") String userId);
 
         @GET("/users/{id}/picture.json")
         Call<String> getUserThumbUrl(@Path("id") String userId);
 
         @GET("/users/{id}.json")
-        Call<_source> getUserDetails(@Path("id") String userId);
+        Call<User> getUserDetails(@Path("id") String userId);
 
         @GET("/users/{id}/contacts.json")
         Call<List<String>> getUserContacts(@Path("id") String userId);
 
         @PUT("/users/{userId}.json")
-        Call<_source> addUser(@Body _source user, @Path("userId") String userId);
+        Call<User> addUser(@Body User user, @Path("userId") String userId);
 
         // Add event to user item
         // Passing in "eventArrayPosition" so ES doesn't break the mapping by accidentally creating
@@ -72,7 +73,7 @@ public class FirebaseService {
 
 
         @PATCH("/users/{userId}.json")
-        Call<_source> patchUser(@Body _source user, @Path("userId") String userId);
+        Call<User> patchUser(@Body User user, @Path("userId") String userId);
 
         // Add contact to user item
         // Passing in "contactArrayPosition" so ES doesn't break the mapping by accidentally creating
@@ -90,6 +91,6 @@ public class FirebaseService {
 
         //TODO: Clean this up. Find a way to minify the MiniEvent name
         @PUT("/users/{userId}/events/{eventId}.json")
-        Call<MiniEvent> addEventToUser(@Body MiniEvent miniEvent, @Path("userId") String userId, @Path("eventId") String eventId);
+        Call<HashMap<String, EventInfo>> addEventToUser(@Body HashMap<String, EventInfo> event, @Path("userId") String userId, @Path("eventId") String eventId);
     }
 }
