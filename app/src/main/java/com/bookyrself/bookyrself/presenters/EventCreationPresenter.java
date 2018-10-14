@@ -7,7 +7,7 @@ import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.MiniUser;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
-import com.bookyrself.bookyrself.models.SerializedModels.User.MiniEvent;
+import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 
 import java.util.ArrayList;
@@ -28,8 +28,8 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     private EventsInteractor eventsInteractor;
     private UsersInteractor usersInteractor;
     List<String> contactIds;
-    List<_source> contactsList;
-    Map<_source, String> usersIdAndDetailMap;
+    List<User> contactsList;
+    Map<User, String> usersIdAndDetailMap;
 
     /**
      * Constructor
@@ -70,8 +70,7 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     }
 
     @Override
-    public void userReturned(String id, _source user) {
-
+    public void userReturned(String id, User user) {
         usersIdAndDetailMap.put(user, id);
         contactsList.add(user);
 
@@ -100,14 +99,11 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     }
 
     @Override
-    public void eventCreated(String eventId, MiniEvent miniEvent, List<MiniUser> usersToInvite) {
-        //        for (MiniUser user : usersToInvite) {
-//              //TODO: Fix the value of eventId. Needs to be string across the board
-//            usersInteractor.addEventToUser(miniEvent, user.getUserId(), String.valueOf(miniEvent.getId()));
-//        }
-        ArrayList<String> testList = new ArrayList<>(Arrays.asList("1", "2", "3", "4"));
-        for (String item : testList) {
-            usersInteractor.addEventToUser(miniEvent, item, eventId);
+    public void eventCreated(String eventId, List<String> userIdsOfAttendees) {
+        for (String userId : userIdsOfAttendees) {
+            EventInfo eventInfo = new EventInfo();
+            eventInfo.setIsInviteAccepted(false);
+            usersInteractor.addEventToUser(eventInfo, userId, eventId);
         }
     }
 
@@ -117,8 +113,18 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     }
 
     @Override
+    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId) {
+
+    }
+
+    @Override
     public void eventAddedToUserSuccessfully() {
         //TODO: Find a way to determine it was added to _all_ invited users
+    }
+
+    @Override
+    public void userDetailReturned(User user, String userId) {
+
     }
 
     /**
@@ -127,7 +133,7 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     public interface EventCreationPresenterListener {
         void addToPotentialUsers(String userId);
 
-        void contactsReturned(Map<_source, String> usersMap, List<_source> contactsList);
+        void contactsReturned(Map<User, String> usersMap, List<User> contactsList);
 
         void eventCreated();
 

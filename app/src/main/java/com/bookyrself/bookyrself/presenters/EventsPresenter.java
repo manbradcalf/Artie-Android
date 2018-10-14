@@ -2,9 +2,14 @@ package com.bookyrself.bookyrself.presenters;
 
 import android.support.annotation.NonNull;
 
+import com.bookyrself.bookyrself.interactors.EventsInteractor;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
+import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import retrofit2.Call;
@@ -15,9 +20,10 @@ import retrofit2.Response;
  * Created by benmedcalf on 3/11/18.
  */
 
-public class EventsPresenter {
+public class EventsPresenter implements EventsInteractor.EventsInteractorListener {
 
     private final CalendarPresenterListener listener;
+    private final EventsInteractor eventsInteractor;
     private final FirebaseService service;
 
     /**
@@ -26,26 +32,60 @@ public class EventsPresenter {
     public EventsPresenter(CalendarPresenterListener listener) {
         this.listener = listener;
         this.service = new FirebaseService();
+        this.eventsInteractor = new EventsInteractor(this);
     }
 
     /**
      * Methods
      */
     public void loadUserEvents(String userId) {
-        service.getAPI().getUserEvents(userId).enqueue(new Callback<List<Event>>() {
+        service.getAPI().getUserEvents(userId).enqueue(new Callback<HashMap<String, EventInfo>>() {
             @Override
-            public void onResponse(@NonNull Call<List<Event>> call, @NonNull Response<List<Event>> response) {
+            public void onResponse(@NonNull Call<HashMap<String, EventInfo>> call, @NonNull Response<HashMap<String, EventInfo>> response) {
                 if (response.body() != null) {
-                    listener.eventsReady(response.body());
+                    //TODO: Rename all of this horrible bullshuit
+                    getActualEvents(new ArrayList<>(response.body().keySet()));
                 }
 
             }
 
             @Override
-            public void onFailure(Call<List<Event>> call, Throwable t) {
+            public void onFailure(Call<HashMap<String, EventInfo>> call, Throwable t) {
 
             }
         });
+    }
+
+    private void getActualEvents(List<String> eventIds) {
+        for (String id : eventIds){
+            eventsInteractor.getEventDetail(id);
+        }
+
+    }
+
+    @Override
+    public void eventDetailReturned(EventDetail event) {
+
+    }
+
+    @Override
+    public void usersEventsReturned(List<Event> events) {
+
+    }
+
+    @Override
+    public void eventCreated(String eventId, List<String> usersToInvite) {
+
+    }
+
+    @Override
+    public void presentError(String error) {
+
+    }
+
+    @Override
+    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId) {
+
     }
 
     /**
@@ -56,7 +96,7 @@ public class EventsPresenter {
 
         void goToEventDetail(String eventId);
 
-        void eventsReady(List<Event> events);
+        void userEventsReady(List<Event> events);
     }
 
 }
