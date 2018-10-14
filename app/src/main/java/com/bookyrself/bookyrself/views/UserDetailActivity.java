@@ -16,8 +16,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.EventsPresenter;
 import com.bookyrself.bookyrself.presenters.UserDetailPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
@@ -77,7 +78,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         eventsPresenter = new EventsPresenter(this);
         eventsPresenter.loadUserEvents(userID);
         Toolbar = findViewById(R.id.toolbar_user_detail);
-        Toolbar.setTitle("MiniUser Details");
+        Toolbar.setTitle("User Details");
         calendarView = findViewById(R.id.user_detail_calendar);
         calendarView.setOnDateChangedListener(this);
         calendarDaysWithEventIds = new HashMap<>();
@@ -86,7 +87,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     }
 
     @Override
-    public void userInfoReady(_source response) {
+    public void userInfoReady(User response) {
 
         // Show the user details now that they're loaded
         usernameTextView = findViewById(R.id.username_user_detail_activity);
@@ -219,10 +220,15 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     }
 
     @Override
-    public void eventsReady(List<Event> events) {
+    public void userEventsReady(List<Event> events) {
+
+    }
+
+    @Override
+    public void usersEventInfoReady(HashMap<String, EventDetail> events, String eventId) {
         if (events != null) {
             for (int i = 0; i < events.size(); i++) {
-                String[] s = events.get(i).getDate().split("-");
+                String[] s = events.get(eventId).getDate().split("-");
                 int year = Integer.parseInt(s[0]);
                 // I have to do weird logic on the month because months are 0 indexed
                 // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
@@ -230,7 +236,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                 int day = Integer.parseInt(s[2]);
                 CalendarDay calendarDay = CalendarDay.from(year, month, day);
                 calendarDays.add(calendarDay);
-                calendarDaysWithEventIds.put(calendarDay, events.get(i).getId());
+                calendarDaysWithEventIds.put(calendarDay, eventId);
             }
             if (calendarDays.size() == events.size()) {
                 calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this));

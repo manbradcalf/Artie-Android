@@ -48,7 +48,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     @BindView(R.id.item_event_detail_username)
     TextView HostUsernameTextview;
     @BindView(R.id.item_event_detail_citystate)
-    TextView HostCityState;
+    TextView EventCityState;
     @BindView(R.id.item_event_detail_url)
     TextView HostUrlTextView;
     @BindView(R.id.event_detail_host_item)
@@ -76,7 +76,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     }
 
     @Override
-    public void eventDataResponseReady(final EventDetail data) {
+    public void eventDataResponseReady(final EventDetail data, final List<MiniUser> miniUsersList) {
 
 
         setSupportActionBar(Toolbar);
@@ -84,15 +84,9 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         getSupportActionBar().setTitle(R.string.event_detail_toolbar);
 
         String date = data.getDate();
-        Host host = data.getHost().get(0);
+        Host host = data.getHost();
         String hostUsername = host.getUsername();
-        String hostCityState = host.getCitystate();
-        String hostURL = host.getUrl();
-        String linkedText = String.format("<a href=\"%s\">%s</a>", ("http://" + hostURL), hostURL);
-
-        HostUrlTextView.setClickable(true);
-        HostUrlTextView.setText(Html.fromHtml(linkedText));
-        HostUrlTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        String hostCityState = data.getCitystate();
 
         DateView.setText("Date");
         DateFormat inputformat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
@@ -109,16 +103,16 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
 
         HostUsernameTextview.setText(hostUsername);
 
-        HostCityState.setText(hostCityState);
+        EventCityState.setText(hostCityState);
 
-        Picasso.with(getApplicationContext())
-                .load(hostURL)
-                .placeholder(R.drawable.round)
-                .error(R.drawable.round)
-                .transform(new CircleTransform())
-                .into(HostImageView);
+//        Picasso.with(getApplicationContext())
+//                .load(hostURL)
+//                .placeholder(R.drawable.round)
+//                .error(R.drawable.round)
+//                .transform(new CircleTransform())
+//                .into(HostImageView);
 
-        miniUsers = data.getUsers();
+        miniUsers = miniUsersList;
 
         for (int i = 0; i < miniUsers.size(); i++) {
             String userId = miniUsers.get(i).getUserId();
@@ -130,7 +124,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(HostcardView.getContext(), UserDetailActivity.class);
-                intent.putExtra("userId", data.getHost().get(0).getUserId());
+                intent.putExtra("userId", data.getHost().getUserId());
                 startActivity(intent);
             }
         });
@@ -155,8 +149,8 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     }
 
     @Override
-    public void present_error() {
-        Toast.makeText(this, "response was null because that id wasn't legit dumbass", Toast.LENGTH_LONG).show();
+    public void present_error(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
 

@@ -21,6 +21,7 @@ import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.Host;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.ContactsActivityPresenter;
 import com.bookyrself.bookyrself.presenters.EventCreationPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
@@ -64,8 +65,8 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     Button submitButton;
 
     private EventCreationPresenter presenter;
-    private List<_source> contacts;
-    private Map<_source, String> contactsMap;
+    private List<User> contacts;
+    private Map<User, String> contactsMap;
     ContactsAdapter adapter;
     RecyclerView.LayoutManager layoutManager;
 
@@ -99,11 +100,9 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
                     event.setTags(tagsList);
                 }
                 Host host = new Host();
-                List<Host> hosts = new ArrayList<>();
                 host.setUsername(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
                 host.setUserId(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                hosts.add(host);
-                event.setHost(hosts);
+                event.setHost(host);
                 presenter.createEvent(event);
             }
         });
@@ -121,7 +120,7 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     }
 
     @Override
-    public void contactsReturned(Map<_source, String> usersMap, List<_source> contactsList) {
+    public void contactsReturned(Map<User, String> usersMap, List<User> contactsList) {
      contacts = contactsList;
      //TODO: These variable names are horrible. Match em
      contactsMap = usersMap;

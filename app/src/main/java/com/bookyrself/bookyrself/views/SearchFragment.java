@@ -462,12 +462,13 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                             .get(position)
                             .get_source()
                             .getEventname());
+                    //TODO: Do I need to show hosted by in Event Search Response Item?
                     viewHolderEvents.eventHostTextView.setText(getString(R.string.event_item_hosted_by,
                             eventsResults.get(position)
                                     .get_source()
                                     .getHost()
-                                    .get(0)
                                     .getUsername()));
+
                     viewHolderEvents.eventCityStateTextView.setText(getString(R.string.event_item_citystate,
                             eventsResults.get(position)
                                     .get_source()

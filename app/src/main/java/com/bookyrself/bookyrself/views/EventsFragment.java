@@ -89,22 +89,22 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
     }
 
     @Override
-    public void eventsReady(List<Event> events) {
-            for (int i = 0; i < events.size(); i++) {
-                String[] s = events.get(i).getDate().split("-");
-                int year = Integer.parseInt(s[0]);
-                // I have to do weird logic on the month because months are 0 indexed
-                // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
-                int month = Integer.parseInt(s[1]) - 1;
-                int day = Integer.parseInt(s[2]);
-                CalendarDay calendarDay = CalendarDay.from(year, month, day);
-                calendarDays.add(calendarDay);
-                calendarDaysWithEventIds.put(calendarDay, events.get(i).getId());
-            }
-            if (calendarDays.size() == events.size()) {
-                calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, getActivity()));
-            }
+    public void userEventsReady(List<Event> events) {
+        for (int i = 0; i < events.size(); i++) {
+            String[] s = events.get(i).getDate().split("-");
+            int year = Integer.parseInt(s[0]);
+            // I have to do weird logic on the month because months are 0 indexed
+            // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
+            int month = Integer.parseInt(s[1]) - 1;
+            int day = Integer.parseInt(s[2]);
+            CalendarDay calendarDay = CalendarDay.from(year, month, day);
+            calendarDays.add(calendarDay);
+            calendarDaysWithEventIds.put(calendarDay, events.get(i).getId());
+        }
+        if (calendarDays.size() == events.size()) {
+            calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, getActivity()));
         }
     }
+}
 
 

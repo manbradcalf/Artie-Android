@@ -20,7 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.ProfilePresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.firebase.ui.auth.AuthUI;
@@ -76,7 +76,7 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     android.support.v7.widget.Toolbar toolbar;
     private ProfilePresenter presenter;
     private StorageReference storageReference;
-    private _source user;
+    private User user;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -97,7 +97,7 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-        user = new _source();
+        user = new User();
         presenter = new ProfilePresenter(this);
         storageReference = FirebaseStorage.getInstance().getReference();
         toolbar.setTitle(R.string.title_profile);
@@ -155,7 +155,7 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     }
 
     @Override
-    public void profileInfoReady(_source response) {
+    public void profileInfoReady(User response) {
         setLayout(response);
     }
 
@@ -174,7 +174,7 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
 
     }
 
-    public void setLayout(_source user) {
+    public void setLayout(User user) {
 
         if (user != null) {
             emptyState.setVisibility(View.GONE);
