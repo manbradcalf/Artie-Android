@@ -8,6 +8,8 @@ import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._so
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import retrofit2.Call;
@@ -43,8 +45,9 @@ public class ContactsActivityPresenter extends BasePresenter implements Contacts
      */
 
     @Override
-    public void contactsReturned(List<String> ids) {
-        presenterListener.contactsReturned(ids);
+    public void contactsReturned(HashMap<String,Boolean> contacts) {
+        List<String> contactIds = new ArrayList<>(contacts.keySet());
+        presenterListener.contactsReturned(contactIds);
     }
 
     @Override

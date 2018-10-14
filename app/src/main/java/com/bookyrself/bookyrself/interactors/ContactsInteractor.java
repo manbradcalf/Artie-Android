@@ -8,6 +8,7 @@ import com.bookyrself.bookyrself.presenters.BasePresenter;
 import com.bookyrself.bookyrself.presenters.ContactsActivityPresenter;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
+import java.util.HashMap;
 import java.util.List;
 
 import retrofit2.Call;
@@ -29,14 +30,14 @@ public class ContactsInteractor {
      * Methods
      */
     public void getContactIds(String userId) {
-        service.getAPI().getUserContacts(userId).enqueue(new Callback<List<String>>() {
+        service.getAPI().getUserContacts(userId).enqueue(new Callback<HashMap<String, Boolean>>() {
             @Override
-            public void onResponse(Call<List<String>> call, Response<List<String>> response) {
+            public void onResponse(Call<HashMap<String,Boolean>> call, Response<HashMap<String,Boolean>> response) {
                 listener.contactsReturned(response.body());
             }
 
             @Override
-            public void onFailure(Call<List<String>> call, Throwable t) {
+            public void onFailure(Call<HashMap<String,Boolean>> call, Throwable t) {
                 listener.presentError(t.getMessage());
                 Log.e("getContactIds: ", t.getMessage());
             }
@@ -66,7 +67,7 @@ public class ContactsInteractor {
 
     public interface ContactsInteractorListener {
 
-        void contactsReturned(List<String> ids);
+        void contactsReturned(HashMap<String,Boolean> contacts);
 
         void userReturned(String id, User user);
 

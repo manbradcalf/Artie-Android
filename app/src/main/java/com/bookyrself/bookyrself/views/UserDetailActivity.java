@@ -112,8 +112,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             addUserToContactsCardview.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //TODO: Add code that adds a user to your contacts list
-                    userDetailPresenter.addContact(FirebaseAuth.getInstance().getCurrentUser().getUid(), userID);
+                    userDetailPresenter.addContactToUser(FirebaseAuth.getInstance().getCurrentUser().getUid(), userID);
                 }
             });
         } else {

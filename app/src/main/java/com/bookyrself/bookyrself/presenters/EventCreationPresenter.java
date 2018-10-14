@@ -64,8 +64,8 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
      * ContactsInteractor Listeners
      */
     @Override
-    public void contactsReturned(List<String> ids) {
-        contactIds = ids;
+    public void contactsReturned(HashMap<String,Boolean> contacts) {
+        contactIds = new ArrayList<>(contacts.keySet());
         contactsInteractor.getUsers(contactIds);
     }
 
@@ -100,11 +100,16 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
 
     @Override
     public void eventCreated(String eventId, List<String> userIdsOfAttendees) {
-        for (String userId : userIdsOfAttendees) {
-            EventInfo eventInfo = new EventInfo();
-            eventInfo.setIsInviteAccepted(false);
-            usersInteractor.addEventToUser(eventInfo, userId, eventId);
+        if (userIdsOfAttendees.size() != 0) {
+            for (String userId : userIdsOfAttendees) {
+                EventInfo eventInfo = new EventInfo();
+                eventInfo.setIsInviteAccepted(false);
+                usersInteractor.addEventToUser(eventInfo, userId, eventId);
+            }
+        } else {
+            presenterListener.eventCreated();
         }
+
     }
 
     @Override

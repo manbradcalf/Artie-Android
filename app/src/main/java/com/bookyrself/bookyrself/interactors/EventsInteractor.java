@@ -4,14 +4,11 @@ import android.util.Log;
 
 import com.bookyrself.bookyrself.models.SerializedModels.EventCreationResponse;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.MiniUser;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -70,8 +67,10 @@ public class EventsInteractor {
         // We'll use this list of ids to add the event to the users.
         // An event's users are stored as a hashmap due to Firebase DB limitations
         final List<String> userIds = new ArrayList<>();
-        for (String key : event.getUsers().keySet()) {
-            userIds.add(key);
+        if (event.getUsers() != null) {
+            for (String key : event.getUsers().keySet()) {
+                userIds.add(key);
+            }
         }
 
         service.getAPI().createEvent(event).enqueue(new Callback<EventCreationResponse>() {

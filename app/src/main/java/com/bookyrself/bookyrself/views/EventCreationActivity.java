@@ -111,7 +111,7 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
 
     @Override
     public void eventCreated() {
-
+        finish();
     }
 
     @Override
