@@ -56,7 +56,7 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         presenter = new EventsPresenter(this);
-        presenter.loadUserEvents(FirebaseAuth.getInstance().getUid());
+        presenter.loadUsersEventInfo(FirebaseAuth.getInstance().getUid());
         calendarView.setOnDateChangedListener(this);
         calendarDaysWithEventIds = new HashMap<>();
         fab.setOnClickListener(new View.OnClickListener() {
