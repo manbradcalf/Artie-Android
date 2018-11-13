@@ -20,9 +20,10 @@ import java.util.Locale;
 //TODO: Refactor this class to allow for any presenter, not just mSearchPresenter. See dataReady method
 public class DatePickerDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener, DatePickerDialogPresenter.DatePickerDialogPresenterListener {
 
+    public static final int FLAG_EVENT_CREATION = 1;
     public static final int FLAG_START_DATE = 2;
     public static final int FLAG_END_DATE = 3;
-    private int flag = 0;
+    private int flag;
     private SearchPresenter mSearchPresenter;
     private EventCreationPresenter mEventCreationPresenter;
 
@@ -39,28 +40,34 @@ public class DatePickerDialogFragment extends DialogFragment implements DatePick
         flag = i;
     }
 
-    public void setmSearchPresenter(SearchPresenter presenter) {
+    public void setSearchPresenter(SearchPresenter presenter) {
         mSearchPresenter = presenter;
     }
 
-    public void setmEventCreationPresenter(EventCreationPresenter presenter) {mEventCreationPresenter = presenter;}
+    public void setmEventCreationPresenter(EventCreationPresenter presenter) {
+        mEventCreationPresenter = presenter;
+    }
 
     @Override
     public void onDateSet(DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
         java.util.Calendar calendar = java.util.Calendar.getInstance();
         calendar.set(year, monthOfYear, dayOfMonth);
         java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US);
-
-        dateReady(flag, format.format(calendar.getTime()));
+        dateSelected(flag, format.format(calendar.getTime()));
     }
 
 
     @Override
-    public void dateReady(int flag, String date) {
-        if (flag == FLAG_START_DATE) {
-            mSearchPresenter.setStartDate(date);
-        } else if (flag == FLAG_END_DATE) {
-            mSearchPresenter.setEndDate(date);
+    public void dateSelected(int flag, String date) {
+        switch (flag) {
+            case FLAG_EVENT_CREATION: mEventCreationPresenter.setDate(date);
+                break;
+
+            case FLAG_START_DATE: mSearchPresenter.setStartDate(date);
+                break;
+
+            case FLAG_END_DATE: mSearchPresenter.setEndDate(date);
+                break;
         }
     }
 }
