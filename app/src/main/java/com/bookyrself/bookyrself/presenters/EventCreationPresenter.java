@@ -4,14 +4,11 @@ import com.bookyrself.bookyrself.interactors.ContactsInteractor;
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.interactors.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.MiniUser;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,14 +56,20 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
         contactsInteractor.getContactIds(userId);
     }
 
+    public void setDate(String date) {
+        presenterListener.dateAdded(date);
+    }
+
 
     /**
      * ContactsInteractor Listeners
      */
     @Override
-    public void contactsReturned(HashMap<String,Boolean> contacts) {
-        contactIds = new ArrayList<>(contacts.keySet());
-        contactsInteractor.getUsers(contactIds);
+    public void contactsReturned(HashMap<String, Boolean> contacts) {
+        if (contacts != null) {
+            contactIds = new ArrayList<>(contacts.keySet());
+            contactsInteractor.getUsers(contactIds);
+        }
     }
 
     @Override
@@ -106,10 +109,12 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
                 eventInfo.setIsInviteAccepted(false);
                 usersInteractor.addEventToUser(eventInfo, userId, eventId);
             }
-        } else {
             presenterListener.eventCreated();
         }
-
+        //TODO: Wut? I'm tired
+        else {
+            presenterListener.eventCreated();
+        }
     }
 
     @Override
@@ -143,5 +148,7 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
         void eventCreated();
 
         void removeFromPotentialUsers(String userId);
+
+        void dateAdded(String date);
     }
 }
