@@ -45,13 +45,14 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
         mService.getAPI().getUserDetails(id).enqueue(new Callback<User>() {
             @Override
             public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                //TODO: I hate all of these null checks. Can I fix?
                 if (response.body() != null) {
                     mListener.userInfoReady(response.body());
+                    if (response.body().getEvents() != null)
                     eventsInteractor.getMultipleEventDetails(new ArrayList<>(response.body().getEvents().keySet()));
                 } else {
                     mListener.presentError();
                 }
-
             }
 
             @Override
