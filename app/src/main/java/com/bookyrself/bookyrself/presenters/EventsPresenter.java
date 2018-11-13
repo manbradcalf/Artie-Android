@@ -1,6 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
@@ -38,25 +39,24 @@ public class EventsPresenter implements EventsInteractor.EventsInteractorListene
     /**
      * Methods
      */
-    public void loadUserEvents(String userId) {
-        service.getAPI().getUserEvents(userId).enqueue(new Callback<HashMap<String, EventInfo>>() {
+    public void loadUserEventIds(final String userId) {
+        service.getAPI().getUserEventIds(userId).enqueue(new Callback<HashMap<String, EventInfo>>() {
             @Override
             public void onResponse(@NonNull Call<HashMap<String, EventInfo>> call, @NonNull Response<HashMap<String, EventInfo>> response) {
                 if (response.body() != null) {
-                    //TODO: Rename all of this horrible bullshuit
-                    getActualEvents(new ArrayList<>(response.body().keySet()));
+                    getEventDetails(new ArrayList<>(response.body().keySet()));
                 }
 
             }
 
             @Override
             public void onFailure(Call<HashMap<String, EventInfo>> call, Throwable t) {
-
+                Log.e(this.toString(), "Failed to load user events for user " + userId);
             }
         });
     }
 
-    private void getActualEvents(List<String> eventIds) {
+    private void getEventDetails(List<String> eventIds) {
         for (String id : eventIds){
             eventsInteractor.getEventDetail(id);
         }
