@@ -24,11 +24,11 @@ import android.widget.TextView;
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.List;
 
@@ -163,7 +163,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             public void onClick(View view) {
                 DatePickerDialogFragment dialog = new DatePickerDialogFragment();
                 dialog.setFlag(FLAG_START_DATE);
-                dialog.setmSearchPresenter(presenter);
+                dialog.setSearchPresenter(presenter);
                 dialog.show(getActivity().getFragmentManager(), "datePicker");
             }
         });
@@ -175,7 +175,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             public void onClick(View view) {
                 DatePickerDialogFragment dialog = new DatePickerDialogFragment();
                 dialog.setFlag(FLAG_END_DATE);
-                dialog.setmSearchPresenter(presenter);
+                dialog.setSearchPresenter(presenter);
                 dialog.show(getActivity().getFragmentManager(), "datePicker");
             }
         });

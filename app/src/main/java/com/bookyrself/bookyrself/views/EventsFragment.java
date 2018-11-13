@@ -16,6 +16,7 @@ import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.presenters.EventsPresenter;
 import com.bookyrself.bookyrself.utils.EventDecorator;
+import com.google.firebase.auth.FirebaseAuth;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
@@ -55,7 +56,7 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         presenter = new EventsPresenter(this);
-        presenter.loadUserEvents("20");
+        presenter.loadUserEvents(FirebaseAuth.getInstance().getUid());
         calendarView.setOnDateChangedListener(this);
         calendarDaysWithEventIds = new HashMap<>();
         fab.setOnClickListener(new View.OnClickListener() {

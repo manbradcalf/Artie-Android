@@ -28,8 +28,11 @@ import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseUserMetadata;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -254,6 +257,11 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
                     }
                     if (data.getStringExtra("username") != null) {
                         user.setUsername(data.getStringExtra("username"));
+                        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+                        UserProfileChangeRequest changeRequest = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(data.getStringExtra("username"))
+                                .build();
+                        fbUser.updateProfile(changeRequest);
                     }
                     if (data.getStringExtra("location") != null) {
                         user.setCitystate(data.getStringExtra("location"));
