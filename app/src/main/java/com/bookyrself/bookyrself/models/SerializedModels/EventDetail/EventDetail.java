@@ -81,7 +81,7 @@ public class EventDetail {
     }
 
     public void setUsers(HashMap<String, Boolean> userIds) {
-        userIds = mUserIds;
+        mUserIds = userIds;
     }
 
 }
