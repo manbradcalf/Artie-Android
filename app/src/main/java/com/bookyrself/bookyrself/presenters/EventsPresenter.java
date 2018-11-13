@@ -39,8 +39,8 @@ public class EventsPresenter implements EventsInteractor.EventsInteractorListene
     /**
      * Methods
      */
-    public void loadUserEventIds(final String userId) {
-        service.getAPI().getUserEventIds(userId).enqueue(new Callback<HashMap<String, EventInfo>>() {
+    public void loadUsersEventInfo(final String userId) {
+        service.getAPI().getUsersEventInfo(userId).enqueue(new Callback<HashMap<String, EventInfo>>() {
             @Override
             public void onResponse(@NonNull Call<HashMap<String, EventInfo>> call, @NonNull Response<HashMap<String, EventInfo>> response) {
                 if (response.body() != null) {

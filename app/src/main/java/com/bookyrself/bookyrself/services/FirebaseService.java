@@ -46,7 +46,7 @@ public class FirebaseService {
         Call<EventDetail> getEventData(@Path("id") String eventId);
 
         @GET("/users/{id}/events.json")
-        Call<HashMap<String, EventInfo>> getUserEvents(@Path("id") String userId);
+        Call<HashMap<String, EventInfo>> getUsersEventInfo(@Path("id") String userId);
 
         @GET("/users/{id}/picture.json")
         Call<String> getUserThumbUrl(@Path("id") String userId);
