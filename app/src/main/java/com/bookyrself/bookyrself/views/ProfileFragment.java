@@ -6,7 +6,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -16,7 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.ProfilePresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.firebase.ui.auth.AuthUI;
@@ -24,14 +28,16 @@ import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseUserMetadata;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -47,10 +53,6 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     private static final int RC_PHOTO_SELECT = 789;
     @BindView(R.id.profile_content)
     RelativeLayout profileContent;
-    @BindView(R.id.btnSignOut)
-    Button btnSignOut;
-    @BindView(R.id.btnEditProfile)
-    Button btnEditProfile;
     @BindView(R.id.bio_body_profile_activity)
     TextView bioTextView;
     @BindView(R.id.profile_image)
@@ -73,39 +75,49 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     TextView emptyStateTextSubHeader;
     @BindView(R.id.empty_state_button)
     Button emptyStateButton;
+    @BindView(R.id.toolbar_profile)
+    android.support.v7.widget.Toolbar toolbar;
     private ProfilePresenter presenter;
     private StorageReference storageReference;
-    private _source user;
+    private User user;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, view);
+        setHasOptionsMenu(true);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-        user = new _source();
+        user = new User();
         presenter = new ProfilePresenter(this);
         storageReference = FirebaseStorage.getInstance().getReference();
+        toolbar.setTitle(R.string.title_profile);
 
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            profileContent.setVisibility(View.GONE);
             emptyStateTextHeader.setText(getString(R.string.auth_val_prop_header));
             emptyStateTextSubHeader.setText(getString(R.string.auth_val_prop_subheader));
             emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_no_auth_profile));
             emptyStateButton.setText("Join Now");
             emptyState.setVisibility(View.VISIBLE);
+            profileContent.setVisibility(View.GONE);
             emptyStateButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
                             new AuthUI.IdpConfig.EmailBuilder().build());
                     // Authenticate
-                    btnSignOut.setVisibility(View.GONE);
                     startActivityForResult(
                             AuthUI.getInstance()
                                     .createSignInIntentBuilder()
@@ -122,7 +134,31 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     }
 
     @Override
-    public void profileInfoReady(_source response) {
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.profile_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.edit_profile:
+                Intent intent = new Intent(getActivity(), ProfileCreationActivity.class);
+                startActivityForResult(intent, RC_PROFILE_CREATION);
+                return true;
+            case R.id.sign_out:
+                if (getContext() != null) {
+                    AuthUI.getInstance().signOut(getContext());
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void profileInfoReady(User response) {
         setLayout(response);
     }
 
@@ -141,14 +177,14 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
 
     }
 
-    public void setLayout(_source user) {
+    public void setLayout(User user) {
 
         if (user != null) {
             emptyState.setVisibility(View.GONE);
             profileContent.setVisibility(View.VISIBLE);
             userNameTextView.setText(user.getUsername());
             bioTextView.setText(user.getBio());
-            StorageReference profileImageReference = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
+            final StorageReference profileImageReference = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
             profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                 @Override
                 public void onSuccess(Uri uri) {
@@ -158,8 +194,16 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
                             .centerCrop()
                             .transform(new CircleTransform())
                             .into(profileImage);
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle any errors
+                    profileImage.setImageDrawable(getContext().getDrawable((R.drawable.ic_profile_black_24dp)));
                 }
             });
+
             profileImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -179,22 +223,8 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
 
         } else {
             userNameTextView.setText("user not in fb db");
+            profileContent.setVisibility(View.GONE);
         }
-        btnSignOut.setVisibility(View.VISIBLE);
-        btnSignOut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-            }
-        });
-        btnEditProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), ProfileCreationActivity.class);
-                startActivityForResult(intent, RC_PROFILE_CREATION);
-            }
-        });
-
     }
 
     @Override
@@ -227,6 +257,11 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
                     }
                     if (data.getStringExtra("username") != null) {
                         user.setUsername(data.getStringExtra("username"));
+                        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+                        UserProfileChangeRequest changeRequest = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(data.getStringExtra("username"))
+                                .build();
+                        fbUser.updateProfile(changeRequest);
                     }
                     if (data.getStringExtra("location") != null) {
                         user.setCitystate(data.getStringExtra("location"));
@@ -269,7 +304,7 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
             }
         } else {
             if (response == null) {
-                // User pressed back button
+                // MiniUser pressed back button
                 showToast("Canceled");
                 return;
             }

@@ -3,7 +3,7 @@ package com.bookyrself.bookyrself.views;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.bookyrself.bookyrself.R;
@@ -12,7 +12,7 @@ import com.bookyrself.bookyrself.utils.FragmentViewPagerAdapter;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class MainActivity extends FragmentActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     private static final int RC_SIGN_IN = 123;
     private static final int SEARCH_FRAGMENT_INDEX = 0;
@@ -69,13 +69,13 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
     private void buildFragmentsList() {
         final ProfileFragment profileFragment = new ProfileFragment();
         final SearchFragment searchFragment = new SearchFragment();
-        final CalendarFragment calendarFragment = new CalendarFragment();
+        final EventsFragment eventsFragment = new EventsFragment();
         final ContactsFragment contactsFragment = new ContactsFragment();
 
         viewPager = findViewById(R.id.view_pager);
         adapter = new FragmentViewPagerAdapter(this.getSupportFragmentManager());
         adapter.addFragment(searchFragment, "Search");
-        adapter.addFragment(calendarFragment, "Calendar");
+        adapter.addFragment(eventsFragment, "Events");
         adapter.addFragment(contactsFragment, "Contacts");
         adapter.addFragment(profileFragment, "Profile");
         viewPager.setAdapter(adapter);

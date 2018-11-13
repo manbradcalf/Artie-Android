@@ -1,18 +1,13 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -21,9 +16,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
-import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
-import com.bookyrself.bookyrself.presenters.CalendarPresenter;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.presenters.EventsPresenter;
 import com.bookyrself.bookyrself.presenters.UserDetailPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -35,7 +31,6 @@ import com.google.firebase.storage.StorageReference;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
-import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -47,7 +42,7 @@ import java.util.List;
  */
 
 public class UserDetailActivity extends AppCompatActivity implements UserDetailPresenter.UserDetailPresenterListener,
-        CalendarPresenter.CalendarPresenterListener, OnDateSelectedListener {
+        EventsPresenter.CalendarPresenterListener, OnDateSelectedListener {
 
     private CardView emailUserCardview;
     private CardView addUserToContactsCardview;
@@ -68,7 +63,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     private String userEmailAddress;
     private String userID;
     private Toolbar Toolbar;
-    private CalendarPresenter calendarPresenter;
+    private EventsPresenter eventsPresenter;
     private MaterialCalendarView calendarView;
     private RelativeLayout contentView;
     private StorageReference storageReference;
@@ -80,8 +75,8 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         userDetailPresenter = new UserDetailPresenter(this);
         userID = getIntent().getStringExtra("userId");
         userDetailPresenter.getUserInfo(userID);
-        calendarPresenter = new CalendarPresenter(this);
-        calendarPresenter.loadUserEvents(userID);
+        eventsPresenter = new EventsPresenter(this);
+        eventsPresenter.loadUsersEventInfo(userID);
         Toolbar = findViewById(R.id.toolbar_user_detail);
         Toolbar.setTitle("User Details");
         calendarView = findViewById(R.id.user_detail_calendar);
@@ -92,7 +87,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     }
 
     @Override
-    public void userInfoReady(_source response) {
+    public void userInfoReady(User response) {
 
         // Show the user details now that they're loaded
         usernameTextView = findViewById(R.id.username_user_detail_activity);
@@ -117,8 +112,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             addUserToContactsCardview.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //TODO: Add code that adds a user to your contacts list
-                    userDetailPresenter.addContact(FirebaseAuth.getInstance().getCurrentUser().getUid(), userID);
+                    userDetailPresenter.addContactToUser(FirebaseAuth.getInstance().getCurrentUser().getUid(), userID);
                 }
             });
         } else {
@@ -225,10 +219,15 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     }
 
     @Override
-    public void eventsReady(List<Event> events) {
+    public void userEventsReady(List<Event> events) {
+
+    }
+
+    @Override
+    public void usersEventInfoReady(HashMap<String, EventDetail> events, String eventId) {
         if (events != null) {
             for (int i = 0; i < events.size(); i++) {
-                String[] s = events.get(i).getDate().split("-");
+                String[] s = events.get(eventId).getDate().split("-");
                 int year = Integer.parseInt(s[0]);
                 // I have to do weird logic on the month because months are 0 indexed
                 // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
@@ -236,7 +235,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                 int day = Integer.parseInt(s[2]);
                 CalendarDay calendarDay = CalendarDay.from(year, month, day);
                 calendarDays.add(calendarDay);
-                calendarDaysWithEventIds.put(calendarDay, events.get(i).getId());
+                calendarDaysWithEventIds.put(calendarDay, eventId);
             }
             if (calendarDays.size() == events.size()) {
                 calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this));

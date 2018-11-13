@@ -1,6 +1,6 @@
 package com.bookyrself.bookyrself.presenters;
 
-import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
 import retrofit2.Call;
@@ -22,45 +22,45 @@ public class ProfilePresenter {
     /**
      * Methods
      */
-    public void createUser(_source user, String UID) {
-        service.getAPI().addUser(user, UID).enqueue(new Callback<_source>() {
+    public void createUser(User user, String UID) {
+        service.getAPI().addUser(user, UID).enqueue(new Callback<User>() {
             @Override
-            public void onResponse(Call<_source> call, Response<_source> response) {
+            public void onResponse(Call<User> call, Response<User> response) {
                 // response
                 listener.profileInfoReady(response.body());
             }
 
             @Override
-            public void onFailure(Call<_source> call, Throwable t) {
+            public void onFailure(Call<User> call, Throwable t) {
                 // failure
             }
         });
     }
 
-    public void patchUser(_source user, String UID) {
-        service.getAPI().patchUser(user, UID).enqueue(new Callback<_source>() {
+    public void patchUser(User user, String UID) {
+        service.getAPI().patchUser(user, UID).enqueue(new Callback<User>() {
             @Override
-            public void onResponse(Call<_source> call, Response<_source> response) {
+            public void onResponse(Call<User> call, Response<User> response) {
                 // response
                 listener.profileInfoReady(response.body());
             }
 
             @Override
-            public void onFailure(Call<_source> call, Throwable t) {
+            public void onFailure(Call<User> call, Throwable t) {
                 // failure
             }
         });
     }
 
     public void getUser(String UID) {
-        service.getAPI().getUserDetails(UID).enqueue(new Callback<_source>() {
+        service.getAPI().getUserDetails(UID).enqueue(new Callback<User>() {
             @Override
-            public void onResponse(Call<_source> call, Response<_source> response) {
+            public void onResponse(Call<User> call, Response<User> response) {
                 listener.profileInfoReady(response.body());
             }
 
             @Override
-            public void onFailure(Call<_source> call, Throwable t) {
+            public void onFailure(Call<User> call, Throwable t) {
 
             }
         });
@@ -95,7 +95,7 @@ public class ProfilePresenter {
      */
     public interface ProfilePresenterListener {
 
-        void profileInfoReady(_source response);
+        void profileInfoReady(User response);
 
         void presentToast(String message);
 

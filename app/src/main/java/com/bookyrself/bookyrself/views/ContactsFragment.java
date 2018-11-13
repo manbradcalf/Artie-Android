@@ -12,12 +12,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
-import com.bookyrself.bookyrself.presenters.ContactsPresenter;
+import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.presenters.ContactsActivityPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
@@ -30,19 +33,32 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ContactsFragment extends Fragment implements ContactsPresenter.ContactsPresenterListener {
+public class ContactsFragment extends Fragment implements ContactsActivityPresenter.ContactsPresenterListener {
 
     private static final int RC_SIGN_IN = 123;
     @BindView(R.id.contacts_recyclerview)
     RecyclerView recyclerView;
+
     @BindView(R.id.toolbar_contacts_fragment)
     Toolbar toolbar;
+
+    @BindView(R.id.contacts_empty_state)
+    LinearLayout emptyState;
+    @BindView(R.id.empty_state_text_header)
+    TextView emptyStateTextHeader;
+    @BindView(R.id.empty_state_image)
+    ImageView emptyStateImage;
+    @BindView(R.id.empty_state_text_subheader)
+    TextView emptyStateTextSubHeader;
+    @BindView(R.id.empty_state_button)
+    Button emptyStateButton;
+
     ContactsAdapter adapter;
-    ContactsPresenter presenter;
+    ContactsActivityPresenter presenter;
     RecyclerView.LayoutManager layoutManager;
     List<String> contactIds;
-    List<_source> contacts;
-    Map<_source, String> contactsMap;
+    List<User> contacts;
+    Map<User, String> contactsMap;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,7 +68,7 @@ public class ContactsFragment extends Fragment implements ContactsPresenter.Cont
         toolbar.setTitle(R.string.contacts_toolbar);
         contactsMap = new HashMap<>();
         contacts = new ArrayList<>();
-        presenter = new ContactsPresenter(this);
+        presenter = new ContactsActivityPresenter(this);
         adapter = new ContactsAdapter();
         recyclerView.setAdapter(adapter);
         layoutManager = new LinearLayoutManager(getActivity());
@@ -63,6 +79,7 @@ public class ContactsFragment extends Fragment implements ContactsPresenter.Cont
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
+        emptyState.setVisibility(View.GONE);
         presenter.getContactIds(FirebaseAuth.getInstance().getUid());
     }
 
@@ -85,16 +102,27 @@ public class ContactsFragment extends Fragment implements ContactsPresenter.Cont
         presenter.getUsers(ids);
     }
 
+    //TODO: Do what?
     //  When I've iterated through all the ids, I notify the adapter of a change
     // Also I am adding to a map of userId with userInfo so I can start a UserDetail activity with the id
     // since the id isn't on the _source object
     @Override
-    public void userReturned(String id, _source user) {
+    public void userReturned(String id, User user) {
         contacts.add(user);
         contactsMap.put(user, id);
         if (contacts.size() == contactIds.size()) {
             adapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void noUsersReturned() {
+        emptyState.setVisibility(View.VISIBLE);
+        emptyStateTextHeader.setText(R.string.contacts_empty_state_header);
+        emptyStateTextSubHeader.setText(R.string.contacts_empty_state_subheader);
+        emptyStateButton.setText(R.string.contacts_empty_state_button_text);
+        emptyStateImage.setImageDrawable(getContext().getDrawable(R.drawable.ic_person_add_black_24dp));
+
     }
 
     class ContactsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

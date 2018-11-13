@@ -20,19 +20,15 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SearchResponseEvents.User;
-import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
-import com.bookyrself.bookyrself.utils.DatePickerDialogFragment;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.List;
 
@@ -76,8 +72,8 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     @BindView(R.id.search_recycler_view)
     RecyclerView recyclerView;
     SearchPresenter presenter;
-    List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> eventsResults;
-    List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> usersResults;
+    List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents.Hit> eventsResults;
+    List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Hit> usersResults;
     ResultsAdapter adapter;
     Boolean boolSearchEditable = false;
     private StorageReference storageReference;
@@ -167,7 +163,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             public void onClick(View view) {
                 DatePickerDialogFragment dialog = new DatePickerDialogFragment();
                 dialog.setFlag(FLAG_START_DATE);
-                dialog.setmSearchPresenter(presenter);
+                dialog.setSearchPresenter(presenter);
                 dialog.show(getActivity().getFragmentManager(), "datePicker");
             }
         });
@@ -179,7 +175,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             public void onClick(View view) {
                 DatePickerDialogFragment dialog = new DatePickerDialogFragment();
                 dialog.setFlag(FLAG_END_DATE);
-                dialog.setmSearchPresenter(presenter);
+                dialog.setSearchPresenter(presenter);
                 dialog.show(getActivity().getFragmentManager(), "datePicker");
             }
         });
@@ -236,7 +232,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
     @Override
     public void searchEventsResponseReady
-            (List<com.bookyrself.bookyrself.models.SearchResponseEvents.Hit> hits) {
+            (List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents.Hit> hits) {
 
         // I hide the recyclerview to show the error empty state
         // If the previous search returned an error empty state, recyclerview
@@ -268,7 +264,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
     @Override
     public void searchUsersResponseReady
-            (List<com.bookyrself.bookyrself.models.SearchResponseUsers.Hit> hits) {
+            (List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Hit> hits) {
 
         // I hide the recyclerview to show the error empty state
         // If the previous search returned an error empty state, recyclerview
@@ -445,7 +441,8 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         @Override
                         public void onFailure(@NonNull Exception exception) {
                             // Handle any errors
-                            viewHolderUsers.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_profile_black_24dp));
+                            viewHolderUsers.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_person_white_16dp));
+                            Log.e("ProfileImage not loaded", exception.getLocalizedMessage());
                         }
                     });
 
@@ -465,12 +462,13 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                             .get(position)
                             .get_source()
                             .getEventname());
+                    //TODO: Do I need to show hosted by in Event Search Response Item?
                     viewHolderEvents.eventHostTextView.setText(getString(R.string.event_item_hosted_by,
                             eventsResults.get(position)
                                     .get_source()
                                     .getHost()
-                                    .get(0)
                                     .getUsername()));
+
                     viewHolderEvents.eventCityStateTextView.setText(getString(R.string.event_item_citystate,
                             eventsResults.get(position)
                                     .get_source()
@@ -498,7 +496,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                     });
                 }
             } else {
-                Log.e(this.getClass().toString(), "Provided neither Event or User viewholder type");
+                Log.e(this.getClass().toString(), "Provided neither MiniEvent or MiniUser viewholder type");
             }
         }
 

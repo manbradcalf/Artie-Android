@@ -1,11 +1,11 @@
 package com.bookyrself.bookyrself.services;
 
-import com.bookyrself.bookyrself.models.EventDetailResponse.EventDetailResponse;
-import com.bookyrself.bookyrself.models.SearchResponseUsers.Event;
-import com.bookyrself.bookyrself.models.SearchResponseUsers._source;
+import com.bookyrself.bookyrself.models.SerializedModels.EventCreationResponse;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 
-import java.util.List;
-import java.util.Map;
+import java.util.HashMap;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -15,6 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.PATCH;
+import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
@@ -42,40 +43,35 @@ public class FirebaseService {
 
     public interface FirebaseApi {
         @GET("/events/{id}.json")
-        Call<EventDetailResponse> getEventData(@Path("id") String eventId);
+        Call<EventDetail> getEventData(@Path("id") String eventId);
 
         @GET("/users/{id}/events.json")
-        Call<List<Event>> getUserEvents(@Path("id") String userId);
+        Call<HashMap<String, EventInfo>> getUsersEventInfo(@Path("id") String userId);
 
         @GET("/users/{id}/picture.json")
         Call<String> getUserThumbUrl(@Path("id") String userId);
 
         @GET("/users/{id}.json")
-        Call<_source> getUserDetails(@Path("id") String userId);
+        Call<User> getUserDetails(@Path("id") String userId);
 
         @GET("/users/{id}/contacts.json")
-        Call<List<String>> getUserContacts(@Path("id") String userId);
+        Call<HashMap<String, Boolean>> getUserContacts(@Path("id") String userId);
 
         @PUT("/users/{userId}.json")
-        Call<_source> addUser(@Body _source user, @Path("userId") String userId);
-
-        // Add event to user item
-        // Passing in "eventArrayPosition" so ES doesn't break the mapping by accidentally creating
-        // an object in firebase instead of maintaining the array.
-        // This is my solution to https://github.com/firebase/flashlight/issues/178
-        //TODO: Revisit this one. Does it actually work? I was getting invalid jsonobject errors befre. look at addContact call for example of one thatworks
-        @PATCH("/users/{userId}/events/{eventArrayPosition}.json")
-        Call<Event> addEventToUser(@Body Event event, @Path("userId") String userId, @Path("eventArrayPosition") Long userArrayPosition);
+        Call<User> addUser(@Body User user, @Path("userId") String userId);
 
 
         @PATCH("/users/{userId}.json")
-        Call<_source> patchUser(@Body _source user, @Path("userId") String userId);
+        Call<User> patchUser(@Body User user, @Path("userId") String userId);
 
-        // Add contact to user item
-        // Passing in "contactArrayPosition" so ES doesn't break the mapping by accidentally creating
-        // an object in firebase instead of maintaining the array.
-        // This is my solution to https://github.com/firebase/flashlight/issues/178
         @PATCH("/users/{userId}/contacts.json")
-        Call<Map<String, String>> addContactToUser(@Body Map<String, String> request, @Path("userId") String userId);
+        Call<HashMap<String, Boolean>> addContactToUser(@Body HashMap<String, Boolean> request, @Path("userId") String userId);
+
+        @POST("/events.json")
+        Call<EventCreationResponse> createEvent(@Body EventDetail request);
+
+        //TODO: Clean this up. Find a way to minify the MiniEvent name
+        @PUT("/users/{userId}/events/{eventId}.json")
+        Call<HashMap<String, EventInfo>> addEventToUser(@Body HashMap<String, EventInfo> event, @Path("userId") String userId, @Path("eventId") String eventId);
     }
 }

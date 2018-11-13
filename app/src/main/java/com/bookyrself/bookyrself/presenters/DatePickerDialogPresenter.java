@@ -19,7 +19,7 @@ public class DatePickerDialogPresenter {
      * Contract / Listener
      */
     public interface DatePickerDialogPresenterListener {
-        void dateReady(int flag, String date);
+        void dateSelected(int flag, String date);
     }
 
     /**
