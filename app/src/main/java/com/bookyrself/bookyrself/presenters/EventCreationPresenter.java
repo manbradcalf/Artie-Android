@@ -143,7 +143,7 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     public interface EventCreationPresenterListener {
         void addToPotentialUsers(String userId);
 
-        void contactsReturned(Map<User, String> usersMap, List<User> contactsList);
+        void contactsReturned(Map<User, String> contactsAndUserIdMap, List<User> contactsList);
 
         void eventCreated();
 

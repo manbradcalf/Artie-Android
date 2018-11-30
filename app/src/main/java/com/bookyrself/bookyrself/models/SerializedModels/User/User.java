@@ -1,7 +1,11 @@
 
 package com.bookyrself.bookyrself.models.SerializedModels.User;
 
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+
 import com.google.gson.annotations.SerializedName;
+import com.pchmn.materialchips.model.ChipInterface;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +14,7 @@ import javax.annotation.Generated;
 
 @Generated("net.hexar.json2pojo")
 @SuppressWarnings("unused")
-public class User {
+public class User implements ChipInterface {
 
     @SerializedName("bio")
     private String mBio;
@@ -83,4 +87,28 @@ public class User {
         this.mUrl = url;
     }
 
+    @Override
+    public Object getId() {
+        return null;
+    }
+
+    @Override
+    public Uri getAvatarUri() {
+        return null;
+    }
+
+    @Override
+    public Drawable getAvatarDrawable() {
+        return null;
+    }
+
+    @Override
+    public String getLabel() {
+        return this.mUsername;
+    }
+
+    @Override
+    public String getInfo() {
+        return this.mCitystate;
+    }
 }
