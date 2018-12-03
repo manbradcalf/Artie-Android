@@ -138,7 +138,7 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
                 mListener.eventDataResponseReady(mEventDetail, mMiniUsers);
             }
         } else {
-            mListener.present_error("Ugh");
+            mListener.present_error(String.format("User %s was null", userId));
         }
     }
 
