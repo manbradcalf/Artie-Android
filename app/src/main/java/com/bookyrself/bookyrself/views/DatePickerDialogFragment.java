@@ -3,6 +3,7 @@ package com.bookyrself.bookyrself.views;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.widget.DatePicker;
 
@@ -33,7 +34,8 @@ public class DatePickerDialogFragment extends DialogFragment implements DatePick
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
-        return new DatePickerDialog(getActivity(), this, year, month, day);
+        DatePickerDialog dialog = new DatePickerDialog(getActivity(), this, year, month, day);
+        return dialog;
     }
 
     public void setFlag(int i) {
@@ -56,19 +58,39 @@ public class DatePickerDialogFragment extends DialogFragment implements DatePick
         dateSelected(flag, format.format(calendar.getTime()));
     }
 
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        switch (flag) {
+            case FLAG_EVENT_CREATION:
+                break;
+
+            case FLAG_START_DATE:
+                mSearchPresenter.clearStartDate();
+                break;
+
+            case FLAG_END_DATE:
+                mSearchPresenter.clearEndDate();
+                break;
+        }
+    }
+
 
     @Override
     public void dateSelected(int flag, String date) {
         switch (flag) {
-            case FLAG_EVENT_CREATION: mEventCreationPresenter.setDate(date);
+            case FLAG_EVENT_CREATION:
+                mEventCreationPresenter.setDate(date);
                 break;
 
-            case FLAG_START_DATE: mSearchPresenter.setStartDate(date);
+            case FLAG_START_DATE:
+                mSearchPresenter.setStartDate(date);
                 break;
 
-            case FLAG_END_DATE: mSearchPresenter.setEndDate(date);
+            case FLAG_END_DATE:
+                mSearchPresenter.setEndDate(date);
                 break;
         }
     }
+
 }
 

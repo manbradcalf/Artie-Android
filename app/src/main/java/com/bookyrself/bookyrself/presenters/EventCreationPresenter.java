@@ -57,7 +57,9 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     }
 
     public void setDate(String date) {
-        presenterListener.dateAdded(date);
+        if (date != null) {
+            presenterListener.dateAdded(date);
+        }
     }
 
 
