@@ -23,16 +23,14 @@ public class UsersInteractor {
     }
 
     public void addEventToUser(EventInfo eventInfo, String userId, String eventId) {
-        HashMap<String, EventInfo> eventWithInviteData = new HashMap<>();
-        eventWithInviteData.put(eventId, eventInfo);
-        service.getAPI().addEventToUser(eventWithInviteData, userId, eventId).enqueue(new Callback<HashMap<String, EventInfo>>() {
+        service.getAPI().addEventToUser(eventInfo, userId, eventId).enqueue(new Callback<EventInfo>() {
             @Override
-            public void onResponse(Call<HashMap<String, EventInfo>> call, Response<HashMap<String, EventInfo>> response) {
+            public void onResponse(Call<EventInfo> call, Response<EventInfo> response) {
                 listener.eventAddedToUserSuccessfully();
             }
 
             @Override
-            public void onFailure(Call<HashMap<String, EventInfo>> call, Throwable t) {
+            public void onFailure(Call<EventInfo> call, Throwable t) {
 
             }
         });
