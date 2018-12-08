@@ -1,15 +1,13 @@
 package com.bookyrself.bookyrself.views;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
-import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
@@ -19,10 +17,13 @@ import com.bookyrself.bookyrself.presenters.EventCreationPresenter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.pchmn.materialchips.ChipsInput;
 import com.pchmn.materialchips.model.Chip;
-import com.pchmn.materialchips.model.ChipInterface;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +36,6 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
 
     @BindView(R.id.event_creation_toolbar)
     Toolbar toolbar;
-
-    @BindView(R.id.search_contacts_event_creation)
-    ChipsInput contactChipsInput;
 
     @BindView(R.id.event_creation_scrollview)
     ScrollView scrollView;
@@ -52,15 +50,18 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     EditText tagsEditText;
 
     @BindView(R.id.event_creation_date_button)
-    Button dateButton;
+    EditText dateButton;
 
     @BindView(R.id.event_creation_submit_button)
-    Button submitButton;
+    FloatingActionButton submitButton;
+
+    @BindView(R.id.search_contacts_event_creation)
+    ChipsInput contactChipsInput;
 
     private EventCreationPresenter presenter;
     private List<User> contacts;
     private Map<User, String> contactsAndUserIdsMap;
-    private HashMap<String,Boolean> selectedContactsAndAttendingBooleanMap;
+    private HashMap<String, Boolean> selectedContactsAndAttendingBooleanMap;
     private String date;
     private int FLAG_EVENT_CREATION = 1;
 
@@ -75,11 +76,6 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
         contacts = new ArrayList<>();
         contactsAndUserIdsMap = new HashMap<>();
 
-        // Set a default empty list to avoid NPEs
-        List<Chip> tempList = new ArrayList<>();
-        tempList.add(new Chip("test","testing"));
-        contactChipsInput.setFilterableList(tempList);
-
         presenter.getContacts(FirebaseAuth.getInstance().getUid());
         dateButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,6 +86,7 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
                 datePickerDialogFragment.show(getFragmentManager(), "datePicker");
             }
         });
+
 
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,7 +114,7 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
                         String userId = contactsAndUserIdsMap.get(user);
 
                         // Set userId's attending boolean to false
-                        selectedContactsAndAttendingBooleanMap.put(userId,false);
+                        selectedContactsAndAttendingBooleanMap.put(userId, false);
                     }
                     event.setUsers(selectedContactsAndAttendingBooleanMap);
                 }
@@ -158,7 +155,20 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
 
     @Override
     public void dateAdded(String dateSelected) {
+
+        // Set the date for the event
         date = dateSelected;
+
+        // Format the date for the view
+        DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date parsedDate = inputFormat.parse(dateSelected);
+            DateFormat outputFormat = new SimpleDateFormat("MMMM dd, yyyy");
+            String dateString = outputFormat.format(parsedDate);
+            dateButton.setText(dateString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
 }
