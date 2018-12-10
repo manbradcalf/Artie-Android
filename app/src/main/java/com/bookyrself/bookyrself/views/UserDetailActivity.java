@@ -35,7 +35,9 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by benmedcalf on 1/13/18.
@@ -46,7 +48,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
 
     private CardView emailUserCardview;
     private CardView addUserToContactsCardview;
-    private List<CalendarDay> calendarDays = new ArrayList<>();
+    private HashSet<CalendarDay> calendarDays;
     private HashMap<CalendarDay, String> calendarDaysWithEventIds;
     private TextView usernameTextView;
     private TextView cityStateTextView;
@@ -81,6 +83,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         Toolbar.setTitle("User Details");
         calendarView = findViewById(R.id.user_detail_calendar);
         calendarView.setOnDateChangedListener(this);
+        calendarDays = new HashSet<>();
         calendarDaysWithEventIds = new HashMap<>();
         storageReference = FirebaseStorage.getInstance().getReference();
         loadingState();
@@ -226,8 +229,8 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     @Override
     public void usersEventInfoReady(HashMap<String, EventDetail> events, String eventId) {
         if (events != null) {
-            for (int i = 0; i < events.size(); i++) {
-                String[] s = events.get(eventId).getDate().split("-");
+            for (Map.Entry<String, EventDetail> pair : events.entrySet()) {
+                String[] s = events.get(pair.getKey()).getDate().split("-");
                 int year = Integer.parseInt(s[0]);
                 // I have to do weird logic on the month because months are 0 indexed
                 // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
@@ -238,7 +241,8 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                 calendarDaysWithEventIds.put(calendarDay, eventId);
             }
             if (calendarDays.size() == events.size()) {
-                calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this));
+                EventDecorator decorator = new EventDecorator(Color. BLUE, calendarDays, this);
+                calendarView.addDecorator(decorator);
             }
         }
     }
