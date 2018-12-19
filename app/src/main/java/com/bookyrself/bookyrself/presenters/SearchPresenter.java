@@ -164,6 +164,14 @@ public class SearchPresenter {
         mListener.endDateChanged(date);
     }
 
+    public void clearStartDate() {
+        mListener.startDateChanged("From");
+    }
+
+    public void clearEndDate() {
+        mListener.endDateChanged("To");
+    }
+
     /**
      * Contract / Listener
      */

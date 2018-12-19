@@ -72,6 +72,6 @@ public class FirebaseService {
 
         //TODO: Clean this up. Find a way to minify the MiniEvent name
         @PUT("/users/{userId}/events/{eventId}.json")
-        Call<HashMap<String, EventInfo>> addEventToUser(@Body HashMap<String, EventInfo> event, @Path("userId") String userId, @Path("eventId") String eventId);
+        Call<EventInfo> addEventToUser(@Body EventInfo eventInfo, @Path("userId") String userId, @Path("eventId") String eventId);
     }
 }
