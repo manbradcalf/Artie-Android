@@ -46,6 +46,9 @@
     <string name="event_creation_city_state">City and State of event</string>
     <string name="event_creation_tags">Tag your event</string>
     <string name="event_creation_select_date">Select Date</string>
+    <string name="search_fragment_search">SEARCH</string>
+    <string name="search_fragment_search_button_text">SEARCH</string>
+    <string name="search_fragment_edit_search_btn_text">EDIT SEARCH</string>
 
 
 </resources>

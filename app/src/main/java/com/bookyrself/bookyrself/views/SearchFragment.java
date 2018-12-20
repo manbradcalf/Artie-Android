@@ -22,6 +22,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
+import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents.Hit;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -72,7 +73,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     @BindView(R.id.search_recycler_view)
     RecyclerView recyclerView;
     SearchPresenter presenter;
-    List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents.Hit> eventsResults;
+    List<Hit> eventsResults;
     List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Hit> usersResults;
     ResultsAdapter adapter;
     Boolean boolSearchEditable = false;
@@ -89,7 +90,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        setLayout(view);
+        setLayout();
     }
 
     @Override
@@ -99,9 +100,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         storageReference = FirebaseStorage.getInstance().getReference();
     }
 
-    //TODO: This is being called every time the framgent is loaded
-    // I need to update this logic
-    private void setLayout(View view) {
+    private void setLayout() {
         emptyStateButton.setVisibility(View.GONE);
         if (presenter == null) {
             presenter = new SearchPresenter(this);
@@ -151,7 +150,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                 searchButton.setVisibility((View.VISIBLE));
                 eventsButton.setVisibility(View.VISIBLE);
                 usersButton.setVisibility(View.VISIBLE);
-                searchButton.setText("Search!");
+                searchButton.setText(R.string.search_fragment_search_button_text);
             }
         });
 
@@ -180,18 +179,6 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             }
         });
 
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
-
-        {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-
-            }
-        });
-
-        //TODO: I don't love the "search button". Could get rid of it? Could change it?
-        // Either way, the following code will be what happens when a user submits a search
-        // from the searchactivity
         searchButton.setOnClickListener(new View.OnClickListener()
 
         {
@@ -221,7 +208,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                     }
                 } else {
                     boolSearchEditable = false;
-                    searchButton.setText("SEARCH!");
+                    searchButton.setText(R.string.search_fragment_search_button_text);
                     showFullSearchBar(true);
                 }
             }
@@ -232,11 +219,8 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
     @Override
     public void searchEventsResponseReady
-            (List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents.Hit> hits) {
+            (List<Hit> hits) {
 
-        // I hide the recyclerview to show the error empty state
-        // If the previous search returned an error empty state, recyclerview
-        // will have a visibility of GONE here. Fix that
         if (recyclerView.getVisibility() == View.GONE) {
             recyclerView.setVisibility(View.VISIBLE);
         }
@@ -257,7 +241,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         eventsResults = hits;
         adapter.setViewType(ResultsAdapter.EVENT_VIEW_TYPE);
         boolSearchEditable = true;
-        searchButton.setText("Edit Search");
+        searchButton.setText(R.string.search_fragment_edit_search_btn_text);
         adapter.notifyDataSetChanged();
         showProgressbar(false);
     }
@@ -397,109 +381,17 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
         }
 
-        //TODO: The app crashes if any of the properties in _source are null. How to remedy this?
         @Override
         public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
 
             if (usersResults != null && holder.getItemViewType() == USER_VIEW_TYPE) {
-                if (usersResults.size() > position) {
-                    //TODO: Was getting index out of bounds errors here when toggling between Events and Users. Not sure how I feel about this check
-                    final ViewHolderUsers viewHolderUsers = (ViewHolderUsers) holder;
-                    viewHolderUsers.userCityStateTextView.setText(usersResults
-                            .get(position)
-                            .get_source()
-                            .getCitystate());
-
-                    viewHolderUsers.userNameTextView.setText(usersResults
-                            .get(position)
-                            .get_source()
-                            .getUsername());
-
-                    //TODO Are null catches the solution here?
-                    if (usersResults.get(position).get_source().getTags() != null) {
-                        StringBuilder listString = new StringBuilder();
-                        for (String s : usersResults.get(position).get_source().getTags()) {
-                            listString.append(s + ", ");
-                        }
-
-                        viewHolderUsers.userTagsTextView.setText(listString.toString());
-                    }
-
-
-                    final StorageReference profileImageReference = storageReference.child("images/" + usersResults.get(position).get_id());
-                    profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            Picasso.with(getContext())
-                                    .load(uri)
-                                    .resize(148, 148)
-                                    .centerCrop()
-                                    .transform(new CircleTransform())
-                                    .into(viewHolderUsers.userProfileImageThumb);
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            // Handle any errors
-                            viewHolderUsers.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_person_white_16dp));
-                            Log.e("ProfileImage not loaded", exception.getLocalizedMessage());
-                        }
-                    });
-
-                    viewHolderUsers.userCardView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            itemSelected(usersResults
-                                    .get(position)
-                                    .get_id(), USER_VIEW_TYPE);
-                        }
-                    });
-                }
+                buildUserViewHolder(holder, position);
             } else if (eventsResults != null && holder.getItemViewType() == EVENT_VIEW_TYPE) {
-                if (eventsResults.size() > position) {
-                    ViewHolderEvents viewHolderEvents = (ViewHolderEvents) holder;
-                    viewHolderEvents.eventNameTextView.setText(eventsResults
-                            .get(position)
-                            .get_source()
-                            .getEventname());
-                    //TODO: Do I need to show hosted by in Event Search Response Item?
-                    viewHolderEvents.eventHostTextView.setText(getString(R.string.event_item_hosted_by,
-                            eventsResults.get(position)
-                                    .get_source()
-                                    .getHost()
-                                    .getUsername()));
-
-                    viewHolderEvents.eventCityStateTextView.setText(getString(R.string.event_item_citystate,
-                            eventsResults.get(position)
-                                    .get_source()
-                                    .getCitystate()));
-
-                    Picasso.with(getActivity().getApplicationContext())
-                            .load(eventsResults
-                                    .get(position)
-                                    .get_source()
-                                    .getPicture())
-                            .placeholder(R.drawable.round)
-                            .error(R.drawable.round)
-                            .transform(new CircleTransform())
-                            .resizeDimen(R.dimen.user_image_thumb_list_height, R.dimen.user_image_thumb_list_width)
-                            .centerCrop()
-                            .into(viewHolderEvents.eventImageThumb);
-
-                    viewHolderEvents.eventCardView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            itemSelected(eventsResults
-                                    .get(position)
-                                    .get_id(), EVENT_VIEW_TYPE);
-                        }
-                    });
-                }
+                buildEventViewHolder(holder, position);
             } else {
-                Log.e(this.getClass().toString(), "Provided neither MiniEvent or MiniUser viewholder type");
+                Log.e(this.getClass().toString(), "Provided neither Event or User viewholder type");
             }
         }
-
 
         @Override
         public int getItemCount() {
@@ -509,6 +401,105 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                 return usersResults.size();
             } else {
                 return 0;
+            }
+        }
+
+        private void buildEventViewHolder(RecyclerView.ViewHolder holder, final int position) {
+            if (eventsResults.size() > position) {
+                ViewHolderEvents viewHolderEvents = (ViewHolderEvents) holder;
+                viewHolderEvents.eventNameTextView.setText(eventsResults
+                        .get(position)
+                        .get_source()
+                        .getEventname());
+                //TODO: Do I need to show hosted by in Event Search Response Item?
+                viewHolderEvents.eventHostTextView.setText(getString(R.string.event_item_hosted_by,
+                        eventsResults.get(position)
+                                .get_source()
+                                .getHost()
+                                .getUsername()));
+
+                viewHolderEvents.eventCityStateTextView.setText(getString(R.string.event_item_citystate,
+                        eventsResults.get(position)
+                                .get_source()
+                                .getCitystate()));
+
+                Picasso.with(getActivity().getApplicationContext())
+                        .load(eventsResults
+                                .get(position)
+                                .get_source()
+                                .getPicture())
+                        .placeholder(R.drawable.round)
+                        .error(R.drawable.round)
+                        .transform(new CircleTransform())
+                        .resizeDimen(R.dimen.user_image_thumb_list_height, R.dimen.user_image_thumb_list_width)
+                        .centerCrop()
+                        .into(viewHolderEvents.eventImageThumb);
+
+                viewHolderEvents.eventCardView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        itemSelected(eventsResults
+                                .get(position)
+                                .get_id(), EVENT_VIEW_TYPE);
+                    }
+                });
+            }
+
+        }
+
+        private void buildUserViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+            //TODO: Intermittent index out of bounds here when toggling between Events and Users.
+            if (usersResults.size() > position) {
+                final ViewHolderUsers viewHolderUsers = (ViewHolderUsers) holder;
+                viewHolderUsers.userCityStateTextView.setText(usersResults
+                        .get(position)
+                        .get_source()
+                        .getCitystate());
+
+                viewHolderUsers.userNameTextView.setText(usersResults
+                        .get(position)
+                        .get_source()
+                        .getUsername());
+
+                //TODO Are null catches the solution here?
+                if (usersResults.get(position).get_source().getTags() != null) {
+                    StringBuilder listString = new StringBuilder();
+                    for (String s : usersResults.get(position).get_source().getTags()) {
+                        listString.append(s + ", ");
+                    }
+
+                    viewHolderUsers.userTagsTextView.setText(listString.toString());
+                }
+
+
+                final StorageReference profileImageReference = storageReference.child("images/" + usersResults.get(position).get_id());
+                profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Picasso.with(getContext())
+                                .load(uri)
+                                .resize(148, 148)
+                                .centerCrop()
+                                .transform(new CircleTransform())
+                                .into(viewHolderUsers.userProfileImageThumb);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle any errors
+                        viewHolderUsers.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_person_white_16dp));
+                        Log.e("ProfileImage not loaded", exception.getLocalizedMessage());
+                    }
+                });
+
+                viewHolderUsers.userCardView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        itemSelected(usersResults
+                                .get(position)
+                                .get_id(), USER_VIEW_TYPE);
+                    }
+                });
             }
         }
 
