@@ -128,9 +128,8 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         } else {
             // Hit this else clause if the fragment is restarted with data already.
             // We need to show the edit search button and unselect the search view
-            // TODO: Fix this, this is gross. Maybe utilize savedInstanceState?
             searchButton.setVisibility(View.VISIBLE);
-            searchButton.setText("Edit Search!");
+            searchButton.setText(R.string.search_fragment_edit_search_btn_text);
             searchViewWhat.clearFocus();
             searchViewWhat.setSelected(false);
             searchViewWhat.setIconified(false);
@@ -226,8 +225,8 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         }
 
         // If the last empty state was an error, make sure that it is now
-        // a generic failed search. No errors will hit this method, so this is
-        // safe.
+        // a generic failed search. No service errors will hit this method,
+        // as they are caught by retrofit, so this is safe.
         if (hits.size() == 0) {
             emptyStateTextHeader.setText(R.string.search_activity_no_results_header);
             emptyStateTextSubHeader.setText(R.string.search_activity_no_results_subheader);
@@ -250,15 +249,13 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     public void searchUsersResponseReady
             (List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Hit> hits) {
 
-        // I hide the recyclerview to show the error empty state
-        // If the previous search returned an error empty state, recyclerview
-        // will have a visibility of GONE here. Fix that
         if (recyclerView.getVisibility() == View.GONE) {
             recyclerView.setVisibility(View.VISIBLE);
         }
 
-        // If there are no results, update the empty state to show the binoculars and no results copy
-        // If there are results, set the empty state to invisible
+        // If the last empty state was an error, make sure that it is now
+        // a generic failed search. No service errors will hit this method,
+        // as they are caught by retrofit, so this is safe.
         if (hits.size() == 0) {
             emptyStateTextHeader.setText(R.string.search_activity_no_results_header);
             emptyStateTextSubHeader.setText(R.string.search_activity_no_results_subheader);
