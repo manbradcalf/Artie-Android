@@ -48,25 +48,6 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
     public void getEventDetailData(String eventId) {
         mListener.showProgressbar(true);
         mEventsInteractor.getEventDetail(eventId);
-        //TODO: Make the index and type toggleable to users
-//        mFirebaseService.getAPI().getEventData(id)
-//                .enqueue(new Callback<EventDetail>() {
-//                    @Override
-//                    public void onResponse(@NonNull Call<EventDetail> call, @NonNull Response<EventDetail> response) {
-//                        if (response.body() != null) {
-//                            EventDetail data = response.body();
-//                            mListener.eventDataResponseReady(data);
-//                        } else {
-//                            mListener.present_error();
-//                        }
-//
-//                    }
-//
-//                    @Override
-//                    public void onFailure(@NonNull Call<EventDetail> call, @NonNull Throwable t) {
-//
-//                    }
-//                });
     }
 
     //TODO: Will the final "id" variable here be stuck on the first id assigned?
