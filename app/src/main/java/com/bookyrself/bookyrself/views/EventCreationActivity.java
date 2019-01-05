@@ -5,9 +5,9 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
+import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
@@ -16,7 +16,6 @@ import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.EventCreationPresenter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.pchmn.materialchips.ChipsInput;
-import com.pchmn.materialchips.model.Chip;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -91,22 +90,10 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //TODO: Find a better control flow for validating required fields
                 EventDetail event = new EventDetail();
-                if (cityStateEditText.getText() != null) {
-                    event.setCitystate(cityStateEditText.getText().toString());
-                }
-                if (eventNameEditText.getText() != null) {
-                    event.setEventname(eventNameEditText.getText().toString());
-                }
-                if (tagsEditText.getText() != null) {
-                    List<String> tagsList = Arrays.asList(tagsEditText.getText().toString().split(", "));
-                    event.setTags(tagsList);
-                }
-                if (date != null) {
-                    event.setDate(date);
-                }
+                // Contacts are the only required propert for an event
                 if (!contactChipsInput.getSelectedChipList().isEmpty()) {
-
                     List<User> selectedUsers = (List<User>) contactChipsInput.getSelectedChipList();
 
                     for (User user : selectedUsers) {
@@ -117,8 +104,34 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
                         selectedContactsAndAttendingBooleanMap.put(userId, false);
                     }
                     event.setUsers(selectedContactsAndAttendingBooleanMap);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Please select contacts to invite!", Toast.LENGTH_LONG).show();
+                    return;
                 }
-
+                if (!eventNameEditText.getText().toString().isEmpty()) {
+                    event.setEventname(eventNameEditText.getText().toString());
+                } else {
+                    eventNameEditText.requestFocus();
+                    Toast.makeText(getApplicationContext(), "Please name your event!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if (!cityStateEditText.getText().toString().isEmpty()) {
+                    event.setCitystate(cityStateEditText.getText().toString());
+                } else {
+                    cityStateEditText.requestFocus();
+                    Toast.makeText(getApplicationContext(), "Please select a location!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if (!tagsEditText.getText().toString().isEmpty()) {
+                    List<String> tagsList = Arrays.asList(tagsEditText.getText().toString().split(", "));
+                    event.setTags(tagsList);
+                }
+                if (date != null) {
+                    event.setDate(date);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Please select a date!", Toast.LENGTH_LONG).show();
+                    return;
+                }
 
                 Host host = new Host();
                 host.setUsername(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());

@@ -92,9 +92,8 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     /**
      * EventsInteractorListener
      */
-
     @Override
-    public void eventDetailReturned(EventDetail event) {
+    public void eventDetailReturned(EventDetail event, String eventId) {
 
     }
 

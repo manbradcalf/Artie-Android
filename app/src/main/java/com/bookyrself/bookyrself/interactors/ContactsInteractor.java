@@ -3,9 +3,6 @@ package com.bookyrself.bookyrself.interactors;
 import android.util.Log;
 
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
-import com.bookyrself.bookyrself.models.SerializedModels.User.User;
-import com.bookyrself.bookyrself.presenters.BasePresenter;
-import com.bookyrself.bookyrself.presenters.ContactsActivityPresenter;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
 import java.util.HashMap;
@@ -32,12 +29,12 @@ public class ContactsInteractor {
     public void getContactIds(String userId) {
         service.getAPI().getUserContacts(userId).enqueue(new Callback<HashMap<String, Boolean>>() {
             @Override
-            public void onResponse(Call<HashMap<String,Boolean>> call, Response<HashMap<String,Boolean>> response) {
+            public void onResponse(Call<HashMap<String, Boolean>> call, Response<HashMap<String, Boolean>> response) {
                 listener.contactsReturned(response.body());
             }
 
             @Override
-            public void onFailure(Call<HashMap<String,Boolean>> call, Throwable t) {
+            public void onFailure(Call<HashMap<String, Boolean>> call, Throwable t) {
                 listener.presentError(t.getMessage());
                 Log.e("getContactIds: ", t.getMessage());
             }
@@ -51,7 +48,11 @@ public class ContactsInteractor {
                 service.getAPI().getUserDetails(userIds.get(user)).enqueue(new Callback<User>() {
                     @Override
                     public void onResponse(Call<User> call, Response<User> response) {
-                        listener.userReturned(userIds.get(position), response.body());
+                        if (response.body() != null) {
+                            listener.userReturned(userIds.get(position), response.body());
+                        } else {
+                            Log.e("ContactsInteractor", "User with userId " + userIds.get(position) + "not found");
+                        }
                     }
 
                     @Override
@@ -67,7 +68,7 @@ public class ContactsInteractor {
 
     public interface ContactsInteractorListener {
 
-        void contactsReturned(HashMap<String,Boolean> contacts);
+        void contactsReturned(HashMap<String, Boolean> contacts);
 
         void userReturned(String id, User user);
 

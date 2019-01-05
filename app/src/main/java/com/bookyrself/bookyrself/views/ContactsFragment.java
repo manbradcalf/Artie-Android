@@ -18,7 +18,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers._source;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.ContactsActivityPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
@@ -110,9 +109,7 @@ public class ContactsFragment extends Fragment implements ContactsActivityPresen
     public void userReturned(String id, User user) {
         contacts.add(user);
         contactsMap.put(user, id);
-        if (contacts.size() == contactIds.size()) {
-            adapter.notifyDataSetChanged();
-        }
+        adapter.notifyDataSetChanged();
     }
 
     @Override

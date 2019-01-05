@@ -1,6 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.interactors.UsersInteractor;
@@ -48,25 +49,6 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
     public void getEventDetailData(String eventId) {
         mListener.showProgressbar(true);
         mEventsInteractor.getEventDetail(eventId);
-        //TODO: Make the index and type toggleable to users
-//        mFirebaseService.getAPI().getEventData(id)
-//                .enqueue(new Callback<EventDetail>() {
-//                    @Override
-//                    public void onResponse(@NonNull Call<EventDetail> call, @NonNull Response<EventDetail> response) {
-//                        if (response.body() != null) {
-//                            EventDetail data = response.body();
-//                            mListener.eventDataResponseReady(data);
-//                        } else {
-//                            mListener.present_error();
-//                        }
-//
-//                    }
-//
-//                    @Override
-//                    public void onFailure(@NonNull Call<EventDetail> call, @NonNull Throwable t) {
-//
-//                    }
-//                });
     }
 
     //TODO: Will the final "id" variable here be stuck on the first id assigned?
@@ -96,11 +78,19 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
     }
 
     @Override
-    public void eventDetailReturned(EventDetail eventDetail) {
-        mUserCount = eventDetail.getUsers().keySet().size();
+    public void eventDetailReturned(EventDetail eventDetail, String eventId) {
+
         mEventDetail = eventDetail;
-        for (String userId : eventDetail.getUsers().keySet()) {
-            mUsersInteractor.getUserDetails(userId);
+
+        // If users exist, iterate through and retrieve their details
+        if (eventDetail.getUsers() != null) {
+            mUserCount = eventDetail.getUsers().keySet().size();
+            for (String userId : eventDetail.getUsers().keySet()) {
+                mUsersInteractor.getUserDetails(userId);
+            }
+        } else {
+            presentError("Event " + eventId + "has no users");
+            Log.e("EventDetailPresenter", "Event " + eventId + "has no users");
         }
     }
 
@@ -116,11 +106,13 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
 
     @Override
     public void presentError(String error) {
-
+        // Surface the error sent from the interactor to the activity
+        mListener.presentError(error);
     }
 
     @Override
-    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId) {
+    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String
+            eventId) {
 
     }
 
@@ -138,7 +130,7 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
                 mListener.eventDataResponseReady(mEventDetail, mMiniUsers);
             }
         } else {
-            mListener.present_error(String.format("User %s was null", userId));
+            mListener.presentError(String.format("User %s was null", userId));
         }
     }
 
@@ -152,6 +144,6 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
 
         void userThumbReady(String response, String id);
 
-        void present_error(String message);
+        void presentError(String message);
     }
 }

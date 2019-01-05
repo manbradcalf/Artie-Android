@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -22,9 +23,9 @@ import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.EventsPresenter;
 import com.bookyrself.bookyrself.presenters.UserDetailPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
+import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -33,9 +34,10 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by benmedcalf on 1/13/18.
@@ -46,7 +48,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
 
     private CardView emailUserCardview;
     private CardView addUserToContactsCardview;
-    private List<CalendarDay> calendarDays = new ArrayList<>();
+    private HashSet<CalendarDay> calendarDays;
     private HashMap<CalendarDay, String> calendarDaysWithEventIds;
     private TextView usernameTextView;
     private TextView cityStateTextView;
@@ -67,6 +69,11 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     private MaterialCalendarView calendarView;
     private RelativeLayout contentView;
     private StorageReference storageReference;
+    private View emptyState;
+    private TextView emptyStateTextHeader;
+    private TextView emptyStateTextSubHeader;
+    private ImageView emptyStateImageView;
+    private Button emptyStateButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,9 +87,17 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         Toolbar = findViewById(R.id.toolbar_user_detail);
         Toolbar.setTitle("User Details");
         calendarView = findViewById(R.id.user_detail_calendar);
+        contentView = findViewById(R.id.user_detail_content);
         calendarView.setOnDateChangedListener(this);
+        calendarDays = new HashSet<>();
         calendarDaysWithEventIds = new HashMap<>();
         storageReference = FirebaseStorage.getInstance().getReference();
+        emptyState = findViewById(R.id.user_detail_empty_state);
+        emptyStateButton = findViewById(R.id.empty_state_button);
+        emptyStateImageView = findViewById(R.id.empty_state_image);
+        emptyStateTextHeader = findViewById(R.id.empty_state_text_header);
+        emptyStateTextSubHeader = findViewById(R.id.empty_state_text_subheader);
+        emptyState.setVisibility(View.GONE);
         loadingState();
     }
 
@@ -176,14 +191,17 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     }
 
     @Override
-    public void presentError() {
-        //TODO: This should be a legit empty state
-//        emptyState.setVisibility(View.VISIBLE);
+    public void presentError(String id) {
+        contentView.setVisibility(View.GONE);
+        emptyStateButton.setVisibility(View.GONE);
+        emptyStateImageView.setImageDrawable(getDrawable(R.drawable.ic_error_empty_state));
+        emptyStateTextHeader.setText("There was a problem loading the user");
+        emptyStateTextSubHeader.setText(String.format("Error fetching userID %s", id));
+        emptyState.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void loadingState() {
-        contentView = findViewById(R.id.user_detail_content);
         contentView.setVisibility(View.GONE);
     }
 
@@ -198,7 +216,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             if (intent.resolveActivity(getPackageManager()) != null) {
                 startActivity(intent);
             } else {
-                presentError();
+                presentError("Unable to email user");
             }
         }
     }
@@ -224,10 +242,10 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     }
 
     @Override
-    public void usersEventInfoReady(HashMap<String, EventDetail> events, String eventId) {
+    public void userseventinfoready(HashMap<String, EventDetail> events) {
         if (events != null) {
-            for (int i = 0; i < events.size(); i++) {
-                String[] s = events.get(eventId).getDate().split("-");
+            for (Map.Entry<String, EventDetail> pair : events.entrySet()) {
+                String[] s = events.get(pair.getKey()).getDate().split("-");
                 int year = Integer.parseInt(s[0]);
                 // I have to do weird logic on the month because months are 0 indexed
                 // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
@@ -235,10 +253,11 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                 int day = Integer.parseInt(s[2]);
                 CalendarDay calendarDay = CalendarDay.from(year, month, day);
                 calendarDays.add(calendarDay);
-                calendarDaysWithEventIds.put(calendarDay, eventId);
+                calendarDaysWithEventIds.put(calendarDay, pair.getKey());
             }
             if (calendarDays.size() == events.size()) {
-                calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this));
+                EventDecorator decorator = new EventDecorator(Color.BLUE, calendarDays, this);
+                calendarView.addDecorator(decorator);
             }
         }
     }

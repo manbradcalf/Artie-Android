@@ -13,8 +13,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,12 +55,26 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     TextView HostUrlTextView;
     @BindView(R.id.event_detail_host_item)
     CardView HostcardView;
-    @BindView(R.id.toolbar_event_detail)
+    @BindView(R.id.event_detail_toolbar)
     Toolbar Toolbar;
     @BindView(R.id.item_event_detail_userthumb)
     ImageView HostImageView;
     @BindView(R.id.event_detail_users_list)
     ListView usersListView;
+    @BindView(R.id.event_detail_empty_state)
+    View emptyState;
+    @BindView(R.id.event_detail_linearlayout)
+    View eventDetailContent;
+    @BindView(R.id.empty_state_text_header)
+    TextView emptyStateTextHeader;
+    @BindView(R.id.empty_state_text_subheader)
+    TextView emptyStateTextSubHeader;
+    @BindView(R.id.empty_state_image)
+    ImageView emptyStateImage;
+    @BindView(R.id.empty_state_button)
+    Button emptyStateButton;
+    @BindView(R.id.event_detail_progress_bar)
+    ProgressBar progressBar;
 
     private List<MiniUser> miniUsers;
     private EventDetailPresenter presenter;
@@ -69,8 +85,9 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
         ButterKnife.bind(this);
-        Intent intent = getIntent();
-        String eventId = intent.getStringExtra("eventId");
+        eventDetailContent.setVisibility(View.GONE);
+        emptyState.setVisibility(View.GONE);
+        String eventId = getIntent().getStringExtra("eventId");
         presenter = new EventDetailPresenter(this);
         presenter.getEventDetailData(eventId);
     }
@@ -78,7 +95,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     @Override
     public void eventDataResponseReady(final EventDetail data, final List<MiniUser> miniUsersList) {
 
-
+        showProgressbar(false);
         setSupportActionBar(Toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(R.string.event_detail_toolbar);
@@ -105,13 +122,6 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
 
         EventCityState.setText(hostCityState);
 
-//        Picasso.with(getApplicationContext())
-//                .load(hostURL)
-//                .placeholder(R.drawable.round)
-//                .error(R.drawable.round)
-//                .transform(new CircleTransform())
-//                .into(HostImageView);
-
         miniUsers = miniUsersList;
 
         for (int i = 0; i < miniUsers.size(); i++) {
@@ -129,11 +139,16 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             }
         });
         Toolbar.setTitle(data.getEventname());
+        eventDetailContent.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void showProgressbar(Boolean bool) {
-
+        if (bool) {
+            progressBar.setVisibility(View.VISIBLE);
+        } else {
+            progressBar.setVisibility(View.GONE);
+        }
     }
 
     //TODO: Seems kinda hacky that I'm using this method to check map sizes and then attach adapter
@@ -149,8 +164,14 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     }
 
     @Override
-    public void present_error(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    public void presentError(String message) {
+        showProgressbar(false);
+        eventDetailContent.setVisibility(View.GONE);
+        emptyStateButton.setVisibility(View.GONE);
+        emptyStateImage.setImageDrawable(getDrawable(R.drawable.ic_error_empty_state));
+        emptyStateTextHeader.setText("There was a problem loading the event");
+        emptyStateTextSubHeader.setText(message);
+        emptyState.setVisibility(View.VISIBLE);
     }
 
 

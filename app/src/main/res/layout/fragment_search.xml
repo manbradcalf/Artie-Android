@@ -20,8 +20,8 @@
             style="@style/SearchViewStyleWhat"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
             android:layout_below="@+id/appBarLayout"
+            android:layout_alignParentStart="true"
             android:layout_marginTop="15dp"
             android:queryHint="@string/search_what_query_hint" />
 
@@ -30,8 +30,8 @@
             style="@style/SearchViewStyleWhere"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
             android:layout_below="@+id/appBarLayout"
+            android:layout_alignParentStart="true"
             android:layout_marginTop="15dp"
             android:queryHint="@string/search_where_query_hint" />
 
@@ -108,9 +108,9 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/appBarLayout"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="false"
-        android:layout_below="@id/appBarLayout">
+        android:layout_alignParentTop="false">
 
         <ProgressBar
             android:id="@+id/progress_bar"
