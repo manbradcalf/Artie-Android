@@ -1,6 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
@@ -41,6 +42,7 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
     /**
      * Methods
      */
+    //TODO: Should this be in @UsersInteractor
     public void getUserInfo(final String id) {
         mService.getAPI().getUserDetails(id).enqueue(new Callback<User>() {
             @Override
@@ -49,15 +51,16 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
                 if (response.body() != null) {
                     mListener.userInfoReady(response.body());
                     if (response.body().getEvents() != null)
-                    eventsInteractor.getMultipleEventDetails(new ArrayList<>(response.body().getEvents().keySet()));
+                        eventsInteractor.getMultipleEventDetails(new ArrayList<>(response.body().getEvents().keySet()));
                 } else {
-                    mListener.presentError();
+                    mListener.presentError(id);
                 }
             }
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
-
+                mListener.presentError(t.getMessage());
+                Log.e("getUserInfo:", String.format("userId %s is null", id));
             }
         });
     }
@@ -67,19 +70,19 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
         request.put(contactId, true);
         mService.getAPI().addContactToUser(request, userId).enqueue(new Callback<HashMap<String, Boolean>>() {
             @Override
-            public void onResponse(Call<HashMap<String, Boolean>> call, Response<HashMap<String,Boolean>> response) {
+            public void onResponse(Call<HashMap<String, Boolean>> call, Response<HashMap<String, Boolean>> response) {
                 mListener.presentSuccess("added to contacts!");
             }
 
             @Override
-            public void onFailure(Call<HashMap<String,Boolean>> call, Throwable t) {
+            public void onFailure(Call<HashMap<String, Boolean>> call, Throwable t) {
                 presentError(t.getMessage());
             }
         });
     }
 
     @Override
-    public void eventDetailReturned(EventDetail event) {
+    public void eventDetailReturned(EventDetail event, String eventId) {
 
     }
 
@@ -103,7 +106,7 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
         //TODO: This method only exists so I can return date info to the UserDetailAcivity but i am really tired so idr why
         events.put(eventId, eventDetail);
         if (events.size() == eventIds.size()) {
-            mListener.usersEventInfoReady(events, eventId);
+            mListener.userseventinfoready(events);
         }
 
     }
@@ -114,9 +117,9 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
     public interface UserDetailPresenterListener {
         void userInfoReady(User userInfo);
 
-        void usersEventInfoReady(HashMap<String, EventDetail> events, String eventId);
+        void userseventinfoready(HashMap<String, EventDetail> events);
 
-        void presentError();
+        void presentError(String message);
 
         void loadingState();
 
