@@ -76,11 +76,8 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
 
     @Override
     public void userReturned(String id, User user) {
-        usersIdAndDetailMap.put(user, id);
-        contactsList.add(user);
-
-        if (usersIdAndDetailMap.size() == contactIds.size()) {
-            presenterListener.contactsReturned(usersIdAndDetailMap, contactsList);
+        if (user != null) {
+            presenterListener.contactReturned(user, id);
         }
     }
 
@@ -144,7 +141,7 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     public interface EventCreationPresenterListener {
         void addToPotentialUsers(String userId);
 
-        void contactsReturned(Map<User, String> contactsAndUserIdMap, List<User> contactsList);
+        void contactReturned(User contact, String userId);
 
         void eventCreated();
 

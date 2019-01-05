@@ -154,10 +154,9 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     }
 
     @Override
-    public void contactsReturned(Map<User, String> usersMap, List<User> contactsList) {
-        contacts.addAll(contactsList);
-        //TODO: These variable names are horrible. Match em
-        contactsAndUserIdsMap = usersMap;
+    public void contactReturned(User contact, String userId) {
+        contacts.add(contact);
+        contactsAndUserIdsMap.put(contact, userId);
         contactChipsInput.setFilterableList(contacts);
     }
 
