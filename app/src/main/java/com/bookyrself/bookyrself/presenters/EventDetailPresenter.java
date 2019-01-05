@@ -1,6 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.interactors.UsersInteractor;
@@ -77,11 +78,19 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
     }
 
     @Override
-    public void eventDetailReturned(EventDetail eventDetail) {
-        mUserCount = eventDetail.getUsers().keySet().size();
+    public void eventDetailReturned(EventDetail eventDetail, String eventId) {
+
         mEventDetail = eventDetail;
-        for (String userId : eventDetail.getUsers().keySet()) {
-            mUsersInteractor.getUserDetails(userId);
+
+        // If users exist, iterate through and retrieve their details
+        if (eventDetail.getUsers() != null) {
+            mUserCount = eventDetail.getUsers().keySet().size();
+            for (String userId : eventDetail.getUsers().keySet()) {
+                mUsersInteractor.getUserDetails(userId);
+            }
+        } else {
+            presentError("Event " + eventId + "has no users");
+            Log.e("EventDetailPresenter", "Event " + eventId + "has no users");
         }
     }
 
@@ -97,11 +106,13 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
 
     @Override
     public void presentError(String error) {
-
+        // Surface the error sent from the interactor to the activity
+        mListener.presentError(error);
     }
 
     @Override
-    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId) {
+    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String
+            eventId) {
 
     }
 
@@ -119,7 +130,7 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
                 mListener.eventDataResponseReady(mEventDetail, mMiniUsers);
             }
         } else {
-            mListener.present_error(String.format("User %s was null", userId));
+            mListener.presentError(String.format("User %s was null", userId));
         }
     }
 
@@ -133,6 +144,6 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
 
         void userThumbReady(String response, String id);
 
-        void present_error(String message);
+        void presentError(String message);
     }
 }

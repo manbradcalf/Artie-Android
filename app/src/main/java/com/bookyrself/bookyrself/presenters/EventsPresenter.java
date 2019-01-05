@@ -64,7 +64,7 @@ public class EventsPresenter implements EventsInteractor.EventsInteractorListene
     }
 
     @Override
-    public void eventDetailReturned(EventDetail event) {
+    public void eventDetailReturned(EventDetail event, String eventId) {
 
     }
 

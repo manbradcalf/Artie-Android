@@ -25,13 +25,13 @@ public class EventsInteractor {
         this.listener = listener;
     }
 
-    public void getEventDetail(String eventId) {
+    public void getEventDetail(final String eventId) {
         service.getAPI().getEventData(eventId).enqueue(new Callback<EventDetail>() {
             @Override
             public void onResponse(Call<EventDetail> call, Response<EventDetail> response) {
                 if (response.body() != null) {
 
-                    listener.eventDetailReturned(response.body());
+                    listener.eventDetailReturned(response.body(), eventId);
                 }
             }
 
@@ -89,7 +89,7 @@ public class EventsInteractor {
 
     public interface EventsInteractorListener {
 
-        void eventDetailReturned(EventDetail event);
+        void eventDetailReturned(EventDetail event, String eventId);
 
         void usersEventsReturned(List<Event> events);
 
