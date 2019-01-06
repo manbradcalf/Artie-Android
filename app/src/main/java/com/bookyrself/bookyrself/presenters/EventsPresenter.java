@@ -51,25 +51,31 @@ public class EventsPresenter implements EventsInteractor.EventsInteractorListene
 
             @Override
             public void onFailure(Call<HashMap<String, EventInfo>> call, Throwable t) {
-                Log.e(this.toString(), "Failed to load user events for user " + userId);
+                presentError("failed to load user events for user " + userId);
             }
         });
     }
 
     private void getEventDetails(List<String> eventIds) {
-        for (String id : eventIds){
+        for (String id : eventIds) {
             eventsInteractor.getEventDetail(id);
         }
-
     }
 
     @Override
     public void eventDetailReturned(EventDetail event, String eventId) {
-
+        listener.eventReady(event, eventId);
     }
 
     @Override
-    public void usersEventsReturned(List<Event> events) {
+    public void presentError(String error) {
+        Log.e(this.toString(), error);
+        listener.presentError(error);
+    }
+
+    //TODO: Find a way to not have to implement these methods from EventsInteractorListener
+    @Override
+    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId) {
 
     }
 
@@ -78,25 +84,14 @@ public class EventsPresenter implements EventsInteractor.EventsInteractorListene
 
     }
 
-    @Override
-    public void presentError(String error) {
-
-    }
-
-    @Override
-    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId) {
-
-    }
-
     /**
      * Contract / Listener
      */
     public interface CalendarPresenterListener {
-        void selectEventOnCalendar(String eventId);
 
-        void goToEventDetail(String eventId);
+        void eventReady(EventDetail event, String eventId);
 
-        void userEventsReady(List<Event> events);
+        void presentError(String error);
     }
 
 }

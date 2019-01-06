@@ -1,15 +1,23 @@
 package com.bookyrself.bookyrself.presenters;
 
+import com.bookyrself.bookyrself.interactors.EventsInteractor;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ProfilePresenter {
+public class ProfilePresenter implements EventsInteractor.EventsInteractorListener {
     private final ProfilePresenterListener listener;
     private final FirebaseService service;
+    private final EventsInteractor eventsInteractor;
 
     /**
      * Construction
@@ -17,6 +25,7 @@ public class ProfilePresenter {
     public ProfilePresenter(ProfilePresenterListener listener) {
         this.listener = listener;
         this.service = new FirebaseService();
+        this.eventsInteractor = new EventsInteractor(this);
     }
 
     /**
@@ -56,6 +65,8 @@ public class ProfilePresenter {
         service.getAPI().getUserDetails(UID).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
+                HashMap<String, EventInfo> events = response.body().getEvents();
+                getEventDetails(new ArrayList<>(events.keySet()));
                 listener.profileInfoReady(response.body());
             }
 
@@ -66,27 +77,29 @@ public class ProfilePresenter {
         });
     }
 
-    public void uploadPhoto() {
+    private void getEventDetails(List<String> eventIds) {
+        for (String id : eventIds) {
+            eventsInteractor.getEventDetail(id);
+        }
+    }
+
+    @Override
+    public void eventDetailReturned(EventDetail event, String eventId) {
+            listener.eventReady(event, eventId);
+    }
+
+    @Override
+    public void eventCreated(String eventId, List<String> usersToInvite) {
 
     }
 
-    public void updateCityState() {
+    @Override
+    public void presentError(String error) {
 
     }
 
-    public void updateTags() {
-
-    }
-
-    public void updateWebsite() {
-
-    }
-
-    public void viewContacts() {
-
-    }
-
-    public void updateBio() {
+    @Override
+    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId) {
 
     }
 
@@ -95,11 +108,13 @@ public class ProfilePresenter {
      */
     public interface ProfilePresenterListener {
 
-        void profileInfoReady(User response);
+        void profileInfoReady(User user);
+
+        void eventReady(EventDetail event, String eventId);
 
         void presentToast(String message);
 
-        void loadingState();
+        void loadingState(Boolean show);
 
         void successfulAuth();
     }

@@ -18,7 +18,6 @@ import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.EventsPresenter;
 import com.bookyrself.bookyrself.presenters.UserDetailPresenter;
@@ -36,8 +35,9 @@ import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by benmedcalf on 1/13/18.
@@ -46,58 +46,77 @@ import java.util.Map;
 public class UserDetailActivity extends AppCompatActivity implements UserDetailPresenter.UserDetailPresenterListener,
         EventsPresenter.CalendarPresenterListener, OnDateSelectedListener {
 
-    private CardView emailUserCardview;
-    private CardView addUserToContactsCardview;
-    private HashSet<CalendarDay> calendarDays;
-    private HashMap<CalendarDay, String> calendarDaysWithEventIds;
-    private TextView usernameTextView;
-    private TextView cityStateTextView;
-    private TextView tagsTextView;
-    private TextView urlTextView;
-    private TextView bioTextView;
-    private ImageView profileImage;
+    @BindView(R.id.message_user_detail_activity_card)
+    CardView emailUserCardview;
+    @BindView(R.id.add_user_to_contacts_card)
+    CardView addUserToContactsCardview;
+    @BindView(R.id.username_user_detail_activity)
+    TextView usernameTextView;
+    @BindView(R.id.city_state_user_detail_activity)
+    TextView cityStateTextView;
+    @BindView(R.id.tags_user_detail_activity)
+    TextView tagsTextView;
+    @BindView(R.id.user_url_user_detail_activity)
+    TextView urlTextView;
+    @BindView(R.id.bio_body_user_detail_activity)
+    TextView bioTextView;
+    @BindView(R.id.profile_image_user_detail_activity)
+    ImageView profileImage;
+    @BindView(R.id.profile_image_progressbar)
+    ProgressBar profileImageProgressbar;
+    @BindView(R.id.message_user_detail_activity_text)
+    TextView emailUserTextView;
+    @BindView(R.id.add_user_to_contacts_textview)
+    TextView addUserToContactsTextView;
+    @BindView(R.id.toolbar_user_detail)
+    Toolbar Toolbar;
+    @BindView(R.id.user_detail_calendar)
+    MaterialCalendarView calendarView;
+    @BindView(R.id.user_detail_content)
+    RelativeLayout contentView;
+    @BindView(R.id.user_detail_empty_state)
+    View emptyState;
+    @BindView(R.id.empty_state_text_header)
+    TextView emptyStateTextHeader;
+    @BindView(R.id.empty_state_text_subheader)
+    TextView emptyStateTextSubHeader;
+    @BindView(R.id.empty_state_image)
+    ImageView emptyStateImageView;
+    @BindView(R.id.empty_state_button)
+    Button emptyStateButton;
 
-    private UserDetailPresenter userDetailPresenter;
-    private ProgressBar profileImageProgressbar;
-    private ProgressBar contentProgressBar;
-    private TextView emailUserTextView;
-    private TextView addUserToContactsTextView;
+    private StorageReference storageReference;
+    private EventsPresenter eventsPresenter;
     private String userEmailAddress;
     private String userID;
-    private Toolbar Toolbar;
-    private EventsPresenter eventsPresenter;
-    private MaterialCalendarView calendarView;
-    private RelativeLayout contentView;
-    private StorageReference storageReference;
-    private View emptyState;
-    private TextView emptyStateTextHeader;
-    private TextView emptyStateTextSubHeader;
-    private ImageView emptyStateImageView;
-    private Button emptyStateButton;
+    private HashSet<CalendarDay> calendarDays;
+    private HashMap<CalendarDay, String> calendarDaysWithEventIds;
+    private UserDetailPresenter userDetailPresenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_detail);
+        ButterKnife.bind(this);
         userDetailPresenter = new UserDetailPresenter(this);
         userID = getIntent().getStringExtra("userId");
         userDetailPresenter.getUserInfo(userID);
         eventsPresenter = new EventsPresenter(this);
         eventsPresenter.loadUsersEventInfo(userID);
-        Toolbar = findViewById(R.id.toolbar_user_detail);
         Toolbar.setTitle("User Details");
-        calendarView = findViewById(R.id.user_detail_calendar);
-        contentView = findViewById(R.id.user_detail_content);
         calendarView.setOnDateChangedListener(this);
         calendarDays = new HashSet<>();
         calendarDaysWithEventIds = new HashMap<>();
         storageReference = FirebaseStorage.getInstance().getReference();
-        emptyState = findViewById(R.id.user_detail_empty_state);
-        emptyStateButton = findViewById(R.id.empty_state_button);
-        emptyStateImageView = findViewById(R.id.empty_state_image);
-        emptyStateTextHeader = findViewById(R.id.empty_state_text_header);
-        emptyStateTextSubHeader = findViewById(R.id.empty_state_text_subheader);
         emptyState.setVisibility(View.GONE);
+        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if (firebaseAuth.getCurrentUser() == null) {
+                    calendarView.removeDecorators();
+                }
+            }
+        });
         loadingState();
     }
 
@@ -105,15 +124,6 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     public void userInfoReady(User response) {
 
         // Show the user details now that they're loaded
-        usernameTextView = findViewById(R.id.username_user_detail_activity);
-        cityStateTextView = findViewById(R.id.city_state_user_detail_activity);
-        tagsTextView = findViewById(R.id.tags_user_detail_activity);
-        urlTextView = findViewById(R.id.user_url_user_detail_activity);
-        profileImageProgressbar = findViewById(R.id.profile_image_progressbar);
-        profileImage = findViewById(R.id.profile_image_user_detail_activity);
-        bioTextView = findViewById(R.id.bio_body_user_detail_activity);
-        emailUserTextView = findViewById(R.id.message_user_detail_activity_text);
-        emailUserCardview = findViewById(R.id.message_user_detail_activity_card);
         emailUserCardview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -121,8 +131,6 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             }
         });
 
-        addUserToContactsCardview = findViewById(R.id.add_user_to_contacts_card);
-        addUserToContactsTextView = findViewById(R.id.add_user_to_contacts_textview);
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             addUserToContactsCardview.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -179,7 +187,8 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             for (String s : response.getTags()) {
                 listString.append(s + ", ");
             }
-            tagsTextView.setText(listString.toString());
+            String tagsText = listString.toString().replaceAll(", $", "");
+            tagsTextView.setText(tagsText);
         }
         contentView.setVisibility(View.VISIBLE);
     }
@@ -188,6 +197,21 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    @Override
+    public void eventReady(EventDetail event, String eventId) {
+        String[] s = event.getDate().split("-");
+        int year = Integer.parseInt(s[0]);
+        // I have to do weird logic on the month because months are 0 indexed
+        // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
+        int month = Integer.parseInt(s[1]) - 1;
+        int day = Integer.parseInt(s[2]);
+        CalendarDay calendarDay = CalendarDay.from(year, month, day);
+        calendarDays.add(calendarDay);
+        calendarDaysWithEventIds.put(calendarDay, eventId);
+        EventDecorator decorator = new EventDecorator(Color.BLUE, calendarDays, this);
+        calendarView.addDecorator(decorator);
     }
 
     @Override
@@ -205,7 +229,6 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         contentView.setVisibility(View.GONE);
     }
 
-    //TODO: I am using this method in both UserDetailActivity and EventDetailActivity presenters. I should consolidate
     @Override
     public void emailUser() {
 
@@ -227,40 +250,10 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     }
 
     @Override
-    public void selectEventOnCalendar(String eventId) {
+    public void usersEventInfoReady(HashMap<String, EventDetail> events) {
 
     }
 
-    @Override
-    public void goToEventDetail(String eventId) {
-
-    }
-
-    @Override
-    public void userEventsReady(List<Event> events) {
-
-    }
-
-    @Override
-    public void userseventinfoready(HashMap<String, EventDetail> events) {
-        if (events != null) {
-            for (Map.Entry<String, EventDetail> pair : events.entrySet()) {
-                String[] s = events.get(pair.getKey()).getDate().split("-");
-                int year = Integer.parseInt(s[0]);
-                // I have to do weird logic on the month because months are 0 indexed
-                // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
-                int month = Integer.parseInt(s[1]) - 1;
-                int day = Integer.parseInt(s[2]);
-                CalendarDay calendarDay = CalendarDay.from(year, month, day);
-                calendarDays.add(calendarDay);
-                calendarDaysWithEventIds.put(calendarDay, pair.getKey());
-            }
-            if (calendarDays.size() == events.size()) {
-                EventDecorator decorator = new EventDecorator(Color.BLUE, calendarDays, this);
-                calendarView.addDecorator(decorator);
-            }
-        }
-    }
 
     @Override
     public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
