@@ -50,6 +50,7 @@
     <string name="search_fragment_search_button_text">SEARCH</string>
     <string name="search_fragment_edit_search_btn_text">EDIT SEARCH</string>
     <string name="event_creation_contacts_required">Please select contacts to invite!</string>
+    <string name="profile_creation_title">Edit Your Profile</string>
 
 
 </resources>
