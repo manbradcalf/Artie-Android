@@ -22,7 +22,7 @@
         android:id="@+id/search_contacts_event_creation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="15dp"
+        android:layout_margin="16dp"
         android:textAlignment="center"
         app:hint="@string/event_creation_artists_hint"
         app:layout_constraintTop_toBottomOf="@id/event_creation_toolbar" />
@@ -43,28 +43,28 @@
                 android:id="@+id/event_creation_event_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="15dp"
+                android:layout_margin="16dp"
                 android:hint="@string/event_creation_event_name" />
 
             <EditText
                 android:id="@+id/event_creation_city_state"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="15dp"
+                android:layout_margin="16dp"
                 android:hint="@string/event_creation_city_state" />
 
             <EditText
                 android:id="@+id/event_creation_tags"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="15dp"
+                android:layout_margin="16dp"
                 android:hint="@string/event_creation_tags" />
 
             <EditText
                 android:id="@+id/event_creation_date_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="15dp"
+                android:layout_margin="16dp"
                 android:focusable="false"
                 android:text="@string/event_creation_select_date" />
         </LinearLayout>

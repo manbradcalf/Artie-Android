@@ -1,45 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/profile_creation_scrollview"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/profile_creation_constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/profile_creation_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:layout_constraintBottom_toTopOf="@id/profile_creation_scrollview"
+        app:popupTheme="@style/AppTheme.PopupOverlay"
+        app:title="@string/profile_creation_title"
+        app:titleTextColor="@android:color/white" />
 
-        <EditText
-            android:id="@+id/profile_creation_username"
-            android:layout_width="wrap_content"
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        app:layout_constraintTop_toBottomOf="@id/profile_creation_toolbar"
+        android:id="@+id/profile_creation_scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="username" />
+            android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/profile_creation_location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="location" />
+            <EditText
+                android:id="@+id/profile_creation_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:hint="Username" />
 
-        <EditText
-            android:id="@+id/profile_creation_tags"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="tags" />
+            <EditText
+                android:id="@+id/profile_creation_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:hint="Location" />
 
-        <EditText
-            android:id="@+id/profile_creation_bio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="bio" />
+            <EditText
+                android:id="@+id/profile_creation_tags"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:hint="Tags" />
 
-        <Button
-            android:id="@+id/profile_creation_submit_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="submit" />
+            <EditText
+                android:id="@+id/profile_creation_bio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:hint="Bio" />
 
-    </LinearLayout>
+            <Button
+                android:id="@+id/profile_creation_submit_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:text="Submit" />
+
+        </LinearLayout>
 
 
-</ScrollView>
+    </ScrollView>
+</android.support.constraint.ConstraintLayout>
