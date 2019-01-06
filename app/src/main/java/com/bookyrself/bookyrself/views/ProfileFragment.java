@@ -63,6 +63,10 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     TextView tagsTextView;
     @BindView(R.id.user_url_profile_activity)
     TextView urlTextView;
+    @BindView(R.id.profile_content_edit_info)
+    Button editInfoButton;
+    @BindView(R.id.profile_content_edit_bio)
+    Button editBioButton;
     @BindView(R.id.username_profile_fragment)
     TextView userNameTextView;
     @BindView(R.id.profile_empty_state)
@@ -143,10 +147,6 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.edit_profile:
-                Intent intent = new Intent(getActivity(), ProfileCreationActivity.class);
-                startActivityForResult(intent, RC_PROFILE_CREATION);
-                return true;
             case R.id.sign_out:
                 if (getContext() != null) {
                     AuthUI.getInstance().signOut(getContext());
@@ -177,54 +177,92 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
 
     }
 
-    public void setLayout(User user) {
+    public void setLayout(final User user) {
 
         if (user != null) {
             emptyState.setVisibility(View.GONE);
             profileContent.setVisibility(View.VISIBLE);
             userNameTextView.setText(user.getUsername());
-            bioTextView.setText(user.getBio());
-            final StorageReference profileImageReference = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
-            profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                @Override
-                public void onSuccess(Uri uri) {
-                    Picasso.with(getActivity().getApplicationContext())
-                            .load(uri)
-                            .resize(148, 148)
-                            .centerCrop()
-                            .transform(new CircleTransform())
-                            .into(profileImage);
-
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Handle any errors
-                    profileImage.setImageDrawable(getContext().getDrawable((R.drawable.ic_profile_black_24dp)));
-                }
-            });
-
-            profileImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent();
-                    intent.setType("image/*");
-                    intent.setAction(Intent.ACTION_GET_CONTENT);
-                    startActivityForResult(Intent.createChooser(intent, "Choose Picture"), RC_PHOTO_SELECT);
-                }
-            });
-            //TODO: Set image, city state, tags, etc
             if (user.getTags() != null) {
-                tagsTextView.setText(user.getTags().toString());
+                tagsTextView.setText(user.getTags().toString().replaceAll("\\[|]|, $", ""));
             }
             if (user.getCitystate() != null) {
                 cityStateTextView.setText(user.getCitystate());
+            }
+
+            if (user.getBio() != null) {
+                bioTextView.setText(user.getBio());
             }
 
         } else {
             userNameTextView.setText("user not in fb db");
             profileContent.setVisibility(View.GONE);
         }
+
+        // Both edit buttons start the profile creation activity
+        editBioButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editProfile(user);
+            }
+        });
+        editInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editProfile(user);
+            }
+        });
+
+        // Load profile image
+        final StorageReference profileImageReference = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
+        profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Picasso.with(getActivity().getApplicationContext())
+                        .load(uri)
+                        .resize(148, 148)
+                        .centerCrop()
+                        .transform(new CircleTransform())
+                        .into(profileImage);
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+                profileImage.setImageDrawable(getContext().getDrawable((R.drawable.ic_add_a_photo_black_24dp)));
+            }
+        });
+
+        profileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Choose Picture"), RC_PHOTO_SELECT);
+            }
+        });
+    }
+
+    private void editProfile(User user) {
+        Intent intent = new Intent(getActivity(), ProfileCreationActivity.class);
+
+        // Add intent extras to pre-populate edittexts in ProfileCreationActivity
+        if (user.getUsername() != null) {
+            intent.putExtra("Username", user.getUsername());
+        }
+        if (user.getBio() != null) {
+            intent.putExtra("Bio", user.getBio());
+        }
+        if (user.getCitystate() != null) {
+            intent.putExtra("Location", user.getCitystate());
+        }
+        if (user.getTags() != null) {
+            intent.putExtra("Tags", String.valueOf(user.getTags()));
+        }
+
+        startActivityForResult(intent, RC_PROFILE_CREATION);
     }
 
     @Override
