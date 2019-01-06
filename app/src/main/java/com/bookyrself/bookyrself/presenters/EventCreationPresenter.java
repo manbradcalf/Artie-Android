@@ -139,13 +139,10 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
      * Contract / Listener
      */
     public interface EventCreationPresenterListener {
-        void addToPotentialUsers(String userId);
 
         void contactReturned(User contact, String userId);
 
         void eventCreated();
-
-        void removeFromPotentialUsers(String userId);
 
         void dateAdded(String date);
     }

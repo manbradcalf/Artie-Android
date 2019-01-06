@@ -149,20 +149,10 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     }
 
     @Override
-    public void addToPotentialUsers(String userId) {
-
-    }
-
-    @Override
     public void contactReturned(User contact, String userId) {
         contacts.add(contact);
         contactsAndUserIdsMap.put(contact, userId);
         contactChipsInput.setFilterableList(contacts);
-    }
-
-    @Override
-    public void removeFromPotentialUsers(String userId) {
-
     }
 
     @Override
