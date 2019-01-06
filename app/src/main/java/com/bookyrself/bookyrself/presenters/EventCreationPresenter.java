@@ -95,11 +95,6 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     }
 
     @Override
-    public void usersEventsReturned(List<Event> events) {
-
-    }
-
-    @Override
     public void eventCreated(String eventId, List<String> userIdsOfAttendees) {
         if (userIdsOfAttendees.size() != 0) {
             for (String userId : userIdsOfAttendees) {

@@ -95,11 +95,6 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
     }
 
     @Override
-    public void usersEventsReturned(List<Event> events) {
-
-    }
-
-    @Override
     public void eventCreated(String eventId, List<String> usersToInvite) {
 
     }

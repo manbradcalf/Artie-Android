@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
@@ -87,11 +86,6 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
     }
 
     @Override
-    public void usersEventsReturned(List<Event> events) {
-
-    }
-
-    @Override
     public void eventCreated(String eventId, List<String> usersToInvite) {
 
     }
@@ -106,7 +100,7 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
         //TODO: This method only exists so I can return date info to the UserDetailAcivity but i am really tired so idr why
         events.put(eventId, eventDetail);
         if (events.size() == eventIds.size()) {
-            mListener.userseventinfoready(events);
+            mListener.usersEventInfoReady(events);
         }
 
     }
@@ -117,7 +111,7 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
     public interface UserDetailPresenterListener {
         void userInfoReady(User userInfo);
 
-        void userseventinfoready(HashMap<String, EventDetail> events);
+        void usersEventInfoReady(HashMap<String, EventDetail> events);
 
         void presentError(String message);
 
