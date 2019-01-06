@@ -465,7 +465,8 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         listString.append(s + ", ");
                     }
 
-                    viewHolderUsers.userTagsTextView.setText(listString.toString());
+                    // Regex to trim the trailing comma
+                    viewHolderUsers.userTagsTextView.setText(listString.toString().replaceAll(", $", ""));
                 }
 
 
