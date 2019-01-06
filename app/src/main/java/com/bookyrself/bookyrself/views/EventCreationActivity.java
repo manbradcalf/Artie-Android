@@ -1,5 +1,6 @@
 package com.bookyrself.bookyrself.views;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -145,6 +146,8 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
 
     @Override
     public void eventCreated() {
+        Intent returnIntent = new Intent();
+        setResult(RESULT_OK, returnIntent);
         finish();
     }
 
