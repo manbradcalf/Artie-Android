@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
-import com.bookyrself.bookyrself.presenters.ContactsActivityPresenter;
+import com.bookyrself.bookyrself.presenters.ContactsFragmentPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
@@ -32,7 +32,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ContactsFragment extends Fragment implements ContactsActivityPresenter.ContactsPresenterListener {
+public class ContactsFragment extends Fragment implements ContactsFragmentPresenter.ContactsPresenterListener {
 
     private static final int RC_SIGN_IN = 123;
     @BindView(R.id.contacts_recyclerview)
@@ -53,7 +53,7 @@ public class ContactsFragment extends Fragment implements ContactsActivityPresen
     Button emptyStateButton;
 
     ContactsAdapter adapter;
-    ContactsActivityPresenter presenter;
+    ContactsFragmentPresenter presenter;
     RecyclerView.LayoutManager layoutManager;
     List<String> contactIds;
     List<User> contacts;
@@ -67,7 +67,7 @@ public class ContactsFragment extends Fragment implements ContactsActivityPresen
         toolbar.setTitle(R.string.contacts_toolbar);
         contactsMap = new HashMap<>();
         contacts = new ArrayList<>();
-        presenter = new ContactsActivityPresenter(this);
+        presenter = new ContactsFragmentPresenter(this);
         adapter = new ContactsAdapter();
         recyclerView.setAdapter(adapter);
         layoutManager = new LinearLayoutManager(getActivity());
@@ -79,11 +79,23 @@ public class ContactsFragment extends Fragment implements ContactsActivityPresen
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
         emptyState.setVisibility(View.GONE);
-        presenter.getContactIds(FirebaseAuth.getInstance().getUid());
+        if (FirebaseAuth.getInstance().getUid() != null) {
+            presenter.getContactIds(FirebaseAuth.getInstance().getUid());
+        } else {
+            presentError("Log in or Sign Up to view your contacts!");
+        }
+
     }
 
     @Override
-    public void presentError() {
+    public void presentError(String message) {
+        emptyState.setVisibility(View.VISIBLE);
+        emptyStateTextHeader.setText(R.string.contacts_empty_state_header);
+        emptyStateTextSubHeader.setText(message);
+
+        // Don't need a button here
+        emptyStateButton.setVisibility(View.GONE);
+        emptyStateImage.setImageDrawable(getContext().getDrawable(R.drawable.ic_person_add_black_24dp));
 
     }
 
@@ -110,16 +122,6 @@ public class ContactsFragment extends Fragment implements ContactsActivityPresen
         contacts.add(user);
         contactsMap.put(user, id);
         adapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void noUsersReturned() {
-        emptyState.setVisibility(View.VISIBLE);
-        emptyStateTextHeader.setText(R.string.contacts_empty_state_header);
-        emptyStateTextSubHeader.setText(R.string.contacts_empty_state_subheader);
-        emptyStateButton.setText(R.string.contacts_empty_state_button_text);
-        emptyStateImage.setImageDrawable(getContext().getDrawable(R.drawable.ic_person_add_black_24dp));
-
     }
 
     class ContactsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
