@@ -1,6 +1,7 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,6 +10,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +18,17 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.ContactsFragmentPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -52,12 +59,13 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
     @BindView(R.id.empty_state_button)
     Button emptyStateButton;
 
-    ContactsAdapter adapter;
-    ContactsFragmentPresenter presenter;
-    RecyclerView.LayoutManager layoutManager;
-    List<String> contactIds;
-    List<User> contacts;
-    Map<User, String> contactsMap;
+    private ContactsAdapter adapter;
+    private ContactsFragmentPresenter presenter;
+    private RecyclerView.LayoutManager layoutManager;
+    private List<String> contactIds;
+    private List<User> contacts;
+    private Map<User, String> contactsMap;
+    private StorageReference storageReference;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -72,6 +80,8 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
         recyclerView.setAdapter(adapter);
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
+        storageReference = FirebaseStorage.getInstance().getReference();
+
         return view;
     }
 
@@ -139,24 +149,40 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
-            ViewHolderContacts viewHolderContacts = (ViewHolderContacts) holder;
+            final ViewHolderContacts viewHolderContacts = (ViewHolderContacts) holder;
             if (contacts.get(position).getTags() != null) {
                 StringBuilder listString = new StringBuilder();
                 for (String s : contacts.get(position).getTags()) {
                     listString.append(s + ", ");
                 }
-                viewHolderContacts.userTagsTextView.setText(listString.toString());
+                viewHolderContacts.userTagsTextView.setText(listString.toString().replaceAll(", $", ""));
 
             }
+
+            final StorageReference profileImageReference = storageReference.child("/images/" + contactsMap.get(contacts.get(position)));
+            profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    Picasso.with(getActivity())
+                            .load(uri)
+                            .placeholder(R.drawable.round)
+                            .error(R.drawable.round)
+                            .transform(new CircleTransform())
+                            .resize(100, 100)
+                            .into(viewHolderContacts.userProfileImageThumb);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    // Handle any errors
+                    Log.e("ContactsFragment: ", "image not dowloaded");
+                    viewHolderContacts.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_profile_black_24dp));
+                }
+            });
+
+
             viewHolderContacts.userNameTextView.setText(contacts.get(position).getUsername());
             viewHolderContacts.userCityStateTextView.setText(contacts.get(position).getCitystate());
-            Picasso.with(getActivity())
-                    .load("https://img.etsystatic.com/il/9a1dbd/1358791570/il_570xN.1358791570_ib1c.jpg")
-                    .placeholder(R.drawable.round)
-                    .error(R.drawable.round)
-                    .transform(new CircleTransform())
-                    .resize(100, 100)
-                    .into(viewHolderContacts.userProfileImageThumb);
             viewHolderContacts.userCardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
