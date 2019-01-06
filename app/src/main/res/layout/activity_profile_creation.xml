@@ -17,10 +17,10 @@
         app:titleTextColor="@android:color/white" />
 
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        app:layout_constraintTop_toBottomOf="@id/profile_creation_toolbar"
         android:id="@+id/profile_creation_scrollview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/profile_creation_toolbar">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -29,6 +29,8 @@
 
             <EditText
                 android:id="@+id/profile_creation_username"
+                android:drawablePadding="8dp"
+                android:drawableStart="@drawable/ic_edit_black_24dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
@@ -39,6 +41,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
+                android:drawableStart="@drawable/ic_map_black_24dp"
+                android:drawablePadding="16dp"
                 android:hint="Location" />
 
             <EditText
@@ -46,24 +50,40 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
+                android:drawableStart="@drawable/ic_tags_black_24dp"
+                android:drawablePadding="16dp"
                 android:hint="Tags" />
+
+            <EditText
+                android:id="@+id/profile_creation_url"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:drawableStart="@drawable/ic_link_black_24dp"
+                android:drawablePadding="16dp"
+                android:hint="Website" />
 
             <EditText
                 android:id="@+id/profile_creation_bio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
+                android:drawableStart="@drawable/ic_person_black_24dp"
+                android:drawablePadding="16dp"
                 android:hint="Bio" />
-
-            <Button
-                android:id="@+id/profile_creation_submit_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:text="Submit" />
 
         </LinearLayout>
 
 
     </ScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/profile_creation_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="32dp"
+        android:tint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/profile_creation_scrollview"
+        app:srcCompat="@drawable/ic_check_white_24dp" />
 </android.support.constraint.ConstraintLayout>

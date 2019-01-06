@@ -13,25 +13,44 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        app:layout_constraintBottom_toTopOf="@id/search_contacts_event_creation"
+        app:layout_constraintBottom_toTopOf="@id/search_contacts_event_creation_wrapper"
         app:popupTheme="@style/AppTheme.PopupOverlay"
         app:title="@string/event_creation_title"
         app:titleTextColor="@android:color/white" />
+
+    <LinearLayout
+        android:id="@+id/search_contacts_event_creation_wrapper"
+        app:layout_constraintTop_toBottomOf="@id/event_creation_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp">
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_person_add_black_24dp"
+        android:layout_gravity="center"
+        android:padding="16dp"/>
 
     <com.pchmn.materialchips.ChipsInput
         android:id="@+id/search_contacts_event_creation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_marginStart="14dp"
         android:textAlignment="center"
+        android:drawableStart="@drawable/ic_edit_black_24dp"
         app:hint="@string/event_creation_artists_hint"
         app:layout_constraintTop_toBottomOf="@id/event_creation_toolbar" />
+
+    </LinearLayout>
 
     <ScrollView
         android:id="@+id/event_creation_scrollview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/search_contacts_event_creation">
+        app:layout_constraintTop_toBottomOf="@id/search_contacts_event_creation_wrapper">
 
         <LinearLayout
             android:id="@+id/event_creation_linear_layout"
@@ -44,6 +63,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
+                android:drawableStart="@drawable/ic_edit_black_24dp"
+                android:drawablePadding="16dp"
                 android:hint="@string/event_creation_event_name" />
 
             <EditText
@@ -51,6 +72,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
+                android:drawableStart="@drawable/ic_map_black_24dp"
+                android:drawablePadding="16dp"
                 android:hint="@string/event_creation_city_state" />
 
             <EditText
@@ -58,6 +81,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
+                android:drawableStart="@drawable/ic_tags_black_24dp"
+                android:drawablePadding="16dp"
                 android:hint="@string/event_creation_tags" />
 
             <EditText
@@ -65,6 +90,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
+                android:drawableStart="@drawable/ic_calendar_black_24dp"
+                android:drawablePadding="16dp"
                 android:focusable="false"
                 android:text="@string/event_creation_select_date" />
         </LinearLayout>
@@ -75,11 +102,11 @@
         android:id="@+id/event_creation_submit_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_add_accent_48dp"
-        app:layout_constraintEnd_toEndOf="@id/event_creation_scrollview"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="32dp"
         android:tint="@android:color/white"
-        android:layout_margin="32dp"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/event_creation_scrollview"
+        app:srcCompat="@drawable/ic_add_accent_48dp" />
 
 
 </android.support.constraint.ConstraintLayout>
