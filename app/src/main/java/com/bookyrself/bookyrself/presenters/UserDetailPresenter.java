@@ -82,7 +82,7 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
 
     @Override
     public void eventDetailReturned(EventDetail event, String eventId) {
-
+        mListener.usersEventReturned(event, eventId);
     }
 
     @Override
@@ -102,8 +102,6 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
     public interface UserDetailPresenterListener {
         void userInfoReady(User userInfo);
 
-        void usersEventInfoReady(HashMap<String, EventDetail> events);
-
         void presentError(String message);
 
         void loadingState();
@@ -111,5 +109,7 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
         void emailUser();
 
         void presentSuccess(String message);
-    }
+
+        void usersEventReturned(EventDetail event, String eventId);
+        }
 }
