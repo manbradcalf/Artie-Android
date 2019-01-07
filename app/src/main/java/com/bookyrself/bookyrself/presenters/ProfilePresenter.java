@@ -66,7 +66,9 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 HashMap<String, EventInfo> events = response.body().getEvents();
-                getEventDetails(new ArrayList<>(events.keySet()));
+                if (events != null) {
+                    getEventDetails(new ArrayList<>(events.keySet()));
+                }
                 listener.profileInfoReady(response.body());
             }
 

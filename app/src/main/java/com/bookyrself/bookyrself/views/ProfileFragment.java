@@ -231,9 +231,12 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
             // Set the user's URL
             urlTextView.setClickable(true);
             urlTextView.setMovementMethod(LinkMovementMethod.getInstance());
-            String linkedText =
-                    String.format("<a href=\"%s\">%s</a> ", ("http://" + user.getUrl()), user.getUrl());
-            urlTextView.setText(Html.fromHtml(linkedText));
+            if (user.getUrl() != null) {
+                String linkedText =
+                        String.format("<a href=\"%s\">%s</a> ", ("http://" + user.getUrl()), user.getUrl());
+                urlTextView.setText(Html.fromHtml(linkedText));
+            }
+
 
             if (user.getTags() != null) {
                 tagsTextView.setText(user.getTags().toString().replaceAll("\\[|]|, $", ""));
