@@ -249,11 +249,6 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void usersEventInfoReady(HashMap<String, EventDetail> events) {
-
-    }
-
 
     @Override
     public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {

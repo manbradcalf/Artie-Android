@@ -116,11 +116,6 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     }
 
     @Override
-    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId) {
-
-    }
-
-    @Override
     public void eventAddedToUserSuccessfully() {
         //TODO: Find a way to determine it was added to _all_ invited users
     }

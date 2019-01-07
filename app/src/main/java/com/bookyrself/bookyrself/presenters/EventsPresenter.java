@@ -73,12 +73,6 @@ public class EventsPresenter implements EventsInteractor.EventsInteractorListene
         listener.presentError(error);
     }
 
-    //TODO: Find a way to not have to implement these methods from EventsInteractorListener
-    @Override
-    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId) {
-
-    }
-
     @Override
     public void eventCreated(String eventId, List<String> usersToInvite) {
 

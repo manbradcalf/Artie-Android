@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.bookyrself.bookyrself.models.SerializedModels.EventCreationResponse;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.services.FirebaseService;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -43,13 +42,14 @@ public class EventsInteractor {
         });
     }
 
+    //TODO: Is this needed?
     public void getMultipleEventDetails(final List<String> eventIds) {
         for (final String id : eventIds) {
             service.getAPI().getEventData(id).enqueue(new Callback<EventDetail>() {
                 @Override
                 public void onResponse(Call<EventDetail> call, Response<EventDetail> response) {
                     if (response.body() != null) {
-                        listener.oneEventDetailOfManyReturned(response.body(), eventIds, id);
+                        listener.eventDetailReturned(response.body(), id);
                     }
                 }
 
@@ -97,8 +97,5 @@ public class EventsInteractor {
 
         void presentError(String error);
 
-        void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId);
     }
-
-
 }

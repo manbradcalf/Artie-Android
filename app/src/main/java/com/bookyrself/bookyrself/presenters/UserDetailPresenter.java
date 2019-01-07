@@ -95,15 +95,6 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
 
     }
 
-    @Override
-    public void oneEventDetailOfManyReturned(EventDetail eventDetail, List<String> eventIds, String eventId) {
-        //TODO: This method only exists so I can return date info to the UserDetailAcivity but i am really tired so idr why
-        events.put(eventId, eventDetail);
-        if (events.size() == eventIds.size()) {
-            mListener.usersEventInfoReady(events);
-        }
-
-    }
 
     /**
      * Contract / Listener

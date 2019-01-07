@@ -106,12 +106,6 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
     }
 
     @Override
-    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String
-            eventId) {
-
-    }
-
-    @Override
     public void eventAddedToUserSuccessfully() {
 
     }
