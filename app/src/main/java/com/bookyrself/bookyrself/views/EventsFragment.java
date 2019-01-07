@@ -30,7 +30,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class EventsFragment extends Fragment implements OnDateSelectedListener, EventsPresenter.CalendarPresenterListener {
+public class EventsFragment extends Fragment implements OnDateSelectedListener, EventsPresenter.EventsPresenterListener {
 
     private static final int RC_EVENT_CREATION = 1;
     @BindView(R.id.events_calendar)

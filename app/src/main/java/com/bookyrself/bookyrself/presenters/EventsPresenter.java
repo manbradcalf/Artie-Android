@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
@@ -23,14 +22,14 @@ import retrofit2.Response;
 
 public class EventsPresenter implements EventsInteractor.EventsInteractorListener {
 
-    private final CalendarPresenterListener listener;
+    private final EventsPresenterListener listener;
     private final EventsInteractor eventsInteractor;
     private final FirebaseService service;
 
     /**
      * Constructor
      */
-    public EventsPresenter(CalendarPresenterListener listener) {
+    public EventsPresenter(EventsPresenterListener listener) {
         this.listener = listener;
         this.service = new FirebaseService();
         this.eventsInteractor = new EventsInteractor(this);
@@ -81,7 +80,7 @@ public class EventsPresenter implements EventsInteractor.EventsInteractorListene
     /**
      * Contract / Listener
      */
-    public interface CalendarPresenterListener {
+    public interface EventsPresenterListener {
 
         void eventReady(EventDetail event, String eventId);
 
