@@ -43,8 +43,7 @@ import butterknife.ButterKnife;
  * Created by benmedcalf on 1/13/18.
  */
 
-public class UserDetailActivity extends AppCompatActivity implements UserDetailPresenter.UserDetailPresenterListener,
-        EventsPresenter.CalendarPresenterListener, OnDateSelectedListener {
+public class UserDetailActivity extends AppCompatActivity implements UserDetailPresenter.UserDetailPresenterListener, OnDateSelectedListener {
 
     @BindView(R.id.message_user_detail_activity_card)
     CardView emailUserCardview;
@@ -86,7 +85,6 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     Button emptyStateButton;
 
     private StorageReference storageReference;
-    private EventsPresenter eventsPresenter;
     private String userEmailAddress;
     private String userID;
     private HashSet<CalendarDay> calendarDays;
@@ -101,8 +99,6 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         userDetailPresenter = new UserDetailPresenter(this);
         userID = getIntent().getStringExtra("userId");
         userDetailPresenter.getUserInfo(userID);
-        eventsPresenter = new EventsPresenter(this);
-        eventsPresenter.loadUsersEventInfo(userID);
         Toolbar.setTitle("User Details");
         calendarView.setOnDateChangedListener(this);
         calendarDays = new HashSet<>();
@@ -200,7 +196,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     }
 
     @Override
-    public void eventReady(EventDetail event, String eventId) {
+    public void usersEventReturned(EventDetail event, String eventId) {
         String[] s = event.getDate().split("-");
         int year = Integer.parseInt(s[0]);
         // I have to do weird logic on the month because months are 0 indexed
