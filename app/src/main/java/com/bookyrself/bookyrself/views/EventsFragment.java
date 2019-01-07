@@ -7,13 +7,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.presenters.EventsPresenter;
 import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,13 +30,17 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class EventsFragment extends Fragment implements OnDateSelectedListener, EventsPresenter.CalendarPresenterListener {
+public class EventsFragment extends Fragment implements OnDateSelectedListener, EventsPresenter.EventsPresenterListener {
 
+    private static final int RC_EVENT_CREATION = 1;
     @BindView(R.id.events_calendar)
     MaterialCalendarView calendarView;
 
     @BindView(R.id.event_creation_fab)
     FloatingActionButton fab;
+
+    @BindView(R.id.events_toolbar)
+    Toolbar toolbar;
 
     private EventsPresenter presenter;
     List<CalendarDay> calendarDays = new ArrayList<>();
@@ -50,6 +56,7 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_events, container, false);
         ButterKnife.bind(this, view);
+        toolbar.setTitle("Your Calendar");
         return view;
     }
 
@@ -63,9 +70,24 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), EventCreationActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, RC_EVENT_CREATION);
             }
         });
+        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if (firebaseAuth.getCurrentUser() == null) {
+                    calendarView.removeDecorators();
+                }
+            }
+        });
+    }
+
+    // Refresh the CalendarView after creating a new event
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        presenter.loadUsersEventInfo(FirebaseAuth.getInstance().getUid());
     }
 
     @Override
@@ -74,37 +96,27 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
         if (calendarDays.contains(calendarDay)) {
             Intent intent = new Intent(getActivity(), EventDetailActivity.class);
             intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
-            intent.putExtra("imgUrl", "https://image.flaticon.com/icons/svg/223/223222.svg");
             startActivity(intent);
         }
     }
 
     @Override
-    public void selectEventOnCalendar(String eventId) {
-
+    public void eventReady(EventDetail event, String eventId) {
+        String[] s = event.getDate().split("-");
+        int year = Integer.parseInt(s[0]);
+        // I have to do weird logic on the month because months are 0 indexed
+        // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
+        int month = Integer.parseInt(s[1]) - 1;
+        int day = Integer.parseInt(s[2]);
+        CalendarDay calendarDay = CalendarDay.from(year, month, day);
+        calendarDays.add(calendarDay);
+        calendarDaysWithEventIds.put(calendarDay, eventId);
+        calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this.getContext()));
     }
 
     @Override
-    public void goToEventDetail(String eventId) {
-
-    }
-
-    @Override
-    public void userEventsReady(List<Event> events) {
-        for (int i = 0; i < events.size(); i++) {
-            String[] s = events.get(i).getDate().split("-");
-            int year = Integer.parseInt(s[0]);
-            // I have to do weird logic on the month because months are 0 indexed
-            // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
-            int month = Integer.parseInt(s[1]) - 1;
-            int day = Integer.parseInt(s[2]);
-            CalendarDay calendarDay = CalendarDay.from(year, month, day);
-            calendarDays.add(calendarDay);
-            calendarDaysWithEventIds.put(calendarDay, events.get(i).getId());
-        }
-        if (calendarDays.size() == events.size()) {
-            calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, getActivity()));
-        }
+    public void presentError(String error) {
+        Toast.makeText(this.getContext(), error, Toast.LENGTH_SHORT).show();
     }
 }
 

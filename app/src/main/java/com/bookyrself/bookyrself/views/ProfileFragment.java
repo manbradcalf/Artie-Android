@@ -1,6 +1,7 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -8,6 +9,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,14 +20,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
+import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.ProfilePresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
+import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
@@ -36,9 +43,14 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.prolificinteractive.materialcalendarview.CalendarDay;
+import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import butterknife.BindView;
@@ -46,7 +58,7 @@ import butterknife.ButterKnife;
 
 import static android.app.Activity.RESULT_OK;
 
-public class ProfileFragment extends Fragment implements ProfilePresenter.ProfilePresenterListener {
+public class ProfileFragment extends Fragment implements OnDateSelectedListener, ProfilePresenter.ProfilePresenterListener {
 
     private static final int RC_SIGN_IN = 123;
     private static final int RC_PROFILE_CREATION = 456;
@@ -63,6 +75,10 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     TextView tagsTextView;
     @BindView(R.id.user_url_profile_activity)
     TextView urlTextView;
+    @BindView(R.id.profile_content_edit_info)
+    Button editInfoButton;
+    @BindView(R.id.profile_content_edit_bio)
+    Button editBioButton;
     @BindView(R.id.username_profile_fragment)
     TextView userNameTextView;
     @BindView(R.id.profile_empty_state)
@@ -77,8 +93,15 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     Button emptyStateButton;
     @BindView(R.id.toolbar_profile)
     Toolbar toolbar;
+    @BindView(R.id.profile_fragment_progressbar)
+    ProgressBar progressbar;
+    @BindView(R.id.profile_events_calendar)
+    MaterialCalendarView calendarView;
+
     private ProfilePresenter presenter;
     private StorageReference storageReference;
+    private List<CalendarDay> calendarDays = new ArrayList<>();
+    HashMap<CalendarDay, String> calendarDaysWithEventIds;
     private User user;
 
     @Override
@@ -94,6 +117,10 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
         ButterKnife.bind(this, view);
         setHasOptionsMenu(true);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        calendarDaysWithEventIds = new HashMap<>();
+        emptyState.setVisibility(View.GONE);
+        profileContent.setVisibility(View.GONE);
+        loadingState(true);
         return view;
     }
 
@@ -143,10 +170,6 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.edit_profile:
-                Intent intent = new Intent(getActivity(), ProfileCreationActivity.class);
-                startActivityForResult(intent, RC_PROFILE_CREATION);
-                return true;
             case R.id.sign_out:
                 if (getContext() != null) {
                     AuthUI.getInstance().signOut(getContext());
@@ -162,13 +185,33 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
         setLayout(response);
     }
 
+    // TODO: Find a way to not repeat myself for this, EventsFragment and UserDetailActivity
     @Override
-    public void presentToast(String message) {
+    public void eventReady(EventDetail event, String eventId) {
+        String[] s = event.getDate().split("-");
+        int year = Integer.parseInt(s[0]);
+        // I have to do weird logic on the month because months are 0 indexed
+        // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
+        int month = Integer.parseInt(s[1]) - 1;
+        int day = Integer.parseInt(s[2]);
+        CalendarDay calendarDay = CalendarDay.from(year, month, day);
+        calendarDays.add(calendarDay);
+        calendarDaysWithEventIds.put(calendarDay, eventId);
+        calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this.getContext()));
+    }
+
+    @Override
+    public void presentToast(String error) {
 
     }
 
     @Override
-    public void loadingState() {
+    public void loadingState(Boolean show) {
+        if (show) {
+            progressbar.setVisibility(View.VISIBLE);
+        } else {
+            progressbar.setVisibility(View.GONE);
+        }
 
     }
 
@@ -177,54 +220,107 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
 
     }
 
-    public void setLayout(User user) {
+    public void setLayout(final User user) {
 
         if (user != null) {
             emptyState.setVisibility(View.GONE);
-            profileContent.setVisibility(View.VISIBLE);
+            loadingState(false);
+            calendarView.setOnDateChangedListener(this);
             userNameTextView.setText(user.getUsername());
-            bioTextView.setText(user.getBio());
-            final StorageReference profileImageReference = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
-            profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                @Override
-                public void onSuccess(Uri uri) {
-                    Picasso.with(getActivity().getApplicationContext())
-                            .load(uri)
-                            .resize(148, 148)
-                            .centerCrop()
-                            .transform(new CircleTransform())
-                            .into(profileImage);
 
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Handle any errors
-                    profileImage.setImageDrawable(getContext().getDrawable((R.drawable.ic_profile_black_24dp)));
-                }
-            });
+            // Set the user's URL
+            urlTextView.setClickable(true);
+            urlTextView.setMovementMethod(LinkMovementMethod.getInstance());
+            if (user.getUrl() != null) {
+                String linkedText =
+                        String.format("<a href=\"%s\">%s</a> ", ("http://" + user.getUrl()), user.getUrl());
+                urlTextView.setText(Html.fromHtml(linkedText));
+            }
 
-            profileImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent();
-                    intent.setType("image/*");
-                    intent.setAction(Intent.ACTION_GET_CONTENT);
-                    startActivityForResult(Intent.createChooser(intent, "Choose Picture"), RC_PHOTO_SELECT);
-                }
-            });
-            //TODO: Set image, city state, tags, etc
+
             if (user.getTags() != null) {
-                tagsTextView.setText(user.getTags().toString());
+                tagsTextView.setText(user.getTags().toString().replaceAll("\\[|]|, $", ""));
             }
             if (user.getCitystate() != null) {
                 cityStateTextView.setText(user.getCitystate());
             }
 
+            if (user.getBio() != null) {
+                bioTextView.setText(user.getBio());
+            }
+            profileContent.setVisibility(View.VISIBLE);
         } else {
             userNameTextView.setText("user not in fb db");
             profileContent.setVisibility(View.GONE);
         }
+
+        // Both edit buttons start the profile creation activity
+        editBioButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editProfile(user);
+            }
+        });
+        editInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editProfile(user);
+            }
+        });
+
+        // Load profile image
+        final StorageReference profileImageReference = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
+        profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Picasso.with(getActivity().getApplicationContext())
+                        .load(uri)
+                        .resize(148, 148)
+                        .centerCrop()
+                        .transform(new CircleTransform())
+                        .into(profileImage);
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+                profileImage.setImageDrawable(getContext().getDrawable((R.drawable.ic_add_a_photo_black_24dp)));
+            }
+        });
+
+        profileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Choose Picture"), RC_PHOTO_SELECT);
+            }
+        });
+    }
+
+    private void editProfile(User user) {
+        Intent intent = new Intent(getActivity(), ProfileCreationActivity.class);
+
+        // Add intent extras to pre-populate edittexts in ProfileCreationActivity
+        if (user.getUsername() != null) {
+            intent.putExtra("Username", user.getUsername());
+        }
+        if (user.getBio() != null) {
+            intent.putExtra("Bio", user.getBio());
+        }
+        if (user.getCitystate() != null) {
+            intent.putExtra("Location", user.getCitystate());
+        }
+        if (user.getTags() != null) {
+            intent.putExtra("Tags", String.valueOf(user.getTags()));
+        }
+        if (user.getUrl() != null) {
+            intent.putExtra("Url", user.getUrl());
+        }
+
+        startActivityForResult(intent, RC_PROFILE_CREATION);
     }
 
     @Override
@@ -270,6 +366,10 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
                         List<String> tagsList = Arrays.asList(data.getStringExtra("tags").split(", "));
                         user.setTags(tagsList);
                     }
+
+                    if (data.getStringExtra("url") != null) {
+                        user.setUrl(data.getStringExtra("url"));
+                    }
                     if (user != null) {
                         presenter.patchUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
                         showToast("Updated Profile!");
@@ -304,7 +404,7 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
             }
         } else {
             if (response == null) {
-                // MiniUser pressed back button
+                // User pressed back button
                 showToast("Canceled");
                 return;
             }
@@ -326,5 +426,15 @@ public class ProfileFragment extends Fragment implements ProfilePresenter.Profil
     public boolean isNewSignUp() {
         FirebaseUserMetadata metadata = FirebaseAuth.getInstance().getCurrentUser().getMetadata();
         return metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp();
+    }
+
+    @Override
+    public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay calendarDay, boolean selected) {
+        Log.i("calendarDay = ", calendarDay.toString());
+        if (calendarDays.contains(calendarDay)) {
+            Intent intent = new Intent(getActivity(), EventDetailActivity.class);
+            intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
+            startActivity(intent);
+        }
     }
 }

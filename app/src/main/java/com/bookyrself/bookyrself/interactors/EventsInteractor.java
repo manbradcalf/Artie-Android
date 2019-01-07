@@ -4,8 +4,8 @@ import android.util.Log;
 
 import com.bookyrself.bookyrself.models.SerializedModels.EventCreationResponse;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.services.FirebaseService;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,13 +42,14 @@ public class EventsInteractor {
         });
     }
 
+    //TODO: Is this needed?
     public void getMultipleEventDetails(final List<String> eventIds) {
         for (final String id : eventIds) {
             service.getAPI().getEventData(id).enqueue(new Callback<EventDetail>() {
                 @Override
                 public void onResponse(Call<EventDetail> call, Response<EventDetail> response) {
                     if (response.body() != null) {
-                        listener.oneEventDetailOfManyReturned(response.body(), eventIds, id);
+                        listener.eventDetailReturned(response.body(), id);
                     }
                 }
 
@@ -61,16 +62,17 @@ public class EventsInteractor {
         }
     }
 
+    // Create the list of userIds of attendees
+    // We'll use this list of ids to add the event to the users.
+    // An event's users are stored as a hashmap due to Firebase DB limitations
     public void createEvent(final EventDetail event) {
 
-        // Create the list of userIds of attendees
-        // We'll use this list of ids to add the event to the users.
-        // An event's users are stored as a hashmap due to Firebase DB limitations
         final List<String> userIds = new ArrayList<>();
+        // Add the host to the list of userIds so it is added to their events in Firebase
+        String hostUserId = FirebaseAuth.getInstance().getUid();
+        userIds.add(hostUserId);
         if (event.getUsers() != null) {
-            for (String key : event.getUsers().keySet()) {
-                userIds.add(key);
-            }
+            userIds.addAll(event.getUsers().keySet());
         }
 
         service.getAPI().createEvent(event).enqueue(new Callback<EventCreationResponse>() {
@@ -82,7 +84,7 @@ public class EventsInteractor {
 
             @Override
             public void onFailure(Call<EventCreationResponse> call, Throwable t) {
-                Log.e("EventInteractor:", "MiniEvent Creation Failed!!!");
+                Log.e("EventInteractor: ", "Event Creation Failed!!!");
             }
         });
     }
@@ -91,14 +93,9 @@ public class EventsInteractor {
 
         void eventDetailReturned(EventDetail event, String eventId);
 
-        void usersEventsReturned(List<Event> events);
-
         void eventCreated(String eventId, List<String> usersToInvite);
 
         void presentError(String error);
 
-        void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId);
     }
-
-
 }

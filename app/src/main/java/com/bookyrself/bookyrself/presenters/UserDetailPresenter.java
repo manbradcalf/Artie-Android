@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
@@ -83,12 +82,7 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
 
     @Override
     public void eventDetailReturned(EventDetail event, String eventId) {
-
-    }
-
-    @Override
-    public void usersEventsReturned(List<Event> events) {
-
+        mListener.usersEventReturned(event, eventId);
     }
 
     @Override
@@ -101,23 +95,12 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
 
     }
 
-    @Override
-    public void oneEventDetailOfManyReturned(EventDetail eventDetail, List<String> eventIds, String eventId) {
-        //TODO: This method only exists so I can return date info to the UserDetailAcivity but i am really tired so idr why
-        events.put(eventId, eventDetail);
-        if (events.size() == eventIds.size()) {
-            mListener.userseventinfoready(events);
-        }
-
-    }
 
     /**
      * Contract / Listener
      */
     public interface UserDetailPresenterListener {
         void userInfoReady(User userInfo);
-
-        void userseventinfoready(HashMap<String, EventDetail> events);
 
         void presentError(String message);
 
@@ -126,5 +109,7 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
         void emailUser();
 
         void presentSuccess(String message);
-    }
+
+        void usersEventReturned(EventDetail event, String eventId);
+        }
 }

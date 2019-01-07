@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName;
 @SuppressWarnings("unused")
 public class EventCreationResponse {
 
+    // The "name" property is the GUID firebase creates
     @SerializedName("name")
     private String mName;
 

@@ -1,5 +1,6 @@
 package com.bookyrself.bookyrself.views;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -145,25 +146,16 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
 
     @Override
     public void eventCreated() {
+        Intent returnIntent = new Intent();
+        setResult(RESULT_OK, returnIntent);
         finish();
     }
 
     @Override
-    public void addToPotentialUsers(String userId) {
-
-    }
-
-    @Override
-    public void contactsReturned(Map<User, String> usersMap, List<User> contactsList) {
-        contacts.addAll(contactsList);
-        //TODO: These variable names are horrible. Match em
-        contactsAndUserIdsMap = usersMap;
+    public void contactReturned(User contact, String userId) {
+        contacts.add(contact);
+        contactsAndUserIdsMap.put(contact, userId);
         contactChipsInput.setFilterableList(contacts);
-    }
-
-    @Override
-    public void removeFromPotentialUsers(String userId) {
-
     }
 
     @Override

@@ -1,45 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/profile_creation_scrollview"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/profile_creation_constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/profile_creation_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:layout_constraintBottom_toTopOf="@id/profile_creation_scrollview"
+        app:popupTheme="@style/AppTheme.PopupOverlay"
+        app:title="@string/profile_creation_title"
+        app:titleTextColor="@android:color/white" />
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/profile_creation_scrollview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        app:layout_constraintTop_toBottomOf="@id/profile_creation_toolbar">
 
-        <EditText
-            android:id="@+id/profile_creation_username"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="username" />
+            android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/profile_creation_location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="location" />
+            <EditText
+                android:id="@+id/profile_creation_username"
+                android:drawablePadding="8dp"
+                android:drawableStart="@drawable/ic_edit_black_24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:hint="Username" />
 
-        <EditText
-            android:id="@+id/profile_creation_tags"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="tags" />
+            <EditText
+                android:id="@+id/profile_creation_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:drawableStart="@drawable/ic_map_black_24dp"
+                android:drawablePadding="16dp"
+                android:hint="Location" />
 
-        <EditText
-            android:id="@+id/profile_creation_bio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="bio" />
+            <EditText
+                android:id="@+id/profile_creation_tags"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:drawableStart="@drawable/ic_tags_black_24dp"
+                android:drawablePadding="16dp"
+                android:hint="Tags" />
 
-        <Button
-            android:id="@+id/profile_creation_submit_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="submit" />
+            <EditText
+                android:id="@+id/profile_creation_url"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:drawableStart="@drawable/ic_link_black_24dp"
+                android:drawablePadding="16dp"
+                android:hint="Website" />
 
-    </LinearLayout>
+            <EditText
+                android:id="@+id/profile_creation_bio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:drawableStart="@drawable/ic_person_black_24dp"
+                android:drawablePadding="16dp"
+                android:hint="Bio" />
+
+        </LinearLayout>
 
 
-</ScrollView>
+    </ScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/profile_creation_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="32dp"
+        android:tint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/profile_creation_scrollview"
+        app:srcCompat="@drawable/ic_check_white_24dp" />
+</android.support.constraint.ConstraintLayout>

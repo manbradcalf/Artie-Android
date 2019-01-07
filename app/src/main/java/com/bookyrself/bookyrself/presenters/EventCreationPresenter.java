@@ -76,11 +76,8 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
 
     @Override
     public void userReturned(String id, User user) {
-        usersIdAndDetailMap.put(user, id);
-        contactsList.add(user);
-
-        if (usersIdAndDetailMap.size() == contactIds.size()) {
-            presenterListener.contactsReturned(usersIdAndDetailMap, contactsList);
+        if (user != null) {
+            presenterListener.contactReturned(user, id);
         }
     }
 
@@ -94,11 +91,6 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
      */
     @Override
     public void eventDetailReturned(EventDetail event, String eventId) {
-
-    }
-
-    @Override
-    public void usersEventsReturned(List<Event> events) {
 
     }
 
@@ -124,11 +116,6 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     }
 
     @Override
-    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId) {
-
-    }
-
-    @Override
     public void eventAddedToUserSuccessfully() {
         //TODO: Find a way to determine it was added to _all_ invited users
     }
@@ -142,13 +129,10 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
      * Contract / Listener
      */
     public interface EventCreationPresenterListener {
-        void addToPotentialUsers(String userId);
 
-        void contactsReturned(Map<User, String> contactsAndUserIdMap, List<User> contactsList);
+        void contactReturned(User contact, String userId);
 
         void eventCreated();
-
-        void removeFromPotentialUsers(String userId);
 
         void dateAdded(String date);
     }

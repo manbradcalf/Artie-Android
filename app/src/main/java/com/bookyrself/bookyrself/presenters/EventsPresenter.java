@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
@@ -23,14 +22,14 @@ import retrofit2.Response;
 
 public class EventsPresenter implements EventsInteractor.EventsInteractorListener {
 
-    private final CalendarPresenterListener listener;
+    private final EventsPresenterListener listener;
     private final EventsInteractor eventsInteractor;
     private final FirebaseService service;
 
     /**
      * Constructor
      */
-    public EventsPresenter(CalendarPresenterListener listener) {
+    public EventsPresenter(EventsPresenterListener listener) {
         this.listener = listener;
         this.service = new FirebaseService();
         this.eventsInteractor = new EventsInteractor(this);
@@ -51,26 +50,26 @@ public class EventsPresenter implements EventsInteractor.EventsInteractorListene
 
             @Override
             public void onFailure(Call<HashMap<String, EventInfo>> call, Throwable t) {
-                Log.e(this.toString(), "Failed to load user events for user " + userId);
+                presentError("failed to load user events for user " + userId);
             }
         });
     }
 
     private void getEventDetails(List<String> eventIds) {
-        for (String id : eventIds){
+        for (String id : eventIds) {
             eventsInteractor.getEventDetail(id);
         }
-
     }
 
     @Override
     public void eventDetailReturned(EventDetail event, String eventId) {
-
+        listener.eventReady(event, eventId);
     }
 
     @Override
-    public void usersEventsReturned(List<Event> events) {
-
+    public void presentError(String error) {
+        Log.e(this.toString(), error);
+        listener.presentError(error);
     }
 
     @Override
@@ -78,25 +77,14 @@ public class EventsPresenter implements EventsInteractor.EventsInteractorListene
 
     }
 
-    @Override
-    public void presentError(String error) {
-
-    }
-
-    @Override
-    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId) {
-
-    }
-
     /**
      * Contract / Listener
      */
-    public interface CalendarPresenterListener {
-        void selectEventOnCalendar(String eventId);
+    public interface EventsPresenterListener {
 
-        void goToEventDetail(String eventId);
+        void eventReady(EventDetail event, String eventId);
 
-        void userEventsReady(List<Event> events);
+        void presentError(String error);
     }
 
 }
