@@ -87,7 +87,7 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
 
     @Override
     public void eventDetailReturned(EventDetail event, String eventId) {
-            listener.eventReady(event, eventId);
+        listener.eventReady(event, eventId);
     }
 
     @Override
@@ -100,26 +100,22 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
 
     }
 
-    @Override
-    public void oneEventDetailOfManyReturned(EventDetail body, List<String> eventIds, String eventId) {
 
-    }
+/**
+ * Contract / Listener
+ */
+public interface ProfilePresenterListener {
 
-    /**
-     * Contract / Listener
-     */
-    public interface ProfilePresenterListener {
+    void profileInfoReady(User user);
 
-        void profileInfoReady(User user);
+    void eventReady(EventDetail event, String eventId);
 
-        void eventReady(EventDetail event, String eventId);
+    void presentToast(String message);
 
-        void presentToast(String message);
+    void loadingState(Boolean show);
 
-        void loadingState(Boolean show);
-
-        void successfulAuth();
-    }
+    void successfulAuth();
+}
 
 
 }
