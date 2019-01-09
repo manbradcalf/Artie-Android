@@ -19,7 +19,6 @@ import android.widget.Toast;
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
-import com.bookyrself.bookyrself.presenters.EventsPresenter;
 import com.bookyrself.bookyrself.presenters.UserDetailPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.EventDecorator;
@@ -155,8 +154,6 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         addUserToContactsTextView.setText(getString(R.string.add_user_to_contacts, response.getUsername()));
         userEmailAddress = response.getEmail();
 
-        // Android Studio or gradle is being weird and not recognizing Task
-        // However everything compiles and runs fine
         final StorageReference profileImageReference = storageReference.child("images/" + userID);
         profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override

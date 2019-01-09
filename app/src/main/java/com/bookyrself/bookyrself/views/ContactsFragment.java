@@ -41,7 +41,6 @@ import butterknife.ButterKnife;
 
 public class ContactsFragment extends Fragment implements ContactsFragmentPresenter.ContactsPresenterListener {
 
-    private static final int RC_SIGN_IN = 123;
     @BindView(R.id.contacts_recyclerview)
     RecyclerView recyclerView;
 
@@ -106,11 +105,6 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
         // Don't need a button here
         emptyStateButton.setVisibility(View.GONE);
         emptyStateImage.setImageDrawable(getContext().getDrawable(R.drawable.ic_person_add_black_24dp));
-
-    }
-
-    @Override
-    public void loadingState() {
 
     }
 

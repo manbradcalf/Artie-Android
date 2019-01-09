@@ -101,21 +101,17 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
     }
 
 
-/**
- * Contract / Listener
- */
-public interface ProfilePresenterListener {
+    /**
+     * Contract / Listener
+     */
+    public interface ProfilePresenterListener {
 
-    void profileInfoReady(User user);
+        void profileInfoReady(User user);
 
-    void eventReady(EventDetail event, String eventId);
+        void eventReady(EventDetail event, String eventId);
 
-    void presentToast(String message);
+        void presentToast(String message);
 
-    void loadingState(Boolean show);
-
-    void successfulAuth();
-}
-
-
+        void loadingState(Boolean show);
+    }
 }

@@ -215,11 +215,6 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
 
     }
 
-    @Override
-    public void successfulAuth() {
-
-    }
-
     public void setLayout(final User user) {
 
         if (user != null) {
@@ -415,7 +410,6 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
             if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
                 showToast("Unknown Error");
             }
-
         }
     }
 

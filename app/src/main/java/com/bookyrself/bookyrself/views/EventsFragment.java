@@ -35,10 +35,8 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
     private static final int RC_EVENT_CREATION = 1;
     @BindView(R.id.events_calendar)
     MaterialCalendarView calendarView;
-
     @BindView(R.id.event_creation_fab)
     FloatingActionButton fab;
-
     @BindView(R.id.events_toolbar)
     Toolbar toolbar;
 

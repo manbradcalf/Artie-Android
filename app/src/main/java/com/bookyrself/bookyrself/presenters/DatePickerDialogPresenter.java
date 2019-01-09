@@ -22,8 +22,6 @@ public class DatePickerDialogPresenter {
         void dateSelected(int flag, String date);
     }
 
-    /**
-     * Methods
-     */
+
 
 }

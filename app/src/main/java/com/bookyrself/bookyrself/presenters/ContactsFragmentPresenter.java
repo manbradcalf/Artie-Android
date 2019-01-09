@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class ContactsFragmentPresenter extends BasePresenter implements ContactsInteractor.ContactsInteractorListener {
+public class ContactsFragmentPresenter implements ContactsInteractor.ContactsInteractorListener {
     private final ContactsPresenterListener presenterListener;
     private final ContactsInteractor contactsInteractor;
 
@@ -66,8 +66,6 @@ public class ContactsFragmentPresenter extends BasePresenter implements Contacts
     public interface ContactsPresenterListener {
 
         void presentError(String message);
-
-        void loadingState();
 
         void contactsReturned(List<String> ids);
 

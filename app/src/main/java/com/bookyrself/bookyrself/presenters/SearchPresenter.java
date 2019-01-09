@@ -33,13 +33,9 @@ import retrofit2.Response;
  */
 
 public class SearchPresenter {
-    private static final int USER_SEARCH_FLAG = 0;
     private static final int EVENT_SEARCH_FLAG = 1;
     private final SearchPresenterListener mListener;
     private final SearchService mService;
-    private DatabaseReference dbref;
-    private ChildEventListener childEventListener;
-    private FirebaseDatabase db;
 
     /**
      * Constructor

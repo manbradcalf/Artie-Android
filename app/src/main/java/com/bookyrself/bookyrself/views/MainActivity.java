@@ -14,7 +14,6 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
-    private static final int RC_SIGN_IN = 123;
     private static final int SEARCH_FRAGMENT_INDEX = 0;
     private static final int CALENDAR_FRAGMENT_INDEX = 1;
     private static final int CONTACTS_FRAGMENT_INDEX = 2;
