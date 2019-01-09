@@ -36,25 +36,18 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
 
     @BindView(R.id.event_creation_toolbar)
     Toolbar toolbar;
-
     @BindView(R.id.event_creation_scrollview)
     ScrollView scrollView;
-
     @BindView(R.id.event_creation_city_state)
     EditText cityStateEditText;
-
     @BindView(R.id.event_creation_event_name)
     EditText eventNameEditText;
-
     @BindView(R.id.event_creation_tags)
     EditText tagsEditText;
-
     @BindView(R.id.event_creation_date_button)
     EditText dateButton;
-
     @BindView(R.id.event_creation_submit_button)
     FloatingActionButton submitButton;
-
     @BindView(R.id.search_contacts_event_creation)
     ChipsInput contactChipsInput;
 

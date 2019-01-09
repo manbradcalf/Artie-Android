@@ -19,14 +19,10 @@ import java.util.Map;
 
 public class EventCreationPresenter implements ContactsInteractor.ContactsInteractorListener, EventsInteractor.EventsInteractorListener, UsersInteractor.UsersInteractorListener {
 
-    private HashMap<String, Long> userEventCountHashMap;
     private EventCreationPresenterListener presenterListener;
     private ContactsInteractor contactsInteractor;
     private EventsInteractor eventsInteractor;
     private UsersInteractor usersInteractor;
-    List<String> contactIds;
-    List<User> contactsList;
-    Map<User, String> usersIdAndDetailMap;
 
     /**
      * Constructor
@@ -36,8 +32,6 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
         this.eventsInteractor = new EventsInteractor(this);
         this.usersInteractor = new UsersInteractor(this);
         this.presenterListener = listener;
-        contactsList = new ArrayList<>();
-        usersIdAndDetailMap = new HashMap<>();
     }
 
     /**
@@ -69,7 +63,7 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     @Override
     public void contactsReturned(HashMap<String, Boolean> contacts) {
         if (contacts != null) {
-            contactIds = new ArrayList<>(contacts.keySet());
+            List<String> contactIds = new ArrayList<>(contacts.keySet());
             contactsInteractor.getUsers(contactIds);
         }
     }

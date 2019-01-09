@@ -24,9 +24,6 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
     private final UserDetailPresenterListener mListener;
     private final FirebaseService mService;
     private final EventsInteractor eventsInteractor;
-    private HashMap<String, EventDetail> events;
-    private User user;
-
     /**
      * Constructor
      */
@@ -35,7 +32,6 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
         this.mListener = listener;
         this.mService = new FirebaseService();
         this.eventsInteractor = new EventsInteractor(this);
-        this.events = new HashMap<>();
     }
 
     /**

@@ -22,7 +22,6 @@ public class ContactsInteractor {
         this.listener = listener;
     }
 
-
     /**
      * Methods
      */

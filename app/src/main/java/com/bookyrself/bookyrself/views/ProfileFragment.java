@@ -101,7 +101,7 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
     private ProfilePresenter presenter;
     private StorageReference storageReference;
     private List<CalendarDay> calendarDays = new ArrayList<>();
-    HashMap<CalendarDay, String> calendarDaysWithEventIds;
+    private HashMap<CalendarDay, String> calendarDaysWithEventIds;
     private User user;
 
     @Override
@@ -212,11 +212,6 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
         } else {
             progressbar.setVisibility(View.GONE);
         }
-
-    }
-
-    @Override
-    public void successfulAuth() {
 
     }
 
@@ -415,7 +410,6 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
             if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
                 showToast("Unknown Error");
             }
-
         }
     }
 
