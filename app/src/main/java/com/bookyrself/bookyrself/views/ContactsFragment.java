@@ -43,10 +43,8 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
 
     @BindView(R.id.contacts_recyclerview)
     RecyclerView recyclerView;
-
     @BindView(R.id.toolbar_contacts_fragment)
     Toolbar toolbar;
-
     @BindView(R.id.contacts_empty_state)
     LinearLayout emptyState;
     @BindView(R.id.empty_state_text_header)

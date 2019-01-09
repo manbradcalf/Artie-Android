@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     public FirebaseApp firebaseApp;
     FragmentViewPagerAdapter adapter;
     FragmentViewPager viewPager;
-    private BottomNavigationView navigationView;
+    BottomNavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

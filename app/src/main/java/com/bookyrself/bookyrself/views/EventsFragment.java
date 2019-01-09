@@ -32,7 +32,6 @@ import butterknife.ButterKnife;
 
 public class EventsFragment extends Fragment implements OnDateSelectedListener, EventsPresenter.EventsPresenterListener {
 
-    private static final int RC_EVENT_CREATION = 1;
     @BindView(R.id.events_calendar)
     MaterialCalendarView calendarView;
     @BindView(R.id.event_creation_fab)
@@ -40,9 +39,10 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
     @BindView(R.id.events_toolbar)
     Toolbar toolbar;
 
+    private static final int RC_EVENT_CREATION = 1;
     private EventsPresenter presenter;
-    List<CalendarDay> calendarDays = new ArrayList<>();
-    HashMap<CalendarDay, String> calendarDaysWithEventIds;
+    private List<CalendarDay> calendarDays = new ArrayList<>();
+    private HashMap<CalendarDay, String> calendarDaysWithEventIds;
 
     @Override
     public void onCreate(Bundle savedInsanceState) {

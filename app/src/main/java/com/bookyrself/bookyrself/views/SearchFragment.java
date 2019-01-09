@@ -38,10 +38,6 @@ import butterknife.ButterKnife;
 
 public class SearchFragment extends Fragment implements SearchPresenter.SearchPresenterListener {
 
-    public static final int FLAG_START_DATE = 2;
-    public static final int FLAG_END_DATE = 3;
-    private static final int USER_SEARCH_FLAG = 0;
-    private static final int EVENT_SEARCH_FLAG = 1;
     @BindView(R.id.search_what)
     SearchView searchViewWhat;
     @BindView(R.id.search_where)
@@ -72,11 +68,16 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     Button emptyStateButton;
     @BindView(R.id.search_recycler_view)
     RecyclerView recyclerView;
-    SearchPresenter presenter;
-    List<Hit> eventsResults;
-    List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Hit> usersResults;
-    ResultsAdapter adapter;
-    Boolean boolSearchEditable = false;
+
+    public static final int FLAG_START_DATE = 2;
+    public static final int FLAG_END_DATE = 3;
+    private static final int USER_SEARCH_FLAG = 0;
+    private static final int EVENT_SEARCH_FLAG = 1;
+    private SearchPresenter presenter;
+    private List<Hit> eventsResults;
+    private List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Hit> usersResults;
+    private ResultsAdapter adapter;
+    private Boolean boolSearchEditable = false;
     private StorageReference storageReference;
 
 

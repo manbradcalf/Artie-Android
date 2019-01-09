@@ -101,7 +101,7 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
     private ProfilePresenter presenter;
     private StorageReference storageReference;
     private List<CalendarDay> calendarDays = new ArrayList<>();
-    HashMap<CalendarDay, String> calendarDaysWithEventIds;
+    private HashMap<CalendarDay, String> calendarDaysWithEventIds;
     private User user;
 
     @Override
