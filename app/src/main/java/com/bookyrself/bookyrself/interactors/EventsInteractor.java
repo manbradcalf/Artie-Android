@@ -16,7 +16,6 @@ import retrofit2.Response;
 
 public class EventsInteractor {
 
-    //TODO: What are the reprecussions of making the service static?
     private final FirebaseService service;
     private final EventsInteractorListener listener;
 
