@@ -139,20 +139,22 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
             emptyStateButton.setText("Join Now");
             emptyState.setVisibility(View.VISIBLE);
             profileContent.setVisibility(View.GONE);
+            progressbar.setVisibility(View.GONE);
             emptyStateButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    //TODO: This is duplicated in EventFragment now
                     List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
-                            new AuthUI.IdpConfig.EmailBuilder().build());
-                    // Authenticate
-                    startActivityForResult(
-                            AuthUI.getInstance()
+                        new AuthUI.IdpConfig.EmailBuilder().build());
+                // Authenticate
+                startActivityForResult(
+                        AuthUI.getInstance()
                                     .createSignInIntentBuilder()
                                     .setIsSmartLockEnabled(false, true)
                                     .setAvailableProviders(providers)
                                     .build(),
-                            RC_SIGN_IN);
-                }
+                RC_SIGN_IN);
+            }
             });
         } else {
             // Get user data

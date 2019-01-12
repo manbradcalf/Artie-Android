@@ -12,23 +12,30 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.presenters.EventsPresenter;
 import com.bookyrself.bookyrself.utils.EventDecorator;
+import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static android.app.Activity.RESULT_OK;
 
 public class EventsFragment extends Fragment implements OnDateSelectedListener, EventsPresenter.EventsPresenterListener {
 
@@ -38,8 +45,19 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
     FloatingActionButton fab;
     @BindView(R.id.events_toolbar)
     Toolbar toolbar;
+    @BindView(R.id.user_detail_empty_state)
+    View emptyState;
+    @BindView(R.id.empty_state_text_header)
+    TextView emptyStateTextHeader;
+    @BindView(R.id.empty_state_text_subheader)
+    TextView emptyStateTextSubHeader;
+    @BindView(R.id.empty_state_image)
+    ImageView emptyStateImageView;
+    @BindView(R.id.empty_state_button)
+    Button emptyStateButton;
 
-    private static final int RC_EVENT_CREATION = 1;
+    private static final int RC_SIGN_IN = 123;
+    private static final int RC_EVENT_CREATION = 456;
     private EventsPresenter presenter;
     private List<CalendarDay> calendarDays = new ArrayList<>();
     private HashMap<CalendarDay, String> calendarDaysWithEventIds;
@@ -54,6 +72,7 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_events, container, false);
         ButterKnife.bind(this, view);
+        showEmptyState(false);
         toolbar.setTitle("Your Calendar");
         return view;
     }
@@ -79,18 +98,30 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
                 }
             }
         });
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            showContent(true);
+        } else {
+            showLoggedOutEmptyState();
+        }
     }
 
-    // Refresh the CalendarView after creating a new event
+    // Reload the CalendarView after creating a new event or signing in
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        presenter.loadUsersEventInfo(FirebaseAuth.getInstance().getUid());
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                //TODO: Is this pointless duplication or good for readability & updatability?
+                case RC_SIGN_IN:
+                    presenter.loadUsersEventInfo(FirebaseAuth.getInstance().getUid());
+                case RC_EVENT_CREATION:
+                    presenter.loadUsersEventInfo(FirebaseAuth.getInstance().getUid());
+            }
+        }
     }
 
     @Override
     public void onDateSelected(@NonNull MaterialCalendarView materialCalendarView, @NonNull CalendarDay calendarDay, boolean b) {
-        Log.i("calendarDay = ", calendarDay.toString());
         if (calendarDays.contains(calendarDay)) {
             Intent intent = new Intent(getActivity(), EventDetailActivity.class);
             intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
@@ -100,6 +131,8 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
 
     @Override
     public void eventReady(EventDetail event, String eventId) {
+        showEmptyState(false);
+        showContent(true);
         String[] s = event.getDate().split("-");
         int year = Integer.parseInt(s[0]);
         // I have to do weird logic on the month because months are 0 indexed
@@ -112,9 +145,87 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
         calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this.getContext()));
     }
 
+    private void showEmptyState(boolean b) {
+        if (b) {
+            emptyState.setVisibility(View.VISIBLE);
+            emptyStateButton.setVisibility(View.VISIBLE);
+        } else {
+            emptyState.setVisibility(View.GONE);
+            emptyStateButton.setVisibility(View.GONE);
+        }
+
+    }
+
     @Override
     public void presentError(String error) {
-        Toast.makeText(this.getContext(), error, Toast.LENGTH_SHORT).show();
+        showContent(false);
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            showLoggedOutEmptyState();
+        } else if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            showUserHasNoEventsEmptyState();
+        } else {
+            Toast.makeText(getActivity(), "Unknown error: " + error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showContent(boolean b) {
+        if (b) {
+            calendarView.setVisibility(View.VISIBLE);
+            fab.setVisibility(View.VISIBLE);
+        } else {
+            calendarView.setVisibility(View.GONE);
+            fab.setVisibility(View.GONE);
+        }
+    }
+
+    private void showUserHasNoEventsEmptyState() {
+        showContent(false);
+        emptyState.setVisibility(View.VISIBLE);
+        emptyStateButton.setVisibility(View.VISIBLE);
+        emptyStateImageView.setImageDrawable(getActivity().getDrawable(R.drawable.ic_calendar));
+        emptyStateTextHeader.setText("Add an event to get started!");
+        emptyStateTextSubHeader.setText("Please sign in to create events.");
+        emptyStateButton.setText("Sign In");
+        emptyStateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                        new AuthUI.IdpConfig.EmailBuilder().build());
+                // Authenticate
+                startActivityForResult(
+                        AuthUI.getInstance()
+                                .createSignInIntentBuilder()
+                                .setIsSmartLockEnabled(false, true)
+                                .setAvailableProviders(providers)
+                                .build(),
+                        RC_SIGN_IN);
+            }
+        });
+    }
+
+    private void showLoggedOutEmptyState() {
+        showContent(false);
+        emptyState.setVisibility(View.VISIBLE);
+        emptyStateButton.setVisibility(View.VISIBLE);
+        emptyStateImageView.setImageDrawable(getActivity().getDrawable(R.drawable.ic_calendar));
+        emptyStateTextHeader.setText("You are logged out!");
+        emptyStateTextSubHeader.setText("Please sign in to view events.");
+        emptyStateButton.setText("Sign In");
+        emptyStateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                        new AuthUI.IdpConfig.EmailBuilder().build());
+                // Authenticate
+                startActivityForResult(
+                        AuthUI.getInstance()
+                                .createSignInIntentBuilder()
+                                .setIsSmartLockEnabled(false, true)
+                                .setAvailableProviders(providers)
+                                .build(),
+                        RC_SIGN_IN);
+            }
+        });
     }
 }
 
