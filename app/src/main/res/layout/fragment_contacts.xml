@@ -24,7 +24,8 @@
     </android.support.design.widget.AppBarLayout>
 
     <include
-        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:id="@+id/contacts_empty_state"
         layout="@layout/empty_state_template"
         android:layout_width="match_parent"
