@@ -50,7 +50,8 @@ public class EventsPresenter implements EventsInteractor.EventsInteractorListene
 
             @Override
             public void onFailure(Call<HashMap<String, EventInfo>> call, Throwable t) {
-                presentError("failed to load user events for user " + userId);
+                Log.e("EventsPresenter: ", t.getMessage());
+                listener.presentError(t.getMessage());
             }
         });
     }
