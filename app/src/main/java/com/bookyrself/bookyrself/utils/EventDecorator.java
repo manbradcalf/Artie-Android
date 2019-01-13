@@ -17,11 +17,11 @@ import java.util.HashSet;
 
 public class EventDecorator implements DayViewDecorator {
     private final Context context;
-    private final int color;
+    private final boolean isEventInviteAccepted;
     private final HashSet<CalendarDay> dates;
 
-    public EventDecorator(int color, Collection<CalendarDay> dates, @NonNull Context context) {
-        this.color = color;
+    public EventDecorator(boolean isEventInviteAccepted, Collection<CalendarDay> dates, @NonNull Context context) {
+        this.isEventInviteAccepted = isEventInviteAccepted;
         this.dates = new HashSet<>(dates);
         this.context = context;
     }
@@ -34,6 +34,10 @@ public class EventDecorator implements DayViewDecorator {
 
     @Override
     public void decorate(DayViewFacade view) {
-        view.setBackgroundDrawable(context.getDrawable(R.drawable.ic_circumference));
+        if (isEventInviteAccepted) {
+            view.setBackgroundDrawable(context.getDrawable(R.drawable.calendar_day_event_invite_accepted_background));
+        } else {
+            view.setBackgroundDrawable(context.getDrawable(R.drawable.calendar_day_event_invite_not_accepted_background));
+        }
     }
 }

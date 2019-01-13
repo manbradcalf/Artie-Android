@@ -1,7 +1,6 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -32,8 +31,11 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -86,9 +88,10 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     private StorageReference storageReference;
     private String userEmailAddress;
     private String userID;
-    private HashSet<CalendarDay> calendarDays;
     private HashMap<CalendarDay, String> calendarDaysWithEventIds;
     private UserDetailPresenter userDetailPresenter;
+    private List<CalendarDay> pendingEventsCalendarDays = new ArrayList<>();
+    private List<CalendarDay> acceptedEventsCalendarDays = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -100,7 +103,6 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         userDetailPresenter.getUserInfo(userID);
         Toolbar.setTitle("User Details");
         calendarView.setOnDateChangedListener(this);
-        calendarDays = new HashSet<>();
         calendarDaysWithEventIds = new HashMap<>();
         storageReference = FirebaseStorage.getInstance().getReference();
         emptyState.setVisibility(View.GONE);
@@ -201,10 +203,17 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         int month = Integer.parseInt(s[1]) - 1;
         int day = Integer.parseInt(s[2]);
         CalendarDay calendarDay = CalendarDay.from(year, month, day);
-        calendarDays.add(calendarDay);
-        calendarDaysWithEventIds.put(calendarDay, eventId);
-        EventDecorator decorator = new EventDecorator(Color.BLUE, calendarDays, this);
-        calendarView.addDecorator(decorator);
+        for (Map.Entry<String, Boolean> userIsAttending : event.getUsers().entrySet()) {
+            if (userIsAttending.getValue()) {
+                acceptedEventsCalendarDays.add(calendarDay);
+                calendarDaysWithEventIds.put(calendarDay, eventId);
+                calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, getApplicationContext()));
+            } else {
+                pendingEventsCalendarDays.add(calendarDay);
+                calendarDaysWithEventIds.put(calendarDay, eventId);
+                calendarView.addDecorator(new EventDecorator(false, pendingEventsCalendarDays, getApplicationContext()));
+            }
+        }
     }
 
     @Override
@@ -244,10 +253,14 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
 
 
     @Override
-    public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
-        if (calendarDays.contains(date)) {
+    public void onDateSelected(@NonNull MaterialCalendarView materialCalendarView, @NonNull CalendarDay calendarDay, boolean b) {
+        if (acceptedEventsCalendarDays.contains(calendarDay)) {
             Intent intent = new Intent(this, EventDetailActivity.class);
-            intent.putExtra("eventId", calendarDaysWithEventIds.get(date));
+            intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
+            startActivity(intent);
+        } else if (pendingEventsCalendarDays.contains(calendarDay)) {
+            Intent intent = new Intent(this, EventDetailActivity.class);
+            intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
             startActivity(intent);
         }
     }

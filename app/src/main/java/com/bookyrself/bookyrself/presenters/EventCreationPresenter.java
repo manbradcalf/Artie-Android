@@ -39,9 +39,6 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
      */
 
     public void createEvent(EventDetail event) {
-
-        // Iterate through the hashmap of users and their events array size.
-        // For each user in the hashmpap, add the event to their
         eventsInteractor.createEvent(event);
     }
 

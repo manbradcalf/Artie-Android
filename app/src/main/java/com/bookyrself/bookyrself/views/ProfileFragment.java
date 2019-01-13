@@ -50,8 +50,10 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -100,9 +102,10 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
 
     private ProfilePresenter presenter;
     private StorageReference storageReference;
-    private List<CalendarDay> calendarDays = new ArrayList<>();
     private HashMap<CalendarDay, String> calendarDaysWithEventIds;
     private User user;
+    private List<CalendarDay> acceptedEventsCalendarDays = new ArrayList<>();
+    private List<CalendarDay> pendingEventsCalendarDays = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -197,9 +200,18 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
         int month = Integer.parseInt(s[1]) - 1;
         int day = Integer.parseInt(s[2]);
         CalendarDay calendarDay = CalendarDay.from(year, month, day);
-        calendarDays.add(calendarDay);
-        calendarDaysWithEventIds.put(calendarDay, eventId);
-        calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this.getContext()));
+
+        for (Map.Entry<String, Boolean> userIsAttending : event.getUsers().entrySet()) {
+            if (userIsAttending.getValue()) {
+                acceptedEventsCalendarDays.add(calendarDay);
+                calendarDaysWithEventIds.put(calendarDay, eventId);
+                calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
+            } else {
+                pendingEventsCalendarDays.add(calendarDay);
+                calendarDaysWithEventIds.put(calendarDay,eventId);
+                calendarView.addDecorator(new EventDecorator(false, pendingEventsCalendarDays, this.getContext()));
+            }
+        }
     }
 
     @Override
@@ -426,8 +438,11 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
 
     @Override
     public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay calendarDay, boolean selected) {
-        Log.i("calendarDay = ", calendarDay.toString());
-        if (calendarDays.contains(calendarDay)) {
+        if (acceptedEventsCalendarDays.contains(calendarDay)) {
+            Intent intent = new Intent(getActivity(), EventDetailActivity.class);
+            intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
+            startActivity(intent);
+        } else if (pendingEventsCalendarDays.contains(calendarDay)) {
             Intent intent = new Intent(getActivity(), EventDetailActivity.class);
             intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
             startActivity(intent);

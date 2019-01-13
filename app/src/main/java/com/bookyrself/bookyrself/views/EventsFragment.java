@@ -1,14 +1,12 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -59,8 +58,9 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
     private static final int RC_SIGN_IN = 123;
     private static final int RC_EVENT_CREATION = 456;
     private EventsPresenter presenter;
-    private List<CalendarDay> calendarDays = new ArrayList<>();
+    private List<CalendarDay> acceptedEventsCalendarDays = new ArrayList<>();
     private HashMap<CalendarDay, String> calendarDaysWithEventIds;
+    private List<CalendarDay> pendingEventsCalendarDays = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInsanceState) {
@@ -122,7 +122,11 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
 
     @Override
     public void onDateSelected(@NonNull MaterialCalendarView materialCalendarView, @NonNull CalendarDay calendarDay, boolean b) {
-        if (calendarDays.contains(calendarDay)) {
+        if (acceptedEventsCalendarDays.contains(calendarDay)) {
+            Intent intent = new Intent(getActivity(), EventDetailActivity.class);
+            intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
+            startActivity(intent);
+        } else if (pendingEventsCalendarDays.contains(calendarDay)) {
             Intent intent = new Intent(getActivity(), EventDetailActivity.class);
             intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
             startActivity(intent);
@@ -140,9 +144,18 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
         int month = Integer.parseInt(s[1]) - 1;
         int day = Integer.parseInt(s[2]);
         CalendarDay calendarDay = CalendarDay.from(year, month, day);
-        calendarDays.add(calendarDay);
-        calendarDaysWithEventIds.put(calendarDay, eventId);
-        calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this.getContext()));
+
+        for (Map.Entry<String, Boolean> userIsAttending : event.getUsers().entrySet()) {
+            if (userIsAttending.getValue()) {
+                acceptedEventsCalendarDays.add(calendarDay);
+                calendarDaysWithEventIds.put(calendarDay, eventId);
+                calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
+            } else {
+                pendingEventsCalendarDays.add(calendarDay);
+                calendarDaysWithEventIds.put(calendarDay, eventId);
+                calendarView.addDecorator(new EventDecorator(false, pendingEventsCalendarDays, this.getContext()));
+            }
+        }
     }
 
     private void showEmptyState(boolean b) {
