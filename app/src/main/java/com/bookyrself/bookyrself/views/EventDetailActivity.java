@@ -116,18 +116,14 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             e.printStackTrace();
         }
 
-
         HostUsernameTextview.setText(hostUsername);
-
         EventCityState.setText(hostCityState);
-
         miniUsers = miniUsersList;
 
         for (int i = 0; i < miniUsers.size(); i++) {
             String userId = miniUsers.get(i).getUserId();
             presenter.getUserThumbUrl(userId);
         }
-
 
         HostcardView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -165,6 +161,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     @Override
     public void presentError(String message) {
         showProgressbar(false);
+        Toolbar.setTitle("Event Detail Error");
         eventDetailContent.setVisibility(View.GONE);
         emptyStateButton.setVisibility(View.GONE);
         emptyStateImage.setImageDrawable(getDrawable(R.drawable.ic_error_empty_state));

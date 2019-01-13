@@ -82,6 +82,16 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
         storageReference = FirebaseStorage.getInstance().getReference();
+        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if (firebaseAuth.getCurrentUser() != null) {
+                    emptyState.setVisibility(View.GONE);
+                    emptyStateButton.setVisibility(View.GONE);
+                    presenter.getContactIds(FirebaseAuth.getInstance().getUid());
+                }
+            }
+        });
 
         return view;
     }
@@ -103,139 +113,141 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case RC_SIGN_IN:
+                    emptyState.setVisibility(View.GONE);
+                    emptyStateButton.setVisibility(View.GONE);
                     presenter.getContactIds(FirebaseAuth.getInstance().getUid());
             }
         }
     }
 
+    @Override
+    public void presentError(String message) {
+        emptyState.setVisibility(View.VISIBLE);
+        emptyStateTextHeader.setText(R.string.contacts_empty_state_header);
+        emptyStateTextSubHeader.setText(message);
+        emptyStateImage.setImageDrawable(getContext().getDrawable(R.drawable.ic_no_auth_profile));
+        emptyStateButton.setVisibility(View.VISIBLE);
+        emptyStateButton.setText("Sign In");
+        emptyStateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                        new AuthUI.IdpConfig.EmailBuilder().build());
+                // Authenticate
+                startActivityForResult(
+                        AuthUI.getInstance()
+                                .createSignInIntentBuilder()
+                                .setIsSmartLockEnabled(false, true)
+                                .setAvailableProviders(providers)
+                                .build(),
+                        RC_SIGN_IN);
+            }
+        });
+
+    }
+
+    // First I get a list of contactIds via the presenter,
+    // upon receiving those ids, I then call getUsers to iterate through
+    // each id to get the relevant user data.
+    @Override
+    public void contactsReturned(List<String> ids) {
+        contactIds = ids;
+        presenter.getUsers(ids);
+    }
+
+    //TODO: Do what?
+    //  When I've iterated through all the ids, I notify the adapter of a change
+    // Also I am adding to a map of userId with userInfo so I can start a UserDetail activity with the id
+    // since the id isn't on the _source object
+    @Override
+    public void userReturned(String id, User user) {
+        contacts.add(user);
+        contactsMap.put(user, id);
+        adapter.notifyDataSetChanged();
+    }
+
+    class ContactsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+        ContactsAdapter() {
+
+        }
+
+        @NonNull
         @Override
-        public void presentError (String message){
-            emptyState.setVisibility(View.VISIBLE);
-            emptyStateTextHeader.setText(R.string.contacts_empty_state_header);
-            emptyStateTextSubHeader.setText(message);
-            emptyStateImage.setImageDrawable(getContext().getDrawable(R.drawable.ic_no_auth_profile));
-            emptyStateButton.setVisibility(View.VISIBLE);
-            emptyStateButton.setText("Sign In");
-            emptyStateButton.setOnClickListener(new View.OnClickListener() {
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = getLayoutInflater().inflate(R.layout.item_user_search_result, parent, false);
+            return new ViewHolderContacts(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
+            final ViewHolderContacts viewHolderContacts = (ViewHolderContacts) holder;
+            if (contacts.get(position).getTags() != null) {
+                StringBuilder listString = new StringBuilder();
+                for (String s : contacts.get(position).getTags()) {
+                    listString.append(s + ", ");
+                }
+                viewHolderContacts.userTagsTextView.setText(listString.toString().replaceAll(", $", ""));
+
+            }
+
+            final StorageReference profileImageReference = storageReference.child("/images/" + contactsMap.get(contacts.get(position)));
+            profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                 @Override
-                public void onClick(View view) {
-                    List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
-                            new AuthUI.IdpConfig.EmailBuilder().build());
-                    // Authenticate
-                    startActivityForResult(
-                            AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setIsSmartLockEnabled(false, true)
-                                    .setAvailableProviders(providers)
-                                    .build(),
-                            RC_SIGN_IN);
+                public void onSuccess(Uri uri) {
+                    Picasso.with(getActivity())
+                            .load(uri)
+                            .placeholder(R.drawable.round)
+                            .error(R.drawable.round)
+                            .transform(new CircleTransform())
+                            .resize(100, 100)
+                            .into(viewHolderContacts.userProfileImageThumb);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    // Handle any errors
+                    Log.e("ContactsFragment: ", "image not dowloaded");
+                    viewHolderContacts.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_profile_black_24dp));
                 }
             });
 
-        }
 
-        // First I get a list of contactIds via the presenter,
-        // upon receiving those ids, I then call getUsers to iterate through
-        // each id to get the relevant user data.
-        @Override
-        public void contactsReturned (List < String > ids) {
-            contactIds = ids;
-            presenter.getUsers(ids);
-        }
-
-        //TODO: Do what?
-        //  When I've iterated through all the ids, I notify the adapter of a change
-        // Also I am adding to a map of userId with userInfo so I can start a UserDetail activity with the id
-        // since the id isn't on the _source object
-        @Override
-        public void userReturned (String id, User user){
-            contacts.add(user);
-            contactsMap.put(user, id);
-            adapter.notifyDataSetChanged();
-        }
-
-        class ContactsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
-            ContactsAdapter() {
-
-            }
-
-            @NonNull
-            @Override
-            public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                View view = getLayoutInflater().inflate(R.layout.item_user_search_result, parent, false);
-                return new ViewHolderContacts(view);
-            }
-
-            @Override
-            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
-                final ViewHolderContacts viewHolderContacts = (ViewHolderContacts) holder;
-                if (contacts.get(position).getTags() != null) {
-                    StringBuilder listString = new StringBuilder();
-                    for (String s : contacts.get(position).getTags()) {
-                        listString.append(s + ", ");
-                    }
-                    viewHolderContacts.userTagsTextView.setText(listString.toString().replaceAll(", $", ""));
-
+            viewHolderContacts.userNameTextView.setText(contacts.get(position).getUsername());
+            viewHolderContacts.userCityStateTextView.setText(contacts.get(position).getCitystate());
+            viewHolderContacts.userCardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getActivity(), UserDetailActivity.class);
+                    intent.putExtra("userId", contactsMap.get(contacts.get(position)));
+                    startActivity(intent);
                 }
-
-                final StorageReference profileImageReference = storageReference.child("/images/" + contactsMap.get(contacts.get(position)));
-                profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        Picasso.with(getActivity())
-                                .load(uri)
-                                .placeholder(R.drawable.round)
-                                .error(R.drawable.round)
-                                .transform(new CircleTransform())
-                                .resize(100, 100)
-                                .into(viewHolderContacts.userProfileImageThumb);
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // Handle any errors
-                        Log.e("ContactsFragment: ", "image not dowloaded");
-                        viewHolderContacts.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_profile_black_24dp));
-                    }
-                });
+            });
+        }
 
 
-                viewHolderContacts.userNameTextView.setText(contacts.get(position).getUsername());
-                viewHolderContacts.userCityStateTextView.setText(contacts.get(position).getCitystate());
-                viewHolderContacts.userCardView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(getActivity(), UserDetailActivity.class);
-                        intent.putExtra("userId", contactsMap.get(contacts.get(position)));
-                        startActivity(intent);
-                    }
-                });
-            }
+        @Override
+        public int getItemCount() {
+            return contacts.size();
+        }
 
+        class ViewHolderContacts extends RecyclerView.ViewHolder {
 
-            @Override
-            public int getItemCount() {
-                return contacts.size();
-            }
+            @BindView(R.id.search_result_card_users)
+            CardView userCardView;
+            @BindView(R.id.user_location_search_result)
+            TextView userCityStateTextView;
+            @BindView(R.id.username_search_result)
+            TextView userNameTextView;
+            @BindView(R.id.user_tag_search_result)
+            TextView userTagsTextView;
+            @BindView(R.id.user_image_search_result)
+            ImageView userProfileImageThumb;
 
-            class ViewHolderContacts extends RecyclerView.ViewHolder {
-
-                @BindView(R.id.search_result_card_users)
-                CardView userCardView;
-                @BindView(R.id.user_location_search_result)
-                TextView userCityStateTextView;
-                @BindView(R.id.username_search_result)
-                TextView userNameTextView;
-                @BindView(R.id.user_tag_search_result)
-                TextView userTagsTextView;
-                @BindView(R.id.user_image_search_result)
-                ImageView userProfileImageThumb;
-
-                ViewHolderContacts(View itemView) {
-                    super(itemView);
-                    ButterKnife.bind(this, itemView);
-                }
+            ViewHolderContacts(View itemView) {
+                super(itemView);
+                ButterKnife.bind(this, itemView);
             }
         }
     }
+}
