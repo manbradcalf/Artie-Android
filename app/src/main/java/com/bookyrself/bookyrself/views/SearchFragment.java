@@ -371,7 +371,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                     view = getLayoutInflater().inflate(R.layout.item_user_search_result, parent, false);
                     return new ViewHolderUsers(view);
                 case 1:
-                    view = getLayoutInflater().inflate(R.layout.item_event_search_result, parent, false);
+                    view = getLayoutInflater().inflate(R.layout.item_event, parent, false);
                     return new ViewHolderEvents(view);
                 default:
                     return null;
@@ -514,11 +514,11 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
             ViewHolderEvents(View view) {
                 super(view);
-                eventCardView = view.findViewById(R.id.search_result_card_events);
-                eventCityStateTextView = view.findViewById(R.id.event_location_search_result);
-                eventHostTextView = view.findViewById(R.id.event_host_search_result);
-                eventNameTextView = view.findViewById(R.id.eventname_search_result);
-                eventImageThumb = view.findViewById(R.id.event_image_search_result);
+                eventCardView = view.findViewById(R.id.event_item_card);
+                eventCityStateTextView = view.findViewById(R.id.event_item_line2);
+                eventHostTextView = view.findViewById(R.id.event_item_line3);
+                eventNameTextView = view.findViewById(R.id.event_item_line1);
+                eventImageThumb = view.findViewById(R.id.event_item_image);
             }
         }
 
