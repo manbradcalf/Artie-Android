@@ -21,16 +21,16 @@ import retrofit2.Response;
  */
 
 public class UserDetailPresenter implements EventsInteractor.EventsInteractorListener {
-    private final UserDetailPresenterListener mListener;
-    private final FirebaseService mService;
+    private final UserDetailPresenterListener listener;
+    private final FirebaseService service;
     private final EventsInteractor eventsInteractor;
     /**
      * Constructor
      */
 
     public UserDetailPresenter(UserDetailPresenterListener listener) {
-        this.mListener = listener;
-        this.mService = new FirebaseService();
+        this.listener = listener;
+        this.service = new FirebaseService();
         this.eventsInteractor = new EventsInteractor(this);
     }
 
@@ -39,22 +39,22 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
      */
     //TODO: Should this be in @UsersInteractor
     public void getUserInfo(final String id) {
-        mService.getAPI().getUserDetails(id).enqueue(new Callback<User>() {
+        service.getAPI().getUserDetails(id).enqueue(new Callback<User>() {
             @Override
             public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
                 //TODO: I hate all of these null checks. Can I fix?
                 if (response.body() != null) {
-                    mListener.userInfoReady(response.body());
+                    listener.userInfoReady(response.body());
                     if (response.body().getEvents() != null)
                         eventsInteractor.getMultipleEventDetails(new ArrayList<>(response.body().getEvents().keySet()));
                 } else {
-                    mListener.presentError(id);
+                    listener.presentError(id);
                 }
             }
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
-                mListener.presentError(t.getMessage());
+                listener.presentError(t.getMessage());
                 Log.e("getUserInfo:", String.format("userId %s is null", id));
             }
         });
@@ -63,10 +63,10 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
     public void addContactToUser(String userId, String contactId) {
         HashMap<String, Boolean> request = new HashMap<>();
         request.put(contactId, true);
-        mService.getAPI().addContactToUser(request, userId).enqueue(new Callback<HashMap<String, Boolean>>() {
+        service.getAPI().addContactToUser(request, userId).enqueue(new Callback<HashMap<String, Boolean>>() {
             @Override
             public void onResponse(Call<HashMap<String, Boolean>> call, Response<HashMap<String, Boolean>> response) {
-                mListener.presentSuccess("added to contacts!");
+                listener.presentSuccess("added to contacts!");
             }
 
             @Override
@@ -78,16 +78,21 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
 
     @Override
     public void eventDetailReturned(EventDetail event, String eventId) {
-        mListener.usersEventReturned(event, eventId);
+        listener.usersEventReturned(event, eventId);
     }
 
     @Override
-    public void eventCreated(String eventId, List<String> usersToInvite) {
+    public void addNewlyCreatedEventToUsers(String eventId, List<String> attendeesToInvite, String hostUserId) {
 
     }
 
     @Override
     public void presentError(String error) {
+
+    }
+
+    @Override
+    public void eventInviteAccepted(String eventId) {
 
     }
 
