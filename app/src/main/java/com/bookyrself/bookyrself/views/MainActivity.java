@@ -18,11 +18,12 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     private static final int CALENDAR_FRAGMENT_INDEX = 1;
     private static final int CONTACTS_FRAGMENT_INDEX = 2;
     private static final int PROFILE_FRAGMENT_INDEX = 3;
+    private static final int EVENTS_INVITE_LIST = 4;
     public FirebaseDatabase db;
     public FirebaseApp firebaseApp;
     FragmentViewPagerAdapter adapter;
     FragmentViewPager viewPager;
-    BottomNavigationView navigationView;
+    private BottomNavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
             viewPager.setCurrentItem(CONTACTS_FRAGMENT_INDEX);
         } else if (itemId == R.id.navigation_profile) {
             viewPager.setCurrentItem(PROFILE_FRAGMENT_INDEX);
+        } else if (itemId == R.id.navigation_event_invites_list) {
+            viewPager.setCurrentItem(EVENTS_INVITE_LIST);
         }
         return true;
     }
@@ -70,13 +73,15 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         final SearchFragment searchFragment = new SearchFragment();
         final EventsFragment eventsFragment = new EventsFragment();
         final ContactsFragment contactsFragment = new ContactsFragment();
+        final EventInvitesFragment eventInvitesFragment = new EventInvitesFragment();
 
         viewPager = findViewById(R.id.view_pager);
         adapter = new FragmentViewPagerAdapter(this.getSupportFragmentManager());
         adapter.addFragment(searchFragment, "Search");
-        adapter.addFragment(eventsFragment, "Events");
+        adapter.addFragment(eventsFragment, "Calendar");
         adapter.addFragment(contactsFragment, "Contacts");
         adapter.addFragment(profileFragment, "Profile");
+        adapter.addFragment(eventInvitesFragment, "Event Invites");
         viewPager.setAdapter(adapter);
     }
 
