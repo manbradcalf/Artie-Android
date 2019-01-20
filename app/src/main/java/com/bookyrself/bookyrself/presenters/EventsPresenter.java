@@ -64,7 +64,12 @@ public class EventsPresenter implements EventsInteractor.EventsInteractorListene
 
     @Override
     public void eventDetailReturned(EventDetail event, String eventId) {
-        listener.eventReady(event, eventId);
+        listener.eventDetailReturned(event, eventId);
+    }
+
+    @Override
+    public void addNewlyCreatedEventToUsers(String eventId, List<String> attendeesToInvite, String hostUserId) {
+
     }
 
     @Override
@@ -74,7 +79,7 @@ public class EventsPresenter implements EventsInteractor.EventsInteractorListene
     }
 
     @Override
-    public void eventCreated(String eventId, List<String> usersToInvite) {
+    public void eventInviteAccepted(String eventId) {
 
     }
 
@@ -83,7 +88,7 @@ public class EventsPresenter implements EventsInteractor.EventsInteractorListene
      */
     public interface EventsPresenterListener {
 
-        void eventReady(EventDetail event, String eventId);
+        void eventDetailReturned(EventDetail event, String eventId);
 
         void presentError(String error);
     }

@@ -91,12 +91,17 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
     }
 
     @Override
-    public void eventCreated(String eventId, List<String> usersToInvite) {
+    public void addNewlyCreatedEventToUsers(String eventId, List<String> attendeesToInvite, String hostUserId) {
 
     }
 
     @Override
     public void presentError(String error) {
+
+    }
+
+    @Override
+    public void eventInviteAccepted(String eventId) {
 
     }
 

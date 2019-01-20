@@ -68,8 +68,8 @@ public class EventsInteractor {
 
         final List<String> userIds = new ArrayList<>();
         // Add the host to the list of userIds so it is added to their events in Firebase
-        String hostUserId = FirebaseAuth.getInstance().getUid();
-        userIds.add(hostUserId);
+        final String hostUserId = FirebaseAuth.getInstance().getUid();
+
         if (event.getUsers() != null) {
             userIds.addAll(event.getUsers().keySet());
         }
@@ -78,7 +78,7 @@ public class EventsInteractor {
             @Override
             public void onResponse(Call<EventCreationResponse> call, Response<EventCreationResponse> response) {
                 String eventId = response.body().getName();
-                listener.eventCreated(eventId, userIds);
+                listener.addNewlyCreatedEventToUsers(eventId, userIds, hostUserId);
             }
 
             @Override
@@ -88,13 +88,48 @@ public class EventsInteractor {
         });
     }
 
+    public void acceptEventInvite(final String eventId, final String userId) {
+        service.getAPI().acceptInvite(true, userId, eventId).enqueue(new Callback<Boolean>() {
+            @Override
+            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                if (response.body() != null) {
+                    setEventUserAsAttending(userId, eventId);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Boolean> call, Throwable t) {
+
+            }
+        });
+    }
+
+    //TODO: Figure out how to handle this if you are the host and accepting/rejcting invites to your own
+    private void setEventUserAsAttending(String userId, final String eventId) {
+        service.getAPI().setEventUserAsAttending(true, userId, eventId).enqueue(new Callback<Boolean>() {
+            @Override
+            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                if (response.body() != null) {
+                    listener.eventInviteAccepted(eventId);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Boolean> call, Throwable t) {
+                Log.e("EventsInteractor ", t.getMessage());
+            }
+        });
+    }
+
+
     public interface EventsInteractorListener {
 
         void eventDetailReturned(EventDetail event, String eventId);
 
-        void eventCreated(String eventId, List<String> usersToInvite);
+        void addNewlyCreatedEventToUsers(String eventId, List<String> attendeesToInvite, String hostUserId);
 
         void presentError(String error);
 
+        void eventInviteAccepted(String eventId);
     }
 }

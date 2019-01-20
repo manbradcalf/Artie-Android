@@ -95,7 +95,7 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
     }
 
     @Override
-    public void eventCreated(String eventId, List<String> usersToInvite) {
+    public void addNewlyCreatedEventToUsers(String eventId, List<String> attendeesToInvite, String hostUserId) {
 
     }
 
@@ -103,6 +103,11 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
     public void presentError(String error) {
         // Surface the error sent from the interactor to the activity
         mListener.presentError(error);
+    }
+
+    @Override
+    public void eventInviteAccepted(String eventId) {
+
     }
 
     @Override
