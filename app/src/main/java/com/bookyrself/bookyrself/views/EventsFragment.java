@@ -134,7 +134,7 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
     }
 
     @Override
-    public void eventReady(EventDetail event, String eventId) {
+    public void eventDetailReturned(EventDetail event, String eventId) {
         showEmptyState(false);
         showContent(true);
         String[] s = event.getDate().split("-");
@@ -145,16 +145,26 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
         int day = Integer.parseInt(s[2]);
         CalendarDay calendarDay = CalendarDay.from(year, month, day);
 
-        for (Map.Entry<String, Boolean> userIsAttending : event.getUsers().entrySet()) {
-            if (userIsAttending.getValue()) {
-                acceptedEventsCalendarDays.add(calendarDay);
-                calendarDaysWithEventIds.put(calendarDay, eventId);
-                calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
-            } else {
-                pendingEventsCalendarDays.add(calendarDay);
-                calendarDaysWithEventIds.put(calendarDay, eventId);
-                calendarView.addDecorator(new EventDecorator(false, pendingEventsCalendarDays, this.getContext()));
+        // If I'm not already hosting
+        if (!event.getHost().getUserId().equals(FirebaseAuth.getInstance().getUid())) {
+            // Check all events for my ID. If it's there && true, set accepted. else, set pending.
+            for (Map.Entry<String, Boolean> userIsAttending : event.getUsers().entrySet()) {
+                if (userIsAttending.getValue()) {
+                    acceptedEventsCalendarDays.add(calendarDay);
+                    calendarDaysWithEventIds.put(calendarDay, eventId);
+                    calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
+                } else {
+                    pendingEventsCalendarDays.add(calendarDay);
+                    calendarDaysWithEventIds.put(calendarDay, eventId);
+                    calendarView.addDecorator(new EventDecorator(false, pendingEventsCalendarDays, this.getContext()));
+                }
             }
+        }
+        // If i'm the host, set me as "accepted"
+        else {
+            acceptedEventsCalendarDays.add(calendarDay);
+            calendarDaysWithEventIds.put(calendarDay, eventId);
+            calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
         }
     }
 
