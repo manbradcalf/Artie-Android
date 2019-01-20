@@ -63,7 +63,6 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
     private ContactsAdapter adapter;
     private ContactsFragmentPresenter presenter;
     private RecyclerView.LayoutManager layoutManager;
-    private List<String> contactIds;
     private List<User> contacts;
     private Map<User, String> contactsMap;
     private StorageReference storageReference;
@@ -146,19 +145,11 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
 
     }
 
-    // First I get a list of contactIds via the presenter,
-    // upon receiving those ids, I then call getUsers to iterate through
-    // each id to get the relevant user data.
     @Override
     public void contactsReturned(List<String> ids) {
-        contactIds = ids;
         presenter.getUsers(ids);
     }
 
-    //TODO: Do what?
-    //  When I've iterated through all the ids, I notify the adapter of a change
-    // Also I am adding to a map of userId with userInfo so I can start a UserDetail activity with the id
-    // since the id isn't on the _source object
     @Override
     public void userReturned(String id, User user) {
         contacts.add(user);
@@ -188,7 +179,6 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
                     listString.append(s + ", ");
                 }
                 viewHolderContacts.userTagsTextView.setText(listString.toString().replaceAll(", $", ""));
-
             }
 
             final StorageReference profileImageReference = storageReference.child("/images/" + contactsMap.get(contacts.get(position)));
@@ -211,7 +201,6 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
                     viewHolderContacts.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_profile_black_24dp));
                 }
             });
-
 
             viewHolderContacts.userNameTextView.setText(contacts.get(position).getUsername());
             viewHolderContacts.userCityStateTextView.setText(contacts.get(position).getCitystate());

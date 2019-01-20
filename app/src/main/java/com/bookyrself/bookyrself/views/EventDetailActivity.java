@@ -99,18 +99,15 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(R.string.event_detail_toolbar);
 
-        String date = data.getDate();
         Host host = data.getHost();
         String hostUsername = host.getUsername();
         String hostCityState = data.getCitystate();
 
-        DateView.setText("Date");
         DateFormat inputformat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        Date d;
         try {
-            d = inputformat.parse(date);
+            Date date = inputformat.parse(data.getDate());
             DateFormat outputFormat = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
-            String formattedDate = outputFormat.format(d);
+            String formattedDate = outputFormat.format(date);
             DateView.setText(formattedDate);
         } catch (ParseException e) {
             e.printStackTrace();
