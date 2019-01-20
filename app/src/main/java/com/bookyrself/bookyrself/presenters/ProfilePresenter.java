@@ -65,11 +65,15 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
         service.getAPI().getUserDetails(UID).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
-                HashMap<String, EventInfo> events = response.body().getEvents();
-                if (events != null) {
-                    getEventDetails(new ArrayList<>(events.keySet()));
+                if (response.body() != null){
+                    HashMap<String, EventInfo> events = response.body().getEvents();
+                    if (events != null) {
+                        getEventDetails(new ArrayList<>(events.keySet()));
+                    }
+                    listener.profileInfoReady(response.body());
+                } else {
+                    listener.presentToast("User was null");
                 }
-                listener.profileInfoReady(response.body());
             }
 
             @Override
