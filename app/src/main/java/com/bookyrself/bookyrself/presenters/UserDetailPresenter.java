@@ -1,9 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
-import android.support.annotation.NonNull;
-import android.util.Log;
-
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
+import com.bookyrself.bookyrself.interactors.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
@@ -20,10 +18,12 @@ import retrofit2.Response;
  * Created by benmedcalf on 1/13/18.
  */
 
-public class UserDetailPresenter implements EventsInteractor.EventsInteractorListener {
+public class UserDetailPresenter implements EventsInteractor.EventsInteractorListener, UsersInteractor.UsersInteractorListener {
     private final UserDetailPresenterListener listener;
     private final FirebaseService service;
     private final EventsInteractor eventsInteractor;
+    private final UsersInteractor usersInteractor;
+
     /**
      * Constructor
      */
@@ -32,34 +32,17 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
         this.listener = listener;
         this.service = new FirebaseService();
         this.eventsInteractor = new EventsInteractor(this);
+        this.usersInteractor = new UsersInteractor(this);
     }
 
     /**
      * Methods
      */
-    //TODO: Should this be in @UsersInteractor
-    public void getUserInfo(final String id) {
-        service.getAPI().getUserDetails(id).enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
-                //TODO: I hate all of these null checks. Can I fix?
-                if (response.body() != null) {
-                    listener.userInfoReady(response.body());
-                    if (response.body().getEvents() != null)
-                        eventsInteractor.getMultipleEventDetails(new ArrayList<>(response.body().getEvents().keySet()));
-                } else {
-                    listener.presentError(id);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                listener.presentError(t.getMessage());
-                Log.e("getUserInfo:", String.format("userId %s is null", id));
-            }
-        });
+    public void getUserInfo(final String userId) {
+        usersInteractor.getUserDetails(userId);
     }
 
+    
     public void addContactToUser(String userId, String contactId) {
         HashMap<String, Boolean> request = new HashMap<>();
         request.put(contactId, true);
@@ -96,6 +79,19 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
 
     }
 
+    @Override
+    public void eventAddedToUserSuccessfully() {
+
+    }
+
+    @Override
+    public void userDetailReturned(User user, String userId) {
+        listener.userInfoReady(user);
+        if (user.getEvents() != null) {
+            eventsInteractor.getMultipleEventDetails(new ArrayList<>(user.getEvents().keySet()));
+        }
+    }
+
 
     /**
      * Contract / Listener
@@ -112,5 +108,5 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
         void presentSuccess(String message);
 
         void usersEventReturned(EventDetail event, String eventId);
-        }
+    }
 }

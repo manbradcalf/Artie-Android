@@ -72,8 +72,11 @@ public class UsersInteractor {
         service.getAPI().getUserDetails(userId).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
-                //TODO: Will the userId here always be the one that made the call?
-                usersInteractorListener.userDetailReturned(response.body(), userId);
+                if (response.body() != null) {
+                    usersInteractorListener.userDetailReturned(response.body(), userId);
+                } else {
+                }
+
             }
 
             @Override
