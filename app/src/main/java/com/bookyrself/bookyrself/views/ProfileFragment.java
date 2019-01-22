@@ -201,22 +201,31 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
         int day = Integer.parseInt(s[2]);
         CalendarDay calendarDay = CalendarDay.from(year, month, day);
 
-        for (Map.Entry<String, Boolean> userIsAttending : event.getUsers().entrySet()) {
-            if (userIsAttending.getValue()) {
+        for (Map.Entry<String, Boolean> isUserAttending : event.getUsers().entrySet()) {
+            // If the
+            if (isUserAttending.getValue() || event.getHost().getUserId().equals(FirebaseAuth.getInstance().getUid())) {
                 acceptedEventsCalendarDays.add(calendarDay);
                 calendarDaysWithEventIds.put(calendarDay, eventId);
                 calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
-            } else {
+            }
+            else {
                 pendingEventsCalendarDays.add(calendarDay);
-                calendarDaysWithEventIds.put(calendarDay,eventId);
+                calendarDaysWithEventIds.put(calendarDay, eventId);
                 calendarView.addDecorator(new EventDecorator(false, pendingEventsCalendarDays, this.getContext()));
             }
         }
     }
 
     @Override
-    public void presentToast(String error) {
+    public void presentError(String error) {
+        emptyStateTextHeader.setText(getString(R.string.error_header));
+        emptyStateTextSubHeader.setText(error);
+        emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_error_empty_state));
+        emptyState.setVisibility(View.VISIBLE);
 
+        // Button and progress bar not needed
+        emptyStateButton.setVisibility(View.GONE);
+        progressbar.setVisibility(View.GONE);
     }
 
     @Override
