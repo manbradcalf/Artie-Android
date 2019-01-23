@@ -446,7 +446,6 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         }
 
         private void buildUserViewHolder(final RecyclerView.ViewHolder holder, final int position) {
-            //TODO: Intermittent index out of bounds here when toggling between Events and Users.
             if (usersResults.size() > position) {
                 final ViewHolderUsers viewHolderUsers = (ViewHolderUsers) holder;
                 viewHolderUsers.userCityStateTextView.setText(usersResults
