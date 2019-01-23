@@ -60,7 +60,7 @@ public class EventInvitesFragment extends Fragment implements EventInvitesFragme
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event_invites, container, false);
         ButterKnife.bind(this, view);
-        toolbar.setTitle(R.string.event_invites_toolbar);
+        toolbar.setTitle(R.string.title_event_invites);
         eventDetailEventIdHashMap = new HashMap<>();
         eventDetailsList = new ArrayList<>();
         adapter = new EventsAdapter();
