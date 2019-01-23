@@ -330,7 +330,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     public void showError() {
         recyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
-        emptyStateTextHeader.setText(R.string.search_error_header);
+        emptyStateTextHeader.setText(R.string.error_header);
         emptyStateTextSubHeader.setText(R.string.search_error_subheader);
         emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_error_empty_state));
         emptyState.setVisibility(View.VISIBLE);
