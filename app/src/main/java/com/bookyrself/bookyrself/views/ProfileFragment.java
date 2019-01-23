@@ -440,7 +440,7 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
         Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
     }
 
-    public boolean isNewSignUp() {
+    private boolean isNewSignUp() {
         FirebaseUserMetadata metadata = FirebaseAuth.getInstance().getCurrentUser().getMetadata();
         return metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp();
     }
