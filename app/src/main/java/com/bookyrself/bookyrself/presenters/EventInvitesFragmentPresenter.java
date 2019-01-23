@@ -7,7 +7,7 @@ import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail
 import java.util.List;
 
 
-public class EventInvitesFragmentPresenter implements UsersInteractor.UsersEventInvitesInteractorListener, EventsInteractor.EventsInteractorListener {
+public class EventInvitesFragmentPresenter implements UsersInteractor.UsersEventInvitesInteractorListener, EventsInteractor.EventInvitesInteractorListener {
 
     private final EventInvitesUserDetailPresenterListener listener;
     private UsersInteractor userInteractor;
@@ -30,21 +30,6 @@ public class EventInvitesFragmentPresenter implements UsersInteractor.UsersEvent
     }
 
     @Override
-    public void eventDetailReturned(EventDetail event, String eventId) {
-        listener.eventsPendingInvitationResponseReturned(event, eventId);
-    }
-
-    @Override
-    public void addNewlyCreatedEventToUsers(String eventId, List<String> attendeesToInvite, String hostUserId) {
-
-    }
-
-    @Override
-    public void presentError(String error) {
-
-    }
-
-    @Override
     public void eventInviteAccepted(String eventId) {
         listener.eventInviteAccepted(eventId);
     }
@@ -52,6 +37,11 @@ public class EventInvitesFragmentPresenter implements UsersInteractor.UsersEvent
     @Override
     public void eventIdOfEventWithPendingInvitesReturned(String eventId) {
         eventsInteractor.getEventDetail(eventId);
+    }
+
+    @Override
+    public void presentError(String error) {
+
     }
 
     /**

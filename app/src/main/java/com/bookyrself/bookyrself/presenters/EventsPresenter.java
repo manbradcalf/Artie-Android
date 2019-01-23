@@ -68,20 +68,11 @@ public class EventsPresenter implements EventsInteractor.EventsInteractorListene
     }
 
     @Override
-    public void addNewlyCreatedEventToUsers(String eventId, List<String> attendeesToInvite, String hostUserId) {
-
-    }
-
-    @Override
     public void presentError(String error) {
         Log.e(this.toString(), error);
         listener.presentError(error);
     }
 
-    @Override
-    public void eventInviteAccepted(String eventId) {
-
-    }
 
     /**
      * Contract / Listener

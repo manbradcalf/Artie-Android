@@ -16,12 +16,24 @@ import retrofit2.Response;
 
 public class EventsInteractor {
 
-    private final FirebaseService service;
-    private final EventsInteractorListener listener;
+    private FirebaseService service;
+    private EventsInteractorListener eventsInteractorListener;
+    private EventCreationInteractorListener eventCreationInteractorListener;
+    private EventInvitesInteractorListener eventInvitesInteractorListener;
 
     public EventsInteractor(EventsInteractorListener listener) {
         this.service = new FirebaseService();
-        this.listener = listener;
+        this.eventsInteractorListener = listener;
+    }
+
+    public EventsInteractor(EventCreationInteractorListener listener) {
+        this.service = new FirebaseService();
+        this.eventCreationInteractorListener = listener;
+    }
+
+    public EventsInteractor(EventInvitesInteractorListener listener) {
+        this.service = new FirebaseService();
+        this.eventInvitesInteractorListener = listener;
     }
 
     public void getEventDetail(final String eventId) {
@@ -29,14 +41,13 @@ public class EventsInteractor {
             @Override
             public void onResponse(Call<EventDetail> call, Response<EventDetail> response) {
                 if (response.body() != null) {
-
-                    listener.eventDetailReturned(response.body(), eventId);
+                    eventsInteractorListener.eventDetailReturned(response.body(), eventId);
                 }
             }
 
             @Override
             public void onFailure(Call<EventDetail> call, Throwable t) {
-                listener.presentError(t.getMessage());
+                eventsInteractorListener.presentError(t.getMessage());
             }
         });
     }
@@ -48,13 +59,13 @@ public class EventsInteractor {
                 @Override
                 public void onResponse(Call<EventDetail> call, Response<EventDetail> response) {
                     if (response.body() != null) {
-                        listener.eventDetailReturned(response.body(), id);
+                        eventsInteractorListener.eventDetailReturned(response.body(), id);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<EventDetail> call, Throwable t) {
-                    listener.presentError(t.getMessage());
+                    eventsInteractorListener.presentError(t.getMessage());
                 }
             });
 
@@ -78,7 +89,7 @@ public class EventsInteractor {
             @Override
             public void onResponse(Call<EventCreationResponse> call, Response<EventCreationResponse> response) {
                 String eventId = response.body().getName();
-                listener.addNewlyCreatedEventToUsers(eventId, userIds, hostUserId);
+                eventCreationInteractorListener.addNewlyCreatedEventToUsers(eventId, userIds, hostUserId);
             }
 
             @Override
@@ -110,7 +121,7 @@ public class EventsInteractor {
             @Override
             public void onResponse(Call<Boolean> call, Response<Boolean> response) {
                 if (response.body() != null) {
-                    listener.eventInviteAccepted(eventId);
+                    eventInvitesInteractorListener.eventInviteAccepted(eventId);
                 }
             }
 
@@ -121,14 +132,23 @@ public class EventsInteractor {
         });
     }
 
-
+    /**
+     * Contracts / Listeners
+     */
     public interface EventsInteractorListener {
 
         void eventDetailReturned(EventDetail event, String eventId);
 
-        void addNewlyCreatedEventToUsers(String eventId, List<String> attendeesToInvite, String hostUserId);
-
         void presentError(String error);
+
+    }
+
+    public interface EventCreationInteractorListener extends EventsInteractorListener {
+
+        void addNewlyCreatedEventToUsers(String eventId, List<String> attendeesToInvite, String hostUserId);
+    }
+
+    public interface EventInvitesInteractorListener {
 
         void eventInviteAccepted(String eventId);
     }

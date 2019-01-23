@@ -15,7 +15,7 @@ import java.util.List;
  * Created by benmedcalf on 3/9/18.
  */
 
-public class EventCreationPresenter implements ContactsInteractor.ContactsInteractorListener, EventsInteractor.EventsInteractorListener, UsersInteractor.UsersInteractorListener {
+public class EventCreationPresenter implements ContactsInteractor.ContactsInteractorListener, EventsInteractor.EventCreationInteractorListener, UsersInteractor.UsersInteractorListener {
 
     private EventCreationPresenterListener presenterListener;
     private ContactsInteractor contactsInteractor;
@@ -108,16 +108,6 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     @Override
     public void presentError(String error) {
 
-    }
-
-    @Override
-    public void eventInviteAccepted(String eventId) {
-
-    }
-
-    @Override
-    public void eventAddedToUserSuccessfully() {
-        //TODO: Find a way to determine it was added to _all_ invited users
     }
 
     @Override

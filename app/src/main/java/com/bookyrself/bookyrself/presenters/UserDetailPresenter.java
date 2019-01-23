@@ -18,7 +18,7 @@ import retrofit2.Response;
  * Created by benmedcalf on 1/13/18.
  */
 
-public class UserDetailPresenter implements EventsInteractor.EventsInteractorListener, UsersInteractor.UsersInteractorListener {
+public class UserDetailPresenter implements EventsInteractor.EventCreationInteractorListener, UsersInteractor.UserDetailInteractorListener {
     private final UserDetailPresenterListener listener;
     private final FirebaseService service;
     private final EventsInteractor eventsInteractor;
@@ -42,7 +42,8 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
         usersInteractor.getUserDetails(userId);
     }
 
-    
+
+    //TODO: Put this in the interactor
     public void addContactToUser(String userId, String contactId) {
         HashMap<String, Boolean> request = new HashMap<>();
         request.put(contactId, true);
@@ -75,21 +76,16 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
     }
 
     @Override
-    public void eventInviteAccepted(String eventId) {
-
-    }
-
-    @Override
-    public void eventAddedToUserSuccessfully() {
-
-    }
-
-    @Override
     public void userDetailReturned(User user, String userId) {
         listener.userInfoReady(user);
         if (user.getEvents() != null) {
             eventsInteractor.getMultipleEventDetails(new ArrayList<>(user.getEvents().keySet()));
         }
+    }
+
+    @Override
+    public void contactSuccessfullyAdded() {
+
     }
 
 
