@@ -81,6 +81,7 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
         storageReference = FirebaseStorage.getInstance().getReference();
+        //TODO: Move to presenter level
         FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {

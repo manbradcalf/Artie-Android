@@ -106,6 +106,8 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         calendarDaysWithEventIds = new HashMap<>();
         storageReference = FirebaseStorage.getInstance().getReference();
         emptyState.setVisibility(View.GONE);
+
+        //TODO: Move to presenter level
         FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
