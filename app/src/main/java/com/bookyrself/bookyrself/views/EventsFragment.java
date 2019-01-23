@@ -59,8 +59,8 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
     private static final int RC_EVENT_CREATION = 456;
     private EventsPresenter presenter;
     private List<CalendarDay> acceptedEventsCalendarDays = new ArrayList<>();
-    private HashMap<CalendarDay, String> calendarDaysWithEventIds;
     private List<CalendarDay> pendingEventsCalendarDays = new ArrayList<>();
+    private HashMap<CalendarDay, String> calendarDaysWithEventIds;
 
     @Override
     public void onCreate(Bundle savedInsanceState) {
@@ -90,6 +90,8 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
                 startActivityForResult(intent, RC_EVENT_CREATION);
             }
         });
+
+        //TODO: Move to presenter level
         FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -168,17 +170,6 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
         }
     }
 
-    private void showEmptyState(boolean b) {
-        if (b) {
-            emptyState.setVisibility(View.VISIBLE);
-            emptyStateButton.setVisibility(View.VISIBLE);
-        } else {
-            emptyState.setVisibility(View.GONE);
-            emptyStateButton.setVisibility(View.GONE);
-        }
-
-    }
-
     @Override
     public void presentError(String error) {
         showContent(false);
@@ -189,6 +180,17 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
         } else {
             Toast.makeText(getActivity(), "Unknown error: " + error, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void showEmptyState(boolean b) {
+        if (b) {
+            emptyState.setVisibility(View.VISIBLE);
+            emptyStateButton.setVisibility(View.VISIBLE);
+        } else {
+            emptyState.setVisibility(View.GONE);
+            emptyStateButton.setVisibility(View.GONE);
+        }
+
     }
 
     private void showContent(boolean b) {
