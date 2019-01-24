@@ -37,6 +37,17 @@ public class EventInvitesFragment extends Fragment implements EventInvitesFragme
     RecyclerView recyclerView;
     @BindView(R.id.toolbar_event_invites_fragment)
     Toolbar toolbar;
+    @BindView(R.id.event_invites_empty_state)
+    View emptyState;
+    @BindView(R.id.empty_state_text_header)
+    TextView emptyStateTextHeader;
+    @BindView(R.id.empty_state_image)
+    ImageView emptyStateImage;
+    @BindView(R.id.empty_state_text_subheader)
+    TextView emptyStateTextSubHeader;
+    @BindView(R.id.empty_state_button)
+    Button emptyStateButton;
+
 
     private HashMap<EventDetail, String> eventDetailEventIdHashMap;
     private RecyclerView.LayoutManager layoutManager;
@@ -67,6 +78,8 @@ public class EventInvitesFragment extends Fragment implements EventInvitesFragme
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+        // Showing the empty state in onCreteView, then showing content if any is returned
+        showEmptyState();
         presenter = new EventInvitesFragmentPresenter(this);
         presenter.getEventInvites(FirebaseAuth.getInstance().getUid());
 
@@ -75,6 +88,9 @@ public class EventInvitesFragment extends Fragment implements EventInvitesFragme
 
     @Override
     public void eventsPendingInvitationResponseReturned(EventDetail event, String eventId) {
+        if (recyclerView.getVisibility() == View.GONE) {
+            recyclerView.setVisibility(View.VISIBLE);
+        }
         eventDetailsList.add(event);
         eventDetailEventIdHashMap.put(event, eventId);
         adapter.notifyDataSetChanged();
@@ -89,7 +105,8 @@ public class EventInvitesFragment extends Fragment implements EventInvitesFragme
     public void eventInviteAccepted(String eventId) {
 
         //TODO: This is fucked
-        for(int i = 0; i < eventDetailsList.size(); i++){
+        // Find the
+        for (int i = 0; i < eventDetailsList.size(); i++) {
             if (eventId.equals(eventDetailEventIdHashMap.get(eventDetailsList.get(i)))) {
                 eventDetailsList.remove(eventDetailsList.get(i));
                 adapter.notifyDataSetChanged();
@@ -97,6 +114,29 @@ public class EventInvitesFragment extends Fragment implements EventInvitesFragme
         }
     }
 
+    @Override
+    public void noInvitesReturnedForUser() {
+        showEmptyState();
+    }
+
+    private void showEmptyState() {
+        recyclerView.setVisibility(View.GONE);
+
+        // No need for a button here
+        emptyStateButton.setVisibility(View.GONE);
+
+        emptyState.setVisibility(View.VISIBLE);
+        emptyStateTextHeader.setText("You have no event invites");
+        emptyStateTextHeader.setVisibility(View.VISIBLE);
+        //TODO: Fix this copy
+        emptyStateTextSubHeader.setText("Go out and make some friends!");
+        emptyStateTextSubHeader.setVisibility(View.VISIBLE);
+        emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_no_events_black_24dp));
+    }
+
+    /**
+     * Adapter
+     */
     class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         EventsAdapter() {

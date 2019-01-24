@@ -33,4 +33,11 @@
         android:layout_marginBottom="?attr/actionBarSize"
         android:layout_marginTop="?attr/actionBarSize"/>
 
+    <include
+        android:id="@+id/event_invites_empty_state"
+        layout="@layout/empty_state_template"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
 </RelativeLayout>
