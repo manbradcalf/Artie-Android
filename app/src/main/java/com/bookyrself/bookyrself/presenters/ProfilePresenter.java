@@ -1,10 +1,13 @@
 package com.bookyrself.bookyrself.presenters;
 
+import android.support.annotation.NonNull;
+
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,14 +21,25 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
     private final ProfilePresenterListener listener;
     private final FirebaseService service;
     private final EventsInteractor eventsInteractor;
+    private final FirebaseAuth auth;
 
     /**
      * Construction
      */
-    public ProfilePresenter(ProfilePresenterListener listener) {
+    public ProfilePresenter(final ProfilePresenterListener listener) {
         this.listener = listener;
         this.service = new FirebaseService();
         this.eventsInteractor = new EventsInteractor(this);
+        this.auth = FirebaseAuth.getInstance();
+        
+        auth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if (auth.getCurrentUser() == null) {
+                    listener.signOut();
+                }
+            }
+        });
     }
 
     /**
@@ -72,13 +86,13 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
                     }
                     listener.profileInfoReady(response.body());
                 } else {
-                    listener.presentToast("User was null");
+                    listener.presentError("User was null");
                 }
             }
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
-
+                    listener.presentError(t.getMessage());
             }
         });
     }
@@ -95,20 +109,9 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
     }
 
     @Override
-    public void addNewlyCreatedEventToUsers(String eventId, List<String> attendeesToInvite, String hostUserId) {
-
-    }
-
-    @Override
     public void presentError(String error) {
-
+        listener.presentError(error);
     }
-
-    @Override
-    public void eventInviteAccepted(String eventId) {
-
-    }
-
 
     /**
      * Contract / Listener
@@ -119,8 +122,10 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
 
         void eventReady(EventDetail event, String eventId);
 
-        void presentToast(String message);
+        void presentError(String error);
 
         void loadingState(Boolean show);
+
+        void signOut();
     }
 }

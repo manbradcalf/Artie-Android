@@ -1,7 +1,6 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,7 +10,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -50,7 +48,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,35 +132,43 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
         storageReference = FirebaseStorage.getInstance().getReference();
         toolbar.setTitle(R.string.title_profile);
 
+        //TODO: How to handle a situation where FB has no data for the FirebaseAuth user
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            emptyStateTextHeader.setText(getString(R.string.auth_val_prop_header));
-            emptyStateTextSubHeader.setText(getString(R.string.auth_val_prop_subheader));
-            emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_no_auth_profile));
-            emptyStateButton.setText("Join Now");
-            emptyState.setVisibility(View.VISIBLE);
-            profileContent.setVisibility(View.GONE);
-            progressbar.setVisibility(View.GONE);
-            emptyStateButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //TODO: This is duplicated in EventFragment now
-                    List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
-                        new AuthUI.IdpConfig.EmailBuilder().build());
-                // Authenticate
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setIsSmartLockEnabled(false, true)
-                                    .setAvailableProviders(providers)
-                                    .build(),
-                RC_SIGN_IN);
-            }
-            });
+            showSignedOutEmptyState();
         } else {
             // Get user data
             presenter.getUser(FirebaseAuth.getInstance().getCurrentUser().getUid());
         }
     }
+
+    private void showSignedOutEmptyState() {
+        profileContent.setVisibility(View.GONE);
+        emptyStateTextHeader.setText(getString(R.string.auth_val_prop_header));
+        emptyStateTextSubHeader.setText(getString(R.string.auth_val_prop_subheader));
+        emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+        emptyStateButton.setText("Join Now");
+        emptyState.setVisibility(View.VISIBLE);
+        emptyStateButton.setVisibility(View.VISIBLE);
+        profileContent.setVisibility(View.GONE);
+        progressbar.setVisibility(View.GONE);
+        emptyStateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO: This is duplicated in EventFragment now
+                List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                        new AuthUI.IdpConfig.EmailBuilder().build());
+                // Authenticate
+                startActivityForResult(
+                        AuthUI.getInstance()
+                                .createSignInIntentBuilder()
+                                .setIsSmartLockEnabled(false, true)
+                                .setAvailableProviders(providers)
+                                .build(),
+                        RC_SIGN_IN);
+            }
+        });
+    }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -193,6 +198,7 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
     // TODO: Find a way to not repeat myself for this, EventsFragment and UserDetailActivity
     @Override
     public void eventReady(EventDetail event, String eventId) {
+        //TODO: Move this date parsing logic to presenter level
         String[] s = event.getDate().split("-");
         int year = Integer.parseInt(s[0]);
         // I have to do weird logic on the month because months are 0 indexed
@@ -207,8 +213,7 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
                 acceptedEventsCalendarDays.add(calendarDay);
                 calendarDaysWithEventIds.put(calendarDay, eventId);
                 calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
-            }
-            else {
+            } else {
                 pendingEventsCalendarDays.add(calendarDay);
                 calendarDaysWithEventIds.put(calendarDay, eventId);
                 calendarView.addDecorator(new EventDecorator(false, pendingEventsCalendarDays, this.getContext()));
@@ -238,8 +243,13 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
 
     }
 
-    public void setLayout(final User user) {
+    @Override
+    public void signOut() {
+        setHasOptionsMenu(false);
+        showSignedOutEmptyState();
+    }
 
+    private void setLayout(final User user) {
         if (user != null) {
             emptyState.setVisibility(View.GONE);
             loadingState(false);
@@ -410,13 +420,13 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
                     uploadTask.addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            presentToast("upload failed");
+                            showToast("upload failed");
                             Picasso.with(getActivity().getApplicationContext()).load(R.drawable.ic_user).into(profileImage);
                         }
                     }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            presentToast("upload succeeded");
+                            showToast("upload succeeded");
                         }
                     });
             }
