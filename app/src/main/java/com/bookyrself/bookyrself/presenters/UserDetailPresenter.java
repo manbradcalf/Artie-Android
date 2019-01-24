@@ -18,7 +18,7 @@ import retrofit2.Response;
  * Created by benmedcalf on 1/13/18.
  */
 
-public class UserDetailPresenter implements EventsInteractor.EventCreationInteractorListener, UsersInteractor.UserDetailInteractorListener {
+public class UserDetailPresenter implements EventsInteractor.EventsInteractorListener, UsersInteractor.UserDetailInteractorListener {
     private final UserDetailPresenterListener listener;
     private final FirebaseService service;
     private final EventsInteractor eventsInteractor;
@@ -63,11 +63,6 @@ public class UserDetailPresenter implements EventsInteractor.EventCreationIntera
     @Override
     public void eventDetailReturned(EventDetail event, String eventId) {
         listener.usersEventReturned(event, eventId);
-    }
-
-    @Override
-    public void addNewlyCreatedEventToUsers(String eventId, List<String> attendeesToInvite, String hostUserId) {
-
     }
 
     @Override
