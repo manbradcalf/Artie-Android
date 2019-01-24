@@ -4,8 +4,6 @@ import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.interactors.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 
-import java.util.List;
-
 
 public class EventInvitesFragmentPresenter implements UsersInteractor.UsersEventInvitesInteractorListener, EventsInteractor.EventInvitesInteractorListener {
 
@@ -41,7 +39,11 @@ public class EventInvitesFragmentPresenter implements UsersInteractor.UsersEvent
 
     @Override
     public void presentError(String error) {
+    }
 
+    @Override
+    public void noInvitesReturnedForUser() {
+        listener.noInvitesReturnedForUser();
     }
 
     /**
@@ -53,5 +55,7 @@ public class EventInvitesFragmentPresenter implements UsersInteractor.UsersEvent
         void presentError(String message);
 
         void eventInviteAccepted(String eventId);
+
+        void noInvitesReturnedForUser();
     }
 }
