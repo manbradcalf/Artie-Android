@@ -115,6 +115,36 @@ public class UsersInteractor {
         });
     }
 
+    public void createUser(User user, final String uid) {
+        service.getAPI().addUser(user, uid).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                // response
+                usersInteractorListener.userDetailReturned(response.body(), uid);
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                // failure
+            }
+        });
+    }
+
+    public void patchUser(User user, final String uID) {
+        service.getAPI().patchUser(user, uID).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                // response
+                usersInteractorListener.userDetailReturned(response.body(), uID);
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                // failure
+            }
+        });
+    }
+
     public interface UsersInteractorListener {
 
         void userDetailReturned(User user, String userId);

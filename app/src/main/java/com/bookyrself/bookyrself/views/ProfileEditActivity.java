@@ -15,7 +15,7 @@ import com.bookyrself.bookyrself.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ProfileCreationActivity extends AppCompatActivity {
+public class ProfileEditActivity extends AppCompatActivity {
 
     @BindView(R.id.profile_creation_toolbar)
     android.support.v7.widget.Toolbar toolbar;
@@ -35,7 +35,7 @@ public class ProfileCreationActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile_creation);
+        setContentView(R.layout.activity_profile_edit);
         ButterKnife.bind(this);
         String username = getIntent().getStringExtra("Username");
         String location = getIntent().getStringExtra("Location");
