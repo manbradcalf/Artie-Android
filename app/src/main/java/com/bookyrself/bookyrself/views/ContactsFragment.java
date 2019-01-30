@@ -42,7 +42,7 @@ import butterknife.ButterKnife;
 
 import static android.app.Activity.RESULT_OK;
 
-public class ContactsFragment extends Fragment implements ContactsFragmentPresenter.ContactsPresenterListener {
+public class ContactsFragment extends Fragment implements ContactsFragmentPresenter.ContactsPresenterListener, MainActivity.AuthListener {
 
     private static final int RC_SIGN_IN = 123;
     @BindView(R.id.contacts_recyclerview)
@@ -81,17 +81,6 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
         storageReference = FirebaseStorage.getInstance().getReference();
-        //TODO: Move to presenter level
-        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if (firebaseAuth.getCurrentUser() != null) {
-                    emptyState.setVisibility(View.GONE);
-                    emptyStateButton.setVisibility(View.GONE);
-                    presenter.getContactIds(FirebaseAuth.getInstance().getUid());
-                }
-            }
-        });
 
         return view;
     }
@@ -147,17 +136,35 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
     }
 
     @Override
-    public void contactsReturned(List<String> ids) {
+    public void contactIdsReturned(List<String> ids) {
         presenter.getUsers(ids);
     }
 
     @Override
-    public void userReturned(String id, User user) {
+    public void contactReturned(String userId, User user) {
         contacts.add(user);
-        contactsMap.put(user, id);
+        contactsMap.put(user, userId);
         adapter.notifyDataSetChanged();
     }
 
+    @Override
+    public void onSignOut() {
+
+    }
+
+    @Override
+    public void onSignIn(User user, String userId) {
+        if (this.isVisible()) {
+            emptyState.setVisibility(View.GONE);
+            emptyStateButton.setVisibility(View.GONE);
+            presenter.getContactIds(userId);
+        }
+    }
+
+
+    /**
+     * RecyclerView Adapter
+     */
     class ContactsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         ContactsAdapter() {

@@ -39,7 +39,7 @@ public class ContactsFragmentPresenter implements ContactsInteractor.ContactsInt
     public void contactsReturned(HashMap<String, Boolean> contacts) {
         if (contacts != null) {
             List<String> contactIds = new ArrayList<>(contacts.keySet());
-            presenterListener.contactsReturned(contactIds);
+            presenterListener.contactIdsReturned(contactIds);
         } else {
             noUsersReturned();
         }
@@ -47,7 +47,7 @@ public class ContactsFragmentPresenter implements ContactsInteractor.ContactsInt
 
     @Override
     public void userReturned(String id, User user) {
-        presenterListener.userReturned(id, user);
+        presenterListener.contactReturned(id, user);
     }
 
     @Override
@@ -67,9 +67,9 @@ public class ContactsFragmentPresenter implements ContactsInteractor.ContactsInt
 
         void presentError(String message);
 
-        void contactsReturned(List<String> ids);
+        void contactIdsReturned(List<String> ids);
 
-        void userReturned(String id, User user);
+        void contactReturned(String id, User user);
 
     }
 }
