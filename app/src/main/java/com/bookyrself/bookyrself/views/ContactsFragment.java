@@ -1,6 +1,8 @@
 package com.bookyrself.bookyrself.views;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -36,8 +38,10 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -197,6 +201,17 @@ public class ContactsFragment extends Fragment implements BaseFragment, Contacts
 
     @Override
     public void contactIdsReturned(List<String> ids) {
+
+        // Save the contacts to shared preferences
+        // In UserDetail, I'll hide the addContact button if user is already a contact
+        // I'm doing this here because of the easy access to context needed to instantiate SharedPrefs
+        Set<String> idsToSaveToSharedPrefs = new HashSet<>();
+        idsToSaveToSharedPrefs.addAll(ids);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putStringSet("contacts", idsToSaveToSharedPrefs);
+        editor.apply();
+
         showLoadingState(false);
         showContent(true);
         presenter.getContacts(ids);

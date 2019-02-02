@@ -59,6 +59,7 @@
     <string name="empty_state_event_invites_signed_out_subheader">Please sign in to view your invites.</string>
     <string name="empty_state_event_invites_no_invites_header">You have no invites!</string>
     <string name="empty_state_event_invites_no_invites_subheader">Your event invites will appear here</string>
+    <string name="add_user_as_contact_val_prop">Log in to add this user to your contacts!</string>
 
 
 </resources>

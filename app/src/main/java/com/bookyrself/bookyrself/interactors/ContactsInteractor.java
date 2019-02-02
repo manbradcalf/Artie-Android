@@ -1,5 +1,7 @@
 package com.bookyrself.bookyrself.interactors;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;

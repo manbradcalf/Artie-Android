@@ -1,12 +1,15 @@
 package com.bookyrself.bookyrself.interactors;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -18,6 +21,7 @@ public class UsersInteractor {
     private UsersInteractorListener usersInteractorListener;
     private UsersEventInvitesInteractorListener usersEventInvitesInteractorListener;
     private UserDetailInteractorListener userDetailInteractorListener;
+    private UsersEventsInteractorListener usersEventsInteractorListener;
 
     /**
      * Constructors
@@ -34,6 +38,11 @@ public class UsersInteractor {
 
     public UsersInteractor(UserDetailInteractorListener listener) {
         this.userDetailInteractorListener = listener;
+        service = new FirebaseService();
+    }
+
+    public UsersInteractor(UsersEventsInteractorListener listener) {
+        this.usersEventsInteractorListener = listener;
         service = new FirebaseService();
     }
 
@@ -154,22 +163,53 @@ public class UsersInteractor {
         });
     }
 
+    public void getUserEvents(String userId) {
+        service.getAPI().getUsersEventInfo(userId).enqueue(new Callback<HashMap<String, EventInfo>>() {
+            @Override
+            public void onResponse(@NonNull Call<HashMap<String, EventInfo>> call, @NonNull Response<HashMap<String, EventInfo>> response) {
+                if (response.body() != null) {
+                    usersEventsInteractorListener.eventsReturned(new ArrayList<>(response.body().keySet()));
+                } else {
+                    usersEventsInteractorListener.noEventsReturned();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<HashMap<String, EventInfo>> call, Throwable t) {
+                Log.e("events presenter:", t.getMessage());
+                usersEventsInteractorListener.presentError(t.getMessage());
+            }
+        });
+    }
+
     public interface UsersInteractorListener {
 
         void userDetailReturned(User user, String userId);
 
         void presentError(String error);
+
+    }
+
+    public interface UserDetailInteractorListener extends UsersInteractorListener {
+        void contactSuccessfullyAdded();
     }
 
     public interface UsersEventInvitesInteractorListener {
+
         void eventIdOfEventWithPendingInvitesReturned(String eventId);
 
         void presentError(String error);
 
         void noInvitesReturnedForUser();
+
     }
 
-    public interface UserDetailInteractorListener extends UsersInteractorListener {
-        void contactSuccessfullyAdded();
+    public interface UsersEventsInteractorListener {
+        void eventsReturned(List<String> eventIds);
+
+        void presentError(String error);
+
+        void noEventsReturned();
     }
 }

@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.presenters.EventsPresenter;
+import com.bookyrself.bookyrself.presenters.EventsFragmentPresenter;
 import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,7 +36,7 @@ import butterknife.ButterKnife;
 
 import static android.app.Activity.RESULT_OK;
 
-public class EventsFragment extends Fragment implements BaseFragment, OnDateSelectedListener, EventsPresenter.EventsPresenterListener {
+public class EventsFragment extends Fragment implements BaseFragment, OnDateSelectedListener, EventsFragmentPresenter.EventsPresenterListener {
 
     @BindView(R.id.events_calendar)
     MaterialCalendarView calendarView;
@@ -59,7 +59,7 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
 
     private static final int RC_SIGN_IN = 123;
     private static final int RC_EVENT_CREATION = 456;
-    private EventsPresenter presenter;
+    private EventsFragmentPresenter presenter;
     private List<CalendarDay> acceptedEventsCalendarDays = new ArrayList<>();
     private List<CalendarDay> pendingEventsCalendarDays = new ArrayList<>();
     private HashMap<CalendarDay, String> calendarDaysWithEventIds;
@@ -73,7 +73,7 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_events, container, false);
-        presenter = new EventsPresenter(this);
+        presenter = new EventsFragmentPresenter(this);
         ButterKnife.bind(this, view);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,6 +96,10 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
                     showLoadingState(true);
                 } else {
                     // Signed Out
+                    calendarDaysWithEventIds.clear();
+                    pendingEventsCalendarDays.clear();
+                    acceptedEventsCalendarDays.clear();
+                    calendarView.removeDecorators();
                     showEmptyState(getString(R.string.auth_val_prop_header), getString(R.string.auth_val_prop_subheader), getString(R.string.sign_in), getActivity().getDrawable(R.drawable.ic_no_auth_profile));
                 }
             }
@@ -164,6 +168,11 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
             calendarDaysWithEventIds.put(calendarDay, eventId);
             calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
         }
+    }
+
+    @Override
+    public void noEventDetailsReturned() {
+        showContent(true);
     }
 
     @Override

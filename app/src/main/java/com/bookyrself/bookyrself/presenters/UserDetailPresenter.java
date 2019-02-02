@@ -8,7 +8,6 @@ import com.bookyrself.bookyrself.services.FirebaseService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -72,7 +71,7 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
 
     @Override
     public void userDetailReturned(User user, String userId) {
-        listener.userInfoReady(user);
+        listener.userInfoReady(user,userId);
         if (user.getEvents() != null) {
             eventsInteractor.getMultipleEventDetails(new ArrayList<>(user.getEvents().keySet()));
         }
@@ -88,7 +87,7 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
      * Contract / Listener
      */
     public interface UserDetailPresenterListener {
-        void userInfoReady(User userInfo);
+        void userInfoReady(User userInfo, String userId);
 
         void presentError(String message);
 
