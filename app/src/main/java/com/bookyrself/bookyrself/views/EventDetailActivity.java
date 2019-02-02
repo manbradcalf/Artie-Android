@@ -143,7 +143,6 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         }
     }
 
-    //TODO: Seems kinda hacky that I'm using this method to check map sizes and then attach adapter
     @Override
     public void userThumbReady(String response, String id) {
 
@@ -174,6 +173,9 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         return true;
     }
 
+    /**
+     *  Adapter
+     */
     private static class UsersListAdapter extends BaseAdapter {
 
         private HashMap mMap;

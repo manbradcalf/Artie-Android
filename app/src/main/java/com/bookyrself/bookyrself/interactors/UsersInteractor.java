@@ -107,28 +107,14 @@ public class UsersInteractor {
                     } else {
                         usersInteractorListener.userDetailReturned(response.body(), userId);
                     }
+                } else {
+                    usersInteractorListener.presentError(String.format("User %s doesn't exist!", userId));
                 }
             }
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
-
-            }
-        });
-    }
-
-    public void addContactToUser(String userId, String contactId) {
-        HashMap<String, Boolean> request = new HashMap<>();
-        request.put(contactId, true);
-        service.getAPI().addContactToUser(request, userId).enqueue(new Callback<HashMap<String, Boolean>>() {
-            @Override
-            public void onResponse(Call<HashMap<String, Boolean>> call, Response<HashMap<String, Boolean>> response) {
-                userDetailInteractorListener.contactSuccessfullyAdded();
-            }
-
-            @Override
-            public void onFailure(Call<HashMap<String, Boolean>> call, Throwable t) {
-                userDetailInteractorListener.presentError(t.getMessage());
+                usersInteractorListener.presentError(t.getMessage());
             }
         });
     }
