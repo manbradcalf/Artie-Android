@@ -79,6 +79,6 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
 
         void presentError(String error);
 
-        void loadingState(Boolean show);
+        void showLoadingState(Boolean show);
     }
 }

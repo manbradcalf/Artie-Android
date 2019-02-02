@@ -1,6 +1,7 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
@@ -42,13 +44,15 @@ import butterknife.ButterKnife;
 
 import static android.app.Activity.RESULT_OK;
 
-public class ContactsFragment extends Fragment implements ContactsFragmentPresenter.ContactsPresenterListener, MainActivity.AuthListener {
+public class ContactsFragment extends Fragment implements BaseFragment, ContactsFragmentPresenter.ContactsPresenterListener {
 
     private static final int RC_SIGN_IN = 123;
     @BindView(R.id.contacts_recyclerview)
     RecyclerView recyclerView;
     @BindView(R.id.toolbar_contacts_fragment)
     Toolbar toolbar;
+    @BindView(R.id.contacts_fragment_progressbar)
+    ProgressBar progressbar;
     @BindView(R.id.contacts_empty_state)
     LinearLayout emptyState;
     @BindView(R.id.empty_state_text_header)
@@ -81,18 +85,92 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
         storageReference = FirebaseStorage.getInstance().getReference();
+        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if (firebaseAuth.getCurrentUser() != null) {
+                    // Signed in
+                    presenter.getContactIds(FirebaseAuth.getInstance().getUid());
+                    showContent(false);
+                    hideEmptyState();
+                    showLoadingState(true);
+                } else {
+                    // Signed Out
+                    showEmptyState(getString(R.string.auth_val_prop_header), getString(R.string.auth_val_prop_subheader), getString(R.string.sign_in), getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+                }
+            }
+        });
 
         return view;
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-
-        emptyState.setVisibility(View.GONE);
-        if (FirebaseAuth.getInstance().getUid() != null) {
-            presenter.getContactIds(FirebaseAuth.getInstance().getUid());
+    public void showLoadingState(boolean show) {
+        if (show) {
+            progressbar.setVisibility(View.VISIBLE);
         } else {
-            presentError("Please sign in to view your contacts.");
+            progressbar.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            showEmptyState(getString(R.string.auth_val_prop_header), getString(R.string.auth_val_prop_subheader), getString(R.string.sign_in), getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+        }
+    }
+
+    @Override
+    public void showEmptyState(String header, String subHeader, String buttonText, Drawable image) {
+        showContent(false);
+        showLoadingState(false);
+        emptyState.setVisibility(View.VISIBLE);
+        emptyStateImage.setVisibility(View.VISIBLE);
+        emptyStateTextHeader.setVisibility(View.VISIBLE);
+        emptyStateTextSubHeader.setVisibility(View.VISIBLE);
+
+        emptyStateTextHeader.setText(header);
+        emptyStateTextSubHeader.setText(subHeader);
+        emptyStateImage.setImageDrawable(image);
+        if (!buttonText.equals("")) {
+            emptyStateButton.setVisibility(View.VISIBLE);
+            emptyStateButton.setText(buttonText);
+            emptyStateButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                            new AuthUI.IdpConfig.EmailBuilder().build());
+                    // Authenticate
+                    startActivityForResult(
+                            AuthUI.getInstance()
+                                    .createSignInIntentBuilder()
+                                    .setIsSmartLockEnabled(false, true)
+                                    .setAvailableProviders(providers)
+                                    .build(),
+                            RC_SIGN_IN);
+                }
+            });
+        } else {
+            emptyStateButton.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void hideEmptyState() {
+        emptyStateButton.setVisibility(View.GONE);
+        emptyState.setVisibility(View.GONE);
+        emptyStateImage.setVisibility(View.GONE);
+        emptyStateTextHeader.setVisibility(View.GONE);
+        emptyStateTextSubHeader.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void showContent(boolean show) {
+        if (show) {
+            recyclerView.setVisibility(View.VISIBLE);
+        } else {
+            recyclerView.setVisibility(View.GONE);
         }
     }
 
@@ -102,42 +180,26 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case RC_SIGN_IN:
-                    emptyState.setVisibility(View.GONE);
-                    emptyStateButton.setVisibility(View.GONE);
+                    hideEmptyState();
+                    showLoadingState(true);
                     presenter.getContactIds(FirebaseAuth.getInstance().getUid());
             }
         }
     }
 
     @Override
-    public void presentError(String message) {
-        emptyState.setVisibility(View.VISIBLE);
-        emptyStateTextHeader.setText(R.string.contacts_empty_state_header);
-        emptyStateTextSubHeader.setText(message);
-        emptyStateImage.setImageDrawable(getContext().getDrawable(R.drawable.ic_no_auth_profile));
-        emptyStateButton.setVisibility(View.VISIBLE);
-        emptyStateButton.setText("Sign In");
-        emptyStateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
-                        new AuthUI.IdpConfig.EmailBuilder().build());
-                // Authenticate
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                .createSignInIntentBuilder()
-                                .setIsSmartLockEnabled(false, true)
-                                .setAvailableProviders(providers)
-                                .build(),
-                        RC_SIGN_IN);
-            }
-        });
-
+    public void noContactsReturned() {
+        showEmptyState(getString(R.string.contacts_empty_state_no_content_header),
+                getString(R.string.contacts_empty_state_no_content_subheader),
+                "",
+                getActivity().getDrawable(R.drawable.ic_person_add_black_24dp));
     }
 
     @Override
     public void contactIdsReturned(List<String> ids) {
-        presenter.getUsers(ids);
+        showLoadingState(false);
+        showContent(true);
+        presenter.getContacts(ids);
     }
 
     @Override
@@ -148,17 +210,11 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
     }
 
     @Override
-    public void onSignOut() {
-
-    }
-
-    @Override
-    public void onSignIn(User user, String userId) {
-        if (this.isVisible()) {
-            emptyState.setVisibility(View.GONE);
-            emptyStateButton.setVisibility(View.GONE);
-            presenter.getContactIds(userId);
-        }
+    public void presentError(String error) {
+        showEmptyState(getString(R.string.error_header),
+                error,
+                "",
+                getActivity().getDrawable(R.drawable.ic_error_empty_state));
     }
 
 

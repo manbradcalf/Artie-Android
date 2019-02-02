@@ -40,7 +40,7 @@ public class ContactsInteractor {
         });
     }
 
-    public void getUsers(final List<String> userIds) {
+    public void getUsersAsContacts(final List<String> userIds) {
         if (userIds != null) {
             for (int user = 0; user < userIds.size(); user++) {
                 final int position = user;

@@ -1,7 +1,9 @@
 package com.bookyrself.bookyrself.views;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,17 +14,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.presenters.EventInvitesFragmentPresenter;
+import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +36,12 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class EventInvitesFragment extends Fragment implements EventInvitesFragmentPresenter.EventInvitesUserDetailPresenterListener {
+public class EventInvitesFragment extends Fragment implements BaseFragment, EventInvitesFragmentPresenter.EventInvitesUserDetailPresenterListener {
 
+    private static final int RC_SIGN_IN = 123;
+
+    @BindView(R.id.event_invites_progress_bar)
+    ProgressBar progressBar;
     @BindView(R.id.event_invites_recycler_view)
     RecyclerView recyclerView;
     @BindView(R.id.toolbar_event_invites_fragment)
@@ -71,26 +80,39 @@ public class EventInvitesFragment extends Fragment implements EventInvitesFragme
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event_invites, container, false);
         ButterKnife.bind(this, view);
-        toolbar.setTitle(R.string.title_event_invites);
         eventDetailEventIdHashMap = new HashMap<>();
         eventDetailsList = new ArrayList<>();
         adapter = new EventsAdapter();
+        presenter = new EventInvitesFragmentPresenter(this);
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
-        // Showing the empty state in onCreteView, then showing content if any is returned
-        showEmptyState();
-        presenter = new EventInvitesFragmentPresenter(this);
-        presenter.getEventInvites(FirebaseAuth.getInstance().getUid());
-
+        toolbar.setTitle(R.string.title_event_invites);
+        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if (firebaseAuth.getCurrentUser() != null) {
+                    // Signed in
+                    presenter.getEventInvites(FirebaseAuth.getInstance().getUid());
+                    showContent(false);
+                    hideEmptyState();
+                    showLoadingState(true);
+                } else {
+                    // Signed Out
+                    showEmptyState(getString(R.string.auth_val_prop_header),
+                            getString(R.string.empty_state_event_invites_signed_out_subheader),
+                            getString(R.string.sign_in),
+                            getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+                }
+            }
+        });
         return view;
     }
 
     @Override
-    public void eventsPendingInvitationResponseReturned(EventDetail event, String eventId) {
-        if (recyclerView.getVisibility() == View.GONE) {
-            recyclerView.setVisibility(View.VISIBLE);
-        }
+    public void eventPendingInvitationResponseReturned(EventDetail event, String eventId) {
+        showLoadingState(false);
+        showContent(true);
         eventDetailsList.add(event);
         eventDetailEventIdHashMap.put(event, eventId);
         adapter.notifyDataSetChanged();
@@ -98,12 +120,15 @@ public class EventInvitesFragment extends Fragment implements EventInvitesFragme
 
     @Override
     public void presentError(String message) {
-
+        showLoadingState(false);
+        showEmptyState(getString(R.string.error_header), message, "", getActivity().getDrawable(R.drawable.ic_error_empty_state));
     }
 
     @Override
     public void eventInviteAccepted(String eventId) {
-
+        if (recyclerView.getVisibility() == View.GONE) {
+            showContent(true);
+        }
         //TODO: This is fucked
         // Find the
         for (int i = 0; i < eventDetailsList.size(); i++) {
@@ -116,22 +141,74 @@ public class EventInvitesFragment extends Fragment implements EventInvitesFragme
 
     @Override
     public void noInvitesReturnedForUser() {
-        showEmptyState();
+        showEmptyState(getString(R.string.empty_state_event_invites_no_invites_header),
+                getString(R.string.empty_state_event_invites_no_invites_subheader),
+                "", getActivity().getDrawable(R.drawable.ic_no_events_black_24dp));
     }
 
-    private void showEmptyState() {
-        recyclerView.setVisibility(View.GONE);
 
-        // No need for a button here
-        emptyStateButton.setVisibility(View.GONE);
+    @Override
+    public void showContent(boolean show) {
+        if (show) {
+            recyclerView.setVisibility(View.VISIBLE);
+        } else {
+            recyclerView.setVisibility(View.GONE);
+        }
+
+    }
+
+    @Override
+    public void showLoadingState(boolean show) {
+        if (show) {
+            progressBar.setVisibility(View.VISIBLE);
+        } else {
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void showEmptyState(String header, String subHeader, String buttonText, Drawable image) {
+
+        showContent(false);
+        showLoadingState(false);
 
         emptyState.setVisibility(View.VISIBLE);
-        emptyStateTextHeader.setText("You have no event invites");
         emptyStateTextHeader.setVisibility(View.VISIBLE);
-        //TODO: Fix this copy
-        emptyStateTextSubHeader.setText("Go out and make some friends!");
         emptyStateTextSubHeader.setVisibility(View.VISIBLE);
-        emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_no_events_black_24dp));
+        emptyStateImage.setVisibility(View.VISIBLE);
+        emptyStateTextHeader.setText(header);
+        emptyStateTextSubHeader.setText(subHeader);
+        emptyStateImage.setImageDrawable(image);
+        if (!buttonText.equals("")) {
+            emptyStateButton.setVisibility(View.VISIBLE);
+            emptyStateButton.setText(buttonText);
+            emptyStateButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                            new AuthUI.IdpConfig.EmailBuilder().build());
+                    // Authenticate
+                    startActivityForResult(
+                            AuthUI.getInstance()
+                                    .createSignInIntentBuilder()
+                                    .setIsSmartLockEnabled(false, true)
+                                    .setAvailableProviders(providers)
+                                    .build(),
+                            RC_SIGN_IN);
+                }
+            });
+        } else {
+            emptyStateButton.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void hideEmptyState() {
+        emptyStateButton.setVisibility(View.GONE);
+        emptyState.setVisibility(View.GONE);
+        emptyStateImage.setVisibility(View.GONE);
+        emptyStateTextHeader.setVisibility(View.GONE);
+        emptyStateTextSubHeader.setVisibility(View.GONE);
     }
 
     /**

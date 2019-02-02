@@ -337,6 +337,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         showFullSearchBar(false);
     }
 
+
     /**
      * Adapter
      */

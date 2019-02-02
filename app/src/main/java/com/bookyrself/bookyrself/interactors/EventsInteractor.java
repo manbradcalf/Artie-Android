@@ -28,11 +28,13 @@ public class EventsInteractor {
 
     public EventsInteractor(EventCreationInteractorListener listener) {
         this.service = new FirebaseService();
+        this.eventsInteractorListener = listener;
         this.eventCreationInteractorListener = listener;
     }
 
     public EventsInteractor(EventInvitesInteractorListener listener) {
         this.service = new FirebaseService();
+        this.eventsInteractorListener = listener;
         this.eventInvitesInteractorListener = listener;
     }
 
@@ -148,7 +150,7 @@ public class EventsInteractor {
         void addNewlyCreatedEventToUsers(String eventId, List<String> attendeesToInvite, String hostUserId);
     }
 
-    public interface EventInvitesInteractorListener {
+    public interface EventInvitesInteractorListener extends EventsInteractorListener {
 
         void eventInviteAccepted(String eventId);
     }

@@ -72,7 +72,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     ImageView emptyStateImage;
     @BindView(R.id.empty_state_button)
     Button emptyStateButton;
-    @BindView(R.id.event_detail_progress_bar)
+    @BindView(R.id.event_detail_progressBar)
     ProgressBar progressBar;
 
     private List<MiniUser> miniUsers;

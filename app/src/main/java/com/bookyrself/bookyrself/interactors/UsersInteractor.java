@@ -56,19 +56,18 @@ public class UsersInteractor {
             @Override
             public void onResponse(Call<HashMap<String, EventInfo>> call, Response<HashMap<String, EventInfo>> response) {
                 if (response.body() != null) {
-                    for (Map.Entry<String, EventInfo> entry : response.body().entrySet()) {
-                        // If invite is not accepted, tell the listener
-                        //TODO: If all invites are accepted, how  to show empty state?
-                        if (!entry.getValue().getIsInviteAccepted() && !entry.getValue().getIsHost()) {
-                            //TODO: Rename eventIdOfEvent...
-                            usersEventInvitesInteractorListener.eventIdOfEventWithPendingInvitesReturned(entry.getKey());
+                    if (hasPendingInvites(response.body())) {
+                        for (Map.Entry<String, EventInfo> entry : response.body().entrySet()) {
+                            // If invite is not accepted, tell the listener
+                            if (!entry.getValue().getIsInviteAccepted() && !entry.getValue().getIsHost()) {
+                                usersEventInvitesInteractorListener.eventIdOfEventWithPendingInvitesReturned(entry.getKey());
+                            }
                         }
+                    } else {
+                        usersEventInvitesInteractorListener.noInvitesReturnedForUser();
                     }
-                } else {
-                    //TODO: Find a better solution
-                    usersEventInvitesInteractorListener.noInvitesReturnedForUser();
-                    Log.e("getUserInvites:", "response is null");
                 }
+
             }
 
             @Override
@@ -76,6 +75,16 @@ public class UsersInteractor {
                 Log.e("getUserInvites:", t.getMessage());
             }
         });
+    }
+
+    private boolean hasPendingInvites(HashMap<String, EventInfo> eventsMap) {
+        boolean hasPendingInvites = false;
+        for (Map.Entry<String, EventInfo> entry : eventsMap.entrySet()) {
+            if (!entry.getValue().getIsInviteAccepted()) {
+                hasPendingInvites = true;
+            }
+        }
+        return hasPendingInvites;
     }
 
     public void getUserDetails(final String userId) {

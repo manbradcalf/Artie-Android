@@ -1,9 +1,9 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
@@ -12,8 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
@@ -36,7 +36,7 @@ import butterknife.ButterKnife;
 
 import static android.app.Activity.RESULT_OK;
 
-public class EventsFragment extends Fragment implements OnDateSelectedListener, EventsPresenter.EventsPresenterListener {
+public class EventsFragment extends Fragment implements BaseFragment, OnDateSelectedListener, EventsPresenter.EventsPresenterListener {
 
     @BindView(R.id.events_calendar)
     MaterialCalendarView calendarView;
@@ -54,6 +54,8 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
     ImageView emptyStateImageView;
     @BindView(R.id.empty_state_button)
     Button emptyStateButton;
+    @BindView(R.id.events_progressbar)
+    ProgressBar progressBar;
 
     private static final int RC_SIGN_IN = 123;
     private static final int RC_EVENT_CREATION = 456;
@@ -71,18 +73,8 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_events, container, false);
-        ButterKnife.bind(this, view);
-        showEmptyState(false);
-        toolbar.setTitle("Your Calendar");
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         presenter = new EventsPresenter(this);
-        presenter.loadUsersEventInfo(FirebaseAuth.getInstance().getUid());
-        calendarView.setOnDateChangedListener(this);
-        calendarDaysWithEventIds = new HashMap<>();
+        ButterKnife.bind(this, view);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -90,21 +82,25 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
                 startActivityForResult(intent, RC_EVENT_CREATION);
             }
         });
-
-        //TODO: Move to presenter level
+        calendarView.setOnDateChangedListener(this);
+        calendarDaysWithEventIds = new HashMap<>();
+        toolbar.setTitle("Your Calendar");
         FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if (firebaseAuth.getCurrentUser() == null) {
-                    calendarView.removeDecorators();
+                if (firebaseAuth.getCurrentUser() != null) {
+                    // Signed in
+                    presenter.loadUsersEventInfo(FirebaseAuth.getInstance().getUid());
+                    showContent(false);
+                    hideEmptyState();
+                    showLoadingState(true);
+                } else {
+                    // Signed Out
+                    showEmptyState(getString(R.string.auth_val_prop_header), getString(R.string.auth_val_prop_subheader), getString(R.string.sign_in), getActivity().getDrawable(R.drawable.ic_no_auth_profile));
                 }
             }
         });
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            showContent(true);
-        } else {
-            showLoggedOutEmptyState();
-        }
+        return view;
     }
 
     // Reload the CalendarView after creating a new event or signing in
@@ -137,8 +133,8 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
 
     @Override
     public void eventDetailReturned(EventDetail event, String eventId) {
-        showEmptyState(false);
         showContent(true);
+        showLoadingState(false);
         String[] s = event.getDate().split("-");
         int year = Integer.parseInt(s[0]);
         // I have to do weird logic on the month because months are 0 indexed
@@ -173,28 +169,15 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
     @Override
     public void presentError(String error) {
         showContent(false);
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            showLoggedOutEmptyState();
-        } else if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            showUserHasNoEventsEmptyState();
-        } else {
-            Toast.makeText(getActivity(), "Unknown error: " + error, Toast.LENGTH_SHORT).show();
-        }
+        showEmptyState(getString(R.string.error_header), error, "", getActivity().getDrawable(R.drawable.ic_error_empty_state));
     }
 
-    private void showEmptyState(boolean b) {
-        if (b) {
-            emptyState.setVisibility(View.VISIBLE);
-            emptyStateButton.setVisibility(View.VISIBLE);
-        } else {
-            emptyState.setVisibility(View.GONE);
-            emptyStateButton.setVisibility(View.GONE);
-        }
 
-    }
-
-    private void showContent(boolean b) {
-        if (b) {
+    @Override
+    public void showContent(boolean show) {
+        if (show) {
+            showLoadingState(false);
+            hideEmptyState();
             calendarView.setVisibility(View.VISIBLE);
             fab.setVisibility(View.VISIBLE);
         } else {
@@ -203,54 +186,58 @@ public class EventsFragment extends Fragment implements OnDateSelectedListener, 
         }
     }
 
-    private void showUserHasNoEventsEmptyState() {
-        showContent(false);
-        emptyState.setVisibility(View.VISIBLE);
-        emptyStateButton.setVisibility(View.VISIBLE);
-        emptyStateImageView.setImageDrawable(getActivity().getDrawable(R.drawable.ic_calendar));
-        emptyStateTextHeader.setText("Add an event to get started!");
-        emptyStateTextSubHeader.setText("Please sign in to create events.");
-        emptyStateButton.setText("Sign In");
-        emptyStateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
-                        new AuthUI.IdpConfig.EmailBuilder().build());
-                // Authenticate
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                .createSignInIntentBuilder()
-                                .setIsSmartLockEnabled(false, true)
-                                .setAvailableProviders(providers)
-                                .build(),
-                        RC_SIGN_IN);
-            }
-        });
+    @Override
+    public void showLoadingState(boolean show) {
+        if (show) {
+            progressBar.setVisibility(View.VISIBLE);
+        } else {
+            progressBar.setVisibility(View.INVISIBLE);
+        }
+
     }
 
-    private void showLoggedOutEmptyState() {
+    @Override
+    public void showEmptyState(String header, String subHeader, String buttonText, Drawable image) {
         showContent(false);
+        showLoadingState(false);
         emptyState.setVisibility(View.VISIBLE);
-        emptyStateButton.setVisibility(View.VISIBLE);
-        emptyStateImageView.setImageDrawable(getActivity().getDrawable(R.drawable.ic_calendar));
-        emptyStateTextHeader.setText("You are logged out!");
-        emptyStateTextSubHeader.setText("Please sign in to view events.");
-        emptyStateButton.setText("Sign In");
-        emptyStateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
-                        new AuthUI.IdpConfig.EmailBuilder().build());
-                // Authenticate
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                .createSignInIntentBuilder()
-                                .setIsSmartLockEnabled(false, true)
-                                .setAvailableProviders(providers)
-                                .build(),
-                        RC_SIGN_IN);
-            }
-        });
+        emptyStateImageView.setVisibility(View.VISIBLE);
+        emptyStateTextHeader.setVisibility(View.VISIBLE);
+        emptyStateTextSubHeader.setVisibility(View.VISIBLE);
+
+        emptyStateImageView.setImageDrawable(image);
+        emptyStateTextHeader.setText(header);
+        emptyStateTextSubHeader.setText(subHeader);
+
+        if (buttonText.equals("")) {
+            emptyStateButton.setVisibility(View.GONE);
+        } else {
+            emptyStateButton.setVisibility(View.VISIBLE);
+            emptyStateButton.setText(buttonText);
+            emptyStateButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                            new AuthUI.IdpConfig.EmailBuilder().build());
+                    // Authenticate
+                    startActivityForResult(
+                            AuthUI.getInstance()
+                                    .createSignInIntentBuilder()
+                                    .setIsSmartLockEnabled(false, true)
+                                    .setAvailableProviders(providers)
+                                    .build(),
+                            RC_SIGN_IN);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void hideEmptyState() {
+        emptyStateButton.setVisibility(View.GONE);
+        emptyState.setVisibility(View.GONE);
+        emptyStateTextHeader.setVisibility(View.GONE);
+        emptyStateTextSubHeader.setVisibility(View.GONE);
     }
 }
 

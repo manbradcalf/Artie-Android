@@ -38,7 +38,13 @@ public class EventInvitesFragmentPresenter implements UsersInteractor.UsersEvent
     }
 
     @Override
+    public void eventDetailReturned(EventDetail event, String eventId) {
+        listener.eventPendingInvitationResponseReturned(event, eventId);
+    }
+
+    @Override
     public void presentError(String error) {
+        listener.presentError(error);
     }
 
     @Override
@@ -50,7 +56,7 @@ public class EventInvitesFragmentPresenter implements UsersInteractor.UsersEvent
      * Contract / Listener
      */
     public interface EventInvitesUserDetailPresenterListener {
-        void eventsPendingInvitationResponseReturned(EventDetail event, String eventId);
+        void eventPendingInvitationResponseReturned(EventDetail event, String eventId);
 
         void presentError(String message);
 

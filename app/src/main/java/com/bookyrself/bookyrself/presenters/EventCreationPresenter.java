@@ -59,7 +59,7 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     public void contactsReturned(HashMap<String, Boolean> contacts) {
         if (contacts != null) {
             List<String> contactIds = new ArrayList<>(contacts.keySet());
-            contactsInteractor.getUsers(contactIds);
+            contactsInteractor.getUsersAsContacts(contactIds);
         }
     }
 

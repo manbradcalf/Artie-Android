@@ -7,9 +7,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.bookyrself.bookyrself.R;
+import com.bookyrself.bookyrself.interactors.UsersInteractor;
+import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.utils.FragmentViewPager;
 import com.bookyrself.bookyrself.utils.FragmentViewPagerAdapter;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.FirebaseUserMetadata;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
@@ -19,6 +24,12 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     private static final int CONTACTS_FRAGMENT_INDEX = 2;
     private static final int PROFILE_FRAGMENT_INDEX = 3;
     private static final int EVENTS_INVITE_LIST = 4;
+    final ProfileFragment profileFragment = new ProfileFragment();
+    final SearchFragment searchFragment = new SearchFragment();
+    final EventsFragment eventsFragment = new EventsFragment();
+    final ContactsFragment contactsFragment = new ContactsFragment();
+    final EventInvitesFragment eventInvitesFragment = new EventInvitesFragment();
+
     public FirebaseDatabase db;
     public FirebaseApp firebaseApp;
     FragmentViewPagerAdapter adapter;
@@ -69,11 +80,6 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     }
 
     private void buildFragmentsList() {
-        final ProfileFragment profileFragment = new ProfileFragment();
-        final SearchFragment searchFragment = new SearchFragment();
-        final EventsFragment eventsFragment = new EventsFragment();
-        final ContactsFragment contactsFragment = new ContactsFragment();
-        final EventInvitesFragment eventInvitesFragment = new EventInvitesFragment();
 
         viewPager = findViewById(R.id.view_pager);
         adapter = new FragmentViewPagerAdapter(this.getSupportFragmentManager());
@@ -84,5 +90,4 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         adapter.addFragment(eventInvitesFragment, "Event Invites");
         viewPager.setAdapter(adapter);
     }
-
 }
