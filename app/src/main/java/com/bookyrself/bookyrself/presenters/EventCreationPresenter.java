@@ -4,7 +4,7 @@ import com.bookyrself.bookyrself.interactors.ContactsInteractor;
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.interactors.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
+import com.bookyrself.bookyrself.models.SerializedModels.User.EventInviteInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 
 import java.util.ArrayList;
@@ -85,19 +85,19 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
 
     @Override
     public void addNewlyCreatedEventToUsers(String eventId, List<String> userIdsOfAttendees, String hostUserId) {
-        EventInfo hostEventInfo = new EventInfo();
-        hostEventInfo.setIsInviteAccepted(true);
-        hostEventInfo.setIsHost(true);
-        hostEventInfo.setIsInviteRejected(false);
-        usersInteractor.addEventToUser(hostEventInfo, hostUserId, eventId);
+        EventInviteInfo hostEventInviteInfo = new EventInviteInfo();
+        hostEventInviteInfo.setIsInviteAccepted(true);
+        hostEventInviteInfo.setIsHost(true);
+        hostEventInviteInfo.setIsInviteRejected(false);
+        usersInteractor.addEventToUser(hostEventInviteInfo, hostUserId, eventId);
 
         if (userIdsOfAttendees.size() != 0) {
             for (String userId : userIdsOfAttendees) {
-                EventInfo eventInfo = new EventInfo();
-                eventInfo.setIsInviteAccepted(false);
-                eventInfo.setIsInviteRejected(false);
-                eventInfo.setIsHost(false);
-                usersInteractor.addEventToUser(eventInfo, userId, eventId);
+                EventInviteInfo eventInviteInfo = new EventInviteInfo();
+                eventInviteInfo.setIsInviteAccepted(false);
+                eventInviteInfo.setIsInviteRejected(false);
+                eventInviteInfo.setIsHost(false);
+                usersInteractor.addEventToUser(eventInviteInfo, userId, eventId);
             }
             presenterListener.eventCreated();
         }

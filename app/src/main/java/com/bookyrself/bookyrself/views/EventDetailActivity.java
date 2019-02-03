@@ -2,13 +2,14 @@ package com.bookyrself.bookyrself.views;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
@@ -25,6 +27,10 @@ import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.Host;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.MiniUser;
 import com.bookyrself.bookyrself.presenters.EventDetailPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
@@ -57,7 +63,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     @BindView(R.id.event_detail_toolbar)
     Toolbar Toolbar;
     @BindView(R.id.item_event_detail_userthumb)
-    ImageView HostImageView;
+    ImageView hostImageView;
     @BindView(R.id.event_detail_users_list)
     ListView usersListView;
     @BindView(R.id.event_detail_empty_state)
@@ -78,12 +84,14 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     private List<MiniUser> miniUsers;
     private EventDetailPresenter presenter;
     private HashMap<String, String> idAndThumbUrlMap = new HashMap<>();
+    private StorageReference storageReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
         ButterKnife.bind(this);
+        storageReference = FirebaseStorage.getInstance().getReference();
         eventDetailContent.setVisibility(View.GONE);
         emptyState.setVisibility(View.GONE);
         String eventId = getIntent().getStringExtra("eventId");
@@ -98,8 +106,8 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         Toolbar.setTitle(data.getEventname());
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Host host = data.getHost();
-        String hostUsername = host.getUsername();
+        final Host host = data.getHost();
+        final String hostUsername = host.getUsername();
         String hostCityState = data.getCitystate();
 
         DateFormat inputformat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
@@ -113,6 +121,26 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         }
 
         HostUsernameTextview.setText(hostUsername);
+        final StorageReference profileImageReference = storageReference.child("images/" + host.getUserId());
+        profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Picasso.with(getApplicationContext())
+                        .load(uri)
+                        .resize(148, 148)
+                        .centerCrop()
+                        .transform(new CircleTransform())
+                        .into(hostImageView);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+                Toast.makeText(getApplicationContext(), String.format("Avatar for %s not downloaded", host.getUserId()), Toast.LENGTH_SHORT).show();
+                hostImageView.setImageDrawable(getApplicationContext().getDrawable(R.drawable.ic_profile_black_24dp));
+            }
+        });
+
         EventCityState.setText(hostCityState);
         miniUsers = miniUsersList;
 
@@ -146,10 +174,9 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
 
         idAndThumbUrlMap.put(id, response);
         if (idAndThumbUrlMap.size() == miniUsers.size()) {
-            UsersListAdapter adapter = new UsersListAdapter(this, miniUsers, idAndThumbUrlMap);
+            UsersListAdapter adapter = new UsersListAdapter(this, miniUsers, storageReference);
             usersListView.setAdapter(adapter);
         }
-
     }
 
     @Override
@@ -172,21 +199,22 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     }
 
     /**
-     *  Adapter
+     * Adapter
      */
     private static class UsersListAdapter extends BaseAdapter {
 
-        private HashMap mMap;
+        private final StorageReference mStorageReference;
         private Context mContext;
         private List<MiniUser> mMiniUsers;
         private LayoutInflater mInflater;
 
 
-        private UsersListAdapter(Context context, List<MiniUser> miniUsers, HashMap idAndThumbUrlMap) {
+        private UsersListAdapter(Context context, List<MiniUser> miniUsers, StorageReference storageReference) {
             mMiniUsers = miniUsers;
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mContext = context;
-            mMap = idAndThumbUrlMap;
+            mStorageReference = storageReference;
+
         }
 
         @Override
@@ -213,39 +241,42 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             TextView userUrl = rowView.findViewById(R.id.item_event_detail_url);
             TextView attendingStatusTextView = rowView.findViewById(R.id.item_event_detail_attending_textview);
 
-            MiniUser miniUser = (MiniUser) getItem(position);
+            final MiniUser miniUser = (MiniUser) getItem(position);
 
             userName.setText(miniUser.getUsername());
             cityState.setText(miniUser.getCitystate());
             attendingStatusTextView.setText(miniUser.getAttendingStatus());
             userUrl.setClickable(true);
             userUrl.setMovementMethod(LinkMovementMethod.getInstance());
-            userUrl.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.e(this.toString(), "Testing the text click");
-                }
-            });
             String linkedText =
                     String.format("<a href=\"%s\">%s</a> ", ("http://" + miniUser.getUrl()), miniUser.getUrl());
             userUrl.setText(Html.fromHtml(linkedText));
 
-            String userId = miniUser.getUserId();
-
-            Picasso.with(mContext)
-                    .load(String.valueOf(mMap.get(userId)))
-                    .placeholder(R.drawable.round)
-                    .error(R.drawable.round)
-                    .transform(new CircleTransform())
-                    .into(userThumb);
-
-            userThumb.setTag(R.id.item_event_detail_userthumb, miniUser.getUserId());
+            final StorageReference profileImageReference = mStorageReference.child("images/" + miniUser.getUserId());
+            profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    Picasso.with(mContext)
+                            .load(uri)
+                            .resize(148, 148)
+                            .centerCrop()
+                            .transform(new CircleTransform())
+                            .into(userThumb);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle any errors
+                    Toast.makeText(mContext, String.format("Avatar for %s not downloaded", miniUser.getUserId()), Toast.LENGTH_SHORT).show();
+                    userThumb.setImageDrawable(mContext.getDrawable(R.drawable.ic_profile_black_24dp));
+                }
+            });
 
             rowView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(mContext, UserDetailActivity.class);
-                    intent.putExtra("userId", (String) userThumb.getTag(R.id.item_event_detail_userthumb));
+                    intent.putExtra("userId", miniUser.getUserId());
                     mContext.startActivity(intent);
                 }
             });

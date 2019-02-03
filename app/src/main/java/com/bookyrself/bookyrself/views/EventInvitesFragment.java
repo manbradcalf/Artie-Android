@@ -98,10 +98,10 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
                     showLoadingState(true);
                 } else {
                     // Signed Out
-                    showEmptyState(getString(R.string.auth_val_prop_header),
+                    showEmptyState(getString(R.string.event_invites_signed_out_header),
                             getString(R.string.empty_state_event_invites_signed_out_subheader),
                             getString(R.string.sign_in),
-                            getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+                            getActivity().getDrawable(R.drawable.ic_invitation));
                 }
             }
         });

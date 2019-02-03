@@ -2,7 +2,7 @@ package com.bookyrself.bookyrself.services;
 
 import com.bookyrself.bookyrself.models.SerializedModels.EventCreationResponse;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
+import com.bookyrself.bookyrself.models.SerializedModels.User.EventInviteInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 
 import java.util.HashMap;
@@ -46,7 +46,7 @@ public class FirebaseService {
         Call<EventDetail> getEventData(@Path("id") String eventId);
 
         @GET("/users/{id}/events.json")
-        Call<HashMap<String, EventInfo>> getUsersEventInfo(@Path("id") String userId);
+        Call<HashMap<String, EventInviteInfo>> getUsersEventInfo(@Path("id") String userId);
 
         @GET("/users/{id}/picture.json")
         Call<String> getUserThumbUrl(@Path("id") String userId);
@@ -55,7 +55,7 @@ public class FirebaseService {
         Call<User> getUserDetails(@Path("id") String userId);
 
         @GET("/users/{id}/events.json")
-        Call<HashMap<String, EventInfo>> getUsersEventInvites(@Path("id") String userId);
+        Call<HashMap<String, EventInviteInfo>> getUsersEventInvites(@Path("id") String userId);
 
         @GET("/users/{id}/contacts.json")
         Call<HashMap<String, Boolean>> getUserContacts(@Path("id") String userId);
@@ -84,7 +84,7 @@ public class FirebaseService {
 
         //TODO: Clean this up. Find a way to minify the MiniEvent name
         @PUT("/users/{userId}/events/{eventId}.json")
-        Call<EventInfo> addEventToUser(@Body EventInfo eventInfo, @Path("userId") String userId, @Path("eventId") String eventId);
+        Call<EventInviteInfo> addEventToUser(@Body EventInviteInfo eventInviteInfo, @Path("userId") String userId, @Path("eventId") String eventId);
 
 
     }

@@ -100,7 +100,7 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
                     pendingEventsCalendarDays.clear();
                     acceptedEventsCalendarDays.clear();
                     calendarView.removeDecorators();
-                    showEmptyState(getString(R.string.auth_val_prop_header), getString(R.string.auth_val_prop_subheader), getString(R.string.sign_in), getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+                    showEmptyState(getString(R.string.events_fragment_empty_state_signed_out_header), getString(R.string.events_fragment_empty_state_signed_out_subheader), getString(R.string.sign_in), getActivity().getDrawable(R.drawable.ic_calendar));
                 }
             }
         });

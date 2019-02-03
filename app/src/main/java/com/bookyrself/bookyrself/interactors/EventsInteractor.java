@@ -101,7 +101,7 @@ public class EventsInteractor {
         });
     }
 
-    public void acceptEventInvite(final String eventId, final String userId) {
+    public void acceptEventInvite(final String userId, final String eventId) {
         service.getAPI().acceptInvite(true, userId, eventId).enqueue(new Callback<Boolean>() {
             @Override
             public void onResponse(Call<Boolean> call, Response<Boolean> response) {

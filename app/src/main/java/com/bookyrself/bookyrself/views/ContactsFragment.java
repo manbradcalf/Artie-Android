@@ -100,7 +100,7 @@ public class ContactsFragment extends Fragment implements BaseFragment, Contacts
                     showLoadingState(true);
                 } else {
                     // Signed Out
-                    showEmptyState(getString(R.string.auth_val_prop_header), getString(R.string.auth_val_prop_subheader), getString(R.string.sign_in), getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+                    showEmptyState(getString(R.string.contacts_empty_state_signed_out_header), getString(R.string.contacts_empty_state_signed_out_subheader), getString(R.string.sign_in), getActivity().getDrawable(R.drawable.ic_person_add_black_24dp));
                 }
             }
         });

@@ -7,7 +7,7 @@ import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.interactors.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.MiniUser;
-import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
+import com.bookyrself.bookyrself.models.SerializedModels.User.EventInviteInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
@@ -80,17 +80,19 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
         return miniUser;
     }
 
-    private String getAttendingStatus(EventInfo eventInfo) {
+    private String getAttendingStatus(EventInviteInfo eventInviteInfo) {
         String status = "Invited";
-        if (eventInfo.getIsInviteRejected() != null) {
-            if (eventInfo.getIsInviteRejected()) {
-                status = "Rejected";
+        if (eventInviteInfo != null) {
+            if (eventInviteInfo.getIsInviteRejected() != null) {
+                if (eventInviteInfo.getIsInviteRejected()) {
+                    status = "Rejected";
+                }
             }
-        }
 
-        if (eventInfo.getIsInviteAccepted() != null) {
-            if (eventInfo.getIsInviteAccepted()) {
-                status = "Attending";
+            if (eventInviteInfo.getIsInviteAccepted() != null) {
+                if (eventInviteInfo.getIsInviteAccepted()) {
+                    status = "Attending";
+                }
             }
         }
         return status;

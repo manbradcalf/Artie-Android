@@ -401,14 +401,9 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         } else if (response == null) {
             // User pressed back button
             showToast("Canceled");
-            return;
         }
-        if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
-            showToast("No Connection");
-            return;
-        }
-        if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
-            showToast("Unknown Error");
+        else if (response.getError() != null) {
+            showToast(response.getError().getMessage());
         }
     }
 

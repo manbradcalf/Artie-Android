@@ -3,7 +3,7 @@ package com.bookyrself.bookyrself.interactors;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
+import com.bookyrself.bookyrself.models.SerializedModels.User.EventInviteInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
@@ -46,54 +46,59 @@ public class UsersInteractor {
         service = new FirebaseService();
     }
 
-    public void addEventToUser(EventInfo eventInfo, final String userId, final String eventId) {
-        service.getAPI().addEventToUser(eventInfo, userId, eventId).enqueue(new Callback<EventInfo>() {
+    public void addEventToUser(EventInviteInfo eventInviteInfo, final String userId, final String eventId) {
+        service.getAPI().addEventToUser(eventInviteInfo, userId, eventId).enqueue(new Callback<EventInviteInfo>() {
             @Override
-            public void onResponse(Call<EventInfo> call, Response<EventInfo> response) {
+            public void onResponse(Call<EventInviteInfo> call, Response<EventInviteInfo> response) {
                 Log.i("UsersInteractor", String.format("User %s successfully invited to Event %s", userId, eventId));
             }
 
             @Override
-            public void onFailure(Call<EventInfo> call, Throwable t) {
+            public void onFailure(Call<EventInviteInfo> call, Throwable t) {
 
             }
         });
     }
 
     public void getUserInvites(final String userId) {
-        service.getAPI().getUsersEventInvites(userId).enqueue(new Callback<HashMap<String, EventInfo>>() {
+        service.getAPI().getUsersEventInvites(userId).enqueue(new Callback<HashMap<String, EventInviteInfo>>() {
             @Override
-            public void onResponse(Call<HashMap<String, EventInfo>> call, Response<HashMap<String, EventInfo>> response) {
+            public void onResponse(Call<HashMap<String, EventInviteInfo>> call, Response<HashMap<String, EventInviteInfo>> response) {
+
                 if (response.body() != null) {
-                    if (hasPendingInvites(response.body())) {
-                        for (Map.Entry<String, EventInfo> entry : response.body().entrySet()) {
-                            // If invite is not accepted, tell the listener
-                            if (!entry.getValue().getIsInviteAccepted() && !entry.getValue().getIsHost()) {
-                                usersEventInvitesInteractorListener.eventIdOfEventWithPendingInvitesReturned(entry.getKey());
-                            }
-                        }
+                    List<String> eventIdsOfPendingInvites = getEventIdsOfPendingInvites(response.body());
+                    if (eventIdsOfPendingInvites.size() != 0) {
+                        usersEventInvitesInteractorListener.eventIdsOfEventsWithPendingInvitesReturned(eventIdsOfPendingInvites);
                     } else {
                         usersEventInvitesInteractorListener.noInvitesReturnedForUser();
                     }
+                } else {
+                    usersEventInvitesInteractorListener.noInvitesReturnedForUser();
                 }
-
             }
 
             @Override
-            public void onFailure(Call<HashMap<String, EventInfo>> call, Throwable t) {
+            public void onFailure(Call<HashMap<String, EventInviteInfo>> call, Throwable t) {
                 Log.e("getUserInvites:", t.getMessage());
             }
         });
     }
 
-    private boolean hasPendingInvites(HashMap<String, EventInfo> eventsMap) {
-        boolean hasPendingInvites = false;
-        for (Map.Entry<String, EventInfo> entry : eventsMap.entrySet()) {
-            if (!entry.getValue().getIsInviteAccepted()) {
-                hasPendingInvites = true;
+    private List <String> getEventIdsOfPendingInvites(HashMap<String, EventInviteInfo> eventsMap) {
+        List<String> eventIds = new ArrayList<>();
+
+        for (Map.Entry<String, EventInviteInfo> entry : eventsMap.entrySet()) {
+            // If the required event invite information exists
+            if (entry.getValue().getIsInviteRejected() != null && entry.getValue().getIsInviteAccepted() != null
+                    && entry.getValue().getIsHost() != null) {
+                // If the user hasn't responded to the invite (hasn't accepted or rejected invites)
+                if (!entry.getValue().getIsInviteAccepted() && !entry.getValue().getIsInviteRejected()
+                        && !entry.getValue().getIsHost()) {
+                    eventIds.add(entry.getKey());
+                }
             }
         }
-        return hasPendingInvites;
+        return eventIds;
     }
 
     public void getUserDetails(final String userId) {
@@ -150,9 +155,9 @@ public class UsersInteractor {
     }
 
     public void getUserEvents(String userId) {
-        service.getAPI().getUsersEventInfo(userId).enqueue(new Callback<HashMap<String, EventInfo>>() {
+        service.getAPI().getUsersEventInfo(userId).enqueue(new Callback<HashMap<String, EventInviteInfo>>() {
             @Override
-            public void onResponse(@NonNull Call<HashMap<String, EventInfo>> call, @NonNull Response<HashMap<String, EventInfo>> response) {
+            public void onResponse(@NonNull Call<HashMap<String, EventInviteInfo>> call, @NonNull Response<HashMap<String, EventInviteInfo>> response) {
                 if (response.body() != null) {
                     usersEventsInteractorListener.eventsReturned(new ArrayList<>(response.body().keySet()));
                 } else {
@@ -162,7 +167,7 @@ public class UsersInteractor {
             }
 
             @Override
-            public void onFailure(Call<HashMap<String, EventInfo>> call, Throwable t) {
+            public void onFailure(Call<HashMap<String, EventInviteInfo>> call, Throwable t) {
                 Log.e("events presenter:", t.getMessage());
                 usersEventsInteractorListener.presentError(t.getMessage());
             }
@@ -183,7 +188,7 @@ public class UsersInteractor {
 
     public interface UsersEventInvitesInteractorListener {
 
-        void eventIdOfEventWithPendingInvitesReturned(String eventId);
+        void eventIdsOfEventsWithPendingInvitesReturned(List<String> eventIds);
 
         void presentError(String error);
 

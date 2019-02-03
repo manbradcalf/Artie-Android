@@ -54,12 +54,16 @@
     <string name="events_fragment_empty_state_no_content_header">You have no events!</string>
     <string name="events_fragment_empty_state_no_content_subheader">Tap the button to create one!</string>
     <string name="empty_state_signed_out_header">You are logged out!</string>
-    <string name="events_fragment_empty_state_signed_out_subheader">Please sign in to view events.</string>
+    <string name="events_fragment_empty_state_signed_out_subheader">Please sign in to view your events.</string>
     <string name="sign_in">Sign In</string>
     <string name="empty_state_event_invites_signed_out_subheader">Please sign in to view your invites.</string>
     <string name="empty_state_event_invites_no_invites_header">You have no invites!</string>
     <string name="empty_state_event_invites_no_invites_subheader">Your event invites will appear here</string>
-    <string name="add_user_as_contact_val_prop">Log in to add this user to your contacts!</string>
+    <string name="add_user_as_contact_val_prop">Log in to add %s to your contacts!</string>
+    <string name="contacts_empty_state_signed_out_subheader">Sign in now to view your contacts</string>
+    <string name="contacts_empty_state_signed_out_header">You\'re signed out!</string>
+    <string name="event_invites_signed_out_header">You\'re signed out!</string>
+    <string name="events_fragment_empty_state_signed_out_header">You\'re signed out!</string>
 
 
 </resources>

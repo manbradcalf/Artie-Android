@@ -25,7 +25,7 @@ public class User implements ChipInterface {
     @SerializedName("url")
     private String mUrl;
     @SerializedName("events")
-    private HashMap<String, EventInfo> mEvents;
+    private HashMap<String, EventInviteInfo> mEvents;
     @SerializedName("tags")
     private List<String> mTags;
     @SerializedName("username")
@@ -55,11 +55,11 @@ public class User implements ChipInterface {
         mEmail = email;
     }
 
-    public HashMap<String, EventInfo> getEvents() {
+    public HashMap<String, EventInviteInfo> getEvents() {
         return mEvents;
     }
 
-    public void setEvents(HashMap<String, EventInfo> events) {
+    public void setEvents(HashMap<String, EventInviteInfo> events) {
         mEvents = events;
     }
 

@@ -139,7 +139,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                 });
             }
         } else {
-            addUserToContactsTextView.setText(R.string.add_user_as_contact_val_prop);
+            addUserToContactsTextView.setText(String.format(getString(R.string.add_user_as_contact_val_prop), user.getUsername()));
         }
 
 

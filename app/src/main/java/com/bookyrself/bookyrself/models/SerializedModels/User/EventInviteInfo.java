@@ -7,7 +7,7 @@ import javax.annotation.Generated;
 
 @Generated("net.hexar.json2pojo")
 @SuppressWarnings("unused")
-public class EventInfo {
+public class EventInviteInfo {
 
     @SerializedName("isInviteAccepted")
     private Boolean mIsInviteAccepted;
