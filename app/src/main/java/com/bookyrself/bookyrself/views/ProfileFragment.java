@@ -208,16 +208,6 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         showEmptyState(getString(R.string.error_header), error, "", getActivity().getDrawable(R.drawable.ic_error_empty_state));
     }
 
-    @Override
-    public void showLoadingState(Boolean show) {
-        if (show) {
-            progressbar.setVisibility(View.VISIBLE);
-        } else {
-            progressbar.setVisibility(View.GONE);
-        }
-
-    }
-
     private void setLayout(final User user) {
         if (user != null) {
             emptyState.setVisibility(View.GONE);
