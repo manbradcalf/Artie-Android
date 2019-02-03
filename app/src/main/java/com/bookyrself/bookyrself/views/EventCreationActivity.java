@@ -127,11 +127,15 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
                     return;
                 }
 
-                Host host = new Host();
-                host.setUsername(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
-                host.setUserId(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                event.setHost(host);
-                presenter.createEvent(event);
+                if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                    Host host = new Host();
+                    host.setUsername(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+                    host.setUserId(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    event.setHost(host);
+                    presenter.createEvent(event);
+                } else {
+                    Toast.makeText(EventCreationActivity.this, "You must be logged in to host an event!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

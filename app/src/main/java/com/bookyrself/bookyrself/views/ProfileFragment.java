@@ -1,7 +1,7 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
-import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,7 +11,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -52,16 +51,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static android.app.Activity.RESULT_OK;
 
-public class ProfileFragment extends Fragment implements OnDateSelectedListener, ProfilePresenter.ProfilePresenterListener {
+public class ProfileFragment extends Fragment implements BaseFragment, OnDateSelectedListener, ProfilePresenter.ProfilePresenterListener {
 
     private static final int RC_SIGN_IN = 123;
-    private static final int RC_PROFILE_CREATION = 456;
+    private static final int RC_PROFILE_EDIT = 456;
     private static final int RC_PHOTO_SELECT = 789;
     @BindView(R.id.profile_content)
     RelativeLayout profileContent;
@@ -100,9 +101,10 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
 
     private ProfilePresenter presenter;
     private StorageReference storageReference;
-    private List<CalendarDay> calendarDays = new ArrayList<>();
     private HashMap<CalendarDay, String> calendarDaysWithEventIds;
     private User user;
+    private List<CalendarDay> acceptedEventsCalendarDays = new ArrayList<>();
+    private List<CalendarDay> pendingEventsCalendarDays = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -116,48 +118,32 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, view);
         setHasOptionsMenu(true);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        calendarDaysWithEventIds = new HashMap<>();
-        emptyState.setVisibility(View.GONE);
-        profileContent.setVisibility(View.GONE);
-        loadingState(true);
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-
-        user = new User();
         presenter = new ProfilePresenter(this);
+        ((AppCompatActivity) Objects.requireNonNull(getActivity())).setSupportActionBar(toolbar);
+        user = new User();
         storageReference = FirebaseStorage.getInstance().getReference();
+        calendarDaysWithEventIds = new HashMap<>();
         toolbar.setTitle(R.string.title_profile);
-
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            emptyStateTextHeader.setText(getString(R.string.auth_val_prop_header));
-            emptyStateTextSubHeader.setText(getString(R.string.auth_val_prop_subheader));
-            emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_no_auth_profile));
-            emptyStateButton.setText("Join Now");
-            emptyState.setVisibility(View.VISIBLE);
-            profileContent.setVisibility(View.GONE);
-            emptyStateButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
-                            new AuthUI.IdpConfig.EmailBuilder().build());
-                    // Authenticate
-                    startActivityForResult(
-                            AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setIsSmartLockEnabled(false, true)
-                                    .setAvailableProviders(providers)
-                                    .build(),
-                            RC_SIGN_IN);
+        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                //TODO: How to handle a situation where FB has no data for the FirebaseAuth user
+                if (firebaseAuth.getCurrentUser() != null) {
+                    // Signed in
+                    presenter.getUser(FirebaseAuth.getInstance().getUid());
+                    showContent(false);
+                    hideEmptyState();
+                    showLoadingState(true);
+                } else {
+                    // Signed Out
+                    showEmptyState(getString(R.string.auth_val_prop_header),
+                            getString(R.string.auth_val_prop_subheader),
+                            getString(R.string.sign_in),
+                            getActivity().getDrawable(R.drawable.ic_no_auth_profile));
                 }
-            });
-        } else {
-            // Get user data
-            presenter.getUser(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        }
+            }
+        });
+        return view;
     }
 
     @Override
@@ -173,6 +159,11 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
             case R.id.sign_out:
                 if (getContext() != null) {
                     AuthUI.getInstance().signOut(getContext());
+                    showContent(false);
+                    showEmptyState(getString(R.string.auth_val_prop_header),
+                            getString(R.string.auth_val_prop_subheader),
+                            getString(R.string.sign_in),
+                            getActivity().getDrawable(R.drawable.ic_no_auth_profile));
                 }
                 return true;
             default:
@@ -181,13 +172,15 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
     }
 
     @Override
-    public void profileInfoReady(User response) {
-        setLayout(response);
+    public void profileInfoReady(User user, String userId) {
+        setLayout(user);
+        showContent(true);
     }
 
     // TODO: Find a way to not repeat myself for this, EventsFragment and UserDetailActivity
     @Override
     public void eventReady(EventDetail event, String eventId) {
+        //TODO: Move this date parsing logic to presenter level
         String[] s = event.getDate().split("-");
         int year = Integer.parseInt(s[0]);
         // I have to do weird logic on the month because months are 0 indexed
@@ -195,18 +188,28 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
         int month = Integer.parseInt(s[1]) - 1;
         int day = Integer.parseInt(s[2]);
         CalendarDay calendarDay = CalendarDay.from(year, month, day);
-        calendarDays.add(calendarDay);
-        calendarDaysWithEventIds.put(calendarDay, eventId);
-        calendarView.addDecorator(new EventDecorator(Color.BLUE, calendarDays, this.getContext()));
+
+        for (Map.Entry<String, Boolean> isUserAttending : event.getUsers().entrySet()) {
+            // If the
+            if (isUserAttending.getValue() || event.getHost().getUserId().equals(FirebaseAuth.getInstance().getUid())) {
+                acceptedEventsCalendarDays.add(calendarDay);
+                calendarDaysWithEventIds.put(calendarDay, eventId);
+                calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
+            } else {
+                pendingEventsCalendarDays.add(calendarDay);
+                calendarDaysWithEventIds.put(calendarDay, eventId);
+                calendarView.addDecorator(new EventDecorator(false, pendingEventsCalendarDays, this.getContext()));
+            }
+        }
     }
 
     @Override
-    public void presentToast(String error) {
-
+    public void presentError(String error) {
+        showEmptyState(getString(R.string.error_header), error, "", getActivity().getDrawable(R.drawable.ic_error_empty_state));
     }
 
     @Override
-    public void loadingState(Boolean show) {
+    public void showLoadingState(Boolean show) {
         if (show) {
             progressbar.setVisibility(View.VISIBLE);
         } else {
@@ -215,15 +218,14 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
 
     }
 
-    public void setLayout(final User user) {
-
+    private void setLayout(final User user) {
         if (user != null) {
             emptyState.setVisibility(View.GONE);
-            loadingState(false);
+            showLoadingState(false);
             calendarView.setOnDateChangedListener(this);
             userNameTextView.setText(user.getUsername());
 
-            // Set the user's URL
+            // Set your URL
             urlTextView.setClickable(true);
             urlTextView.setMovementMethod(LinkMovementMethod.getInstance());
             if (user.getUrl() != null) {
@@ -296,9 +298,9 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
     }
 
     private void editProfile(User user) {
-        Intent intent = new Intent(getActivity(), ProfileCreationActivity.class);
+        Intent intent = new Intent(getActivity(), ProfileEditActivity.class);
 
-        // Add intent extras to pre-populate edittexts in ProfileCreationActivity
+        // Add intent extras to pre-populate edittexts in ProfileEditActivity
         if (user.getUsername() != null) {
             intent.putExtra("Username", user.getUsername());
         }
@@ -315,101 +317,111 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
             intent.putExtra("Url", user.getUrl());
         }
 
-        startActivityForResult(intent, RC_PROFILE_CREATION);
+        startActivityForResult(intent, RC_PROFILE_EDIT);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         IdpResponse response = IdpResponse.fromResultIntent(data);
-        // RC_SIGN_IN is the request code you passed into startActivityForResult(...) when starting the sign in flow.
         if (resultCode == RESULT_OK) {
-            switch (requestCode) {
-                case RC_SIGN_IN:
-                    if (isNewSignUp()) {
-                        // Successfully signed up
-                        // Creating user object to push to FB DB
-                        user.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
-                        user.setUsername(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
-                        presenter.createUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
-                        showToast("Signing Up!");
-                    } else {
-                        // Successfully signed in
-                        presenter.getUser(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                        showToast("Signing In!");
-                    }
-                    return;
-                case RC_PROFILE_CREATION:
-                    //TODO: This creation logic probably shouldn't be in the fragment?
-                    //TODO: Should I pass the Intent to the presenter?
-                    //TODO: *Vomit emoji* do i really need to null check everything?
-                    if (data.getStringExtra("bio") != null) {
-                        user.setBio(data.getStringExtra("bio"));
-                    }
-                    if (data.getStringExtra("username") != null) {
-                        user.setUsername(data.getStringExtra("username"));
-                        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
-                        UserProfileChangeRequest changeRequest = new UserProfileChangeRequest.Builder()
-                                .setDisplayName(data.getStringExtra("username"))
-                                .build();
-                        fbUser.updateProfile(changeRequest);
-                    }
-                    if (data.getStringExtra("location") != null) {
-                        user.setCitystate(data.getStringExtra("location"));
-                    }
-                    if (data.getStringExtra("tags") != null) {
-                        List<String> tagsList = Arrays.asList(data.getStringExtra("tags").split(", "));
-                        user.setTags(tagsList);
-                    }
-
-                    if (data.getStringExtra("url") != null) {
-                        user.setUrl(data.getStringExtra("url"));
-                    }
-                    if (user != null) {
-                        presenter.patchUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
-                        showToast("Updated Profile!");
-                    }
-                    return;
-                case RC_PHOTO_SELECT:
-                    Uri selectedimg = data.getData();
-
-                    // Set the image to the profileImageThumb
-                    Picasso.with(getActivity().getApplicationContext())
-                            .load(selectedimg)
-                            .resize(148, 148)
-                            .centerCrop()
-                            .transform(new CircleTransform())
-                            .into(profileImage);
-
-                    // Upload to firebase
-                    StorageReference profilePhotoRef = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
-                    UploadTask uploadTask = profilePhotoRef.putFile(selectedimg);
-                    uploadTask.addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            presentToast("upload failed");
-                            Picasso.with(getActivity().getApplicationContext()).load(R.drawable.ic_user).into(profileImage);
+            FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (fbUser != null) {
+                switch (requestCode) {
+                    case RC_SIGN_IN:
+                        if (isNewSignUp()) {
+                            // Successfully signed up
+                            // Creating user object to push to FB DB
+                            user.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                            user.setUsername(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+                            presenter.createUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
+                            showToast("Signing Up!");
+                        } else {
+                            // Successfully signed in
+                            presenter.getUser(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                            showLoadingState(true);
+                            showToast("Signing In!");
                         }
-                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            presentToast("upload succeeded");
+                        return;
+                    case RC_PROFILE_EDIT:
+                        if (data.getStringExtra("bio") != null) {
+                            user.setBio(data.getStringExtra("bio"));
                         }
-                    });
+                        if (data.getStringExtra("username") != null) {
+                            user.setUsername(data.getStringExtra("username"));
+                            UserProfileChangeRequest changeRequest = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(data.getStringExtra("username"))
+                                    .build();
+                            fbUser.updateProfile(changeRequest);
+                        }
+                        if (data.getStringExtra("location") != null) {
+                            user.setCitystate(data.getStringExtra("location"));
+                        }
+                        if (data.getStringExtra("tags") != null) {
+                            List<String> tagsList = Arrays.asList(data.getStringExtra("tags").split(", "));
+                            user.setTags(tagsList);
+                        }
+
+                        if (data.getStringExtra("url") != null) {
+                            user.setUrl(data.getStringExtra("url"));
+                        }
+                        if (user != null) {
+                            presenter.patchUser(user, fbUser.getUid());
+                            showToast("Updated Profile!");
+                        }
+                        return;
+                    case RC_PHOTO_SELECT:
+                        Uri selectedimg = data.getData();
+
+                        // Set the image to the profileImageThumb
+                        Picasso.with(getActivity().getApplicationContext())
+                                .load(selectedimg)
+                                .resize(148, 148)
+                                .centerCrop()
+                                .transform(new CircleTransform())
+                                .into(profileImage);
+
+                        // Upload to firebase
+                        StorageReference profilePhotoRef = storageReference.child("images/" + fbUser.getUid());
+                        UploadTask uploadTask = profilePhotoRef.putFile(selectedimg);
+                        uploadTask.addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                showToast("upload failed");
+                                Picasso.with(getActivity().getApplicationContext()).load(R.drawable.ic_user).into(profileImage);
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                showToast("upload succeeded");
+                            }
+                        });
+                }
             }
-        } else {
-            if (response == null) {
-                // User pressed back button
-                showToast("Canceled");
-                return;
-            }
-            if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
-                showToast("No Connection");
-                return;
-            }
-            if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
-                showToast("Unknown Error");
-            }
+        } else if (response == null) {
+            // User pressed back button
+            showToast("Canceled");
+            return;
+        }
+        if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
+            showToast("No Connection");
+            return;
+        }
+        if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+            showToast("Unknown Error");
+        }
+    }
+
+    @Override
+    public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay calendarDay, boolean selected) {
+        if (acceptedEventsCalendarDays.contains(calendarDay)) {
+            Intent intent = new Intent(getActivity(), EventDetailActivity.class);
+            intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
+            startActivity(intent);
+        } else if (pendingEventsCalendarDays.contains(calendarDay)) {
+            Intent intent = new Intent(getActivity(), EventDetailActivity.class);
+            intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
+            startActivity(intent);
         }
     }
 
@@ -417,18 +429,71 @@ public class ProfileFragment extends Fragment implements OnDateSelectedListener,
         Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
     }
 
-    public boolean isNewSignUp() {
-        FirebaseUserMetadata metadata = FirebaseAuth.getInstance().getCurrentUser().getMetadata();
-        return metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp();
+    @Override
+    public void showContent(boolean show) {
+        if (show) {
+            profileContent.setVisibility(View.VISIBLE);
+        } else {
+            profileContent.setVisibility(View.GONE);
+        }
     }
 
     @Override
-    public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay calendarDay, boolean selected) {
-        Log.i("calendarDay = ", calendarDay.toString());
-        if (calendarDays.contains(calendarDay)) {
-            Intent intent = new Intent(getActivity(), EventDetailActivity.class);
-            intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
-            startActivity(intent);
+    public void showLoadingState(boolean show) {
+        if (show) {
+            progressbar.setVisibility(View.VISIBLE);
+        } else {
+            progressbar.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void showEmptyState(String header, String subHeader, String buttonText, Drawable image) {
+
+        showContent(false);
+        showLoadingState(false);
+        emptyState.setVisibility(View.VISIBLE);
+        emptyStateImage.setVisibility(View.VISIBLE);
+        emptyStateTextHeader.setVisibility(View.VISIBLE);
+        emptyStateTextSubHeader.setVisibility(View.VISIBLE);
+
+        emptyStateTextHeader.setText(header);
+        emptyStateTextSubHeader.setText(subHeader);
+        emptyStateImage.setImageDrawable(image);
+        if (!buttonText.equals("")) {
+            emptyStateButton.setVisibility(View.VISIBLE);
+            emptyStateButton.setText(buttonText);
+            emptyStateButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                            new AuthUI.IdpConfig.EmailBuilder().build());
+                    // Authenticate
+                    startActivityForResult(
+                            AuthUI.getInstance()
+                                    .createSignInIntentBuilder()
+                                    .setIsSmartLockEnabled(false, true)
+                                    .setAvailableProviders(providers)
+                                    .build(),
+                            RC_SIGN_IN);
+                }
+            });
+        } else {
+            emptyStateButton.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void hideEmptyState() {
+        emptyState.setVisibility(View.GONE);
+        emptyStateTextHeader.setVisibility(View.GONE);
+        emptyStateTextSubHeader.setVisibility(View.GONE);
+        emptyStateButton.setVisibility(View.GONE);
+        emptyStateImage.setVisibility(View.GONE);
+    }
+
+    private boolean isNewSignUp() {
+        FirebaseUserMetadata metadata = FirebaseAuth.getInstance().getCurrentUser().getMetadata();
+        return metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp();
     }
 }

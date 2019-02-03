@@ -1,6 +1,9 @@
 package com.bookyrself.bookyrself.views;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,13 +20,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.ContactsFragmentPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
+import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,19 +36,27 @@ import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ContactsFragment extends Fragment implements ContactsFragmentPresenter.ContactsPresenterListener {
+import static android.app.Activity.RESULT_OK;
 
+public class ContactsFragment extends Fragment implements BaseFragment, ContactsFragmentPresenter.ContactsPresenterListener {
+
+    private static final int RC_SIGN_IN = 123;
     @BindView(R.id.contacts_recyclerview)
     RecyclerView recyclerView;
     @BindView(R.id.toolbar_contacts_fragment)
     Toolbar toolbar;
+    @BindView(R.id.contacts_fragment_progressbar)
+    ProgressBar progressbar;
     @BindView(R.id.contacts_empty_state)
     LinearLayout emptyState;
     @BindView(R.id.empty_state_text_header)
@@ -59,7 +71,6 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
     private ContactsAdapter adapter;
     private ContactsFragmentPresenter presenter;
     private RecyclerView.LayoutManager layoutManager;
-    private List<String> contactIds;
     private List<User> contacts;
     private Map<User, String> contactsMap;
     private StorageReference storageReference;
@@ -78,54 +89,153 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
         storageReference = FirebaseStorage.getInstance().getReference();
+        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if (firebaseAuth.getCurrentUser() != null) {
+                    // Signed in
+                    presenter.getContactIds(FirebaseAuth.getInstance().getUid());
+                    showContent(false);
+                    hideEmptyState();
+                    showLoadingState(true);
+                } else {
+                    // Signed Out
+                    showEmptyState(getString(R.string.auth_val_prop_header), getString(R.string.auth_val_prop_subheader), getString(R.string.sign_in), getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+                }
+            }
+        });
 
         return view;
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-
-        emptyState.setVisibility(View.GONE);
-        if (FirebaseAuth.getInstance().getUid() != null) {
-            presenter.getContactIds(FirebaseAuth.getInstance().getUid());
+    public void showLoadingState(boolean show) {
+        if (show) {
+            progressbar.setVisibility(View.VISIBLE);
         } else {
-            presentError("Log in or Sign Up to view your contacts!");
+            progressbar.setVisibility(View.GONE);
         }
-
     }
 
     @Override
-    public void presentError(String message) {
+    public void onResume() {
+        super.onResume();
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            showEmptyState(getString(R.string.auth_val_prop_header), getString(R.string.auth_val_prop_subheader), getString(R.string.sign_in), getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+        }
+    }
+
+    @Override
+    public void showEmptyState(String header, String subHeader, String buttonText, Drawable image) {
+        showContent(false);
+        showLoadingState(false);
         emptyState.setVisibility(View.VISIBLE);
-        emptyStateTextHeader.setText(R.string.contacts_empty_state_header);
-        emptyStateTextSubHeader.setText(message);
+        emptyStateImage.setVisibility(View.VISIBLE);
+        emptyStateTextHeader.setVisibility(View.VISIBLE);
+        emptyStateTextSubHeader.setVisibility(View.VISIBLE);
 
-        // Don't need a button here
+        emptyStateTextHeader.setText(header);
+        emptyStateTextSubHeader.setText(subHeader);
+        emptyStateImage.setImageDrawable(image);
+        if (!buttonText.equals("")) {
+            emptyStateButton.setVisibility(View.VISIBLE);
+            emptyStateButton.setText(buttonText);
+            emptyStateButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                            new AuthUI.IdpConfig.EmailBuilder().build());
+                    // Authenticate
+                    startActivityForResult(
+                            AuthUI.getInstance()
+                                    .createSignInIntentBuilder()
+                                    .setIsSmartLockEnabled(false, true)
+                                    .setAvailableProviders(providers)
+                                    .build(),
+                            RC_SIGN_IN);
+                }
+            });
+        } else {
+            emptyStateButton.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void hideEmptyState() {
         emptyStateButton.setVisibility(View.GONE);
-        emptyStateImage.setImageDrawable(getContext().getDrawable(R.drawable.ic_person_add_black_24dp));
-
+        emptyState.setVisibility(View.GONE);
+        emptyStateImage.setVisibility(View.GONE);
+        emptyStateTextHeader.setVisibility(View.GONE);
+        emptyStateTextSubHeader.setVisibility(View.GONE);
     }
 
-    // First I get a list of contactIds via the presenter,
-    // upon receiving those ids, I then call getUsers to iterate through
-    // each id to get the relevant user data.
     @Override
-    public void contactsReturned(List<String> ids) {
-        contactIds = ids;
-        presenter.getUsers(ids);
+    public void showContent(boolean show) {
+        if (show) {
+            recyclerView.setVisibility(View.VISIBLE);
+        } else {
+            recyclerView.setVisibility(View.GONE);
+        }
     }
 
-    //TODO: Do what?
-    //  When I've iterated through all the ids, I notify the adapter of a change
-    // Also I am adding to a map of userId with userInfo so I can start a UserDetail activity with the id
-    // since the id isn't on the _source object
     @Override
-    public void userReturned(String id, User user) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case RC_SIGN_IN:
+                    hideEmptyState();
+                    showLoadingState(true);
+                    presenter.getContactIds(FirebaseAuth.getInstance().getUid());
+            }
+        }
+    }
+
+    @Override
+    public void noContactsReturned() {
+        showEmptyState(getString(R.string.contacts_empty_state_no_content_header),
+                getString(R.string.contacts_empty_state_no_content_subheader),
+                "",
+                getActivity().getDrawable(R.drawable.ic_person_add_black_24dp));
+    }
+
+    @Override
+    public void contactIdsReturned(List<String> ids) {
+
+        // Save the contacts to shared preferences
+        // In UserDetail, I'll hide the addContact button if user is already a contact
+        // I'm doing this here because of the easy access to context needed to instantiate SharedPrefs
+        Set<String> idsToSaveToSharedPrefs = new HashSet<>();
+        idsToSaveToSharedPrefs.addAll(ids);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putStringSet("contacts", idsToSaveToSharedPrefs);
+        editor.apply();
+
+        showLoadingState(false);
+        showContent(true);
+        presenter.getContacts(ids);
+    }
+
+    @Override
+    public void contactReturned(String userId, User user) {
         contacts.add(user);
-        contactsMap.put(user, id);
+        contactsMap.put(user, userId);
         adapter.notifyDataSetChanged();
     }
 
+    @Override
+    public void presentError(String error) {
+        showEmptyState(getString(R.string.error_header),
+                error,
+                "",
+                getActivity().getDrawable(R.drawable.ic_error_empty_state));
+    }
+
+
+    /**
+     * RecyclerView Adapter
+     */
     class ContactsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         ContactsAdapter() {
@@ -148,7 +258,6 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
                     listString.append(s + ", ");
                 }
                 viewHolderContacts.userTagsTextView.setText(listString.toString().replaceAll(", $", ""));
-
             }
 
             final StorageReference profileImageReference = storageReference.child("/images/" + contactsMap.get(contacts.get(position)));
@@ -171,7 +280,6 @@ public class ContactsFragment extends Fragment implements ContactsFragmentPresen
                     viewHolderContacts.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_profile_black_24dp));
                 }
             });
-
 
             viewHolderContacts.userNameTextView.setText(contacts.get(position).getUsername());
             viewHolderContacts.userCityStateTextView.setText(contacts.get(position).getCitystate());

@@ -21,11 +21,11 @@
     </android.support.design.widget.AppBarLayout>
 
     <ProgressBar
-        android:id="@+id/event_detail_progress_bar"
+        android:id="@+id/event_detail_progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/event_detail_app_bar_layout"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerInParent="true"/>
 
 
     <LinearLayout

@@ -1,5 +1,7 @@
 package com.bookyrself.bookyrself.interactors;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
@@ -40,7 +42,7 @@ public class ContactsInteractor {
         });
     }
 
-    public void getUsers(final List<String> userIds) {
+    public void getUsersAsContacts(final List<String> userIds) {
         if (userIds != null) {
             for (int user = 0; user < userIds.size(); user++) {
                 final int position = user;

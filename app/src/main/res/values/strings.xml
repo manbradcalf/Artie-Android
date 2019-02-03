@@ -24,7 +24,7 @@
     <string name="add_user_to_contacts">Save %s to your contacts!</string>
     <string name="title_activity_onboarding">Onboarding</string>
     <string name="search_empty_state_header">Get To The Gig!</string>
-    <string name="search_error_header">Oh no! Something went wrong</string>
+    <string name="error_header">Oh no! Something went wrong</string>
     <string name="search_error_subheader">We\'re looking into it!</string>
     <string name="preference_file_key">com.bookyrself.bookyrself.PREFERENCE_FILE_KEY</string>
     <string name="has_seen_onboarding_key">HAS_SEEN_ONBOARDING_KEY</string>
@@ -36,9 +36,8 @@
     <string name="contacts_toolbar">Your Contacts</string>
     <string name="edit_profile">Edit Profile</string>
     <string name="sign_out">Sign Out</string>
-    <string name="contacts_empty_state_header">You have no contacts!</string>
-    <string name="contacts_empty_state_subheader">Add contacts by clicking \"Add Contact\" on User profiles</string>
-    <string name="contacts_empty_state_button_text">This button does nada</string>
+    <string name="contacts_empty_state_no_content_header">You have no contacts!</string>
+    <string name="contacts_empty_state_no_content_subheader">Add contacts by clicking \"Add Contact\" on User profiles</string>
     <string name="search_event_creation_query_hint">Who are you looking for?</string>
     <string name="event_creation_artists_hint">Choose artists from your contacts</string>
     <string name="event_creation_title">Event Creation</string>
@@ -51,6 +50,16 @@
     <string name="search_fragment_edit_search_btn_text">EDIT SEARCH</string>
     <string name="event_creation_contacts_required">Please select contacts to invite!</string>
     <string name="profile_creation_title">Edit Your Profile</string>
+    <string name="title_event_invites">Event Invites</string>
+    <string name="events_fragment_empty_state_no_content_header">You have no events!</string>
+    <string name="events_fragment_empty_state_no_content_subheader">Tap the button to create one!</string>
+    <string name="empty_state_signed_out_header">You are logged out!</string>
+    <string name="events_fragment_empty_state_signed_out_subheader">Please sign in to view events.</string>
+    <string name="sign_in">Sign In</string>
+    <string name="empty_state_event_invites_signed_out_subheader">Please sign in to view your invites.</string>
+    <string name="empty_state_event_invites_no_invites_header">You have no invites!</string>
+    <string name="empty_state_event_invites_no_invites_subheader">Your event invites will appear here</string>
+    <string name="add_user_as_contact_val_prop">Log in to add this user to your contacts!</string>
 
 
 </resources>

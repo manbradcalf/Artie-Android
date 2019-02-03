@@ -16,13 +16,26 @@ import retrofit2.Response;
 
 public class EventsInteractor {
 
-    //TODO: What are the reprecussions of making the service static?
-    private final FirebaseService service;
-    private final EventsInteractorListener listener;
+    private FirebaseService service;
+    private EventsInteractorListener eventsInteractorListener;
+    private EventCreationInteractorListener eventCreationInteractorListener;
+    private EventInvitesInteractorListener eventInvitesInteractorListener;
 
     public EventsInteractor(EventsInteractorListener listener) {
         this.service = new FirebaseService();
-        this.listener = listener;
+        this.eventsInteractorListener = listener;
+    }
+
+    public EventsInteractor(EventCreationInteractorListener listener) {
+        this.service = new FirebaseService();
+        this.eventsInteractorListener = listener;
+        this.eventCreationInteractorListener = listener;
+    }
+
+    public EventsInteractor(EventInvitesInteractorListener listener) {
+        this.service = new FirebaseService();
+        this.eventsInteractorListener = listener;
+        this.eventInvitesInteractorListener = listener;
     }
 
     public void getEventDetail(final String eventId) {
@@ -30,14 +43,13 @@ public class EventsInteractor {
             @Override
             public void onResponse(Call<EventDetail> call, Response<EventDetail> response) {
                 if (response.body() != null) {
-
-                    listener.eventDetailReturned(response.body(), eventId);
+                    eventsInteractorListener.eventDetailReturned(response.body(), eventId);
                 }
             }
 
             @Override
             public void onFailure(Call<EventDetail> call, Throwable t) {
-                listener.presentError(t.getMessage());
+                eventsInteractorListener.presentError(t.getMessage());
             }
         });
     }
@@ -49,13 +61,13 @@ public class EventsInteractor {
                 @Override
                 public void onResponse(Call<EventDetail> call, Response<EventDetail> response) {
                     if (response.body() != null) {
-                        listener.eventDetailReturned(response.body(), id);
+                        eventsInteractorListener.eventDetailReturned(response.body(), id);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<EventDetail> call, Throwable t) {
-                    listener.presentError(t.getMessage());
+                    eventsInteractorListener.presentError(t.getMessage());
                 }
             });
 
@@ -69,8 +81,8 @@ public class EventsInteractor {
 
         final List<String> userIds = new ArrayList<>();
         // Add the host to the list of userIds so it is added to their events in Firebase
-        String hostUserId = FirebaseAuth.getInstance().getUid();
-        userIds.add(hostUserId);
+        final String hostUserId = FirebaseAuth.getInstance().getUid();
+
         if (event.getUsers() != null) {
             userIds.addAll(event.getUsers().keySet());
         }
@@ -79,7 +91,7 @@ public class EventsInteractor {
             @Override
             public void onResponse(Call<EventCreationResponse> call, Response<EventCreationResponse> response) {
                 String eventId = response.body().getName();
-                listener.eventCreated(eventId, userIds);
+                eventCreationInteractorListener.addNewlyCreatedEventToUsers(eventId, userIds, hostUserId);
             }
 
             @Override
@@ -89,13 +101,73 @@ public class EventsInteractor {
         });
     }
 
+    public void acceptEventInvite(final String eventId, final String userId) {
+        service.getAPI().acceptInvite(true, userId, eventId).enqueue(new Callback<Boolean>() {
+            @Override
+            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                if (response.body() != null) {
+                    setEventUserAsAttending(userId, eventId);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Boolean> call, Throwable t) {
+
+            }
+        });
+    }
+
+    //TODO: Figure out how to handle this if you are the host and accepting/rejcting invites to your own
+    private void setEventUserAsAttending(String userId, final String eventId) {
+        service.getAPI().setEventUserAsAttending(true, userId, eventId).enqueue(new Callback<Boolean>() {
+            @Override
+            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                if (response.body() != null) {
+                    eventInvitesInteractorListener.eventInviteAccepted(true, eventId);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Boolean> call, Throwable t) {
+                Log.e("EventsInteractor ", t.getMessage());
+            }
+        });
+    }
+
+    public void rejectEventInvite(String userId, final String eventId) {
+        service.getAPI().rejectInvite(true, userId, eventId).enqueue(new Callback<Boolean>() {
+            @Override
+            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                if (response.body() != null) {
+                    eventInvitesInteractorListener.eventInviteAccepted(false, eventId);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Boolean> call, Throwable t) {
+
+            }
+        });
+    }
+
+    /**
+     * Contracts / Listeners
+     */
     public interface EventsInteractorListener {
 
         void eventDetailReturned(EventDetail event, String eventId);
 
-        void eventCreated(String eventId, List<String> usersToInvite);
-
         void presentError(String error);
 
+    }
+
+    public interface EventCreationInteractorListener extends EventsInteractorListener {
+
+        void addNewlyCreatedEventToUsers(String eventId, List<String> attendeesToInvite, String hostUserId);
+    }
+
+    public interface EventInvitesInteractorListener extends EventsInteractorListener {
+
+        void eventInviteAccepted(boolean accepted, String eventId);
     }
 }

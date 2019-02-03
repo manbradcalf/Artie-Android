@@ -35,7 +35,7 @@
             android:label="EventDetail"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".views.ProfileCreationActivity"
+            android:name=".views.ProfileEditActivity"
             android:label="ProfileCreation"
             android:theme="@style/AppTheme.NoActionBar" />
 

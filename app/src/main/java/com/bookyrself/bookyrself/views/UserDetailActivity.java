@@ -1,7 +1,8 @@
 package com.bookyrself.bookyrself.views;
 
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -32,8 +33,12 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -86,9 +91,11 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     private StorageReference storageReference;
     private String userEmailAddress;
     private String userID;
-    private HashSet<CalendarDay> calendarDays;
     private HashMap<CalendarDay, String> calendarDaysWithEventIds;
     private UserDetailPresenter userDetailPresenter;
+    private List<CalendarDay> acceptedEventsCalendarDays = new ArrayList<>();
+    private Set<String> contactIdsToCheck = new HashSet<>();
+    private SharedPreferences sharedPreferences;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -100,23 +107,16 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         userDetailPresenter.getUserInfo(userID);
         Toolbar.setTitle("User Details");
         calendarView.setOnDateChangedListener(this);
-        calendarDays = new HashSet<>();
         calendarDaysWithEventIds = new HashMap<>();
         storageReference = FirebaseStorage.getInstance().getReference();
         emptyState.setVisibility(View.GONE);
-        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if (firebaseAuth.getCurrentUser() == null) {
-                    calendarView.removeDecorators();
-                }
-            }
-        });
+        sharedPreferences = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        contactIdsToCheck = sharedPreferences.getStringSet("contacts", contactIdsToCheck);
         loadingState();
     }
 
     @Override
-    public void userInfoReady(User response) {
+    public void userInfoReady(User user, String userId) {
 
         // Show the user details now that they're loaded
         emailUserCardview.setOnClickListener(new View.OnClickListener() {
@@ -127,32 +127,36 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         });
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            addUserToContactsCardview.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    userDetailPresenter.addContactToUser(FirebaseAuth.getInstance().getCurrentUser().getUid(), userID);
-                }
-            });
+            if (contactIdsToCheck.contains(userId)) {
+                addUserToContactsTextView.setText("This user is already a contact!");
+            } else {
+                addUserToContactsTextView.setText(getString(R.string.add_user_to_contacts, user.getUsername()));
+                addUserToContactsCardview.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        userDetailPresenter.addContactToUser(FirebaseAuth.getInstance().getCurrentUser().getUid(), userID);
+                    }
+                });
+            }
         } else {
-            addUserToContactsTextView.setText("Log in to add this user to your contacts!");
+            addUserToContactsTextView.setText(R.string.add_user_as_contact_val_prop);
         }
 
 
         setSupportActionBar(Toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        if (response.getUsername() != null) {
-            String toolbarText = getString(R.string.user_detail_toolbar, response.getUsername());
+        if (user.getUsername() != null) {
+            String toolbarText = getString(R.string.user_detail_toolbar, user.getUsername());
             getSupportActionBar().setTitle(toolbarText);
         }
 
 
         StringBuilder listString = new StringBuilder();
-        usernameTextView.setText(response.getUsername());
-        cityStateTextView.setText(response.getCitystate());
-        bioTextView.setText(response.getBio());
-        emailUserTextView.setText(getString(R.string.email_user, response.getUsername()));
-        addUserToContactsTextView.setText(getString(R.string.add_user_to_contacts, response.getUsername()));
-        userEmailAddress = response.getEmail();
+        usernameTextView.setText(user.getUsername());
+        cityStateTextView.setText(user.getCitystate());
+        bioTextView.setText(user.getBio());
+        emailUserTextView.setText(getString(R.string.email_user, user.getUsername()));
+        userEmailAddress = user.getEmail();
 
         final StorageReference profileImageReference = storageReference.child("images/" + userID);
         profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -176,8 +180,8 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             }
         });
 
-        if (response.getTags() != null) {
-            for (String s : response.getTags()) {
+        if (user.getTags() != null) {
+            for (String s : user.getTags()) {
                 listString.append(s + ", ");
             }
             String tagsText = listString.toString().replaceAll(", $", "");
@@ -201,10 +205,13 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         int month = Integer.parseInt(s[1]) - 1;
         int day = Integer.parseInt(s[2]);
         CalendarDay calendarDay = CalendarDay.from(year, month, day);
-        calendarDays.add(calendarDay);
-        calendarDaysWithEventIds.put(calendarDay, eventId);
-        EventDecorator decorator = new EventDecorator(Color.BLUE, calendarDays, this);
-        calendarView.addDecorator(decorator);
+        for (Map.Entry<String, Boolean> userIsAttending : event.getUsers().entrySet()) {
+            if (userIsAttending.getValue()) {
+                acceptedEventsCalendarDays.add(calendarDay);
+                calendarDaysWithEventIds.put(calendarDay, eventId);
+                calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, getApplicationContext()));
+            }
+        }
     }
 
     @Override
@@ -244,10 +251,10 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
 
 
     @Override
-    public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
-        if (calendarDays.contains(date)) {
+    public void onDateSelected(@NonNull MaterialCalendarView materialCalendarView, @NonNull CalendarDay calendarDay, boolean b) {
+        if (acceptedEventsCalendarDays.contains(calendarDay)) {
             Intent intent = new Intent(this, EventDetailActivity.class);
-            intent.putExtra("eventId", calendarDaysWithEventIds.get(date));
+            intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
             startActivity(intent);
         }
     }

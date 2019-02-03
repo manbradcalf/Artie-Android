@@ -4,4 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#ff4081</color>
     <color name="colorAccentLight">#ffffff</color>
+    <color name="pendingEvent">#ffd600</color>
+    <color name="acceptInviteButtonBackground">#c364dd17</color>
+    <color name="denyInviteButtonBackground">#e2d50000</color>
 </resources>

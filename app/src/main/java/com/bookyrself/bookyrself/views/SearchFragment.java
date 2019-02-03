@@ -330,12 +330,13 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     public void showError() {
         recyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
-        emptyStateTextHeader.setText(R.string.search_error_header);
+        emptyStateTextHeader.setText(R.string.error_header);
         emptyStateTextSubHeader.setText(R.string.search_error_subheader);
         emptyStateImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_error_empty_state));
         emptyState.setVisibility(View.VISIBLE);
         showFullSearchBar(false);
     }
+
 
     /**
      * Adapter
@@ -371,7 +372,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                     view = getLayoutInflater().inflate(R.layout.item_user_search_result, parent, false);
                     return new ViewHolderUsers(view);
                 case 1:
-                    view = getLayoutInflater().inflate(R.layout.item_event_search_result, parent, false);
+                    view = getLayoutInflater().inflate(R.layout.item_event, parent, false);
                     return new ViewHolderEvents(view);
                 default:
                     return null;
@@ -446,7 +447,6 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         }
 
         private void buildUserViewHolder(final RecyclerView.ViewHolder holder, final int position) {
-            //TODO: Intermittent index out of bounds here when toggling between Events and Users.
             if (usersResults.size() > position) {
                 final ViewHolderUsers viewHolderUsers = (ViewHolderUsers) holder;
                 viewHolderUsers.userCityStateTextView.setText(usersResults
@@ -514,11 +514,11 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
             ViewHolderEvents(View view) {
                 super(view);
-                eventCardView = view.findViewById(R.id.search_result_card_events);
-                eventCityStateTextView = view.findViewById(R.id.event_location_search_result);
-                eventHostTextView = view.findViewById(R.id.event_host_search_result);
-                eventNameTextView = view.findViewById(R.id.eventname_search_result);
-                eventImageThumb = view.findViewById(R.id.event_image_search_result);
+                eventCardView = view.findViewById(R.id.event_item_card);
+                eventCityStateTextView = view.findViewById(R.id.event_item_line2);
+                eventHostTextView = view.findViewById(R.id.event_item_line3);
+                eventNameTextView = view.findViewById(R.id.event_item_line1);
+                eventImageThumb = view.findViewById(R.id.event_item_image);
             }
         }
 

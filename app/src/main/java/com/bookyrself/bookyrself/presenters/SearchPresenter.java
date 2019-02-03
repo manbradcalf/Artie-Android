@@ -16,9 +16,6 @@ import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Range;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents.SearchResponse2;
 import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.SearchResponseUsers;
 import com.bookyrself.bookyrself.services.SearchService;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,15 +31,15 @@ import retrofit2.Response;
 
 public class SearchPresenter {
     private static final int EVENT_SEARCH_FLAG = 1;
-    private final SearchPresenterListener mListener;
-    private final SearchService mService;
+    private final SearchPresenterListener listener;
+    private final SearchService service;
 
     /**
      * Constructor
      */
     public SearchPresenter(SearchPresenterListener listener) {
-        this.mListener = listener;
-        this.mService = new SearchService();
+        this.listener = listener;
+        this.service = new SearchService();
 
     }
 
@@ -50,14 +47,14 @@ public class SearchPresenter {
      * Methods
      */
     public void executeSearch(int searchType, String what, String where, String fromWhen, String toWhen) {
-        mListener.showProgressbar(true);
+        listener.showProgressbar(true);
         final Query query = createQuery(what, where, fromWhen, toWhen);
         final Body body = new Body();
         body.setQuery(query);
         body.setSize(100);
         //TODO: Make the index and type toggleable to users
         if (searchType == EVENT_SEARCH_FLAG) {
-            mService
+            service
                     .getAPI()
                     .executeEventsSearch(body)
                     .enqueue(new Callback<SearchResponse2>() {
@@ -66,7 +63,7 @@ public class SearchPresenter {
                             Log.i(this.toString(), response.toString());
                             if (response.body() != null) {
                                 List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents.Hit> hits = response.body().getHits().getHits();
-                                mListener.searchEventsResponseReady(hits);
+                                listener.searchEventsResponseReady(hits);
                             }
                         }
 
@@ -74,11 +71,11 @@ public class SearchPresenter {
                         public void onFailure(Call<SearchResponse2> call, Throwable t) {
                             Log.e(getClass().toString(), call.request().body().toString());
                             Log.e(getClass().toString(), t.getMessage());
-                            mListener.showError();
+                            listener.showError();
                         }
                     });
         } else {
-            mService
+            service
                     .getAPI()
                     .executeUsersSearch(body)
                     .enqueue(new Callback<SearchResponseUsers>() {
@@ -86,9 +83,9 @@ public class SearchPresenter {
                         public void onResponse(Call<SearchResponseUsers> call, Response<SearchResponseUsers> response) {
                             if (response.body() != null) {
                                 List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Hit> hits = response.body().getHits().getHits();
-                                mListener.searchUsersResponseReady(hits);
+                                listener.searchUsersResponseReady(hits);
                             } else if (response.errorBody() != null) {
-                                mListener.showError();
+                                listener.showError();
                             }
                         }
 
@@ -96,7 +93,7 @@ public class SearchPresenter {
                         public void onFailure(Call<SearchResponseUsers> call, Throwable t) {
                             Log.e(getClass().toString(), call.request().body().toString());
                             Log.e(getClass().toString(), t.getMessage());
-                            mListener.showError();
+                            listener.showError();
                         }
                     });
         }
@@ -153,19 +150,19 @@ public class SearchPresenter {
     }
 
     public void setStartDate(String date) {
-        mListener.startDateChanged(date);
+        listener.startDateChanged(date);
     }
 
     public void setEndDate(String date) {
-        mListener.endDateChanged(date);
+        listener.endDateChanged(date);
     }
 
     public void clearStartDate() {
-        mListener.startDateChanged("From");
+        listener.startDateChanged("From");
     }
 
     public void clearEndDate() {
-        mListener.endDateChanged("To");
+        listener.endDateChanged("To");
     }
 
     /**

@@ -72,7 +72,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     ImageView emptyStateImage;
     @BindView(R.id.empty_state_button)
     Button emptyStateButton;
-    @BindView(R.id.event_detail_progress_bar)
+    @BindView(R.id.event_detail_progressBar)
     ProgressBar progressBar;
 
     private List<MiniUser> miniUsers;
@@ -93,41 +93,33 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
 
     @Override
     public void eventDataResponseReady(final EventDetail data, final List<MiniUser> miniUsersList) {
-
         showProgressbar(false);
         setSupportActionBar(Toolbar);
+        Toolbar.setTitle(data.getEventname());
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(R.string.event_detail_toolbar);
 
-        String date = data.getDate();
         Host host = data.getHost();
         String hostUsername = host.getUsername();
         String hostCityState = data.getCitystate();
 
-        DateView.setText("Date");
         DateFormat inputformat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        Date d;
         try {
-            d = inputformat.parse(date);
+            Date date = inputformat.parse(data.getDate());
             DateFormat outputFormat = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
-            String formattedDate = outputFormat.format(d);
+            String formattedDate = outputFormat.format(date);
             DateView.setText(formattedDate);
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
-
         HostUsernameTextview.setText(hostUsername);
-
         EventCityState.setText(hostCityState);
-
         miniUsers = miniUsersList;
 
         for (int i = 0; i < miniUsers.size(); i++) {
             String userId = miniUsers.get(i).getUserId();
             presenter.getUserThumbUrl(userId);
         }
-
 
         HostcardView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,7 +129,6 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                 startActivity(intent);
             }
         });
-        Toolbar.setTitle(data.getEventname());
         eventDetailContent.setVisibility(View.VISIBLE);
     }
 
@@ -150,7 +141,6 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         }
     }
 
-    //TODO: Seems kinda hacky that I'm using this method to check map sizes and then attach adapter
     @Override
     public void userThumbReady(String response, String id) {
 
@@ -165,6 +155,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     @Override
     public void presentError(String message) {
         showProgressbar(false);
+        Toolbar.setTitle("Event Detail Error");
         eventDetailContent.setVisibility(View.GONE);
         emptyStateButton.setVisibility(View.GONE);
         emptyStateImage.setImageDrawable(getDrawable(R.drawable.ic_error_empty_state));
@@ -180,6 +171,9 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         return true;
     }
 
+    /**
+     *  Adapter
+     */
     private static class UsersListAdapter extends BaseAdapter {
 
         private HashMap mMap;
@@ -217,11 +211,13 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             TextView userName = rowView.findViewById(R.id.item_event_detail_username);
             TextView cityState = rowView.findViewById(R.id.item_event_detail_citystate);
             TextView userUrl = rowView.findViewById(R.id.item_event_detail_url);
+            TextView attendingStatusTextView = rowView.findViewById(R.id.item_event_detail_attending_textview);
 
             MiniUser miniUser = (MiniUser) getItem(position);
 
             userName.setText(miniUser.getUsername());
             cityState.setText(miniUser.getCitystate());
+            attendingStatusTextView.setText(miniUser.getAttendingStatus());
             userUrl.setClickable(true);
             userUrl.setMovementMethod(LinkMovementMethod.getInstance());
             userUrl.setOnClickListener(new View.OnClickListener() {

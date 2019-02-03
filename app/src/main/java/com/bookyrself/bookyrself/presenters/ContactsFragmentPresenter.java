@@ -26,8 +26,8 @@ public class ContactsFragmentPresenter implements ContactsInteractor.ContactsInt
         contactsInteractor.getContactIds(userId);
     }
 
-    public void getUsers(final List<String> ids) {
-        contactsInteractor.getUsers(ids);
+    public void getContacts(final List<String> ids) {
+        contactsInteractor.getUsersAsContacts(ids);
     }
 
 
@@ -39,7 +39,7 @@ public class ContactsFragmentPresenter implements ContactsInteractor.ContactsInt
     public void contactsReturned(HashMap<String, Boolean> contacts) {
         if (contacts != null) {
             List<String> contactIds = new ArrayList<>(contacts.keySet());
-            presenterListener.contactsReturned(contactIds);
+            presenterListener.contactIdsReturned(contactIds);
         } else {
             noUsersReturned();
         }
@@ -47,12 +47,12 @@ public class ContactsFragmentPresenter implements ContactsInteractor.ContactsInt
 
     @Override
     public void userReturned(String id, User user) {
-        presenterListener.userReturned(id, user);
+        presenterListener.contactReturned(id, user);
     }
 
     @Override
     public void noUsersReturned() {
-        presenterListener.presentError("Add contacts by clicking \"Add Contact\" on User profiles");
+        presenterListener.noContactsReturned();
     }
 
     @Override
@@ -65,11 +65,13 @@ public class ContactsFragmentPresenter implements ContactsInteractor.ContactsInt
      */
     public interface ContactsPresenterListener {
 
-        void presentError(String message);
+        void noContactsReturned();
 
-        void contactsReturned(List<String> ids);
+        void contactIdsReturned(List<String> ids);
 
-        void userReturned(String id, User user);
+        void contactReturned(String id, User user);
+
+        void presentError(String error);
 
     }
 }

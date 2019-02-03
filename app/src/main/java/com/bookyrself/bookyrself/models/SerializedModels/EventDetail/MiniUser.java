@@ -16,6 +16,8 @@ public class MiniUser {
     private String mUserId;
     @SerializedName("username")
     private String mUsername;
+    @SerializedName("attendingStatus")
+    private String mAttendingStatus;
 
     public String getCitystate() {
         return mCitystate;
@@ -49,4 +51,11 @@ public class MiniUser {
         mUsername = username;
     }
 
+    public String getAttendingStatus() {
+        return mAttendingStatus;
+    }
+
+    public void setAttendingStatus(String mAttendingStatus) {
+        this.mAttendingStatus = mAttendingStatus;
+    }
 }

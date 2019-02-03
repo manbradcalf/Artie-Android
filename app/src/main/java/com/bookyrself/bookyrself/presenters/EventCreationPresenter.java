@@ -4,20 +4,18 @@ import com.bookyrself.bookyrself.interactors.ContactsInteractor;
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.interactors.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Event;
 import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by benmedcalf on 3/9/18.
  */
 
-public class EventCreationPresenter implements ContactsInteractor.ContactsInteractorListener, EventsInteractor.EventsInteractorListener, UsersInteractor.UsersInteractorListener {
+public class EventCreationPresenter implements ContactsInteractor.ContactsInteractorListener, EventsInteractor.EventCreationInteractorListener, UsersInteractor.UsersInteractorListener {
 
     private EventCreationPresenterListener presenterListener;
     private ContactsInteractor contactsInteractor;
@@ -39,9 +37,6 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
      */
 
     public void createEvent(EventDetail event) {
-
-        // Iterate through the hashmap of users and their events array size.
-        // For each user in the hashmpap, add the event to their
         eventsInteractor.createEvent(event);
     }
 
@@ -64,7 +59,7 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     public void contactsReturned(HashMap<String, Boolean> contacts) {
         if (contacts != null) {
             List<String> contactIds = new ArrayList<>(contacts.keySet());
-            contactsInteractor.getUsers(contactIds);
+            contactsInteractor.getUsersAsContacts(contactIds);
         }
     }
 
@@ -89,11 +84,19 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     }
 
     @Override
-    public void eventCreated(String eventId, List<String> userIdsOfAttendees) {
+    public void addNewlyCreatedEventToUsers(String eventId, List<String> userIdsOfAttendees, String hostUserId) {
+        EventInfo hostEventInfo = new EventInfo();
+        hostEventInfo.setIsInviteAccepted(true);
+        hostEventInfo.setIsHost(true);
+        hostEventInfo.setIsInviteRejected(false);
+        usersInteractor.addEventToUser(hostEventInfo, hostUserId, eventId);
+
         if (userIdsOfAttendees.size() != 0) {
             for (String userId : userIdsOfAttendees) {
                 EventInfo eventInfo = new EventInfo();
                 eventInfo.setIsInviteAccepted(false);
+                eventInfo.setIsInviteRejected(false);
+                eventInfo.setIsHost(false);
                 usersInteractor.addEventToUser(eventInfo, userId, eventId);
             }
             presenterListener.eventCreated();
@@ -107,11 +110,6 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
     @Override
     public void presentError(String error) {
 
-    }
-
-    @Override
-    public void eventAddedToUserSuccessfully() {
-        //TODO: Find a way to determine it was added to _all_ invited users
     }
 
     @Override

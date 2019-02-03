@@ -54,11 +54,23 @@ public class FirebaseService {
         @GET("/users/{id}.json")
         Call<User> getUserDetails(@Path("id") String userId);
 
+        @GET("/users/{id}/events.json")
+        Call<HashMap<String, EventInfo>> getUsersEventInvites(@Path("id") String userId);
+
         @GET("/users/{id}/contacts.json")
         Call<HashMap<String, Boolean>> getUserContacts(@Path("id") String userId);
 
         @PUT("/users/{userId}.json")
         Call<User> addUser(@Body User user, @Path("userId") String userId);
+
+        @PUT("/users/{userId}/events/{eventId}/isInviteRejected.json")
+        Call<Boolean> rejectInvite(@Body Boolean bool, @Path("userId") String userId, @Path("eventId") String eventId);
+
+        @PUT("/users/{userId}/events/{eventId}/isInviteAccepted.json")
+        Call<Boolean> acceptInvite(@Body Boolean bool, @Path("userId") String userId, @Path("eventId") String eventId);
+
+        @PUT("/events/{eventId}/users/{userId}.json")
+        Call<Boolean> setEventUserAsAttending(@Body Boolean bool, @Path("userId") String userId, @Path("eventId") String eventId);
 
 
         @PATCH("/users/{userId}.json")
@@ -73,5 +85,7 @@ public class FirebaseService {
         //TODO: Clean this up. Find a way to minify the MiniEvent name
         @PUT("/users/{userId}/events/{eventId}.json")
         Call<EventInfo> addEventToUser(@Body EventInfo eventInfo, @Path("userId") String userId, @Path("eventId") String eventId);
+
+
     }
 }
