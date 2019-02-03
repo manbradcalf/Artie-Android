@@ -63,6 +63,9 @@ public class EventsInteractor {
                     if (response.body() != null) {
                         eventsInteractorListener.eventDetailReturned(response.body(), id);
                     }
+                    else {
+                        eventsInteractorListener.presentError(String.format("Event %s is null", id));
+                    }
                 }
 
                 @Override

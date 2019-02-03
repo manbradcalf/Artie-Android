@@ -5,6 +5,7 @@ import com.bookyrself.bookyrself.interactors.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProfilePresenter implements EventsInteractor.EventsInteractorListener, UsersInteractor.UsersInteractorListener {
@@ -31,7 +32,7 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
     }
 
     public void patchUser(User user, final String uID) {
-        usersInteractor.patchUser(user, uID );
+        usersInteractor.patchUser(user, uID);
     }
 
     public void getUser(final String uID) {
@@ -51,6 +52,13 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
 
     @Override
     public void userDetailReturned(User user, String userId) {
+        // If there are events, get the info
+        if (user.getEvents() != null && !user.getEvents().isEmpty()) {
+            List<String> eventIds = new ArrayList<>(user.getEvents().keySet());
+            getEventDetails(eventIds);
+        }
+
+
         listener.profileInfoReady(user, userId);
     }
 
@@ -70,7 +78,5 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
         void eventReady(EventDetail event, String eventId);
 
         void presentError(String error);
-
-        void showLoadingState(Boolean show);
     }
 }
