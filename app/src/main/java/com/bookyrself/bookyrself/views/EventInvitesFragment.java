@@ -3,7 +3,6 @@ package com.bookyrself.bookyrself.views;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -125,12 +124,11 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
     }
 
     @Override
-    public void eventInviteAccepted(String eventId) {
+    public void eventInviteAccepted(boolean accepted, String eventId) {
         if (recyclerView.getVisibility() == View.GONE) {
             showContent(true);
         }
-        //TODO: This is fucked
-        // Find the
+
         for (int i = 0; i < eventDetailsList.size(); i++) {
             if (eventId.equals(eventDetailEventIdHashMap.get(eventDetailsList.get(i)))) {
                 eventDetailsList.remove(eventDetailsList.get(i));
@@ -252,6 +250,13 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
                     // THen pass that iD to the presenter method
                     // UGH
                     presenter.acceptEventInvite(FirebaseAuth.getInstance().getUid(), eventDetailEventIdHashMap.get(eventDetailsList.get(position)));
+                }
+            });
+
+            viewHolderEvents.denyButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    presenter.rejectInvite(FirebaseAuth.getInstance().getUid(), eventDetailEventIdHashMap.get(eventDetailsList.get(position)));
                 }
             });
         }

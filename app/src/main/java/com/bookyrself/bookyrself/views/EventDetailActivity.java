@@ -93,11 +93,10 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
 
     @Override
     public void eventDataResponseReady(final EventDetail data, final List<MiniUser> miniUsersList) {
-
         showProgressbar(false);
         setSupportActionBar(Toolbar);
+        Toolbar.setTitle(data.getEventname());
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(R.string.event_detail_toolbar);
 
         Host host = data.getHost();
         String hostUsername = host.getUsername();
@@ -130,7 +129,6 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                 startActivity(intent);
             }
         });
-        Toolbar.setTitle(data.getEventname());
         eventDetailContent.setVisibility(View.VISIBLE);
     }
 
@@ -213,11 +211,13 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             TextView userName = rowView.findViewById(R.id.item_event_detail_username);
             TextView cityState = rowView.findViewById(R.id.item_event_detail_citystate);
             TextView userUrl = rowView.findViewById(R.id.item_event_detail_url);
+            TextView attendingStatusTextView = rowView.findViewById(R.id.item_event_detail_attending_textview);
 
             MiniUser miniUser = (MiniUser) getItem(position);
 
             userName.setText(miniUser.getUsername());
             cityState.setText(miniUser.getCitystate());
+            attendingStatusTextView.setText(miniUser.getAttendingStatus());
             userUrl.setClickable(true);
             userUrl.setMovementMethod(LinkMovementMethod.getInstance());
             userUrl.setOnClickListener(new View.OnClickListener() {

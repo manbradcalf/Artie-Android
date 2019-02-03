@@ -24,12 +24,16 @@ public class EventInvitesFragmentPresenter implements UsersInteractor.UsersEvent
     }
 
     public void acceptEventInvite(String userId, String eventId) {
-        eventsInteractor.acceptEventInvite(eventId, userId);
+        eventsInteractor.acceptEventInvite(userId, eventId);
+    }
+
+    public void rejectInvite(String userId, String eventId) {
+        eventsInteractor.rejectEventInvite(userId, eventId);
     }
 
     @Override
-    public void eventInviteAccepted(String eventId) {
-        listener.eventInviteAccepted(eventId);
+    public void eventInviteAccepted(boolean accepted, String eventId) {
+        listener.eventInviteAccepted(accepted, eventId);
     }
 
     @Override
@@ -60,7 +64,7 @@ public class EventInvitesFragmentPresenter implements UsersInteractor.UsersEvent
 
         void presentError(String message);
 
-        void eventInviteAccepted(String eventId);
+        void eventInviteAccepted(boolean accepted, String eventId);
 
         void noInvitesReturnedForUser();
     }

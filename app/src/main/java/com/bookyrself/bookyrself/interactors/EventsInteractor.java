@@ -123,13 +123,29 @@ public class EventsInteractor {
             @Override
             public void onResponse(Call<Boolean> call, Response<Boolean> response) {
                 if (response.body() != null) {
-                    eventInvitesInteractorListener.eventInviteAccepted(eventId);
+                    eventInvitesInteractorListener.eventInviteAccepted(true, eventId);
                 }
             }
 
             @Override
             public void onFailure(Call<Boolean> call, Throwable t) {
                 Log.e("EventsInteractor ", t.getMessage());
+            }
+        });
+    }
+
+    public void rejectEventInvite(String userId, final String eventId) {
+        service.getAPI().rejectInvite(true, userId, eventId).enqueue(new Callback<Boolean>() {
+            @Override
+            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                if (response.body() != null) {
+                    eventInvitesInteractorListener.eventInviteAccepted(false, eventId);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Boolean> call, Throwable t) {
+
             }
         });
     }
@@ -152,6 +168,6 @@ public class EventsInteractor {
 
     public interface EventInvitesInteractorListener extends EventsInteractorListener {
 
-        void eventInviteAccepted(String eventId);
+        void eventInviteAccepted(boolean accepted, String eventId);
     }
 }

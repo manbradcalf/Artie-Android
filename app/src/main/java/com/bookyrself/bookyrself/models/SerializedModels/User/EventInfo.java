@@ -13,7 +13,7 @@ public class EventInfo {
     private Boolean mIsInviteAccepted;
 
     @SerializedName("isInviteRejected")
-    private Boolean mIsInviteRejectted;
+    private Boolean mIsInviteRejected;
 
     @SerializedName("isHost")
     private Boolean mIsHost;
@@ -34,11 +34,11 @@ public class EventInfo {
         this.mIsHost = mIsHost;
     }
 
-    public Boolean getIsInviteRejectted() {
-        return mIsInviteRejectted;
+    public Boolean getIsInviteRejected() {
+        return mIsInviteRejected;
     }
 
-    public void setIsInviteRejectted(Boolean mIsInviteRejectted) {
-        this.mIsInviteRejectted = mIsInviteRejectted;
+    public void setIsInviteRejected(Boolean mIsInviteRejectted) {
+        this.mIsInviteRejected = mIsInviteRejectted;
     }
 }

@@ -4,10 +4,10 @@
     android:id="@+id/search_result_card_users"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="@dimen/card_margin_vertical_big_activity"
-    android:layout_marginEnd="@dimen/card_margin_horizontal_big_activity"
     android:layout_marginStart="@dimen/card_margin_horizontal_big_activity"
     android:layout_marginTop="@dimen/card_margin_vertical_big_activity"
+    android:layout_marginEnd="@dimen/card_margin_horizontal_big_activity"
+    android:layout_marginBottom="@dimen/card_margin_vertical_big_activity"
     android:background="@android:color/white"
     android:foreground="?attr/selectableItemBackground"
     card_view:cardCornerRadius="@dimen/card_recycler_corner_radius"
@@ -49,6 +49,14 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/item_event_detail_citystate"
             android:layout_marginTop="@dimen/text_margin_very_small"
+            android:layout_toEndOf="@id/item_event_detail_userthumb" />
+
+        <TextView
+            android:id="@+id/item_event_detail_attending_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/item_event_detail_url"
+            android:layout_marginTop="4dp"
             android:layout_toEndOf="@id/item_event_detail_userthumb" />
 
     </RelativeLayout>

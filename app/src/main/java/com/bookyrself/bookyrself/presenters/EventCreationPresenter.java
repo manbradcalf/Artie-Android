@@ -88,13 +88,15 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
         EventInfo hostEventInfo = new EventInfo();
         hostEventInfo.setIsInviteAccepted(true);
         hostEventInfo.setIsHost(true);
-        hostEventInfo.setIsInviteRejectted(false);
+        hostEventInfo.setIsInviteRejected(false);
         usersInteractor.addEventToUser(hostEventInfo, hostUserId, eventId);
 
         if (userIdsOfAttendees.size() != 0) {
             for (String userId : userIdsOfAttendees) {
                 EventInfo eventInfo = new EventInfo();
                 eventInfo.setIsInviteAccepted(false);
+                eventInfo.setIsInviteRejected(false);
+                eventInfo.setIsHost(false);
                 usersInteractor.addEventToUser(eventInfo, userId, eventId);
             }
             presenterListener.eventCreated();
