@@ -17,19 +17,19 @@ import butterknife.ButterKnife;
 
 public class ProfileEditActivity extends AppCompatActivity {
 
-    @BindView(R.id.profile_creation_toolbar)
+    @BindView(R.id.profile_edit_toolbar)
     android.support.v7.widget.Toolbar toolbar;
-    @BindView(R.id.profile_creation_fab)
+    @BindView(R.id.profile_edit_fab)
     FloatingActionButton fab;
-    @BindView(R.id.profile_creation_bio)
+    @BindView(R.id.profile_edit_bio)
     EditText bioEditText;
-    @BindView(R.id.profile_creation_username)
+    @BindView(R.id.profile_edit_username)
     EditText usernameEditText;
-    @BindView(R.id.profile_creation_location)
+    @BindView(R.id.profile_edit_location)
     EditText locationEditText;
-    @BindView(R.id.profile_creation_tags)
+    @BindView(R.id.profile_edit_tags)
     EditText tagsEditText;
-    @BindView(R.id.profile_creation_url)
+    @BindView(R.id.profile_edit_url)
     EditText urlEditText;
 
     @Override

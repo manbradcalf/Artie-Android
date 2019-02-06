@@ -64,6 +64,7 @@
     <string name="contacts_empty_state_signed_out_header">You\'re signed out!</string>
     <string name="event_invites_signed_out_header">You\'re signed out!</string>
     <string name="events_fragment_empty_state_signed_out_header">You\'re signed out!</string>
+    <string name="profile_edit_title">Edit Your Profile</string>
 
 
 </resources>
