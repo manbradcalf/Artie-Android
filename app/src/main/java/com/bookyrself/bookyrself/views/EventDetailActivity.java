@@ -136,7 +136,6 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             @Override
             public void onFailure(@NonNull Exception exception) {
                 // Handle any errors
-                Toast.makeText(getApplicationContext(), String.format("Avatar for %s not downloaded", host.getUserId()), Toast.LENGTH_SHORT).show();
                 hostImageView.setImageDrawable(getApplicationContext().getDrawable(R.drawable.ic_profile_black_24dp));
             }
         });
@@ -267,7 +266,6 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                 @Override
                 public void onFailure(@NonNull Exception exception) {
                     // Handle any errors
-                    Toast.makeText(mContext, String.format("Avatar for %s not downloaded", miniUser.getUsername()), Toast.LENGTH_SHORT).show();
                     userThumb.setImageDrawable(mContext.getDrawable(R.drawable.ic_profile_black_24dp));
                 }
             });
