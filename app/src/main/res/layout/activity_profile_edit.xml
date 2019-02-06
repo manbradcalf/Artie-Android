@@ -16,11 +16,12 @@
         app:title="@string/profile_creation_title"
         app:titleTextColor="@android:color/white" />
 
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/profile_creation_scrollview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/profile_creation_toolbar">
+        app:layout_constraintTop_toBottomOf="@id/profile_creation_toolbar"
+        app:layout_constraintBottom_toTopOf="@id/profile_creation_fab">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -75,7 +76,7 @@
         </LinearLayout>
 
 
-    </ScrollView>
+    </android.support.v4.widget.NestedScrollView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/profile_creation_fab"
