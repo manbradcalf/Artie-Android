@@ -37,6 +37,7 @@ public class UsersInteractor {
     }
 
     public UsersInteractor(UserDetailInteractorListener listener) {
+        this.usersInteractorListener = listener;
         this.userDetailInteractorListener = listener;
         service = new FirebaseService();
     }
@@ -55,7 +56,7 @@ public class UsersInteractor {
 
             @Override
             public void onFailure(Call<EventInviteInfo> call, Throwable t) {
-
+                usersInteractorListener.presentError(t.getMessage());
             }
         });
     }
@@ -70,9 +71,11 @@ public class UsersInteractor {
                     if (eventIdsOfPendingInvites.size() != 0) {
                         usersEventInvitesInteractorListener.eventIdsOfEventsWithPendingInvitesReturned(eventIdsOfPendingInvites);
                     } else {
+                        // Event invites exist but none are pending
                         usersEventInvitesInteractorListener.noInvitesReturnedForUser();
                     }
                 } else {
+                    // No event invites exist
                     usersEventInvitesInteractorListener.noInvitesReturnedForUser();
                 }
             }
@@ -84,34 +87,12 @@ public class UsersInteractor {
         });
     }
 
-    private List <String> getEventIdsOfPendingInvites(HashMap<String, EventInviteInfo> eventsMap) {
-        List<String> eventIds = new ArrayList<>();
-
-        for (Map.Entry<String, EventInviteInfo> entry : eventsMap.entrySet()) {
-            // If the required event invite information exists
-            if (entry.getValue().getIsInviteRejected() != null && entry.getValue().getIsInviteAccepted() != null
-                    && entry.getValue().getIsHost() != null) {
-                // If the user hasn't responded to the invite (hasn't accepted or rejected invites)
-                if (!entry.getValue().getIsInviteAccepted() && !entry.getValue().getIsInviteRejected()
-                        && !entry.getValue().getIsHost()) {
-                    eventIds.add(entry.getKey());
-                }
-            }
-        }
-        return eventIds;
-    }
-
     public void getUserDetails(final String userId) {
         service.getAPI().getUserDetails(userId).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.body() != null) {
-                    //TODO: How to determine which listener to use? This is fukt
-                    if (userDetailInteractorListener != null) {
-                        userDetailInteractorListener.userDetailReturned(response.body(), userId);
-                    } else {
-                        usersInteractorListener.userDetailReturned(response.body(), userId);
-                    }
+                    usersInteractorListener.userDetailReturned(response.body(), userId);
                 } else {
                     usersInteractorListener.presentError(String.format("User %s doesn't exist!", userId));
                 }
@@ -135,6 +116,7 @@ public class UsersInteractor {
             @Override
             public void onFailure(Call<User> call, Throwable t) {
                 // failure
+                usersInteractorListener.presentError(t.getMessage());
             }
         });
     }
@@ -150,6 +132,7 @@ public class UsersInteractor {
             @Override
             public void onFailure(Call<User> call, Throwable t) {
                 // failure
+                usersInteractorListener.presentError(t.getMessage());
             }
         });
     }
@@ -174,6 +157,44 @@ public class UsersInteractor {
         });
     }
 
+    public void addContactToUser(String contactId, String userId) {
+        HashMap<String, Boolean> request = new HashMap<>();
+        request.put(contactId, true);
+        service.getAPI().addContactToUser(request, userId).enqueue(new Callback<HashMap<String, Boolean>>() {
+            @Override
+            public void onResponse(Call<HashMap<String, Boolean>> call, Response<HashMap<String, Boolean>> response) {
+                userDetailInteractorListener.contactSuccessfullyAdded();
+            }
+
+            @Override
+            public void onFailure(Call<HashMap<String, Boolean>> call, Throwable t) {
+                userDetailInteractorListener.presentError(t.getMessage());
+            }
+        });
+    }
+
+
+    private List<String> getEventIdsOfPendingInvites(HashMap<String, EventInviteInfo> eventsMap) {
+        List<String> eventIds = new ArrayList<>();
+
+        for (Map.Entry<String, EventInviteInfo> entry : eventsMap.entrySet()) {
+            // If the required event invite information exists
+            if (entry.getValue().getIsInviteRejected() != null && entry.getValue().getIsInviteAccepted() != null
+                    && entry.getValue().getIsHost() != null) {
+                // If the user hasn't responded to the invite (hasn't accepted or rejected invites)
+                if (!entry.getValue().getIsInviteAccepted() && !entry.getValue().getIsInviteRejected()
+                        && !entry.getValue().getIsHost()) {
+                    eventIds.add(entry.getKey());
+                }
+            }
+        }
+        return eventIds;
+    }
+
+
+    /**
+     * Interfaces
+     */
     public interface UsersInteractorListener {
 
         void userDetailReturned(User user, String userId);
@@ -183,6 +204,9 @@ public class UsersInteractor {
     }
 
     public interface UserDetailInteractorListener extends UsersInteractorListener {
+
+        void userDetailReturned(User user, String userId);
+
         void contactSuccessfullyAdded();
     }
 

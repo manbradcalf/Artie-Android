@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/profile_creation_constraint_layout"
+    android:id="@+id/profile_creation_relative_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -11,17 +11,16 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        app:layout_constraintBottom_toTopOf="@id/profile_creation_scrollview"
         app:popupTheme="@style/AppTheme.PopupOverlay"
         app:title="@string/profile_creation_title"
         app:titleTextColor="@android:color/white" />
 
-    <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/profile_creation_scrollview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/profile_creation_toolbar"
-        app:layout_constraintBottom_toTopOf="@id/profile_creation_fab">
+        android:paddingTop="16dp"
+        android:layout_below="@+id/profile_creation_toolbar">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -31,7 +30,7 @@
             <EditText
                 android:id="@+id/profile_creation_username"
                 android:drawablePadding="8dp"
-                android:drawableStart="@drawable/ic_edit_black_24dp"
+                android:drawableStart="@drawable/ic_person_black_24dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
@@ -69,14 +68,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:drawableStart="@drawable/ic_person_black_24dp"
+                android:drawableStart="@drawable/ic_bio"
                 android:drawablePadding="16dp"
                 android:hint="Bio" />
 
         </LinearLayout>
 
 
-    </android.support.v4.widget.NestedScrollView>
+    </ScrollView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/profile_creation_fab"
@@ -84,7 +83,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="32dp"
         android:tint="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/profile_creation_scrollview"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
         app:srcCompat="@drawable/ic_check_white_24dp" />
-</android.support.constraint.ConstraintLayout>
+</RelativeLayout>
