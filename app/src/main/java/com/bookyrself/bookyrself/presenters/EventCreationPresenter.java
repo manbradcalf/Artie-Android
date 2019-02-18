@@ -1,24 +1,25 @@
 package com.bookyrself.bookyrself.presenters;
 
-import com.bookyrself.bookyrself.interactors.ContactsInteractor;
+import com.bookyrself.bookyrself.interactors.ContactsRepository;
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.interactors.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.User.EventInviteInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created by benmedcalf on 3/9/18.
  */
 
-public class EventCreationPresenter implements ContactsInteractor.ContactsInteractorListener, EventsInteractor.EventCreationInteractorListener, UsersInteractor.UsersInteractorListener {
+public class EventCreationPresenter implements ContactsRepository.ContactsInteractorListener, EventsInteractor.EventCreationInteractorListener, UsersInteractor.UsersInteractorListener {
 
     private EventCreationPresenterListener presenterListener;
-    private ContactsInteractor contactsInteractor;
+    private ContactsRepository contactsRepository;
     private EventsInteractor eventsInteractor;
     private UsersInteractor usersInteractor;
 
@@ -26,7 +27,7 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
      * Constructor
      */
     public EventCreationPresenter(EventCreationPresenterListener listener) {
-        this.contactsInteractor = new ContactsInteractor(this);
+        this.contactsRepository = new ContactsRepository(this);
         this.eventsInteractor = new EventsInteractor(this);
         this.usersInteractor = new UsersInteractor(this);
         this.presenterListener = listener;
@@ -42,7 +43,7 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
 
     public void getContacts(String userId) {
 
-        contactsInteractor.getContactIds(userId);
+        contactsRepository.getContactsForUser(userId);
     }
 
     public void setDate(String date) {
@@ -53,27 +54,20 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
 
 
     /**
-     * ContactsInteractor Listeners
+     * ContactsRepository Listeners
      */
-    @Override
-    public void contactsReturned(HashMap<String, Boolean> contacts) {
-        if (contacts != null) {
-            List<String> contactIds = new ArrayList<>(contacts.keySet());
-            contactsInteractor.getUsersAsContacts(contactIds);
-        }
-    }
 
-    @Override
-    public void userReturned(String id, User user) {
-        if (user != null) {
-            presenterListener.contactReturned(user, id);
-        }
-    }
-
-    @Override
-    public void noUsersReturned() {
-
-    }
+//    @Override
+//    public void userReturned(String id, User user) {
+//        if (user != null) {
+//            presenterListener.contactReturned(user, id);
+//        }
+//    }
+//
+//    @Override
+//    public void noUsersReturned() {
+//
+//    }
 
     /**
      * EventsInteractorListener
@@ -114,6 +108,26 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
 
     @Override
     public void userDetailReturned(User user, String userId) {
+
+    }
+
+    @Override
+    public void subscribe() {
+
+    }
+
+    @Override
+    public void unsubscribe() {
+
+    }
+
+    @Override
+    public void contactReturned(String userId, User contact) {
+
+    }
+
+    @Override
+    public void noContactsReturned() {
 
     }
 

@@ -1,18 +1,11 @@
 package com.bookyrself.bookyrself.presenters;
 
-import com.bookyrself.bookyrself.interactors.ContactsInteractor;
 import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.interactors.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
-import com.bookyrself.bookyrself.services.FirebaseService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Created by benmedcalf on 1/13/18.

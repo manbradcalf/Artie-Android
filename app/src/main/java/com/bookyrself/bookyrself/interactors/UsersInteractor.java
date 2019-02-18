@@ -88,21 +88,21 @@ public class UsersInteractor {
     }
 
     public void getUserDetails(final String userId) {
-        service.getAPI().getUserDetails(userId).enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                if (response.body() != null) {
-                    usersInteractorListener.userDetailReturned(response.body(), userId);
-                } else {
-                    usersInteractorListener.presentError(String.format("User %s doesn't exist!", userId));
-                }
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                usersInteractorListener.presentError(t.getMessage());
-            }
-        });
+//        service.getAPI().getUserDetails(userId).enqueue(new Callback<User>() {
+//            @Override
+//            public void onResponse(Call<User> call, Response<User> response) {
+//                if (response.body() != null) {
+//                    usersInteractorListener.userDetailReturned(response.body(), userId);
+//                } else {
+//                    usersInteractorListener.presentError(String.format("User %s doesn't exist!", userId));
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<User> call, Throwable t) {
+//                usersInteractorListener.presentError(t.getMessage());
+//            }
+//        });
     }
 
     public void createUser(User user, final String uid) {

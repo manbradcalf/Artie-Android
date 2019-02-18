@@ -7,10 +7,14 @@ import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 
 import java.util.HashMap;
 
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -25,20 +29,27 @@ import retrofit2.http.Path;
 
 public class FirebaseService {
 
+    private static FirebaseService.FirebaseApi INSTANCE;
+
     private static String BASE_URL_BOOKYRSELF_FIREBASE = "https://bookyrself-staging.firebaseio.com/";
 
-    public FirebaseService.FirebaseApi getAPI() {
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+    public static FirebaseService.FirebaseApi getAPI() {
+
+        if (INSTANCE == null) {
+            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL_BOOKYRSELF_FIREBASE)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        return retrofit.create(FirebaseService.FirebaseApi.class);
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(BASE_URL_BOOKYRSELF_FIREBASE)
+                    .client(client)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                    .build();
+            INSTANCE = retrofit.create(FirebaseService.FirebaseApi.class);
+        }
+        return INSTANCE;
     }
 
     public interface FirebaseApi {
@@ -52,13 +63,13 @@ public class FirebaseService {
         Call<String> getUserThumbUrl(@Path("id") String userId);
 
         @GET("/users/{id}.json")
-        Call<User> getUserDetails(@Path("id") String userId);
+        Flowable<User> getUserDetails(@Path("id") String userId);
 
         @GET("/users/{id}/events.json")
         Call<HashMap<String, EventInviteInfo>> getUsersEventInvites(@Path("id") String userId);
 
         @GET("/users/{id}/contacts.json")
-        Call<HashMap<String, Boolean>> getUserContacts(@Path("id") String userId);
+        Flowable<HashMap<String, Boolean>> getUserContacts(@Path("id") String userId);
 
         @PUT("/users/{userId}.json")
         Call<User> addUser(@Body User user, @Path("userId") String userId);
