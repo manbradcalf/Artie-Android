@@ -5,13 +5,18 @@ import android.util.Log;
 
 import com.bookyrself.bookyrself.models.SerializedModels.User.EventInviteInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.presenters.BasePresenter;
 import com.bookyrself.bookyrself.services.FirebaseService;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.Flowable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -48,7 +53,7 @@ public class UsersInteractor {
     }
 
     public void addEventToUser(EventInviteInfo eventInviteInfo, final String userId, final String eventId) {
-        service.getAPI().addEventToUser(eventInviteInfo, userId, eventId).enqueue(new Callback<EventInviteInfo>() {
+        FirebaseService.getAPI().addEventToUser(eventInviteInfo, userId, eventId).enqueue(new Callback<EventInviteInfo>() {
             @Override
             public void onResponse(Call<EventInviteInfo> call, Response<EventInviteInfo> response) {
                 Log.i("UsersInteractor", String.format("User %s successfully invited to Event %s", userId, eventId));
@@ -62,7 +67,7 @@ public class UsersInteractor {
     }
 
     public void getUserInvites(final String userId) {
-        service.getAPI().getUsersEventInvites(userId).enqueue(new Callback<HashMap<String, EventInviteInfo>>() {
+        FirebaseService.getAPI().getUsersEventInvites(userId).enqueue(new Callback<HashMap<String, EventInviteInfo>>() {
             @Override
             public void onResponse(Call<HashMap<String, EventInviteInfo>> call, Response<HashMap<String, EventInviteInfo>> response) {
 
@@ -87,26 +92,15 @@ public class UsersInteractor {
         });
     }
 
-    public void getUserDetails(final String userId) {
-//        service.getAPI().getUserDetails(userId).enqueue(new Callback<User>() {
-//            @Override
-//            public void onResponse(Call<User> call, Response<User> response) {
-//                if (response.body() != null) {
-//                    usersInteractorListener.userDetailReturned(response.body(), userId);
-//                } else {
-//                    usersInteractorListener.presentError(String.format("User %s doesn't exist!", userId));
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<User> call, Throwable t) {
-//                usersInteractorListener.presentError(t.getMessage());
-//            }
-//        });
+    public Flowable<User> getUserDetails(final String userId) {
+        return FirebaseService.getAPI()
+                .getUserDetails(userId)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread());
     }
 
     public void createUser(User user, final String uid) {
-        service.getAPI().addUser(user, uid).enqueue(new Callback<User>() {
+        FirebaseService.getAPI().addUser(user, uid).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 // response
@@ -122,7 +116,7 @@ public class UsersInteractor {
     }
 
     public void patchUser(User user, final String uID) {
-        service.getAPI().patchUser(user, uID).enqueue(new Callback<User>() {
+        FirebaseService.getAPI().patchUser(user, uID).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 // response
@@ -138,7 +132,7 @@ public class UsersInteractor {
     }
 
     public void getUserEvents(String userId) {
-        service.getAPI().getUsersEventInfo(userId).enqueue(new Callback<HashMap<String, EventInviteInfo>>() {
+        FirebaseService.getAPI().getUsersEventInfo(userId).enqueue(new Callback<HashMap<String, EventInviteInfo>>() {
             @Override
             public void onResponse(@NonNull Call<HashMap<String, EventInviteInfo>> call, @NonNull Response<HashMap<String, EventInviteInfo>> response) {
                 if (response.body() != null) {
@@ -160,7 +154,7 @@ public class UsersInteractor {
     public void addContactToUser(String contactId, String userId) {
         HashMap<String, Boolean> request = new HashMap<>();
         request.put(contactId, true);
-        service.getAPI().addContactToUser(request, userId).enqueue(new Callback<HashMap<String, Boolean>>() {
+        FirebaseService.getAPI().addContactToUser(request, userId).enqueue(new Callback<HashMap<String, Boolean>>() {
             @Override
             public void onResponse(Call<HashMap<String, Boolean>> call, Response<HashMap<String, Boolean>> response) {
                 userDetailInteractorListener.contactSuccessfullyAdded();
@@ -203,9 +197,7 @@ public class UsersInteractor {
 
     }
 
-    public interface UserDetailInteractorListener extends UsersInteractorListener {
-
-        void userDetailReturned(User user, String userId);
+    public interface UserDetailInteractorListener extends UsersInteractorListener, BasePresenter {
 
         void contactSuccessfullyAdded();
     }

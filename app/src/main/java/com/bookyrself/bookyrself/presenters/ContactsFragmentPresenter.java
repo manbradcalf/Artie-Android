@@ -4,6 +4,7 @@ import android.os.Build;
 
 import com.bookyrself.bookyrself.interactors.ContactsRepository;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.views.MainActivity;
 import com.google.firebase.auth.FirebaseAuth;
 
 import io.reactivex.disposables.CompositeDisposable;
@@ -19,7 +20,7 @@ public class ContactsFragmentPresenter implements ContactsRepository.ContactsInt
      */
     public ContactsFragmentPresenter(ContactsPresenterListener listener) {
         this.presenterListener = listener;
-        this.contactsRepository = new ContactsRepository(this);
+        this.contactsRepository = MainActivity.getContactsRepo();
         this.compositeDisposable = new CompositeDisposable();
     }
 

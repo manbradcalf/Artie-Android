@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.bookyrself.bookyrself.R;
+import com.bookyrself.bookyrself.interactors.ContactsRepository;
 import com.bookyrself.bookyrself.interactors.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.utils.FragmentViewPager;
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     private static final int CONTACTS_FRAGMENT_INDEX = 2;
     private static final int PROFILE_FRAGMENT_INDEX = 3;
     private static final int EVENTS_INVITE_LIST = 4;
+    private static ContactsRepository CONTACTS_REPO = null;
     final ProfileFragment profileFragment = new ProfileFragment();
     final SearchFragment searchFragment = new SearchFragment();
     final EventsFragment eventsFragment = new EventsFragment();
@@ -35,6 +37,15 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     FragmentViewPagerAdapter adapter;
     FragmentViewPager viewPager;
     private BottomNavigationView navigationView;
+
+    public static ContactsRepository getContactsRepo() {
+        if (CONTACTS_REPO == null) {
+            CONTACTS_REPO = new ContactsRepository();
+            return CONTACTS_REPO;
+        } else {
+            return CONTACTS_REPO;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

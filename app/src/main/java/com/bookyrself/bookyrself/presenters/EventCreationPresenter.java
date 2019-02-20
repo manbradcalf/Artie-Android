@@ -6,6 +6,7 @@ import com.bookyrself.bookyrself.interactors.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.User.EventInviteInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.views.MainActivity;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,7 @@ public class EventCreationPresenter implements ContactsRepository.ContactsIntera
      * Constructor
      */
     public EventCreationPresenter(EventCreationPresenterListener listener) {
-        this.contactsRepository = new ContactsRepository(this);
+        this.contactsRepository = MainActivity.getContactsRepo();
         this.eventsInteractor = new EventsInteractor(this);
         this.usersInteractor = new UsersInteractor(this);
         this.presenterListener = listener;
@@ -56,18 +57,16 @@ public class EventCreationPresenter implements ContactsRepository.ContactsIntera
     /**
      * ContactsRepository Listeners
      */
+    @Override
+    public void contactReturned(String userId, User contact) {
 
-//    @Override
-//    public void userReturned(String id, User user) {
-//        if (user != null) {
-//            presenterListener.contactReturned(user, id);
-//        }
-//    }
-//
-//    @Override
-//    public void noUsersReturned() {
-//
-//    }
+    }
+
+    @Override
+    public void noContactsReturned() {
+
+    }
+
 
     /**
      * EventsInteractorListener
@@ -118,16 +117,6 @@ public class EventCreationPresenter implements ContactsRepository.ContactsIntera
 
     @Override
     public void unsubscribe() {
-
-    }
-
-    @Override
-    public void contactReturned(String userId, User contact) {
-
-    }
-
-    @Override
-    public void noContactsReturned() {
 
     }
 

@@ -54,7 +54,7 @@ public class FirebaseService {
 
     public interface FirebaseApi {
         @GET("/events/{id}.json")
-        Call<EventDetail> getEventData(@Path("id") String eventId);
+        Flowable<EventDetail> getEventData(@Path("id") String eventId);
 
         @GET("/users/{id}/events.json")
         Call<HashMap<String, EventInviteInfo>> getUsersEventInfo(@Path("id") String userId);

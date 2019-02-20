@@ -23,8 +23,6 @@ import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.UserDetailPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.EventDecorator;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -102,9 +100,9 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_detail);
         ButterKnife.bind(this);
-        userDetailPresenter = new UserDetailPresenter(this);
         userID = getIntent().getStringExtra("userId");
-        userDetailPresenter.getUserInfo(userID);
+        userDetailPresenter = new UserDetailPresenter(userID, this);
+        userDetailPresenter.subscribe();
         Toolbar.setTitle("User Details");
         calendarView.setOnDateChangedListener(this);
         calendarDaysWithEventIds = new HashMap<>();
@@ -112,31 +110,28 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         emptyState.setVisibility(View.GONE);
         sharedPreferences = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         contactIdsToCheck = sharedPreferences.getStringSet("contacts", contactIdsToCheck);
-        loadingState();
+        displayLoadingState();
     }
 
     @Override
-    public void userInfoReady(User user, String userId) {
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
 
-        // Show the user details now that they're loaded
-        emailUserCardview.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                emailUser();
-            }
-        });
+    @Override
+    public void displayUserInfo(User user, String userId) {
+
+        emailUserCardview.setOnClickListener(v -> emailUser());
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+
+            //TODO: Replace this with a call to the contactsRepo
             if (contactIdsToCheck.contains(userId)) {
-                addUserToContactsTextView.setText("This user is already a contact!");
+                addUserToContactsTextView.setText(R.string.user_detail_contact_already_added);
             } else {
                 addUserToContactsTextView.setText(getString(R.string.add_user_to_contacts, user.getUsername()));
-                addUserToContactsCardview.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        userDetailPresenter.addContactToUser(FirebaseAuth.getInstance().getCurrentUser().getUid(), userID);
-                    }
-                });
+                addUserToContactsCardview.setOnClickListener(v -> userDetailPresenter.addContactToUser(userID, FirebaseAuth.getInstance().getCurrentUser().getUid()));
             }
         } else {
             addUserToContactsTextView.setText(String.format(getString(R.string.add_user_as_contact_val_prop), user.getUsername()));
@@ -159,30 +154,26 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         userEmailAddress = user.getEmail();
 
         final StorageReference profileImageReference = storageReference.child("images/" + userID);
-        profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                Picasso.with(getApplicationContext())
-                        .load(uri)
-                        .resize(148, 148)
-                        .centerCrop()
-                        .transform(new CircleTransform())
-                        .into(profileImage);
-                profileImageProgressbar.setVisibility(View.GONE);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle any errors
-                Toast.makeText(getApplicationContext(), "image not dowloaded", Toast.LENGTH_SHORT).show();
-                profileImage.setImageDrawable(getDrawable(R.drawable.ic_profile_black_24dp));
-                profileImageProgressbar.setVisibility(View.GONE);
-            }
+        profileImageReference
+                .getDownloadUrl()
+                .addOnSuccessListener(uri -> {
+                    Picasso.with(getApplicationContext())
+                            .load(uri)
+                            .resize(148, 148)
+                            .centerCrop()
+                            .transform(new CircleTransform())
+                            .into(profileImage);
+                    profileImageProgressbar.setVisibility(View.GONE);
+                }).addOnFailureListener(exception -> {
+            // Handle any errors
+            Toast.makeText(getApplicationContext(), "Profile Image Unavailable", Toast.LENGTH_SHORT).show();
+            profileImage.setImageDrawable(getDrawable(R.drawable.ic_profile_black_24dp));
+            profileImageProgressbar.setVisibility(View.GONE);
         });
 
         if (user.getTags() != null) {
             for (String s : user.getTags()) {
-                listString.append(s + ", ");
+                listString.append(s).append(", ");
             }
             String tagsText = listString.toString().replaceAll(", $", "");
             tagsTextView.setText(tagsText);
@@ -191,13 +182,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     }
 
     @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
-    }
-
-    @Override
-    public void usersEventReturned(EventDetail event, String eventId) {
+    public void displayUserEvents(EventDetail event, String eventId) {
         String[] s = event.getDate().split("-");
         int year = Integer.parseInt(s[0]);
         // I have to do weird logic on the month because months are 0 indexed
@@ -205,12 +190,11 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         int month = Integer.parseInt(s[1]) - 1;
         int day = Integer.parseInt(s[2]);
         CalendarDay calendarDay = CalendarDay.from(year, month, day);
+
         for (Map.Entry<String, Boolean> userIsAttending : event.getUsers().entrySet()) {
-            if (userIsAttending.getValue()) {
-                acceptedEventsCalendarDays.add(calendarDay);
-                calendarDaysWithEventIds.put(calendarDay, eventId);
-                calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, getApplicationContext()));
-            }
+            acceptedEventsCalendarDays.add(calendarDay);
+            calendarDaysWithEventIds.put(calendarDay, eventId);
+            calendarView.addDecorator(new EventDecorator(userIsAttending.getValue(), acceptedEventsCalendarDays, getApplicationContext()));
         }
     }
 
@@ -225,24 +209,10 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     }
 
     @Override
-    public void loadingState() {
+    public void displayLoadingState() {
         contentView.setVisibility(View.GONE);
     }
 
-    @Override
-    public void emailUser() {
-
-        if (userEmailAddress != null) {
-            Intent intent = new Intent(Intent.ACTION_SENDTO);
-            intent.setData(Uri.parse("mailto:"));
-            intent.putExtra(Intent.EXTRA_EMAIL, new String[]{userEmailAddress});
-            if (intent.resolveActivity(getPackageManager()) != null) {
-                startActivity(intent);
-            } else {
-                presentError("Unable to email user");
-            }
-        }
-    }
 
     @Override
     public void presentSuccess(String message) {
@@ -256,6 +226,20 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             Intent intent = new Intent(this, EventDetailActivity.class);
             intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
             startActivity(intent);
+        }
+    }
+
+    private void emailUser() {
+
+        if (userEmailAddress != null) {
+            Intent intent = new Intent(Intent.ACTION_SENDTO);
+            intent.setData(Uri.parse("mailto:"));
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[]{userEmailAddress});
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                startActivity(intent);
+            } else {
+                presentError("Unable to email user");
+            }
         }
     }
 }

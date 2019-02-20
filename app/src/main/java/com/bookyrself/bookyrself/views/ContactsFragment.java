@@ -86,13 +86,11 @@ public class ContactsFragment extends Fragment implements BaseFragment, Contacts
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
         storageReference = FirebaseStorage.getInstance().getReference();
+        showLoadingState(true);
         FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
             if (firebaseAuth.getCurrentUser() != null) {
                 // Signed in
                 presenter.loadContacts(FirebaseAuth.getInstance().getUid());
-                showContent(false);
-                hideEmptyState();
-                showLoadingState(true);
             } else {
                 // Signed Out
                 showEmptyState(getString(R.string.contacts_empty_state_signed_out_header), getString(R.string.contacts_empty_state_signed_out_subheader), getString(R.string.sign_in), getActivity().getDrawable(R.drawable.ic_person_add_black_24dp));
@@ -162,7 +160,7 @@ public class ContactsFragment extends Fragment implements BaseFragment, Contacts
 
     @Override
     public void showContent(boolean show) {
-        if (show && recyclerView.getVisibility() == View.GONE) {
+        if (show) {
             recyclerView.setVisibility(View.VISIBLE);
         } else {
             recyclerView.setVisibility(View.GONE);
@@ -193,6 +191,7 @@ public class ContactsFragment extends Fragment implements BaseFragment, Contacts
     @Override
     public void contactReturned(String id, User user) {
         showLoadingState(false);
+        hideEmptyState();
         showContent(true);
         contacts.add(user);
         contactsMap.put(user, id);

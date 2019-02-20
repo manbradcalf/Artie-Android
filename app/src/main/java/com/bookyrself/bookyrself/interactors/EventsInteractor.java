@@ -39,42 +39,42 @@ public class EventsInteractor {
     }
 
     public void getEventDetail(final String eventId) {
-        service.getAPI().getEventData(eventId).enqueue(new Callback<EventDetail>() {
-            @Override
-            public void onResponse(Call<EventDetail> call, Response<EventDetail> response) {
-                if (response.body() != null) {
-                    eventsInteractorListener.eventDetailReturned(response.body(), eventId);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<EventDetail> call, Throwable t) {
-                eventsInteractorListener.presentError(t.getMessage());
-            }
-        });
+//        service.getAPI().getEventData(eventId).enqueue(new Callback<EventDetail>() {
+//            @Override
+//            public void onResponse(Call<EventDetail> call, Response<EventDetail> response) {
+//                if (response.body() != null) {
+//                    eventsInteractorListener.eventDetailReturned(response.body(), eventId);
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<EventDetail> call, Throwable t) {
+//                eventsInteractorListener.presentError(t.getMessage());
+//            }
+//        });
     }
 
     //TODO: Is this needed?
     public void getMultipleEventDetails(final List<String> eventIds) {
-        for (final String id : eventIds) {
-            service.getAPI().getEventData(id).enqueue(new Callback<EventDetail>() {
-                @Override
-                public void onResponse(Call<EventDetail> call, Response<EventDetail> response) {
-                    if (response.body() != null) {
-                        eventsInteractorListener.eventDetailReturned(response.body(), id);
-                    }
-                    else {
-                        eventsInteractorListener.presentError(String.format("Event %s is null", id));
-                    }
-                }
+//        for (final String id : eventIds) {
+//            service.getAPI().getEventData(id).enqueue(new Callback<EventDetail>() {
+//                @Override
+//                public void onResponse(Call<EventDetail> call, Response<EventDetail> response) {
+//                    if (response.body() != null) {
+//                        eventsInteractorListener.eventDetailReturned(response.body(), id);
+//                    }
+//                    else {
+//                        eventsInteractorListener.presentError(String.format("Event %s is null", id));
+//                    }
+//                }
+//
+//                @Override
+//                public void onFailure(Call<EventDetail> call, Throwable t) {
+//                    eventsInteractorListener.presentError(t.getMessage());
+//                }
+//            });
 
-                @Override
-                public void onFailure(Call<EventDetail> call, Throwable t) {
-                    eventsInteractorListener.presentError(t.getMessage());
-                }
-            });
-
-        }
+//        }
     }
 
     // Create the list of userIds of attendees

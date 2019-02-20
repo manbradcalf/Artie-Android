@@ -1,45 +1,81 @@
 package com.bookyrself.bookyrself.presenters;
 
-import com.bookyrself.bookyrself.interactors.EventsInteractor;
 import com.bookyrself.bookyrself.interactors.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.services.FirebaseService;
 
-import java.util.ArrayList;
+import io.reactivex.Flowable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by benmedcalf on 1/13/18.
  */
 
-public class UserDetailPresenter implements EventsInteractor.EventsInteractorListener, UsersInteractor.UserDetailInteractorListener{
+public class UserDetailPresenter implements UsersInteractor.UserDetailInteractorListener {
     private final UserDetailPresenterListener listener;
-    private final EventsInteractor eventsInteractor;
     private final UsersInteractor usersInteractor;
+    private final CompositeDisposable compositeDisposable;
+    private final String userId;
 
     /**
      * Constructor
      */
 
-    public UserDetailPresenter(UserDetailPresenterListener listener) {
+    public UserDetailPresenter(String userId, UserDetailPresenterListener listener) {
         this.listener = listener;
-        this.eventsInteractor = new EventsInteractor(this);
         this.usersInteractor = new UsersInteractor(this);
+        this.compositeDisposable = new CompositeDisposable();
+        this.userId = userId;
     }
 
     /**
      * Methods
      */
-    public void getUserInfo(final String userId) {
-        usersInteractor.getUserDetails(userId);
-    }
+    public void loadUserInfoWithEvents(final String userId) {
 
-    public void addContactToUser(String contactId, String userId) {
-        usersInteractor.addContactToUser(contactId,userId);
+        compositeDisposable.add(
+                usersInteractor
+                        .getUserDetails(userId)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnError(throwable -> {
+                            listener.presentError(throwable.getMessage());
+                        })
+                        .flatMap(user -> {
+
+                            // Notify view that user details have been returned
+                            listener.displayUserInfo(user, userId);
+
+                            return Flowable.fromIterable(user.getEvents().entrySet());
+                        })
+
+                        // Map the event infos into event details
+                        .map(stringEventInviteInfoEntry ->
+                                FirebaseService
+                                        .getAPI()
+                                        .getEventData(stringEventInviteInfoEntry.getKey())
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .doOnNext(eventDetail -> {
+                                            // notify the view
+                                            listener.displayUserEvents(eventDetail, stringEventInviteInfoEntry.getKey());
+                                        })
+                                        .doOnError(throwable -> { listener.presentError(throwable.getMessage());
+                                        })
+                                        .subscribe())
+                        .subscribe());
     }
 
     @Override
-    public void eventDetailReturned(EventDetail event, String eventId) {
-        listener.usersEventReturned(event, eventId);
+    public void contactSuccessfullyAdded() {
+        listener.presentSuccess("Added contact!");
+    }
+
+    public void addContactToUser(String contactId, String userId) {
+        usersInteractor.addContactToUser(contactId, userId);
     }
 
     @Override
@@ -49,15 +85,17 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
 
     @Override
     public void userDetailReturned(User user, String userId) {
-        listener.userInfoReady(user,userId);
-        if (user.getEvents() != null) {
-            eventsInteractor.getMultipleEventDetails(new ArrayList<>(user.getEvents().keySet()));
-        }
+
     }
 
     @Override
-    public void contactSuccessfullyAdded() {
-        listener.presentSuccess("Added contact!");
+    public void subscribe() {
+        loadUserInfoWithEvents(userId);
+    }
+
+    @Override
+    public void unsubscribe() {
+        compositeDisposable.dispose();
     }
 
 
@@ -65,16 +103,15 @@ public class UserDetailPresenter implements EventsInteractor.EventsInteractorLis
      * Contract / Listener
      */
     public interface UserDetailPresenterListener {
-        void userInfoReady(User userInfo, String userId);
+        void displayUserInfo(User userInfo, String userId);
+
+        void displayUserEvents(EventDetail event, String eventId);
+
+        void displayLoadingState();
 
         void presentError(String message);
 
-        void loadingState();
-
-        void emailUser();
-
         void presentSuccess(String message);
 
-        void usersEventReturned(EventDetail event, String eventId);
     }
 }
