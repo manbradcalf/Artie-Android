@@ -2,8 +2,8 @@ package com.bookyrself.bookyrself.presenters;
 
 import android.util.Log;
 
-import com.bookyrself.bookyrself.interactors.EventsInteractor;
-import com.bookyrself.bookyrself.interactors.UsersInteractor;
+import com.bookyrself.bookyrself.data.EventsInteractor;
+import com.bookyrself.bookyrself.data.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 
 import java.util.List;

@@ -1,10 +1,11 @@
-package com.bookyrself.bookyrself.interactors;
+package com.bookyrself.bookyrself.data.Contacts;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.util.Log;
 
+import com.bookyrself.bookyrself.data.Contacts.ContactsDataSource;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.BasePresenter;
 import com.bookyrself.bookyrself.services.FirebaseService;

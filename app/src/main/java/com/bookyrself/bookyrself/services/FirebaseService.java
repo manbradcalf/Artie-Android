@@ -66,7 +66,7 @@ public class FirebaseService {
         Flowable<User> getUserDetails(@Path("id") String userId);
 
         @GET("/users/{id}/events.json")
-        Call<HashMap<String, EventInviteInfo>> getUsersEventInvites(@Path("id") String userId);
+        Flowable<HashMap<String, EventInviteInfo>> getUsersEventInvites(@Path("id") String userId);
 
         @GET("/users/{id}/contacts.json")
         Flowable<HashMap<String, Boolean>> getUserContacts(@Path("id") String userId);

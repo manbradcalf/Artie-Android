@@ -35,7 +35,7 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class EventInvitesFragment extends Fragment implements BaseFragment, EventInvitesFragmentPresenter.EventInvitesUserDetailPresenterListener {
+public class EventInvitesFragment extends Fragment implements BaseFragment, EventInvitesFragmentPresenter.EventInvitesViewListener {
 
     private static final int RC_SIGN_IN = 123;
 
@@ -82,27 +82,24 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         eventDetailEventIdHashMap = new HashMap<>();
         eventDetailsList = new ArrayList<>();
         adapter = new EventsAdapter();
-        presenter = new EventInvitesFragmentPresenter(this);
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
         toolbar.setTitle(R.string.title_event_invites);
-        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if (firebaseAuth.getCurrentUser() != null) {
-                    // Signed in
-                    presenter.getEventInvites(FirebaseAuth.getInstance().getUid());
-                    showContent(false);
-                    hideEmptyState();
-                    showLoadingState(true);
-                } else {
-                    // Signed Out
-                    showEmptyState(getString(R.string.event_invites_signed_out_header),
-                            getString(R.string.empty_state_event_invites_signed_out_subheader),
-                            getString(R.string.sign_in),
-                            getActivity().getDrawable(R.drawable.ic_invitation));
-                }
+        FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
+            if (firebaseAuth.getCurrentUser() != null) {
+                // Signed in
+                presenter = new EventInvitesFragmentPresenter(this, FirebaseAuth.getInstance().getUid());
+                presenter.loadPendingInvites(FirebaseAuth.getInstance().getUid());
+                showContent(false);
+                hideEmptyState();
+                showLoadingState(true);
+            } else {
+                // Signed Out
+                showEmptyState(getString(R.string.event_invites_signed_out_header),
+                        getString(R.string.empty_state_event_invites_signed_out_subheader),
+                        getString(R.string.sign_in),
+                        getActivity().getDrawable(R.drawable.ic_invitation));
             }
         });
         return view;

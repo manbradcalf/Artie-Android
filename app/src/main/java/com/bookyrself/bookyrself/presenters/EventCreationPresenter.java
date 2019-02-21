@@ -1,17 +1,14 @@
 package com.bookyrself.bookyrself.presenters;
 
-import com.bookyrself.bookyrself.interactors.ContactsRepository;
-import com.bookyrself.bookyrself.interactors.EventsInteractor;
-import com.bookyrself.bookyrself.interactors.UsersInteractor;
+import com.bookyrself.bookyrself.data.Contacts.ContactsRepository;
+import com.bookyrself.bookyrself.data.EventsInteractor;
+import com.bookyrself.bookyrself.data.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.User.EventInviteInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.views.MainActivity;
 
 import java.util.List;
-import java.util.Map;
-
-import io.reactivex.disposables.Disposable;
 
 /**
  * Created by benmedcalf on 3/9/18.

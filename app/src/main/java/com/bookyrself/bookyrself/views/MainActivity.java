@@ -7,15 +7,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.interactors.ContactsRepository;
-import com.bookyrself.bookyrself.interactors.UsersInteractor;
-import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.data.Contacts.ContactsRepository;
 import com.bookyrself.bookyrself.utils.FragmentViewPager;
 import com.bookyrself.bookyrself.utils.FragmentViewPagerAdapter;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.FirebaseUserMetadata;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {

@@ -2,7 +2,7 @@ package com.bookyrself.bookyrself.presenters;
 
 import android.os.Build;
 
-import com.bookyrself.bookyrself.interactors.ContactsRepository;
+import com.bookyrself.bookyrself.data.Contacts.ContactsRepository;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.views.MainActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,13 +29,11 @@ public class ContactsFragmentPresenter implements ContactsRepository.ContactsInt
      */
     public void loadContacts(String userId) {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             compositeDisposable
                     .add(contactsRepository.getContactsForUser(userId)
                     .forEach(stringUserPair ->
                             contactReturned(stringUserPair.first, stringUserPair.second)));
         }
-    }
 
     /**
      * Interactor Listener

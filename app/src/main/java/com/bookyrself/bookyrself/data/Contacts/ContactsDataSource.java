@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.interactors;
+package com.bookyrself.bookyrself.data.Contacts;
 
 import android.support.v4.util.Pair;
 

@@ -1,6 +1,6 @@
 package com.bookyrself.bookyrself.presenters;
 
-import com.bookyrself.bookyrself.interactors.UsersInteractor;
+import com.bookyrself.bookyrself.data.UsersInteractor;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;

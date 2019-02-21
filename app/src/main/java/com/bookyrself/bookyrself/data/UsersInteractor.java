@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.interactors;
+package com.bookyrself.bookyrself.data;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -7,7 +7,6 @@ import com.bookyrself.bookyrself.models.SerializedModels.User.EventInviteInfo;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.presenters.BasePresenter;
 import com.bookyrself.bookyrself.services.FirebaseService;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,9 +21,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class UsersInteractor {
-    private FirebaseService service;
     private UsersInteractorListener usersInteractorListener;
-    private UsersEventInvitesInteractorListener usersEventInvitesInteractorListener;
     private UserDetailInteractorListener userDetailInteractorListener;
     private UsersEventsInteractorListener usersEventsInteractorListener;
 
@@ -33,23 +30,15 @@ public class UsersInteractor {
      */
     public UsersInteractor(UsersInteractorListener listener) {
         this.usersInteractorListener = listener;
-        service = new FirebaseService();
-    }
-
-    public UsersInteractor(UsersEventInvitesInteractorListener listener) {
-        this.usersEventInvitesInteractorListener = listener;
-        service = new FirebaseService();
     }
 
     public UsersInteractor(UserDetailInteractorListener listener) {
         this.usersInteractorListener = listener;
         this.userDetailInteractorListener = listener;
-        service = new FirebaseService();
     }
 
     public UsersInteractor(UsersEventsInteractorListener listener) {
         this.usersEventsInteractorListener = listener;
-        service = new FirebaseService();
     }
 
     public void addEventToUser(EventInviteInfo eventInviteInfo, final String userId, final String eventId) {
@@ -62,32 +51,6 @@ public class UsersInteractor {
             @Override
             public void onFailure(Call<EventInviteInfo> call, Throwable t) {
                 usersInteractorListener.presentError(t.getMessage());
-            }
-        });
-    }
-
-    public void getUserInvites(final String userId) {
-        FirebaseService.getAPI().getUsersEventInvites(userId).enqueue(new Callback<HashMap<String, EventInviteInfo>>() {
-            @Override
-            public void onResponse(Call<HashMap<String, EventInviteInfo>> call, Response<HashMap<String, EventInviteInfo>> response) {
-
-                if (response.body() != null) {
-                    List<String> eventIdsOfPendingInvites = getEventIdsOfPendingInvites(response.body());
-                    if (eventIdsOfPendingInvites.size() != 0) {
-                        usersEventInvitesInteractorListener.eventIdsOfEventsWithPendingInvitesReturned(eventIdsOfPendingInvites);
-                    } else {
-                        // Event invites exist but none are pending
-                        usersEventInvitesInteractorListener.noInvitesReturnedForUser();
-                    }
-                } else {
-                    // No event invites exist
-                    usersEventInvitesInteractorListener.noInvitesReturnedForUser();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<HashMap<String, EventInviteInfo>> call, Throwable t) {
-                Log.e("getUserInvites:", t.getMessage());
             }
         });
     }
@@ -165,24 +128,6 @@ public class UsersInteractor {
                 userDetailInteractorListener.presentError(t.getMessage());
             }
         });
-    }
-
-
-    private List<String> getEventIdsOfPendingInvites(HashMap<String, EventInviteInfo> eventsMap) {
-        List<String> eventIds = new ArrayList<>();
-
-        for (Map.Entry<String, EventInviteInfo> entry : eventsMap.entrySet()) {
-            // If the required event invite information exists
-            if (entry.getValue().getIsInviteRejected() != null && entry.getValue().getIsInviteAccepted() != null
-                    && entry.getValue().getIsHost() != null) {
-                // If the user hasn't responded to the invite (hasn't accepted or rejected invites)
-                if (!entry.getValue().getIsInviteAccepted() && !entry.getValue().getIsInviteRejected()
-                        && !entry.getValue().getIsHost()) {
-                    eventIds.add(entry.getKey());
-                }
-            }
-        }
-        return eventIds;
     }
 
 
