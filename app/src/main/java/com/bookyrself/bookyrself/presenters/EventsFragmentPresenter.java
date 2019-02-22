@@ -12,10 +12,10 @@ import java.util.List;
  * Created by benmedcalf on 3/11/18.
  */
 
-public class EventsFragmentPresenter implements EventsInteractor.EventsInteractorListener, UsersInteractor.UsersEventsInteractorListener {
+public class EventsFragmentPresenter implements UsersInteractor.UsersEventsInteractorListener {
 
     private final EventsPresenterListener listener;
-    private final EventsInteractor eventsInteractor;
+//    private final EventsInteractor eventsInteractor;
     private final UsersInteractor usersInteractor;
 
     /**
@@ -23,21 +23,21 @@ public class EventsFragmentPresenter implements EventsInteractor.EventsInteracto
      */
     public EventsFragmentPresenter(EventsPresenterListener listener) {
         this.listener = listener;
-        this.eventsInteractor = new EventsInteractor(this);
+//        this.eventsInteractor = new EventsInteractor(this);
         this.usersInteractor = new UsersInteractor(this);
     }
 
     /**
      * Methods
      */
-    @Override
-    public void eventDetailReturned(EventDetail event, String eventId) {
-        listener.eventDetailReturned(event, eventId);
-    }
+//    @Override
+//    public void eventDetailReturned(EventDetail event, String eventId) {
+//        listener.eventDetailReturned(event, eventId);
+//    }
 
     @Override
     public void eventsReturned(List<String> eventIds) {
-        getEventDetails(eventIds);
+//        getEventDetails(eventIds);
     }
 
     @Override
@@ -55,11 +55,11 @@ public class EventsFragmentPresenter implements EventsInteractor.EventsInteracto
         usersInteractor.getUserEvents(userId);
     }
 
-    private void getEventDetails(List<String> eventIds) {
-        for (String id : eventIds) {
-            eventsInteractor.getEventDetail(id);
-        }
-    }
+//    private void getEventDetails(List<String> eventIds) {
+//        for (String id : eventIds) {
+//            eventsInteractor.getEventDetail(id);
+//        }
+//    }
 
     /**
      * Contract / Listener

@@ -61,6 +61,7 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
     private RecyclerView.LayoutManager layoutManager;
     private EventsAdapter adapter;
     private List<EventDetail> eventDetailsList;
+    private HashMap<String,EventDetail> eventDetailHashMap;
     private EventInvitesFragmentPresenter presenter;
 
 
@@ -79,7 +80,8 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event_invites, container, false);
         ButterKnife.bind(this, view);
-        eventDetailEventIdHashMap = new HashMap<>();
+//        eventDetailEventIdHashMap = new HashMap<>();
+        eventDetailHashMap = new HashMap<>();
         eventDetailsList = new ArrayList<>();
         adapter = new EventsAdapter();
         layoutManager = new LinearLayoutManager(getActivity());
@@ -121,14 +123,15 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
     }
 
     @Override
-    public void eventInviteAccepted(boolean accepted, String eventId) {
+    public void removeEventFromList(String eventId) {
         if (recyclerView.getVisibility() == View.GONE) {
             showContent(true);
         }
 
         for (int i = 0; i < eventDetailsList.size(); i++) {
             if (eventId.equals(eventDetailEventIdHashMap.get(eventDetailsList.get(i)))) {
-                eventDetailsList.remove(eventDetailsList.get(i));
+
+                eventDetailsList.remove(i);
                 adapter.notifyDataSetChanged();
             }
         }
@@ -177,20 +180,17 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         if (!buttonText.equals("")) {
             emptyStateButton.setVisibility(View.VISIBLE);
             emptyStateButton.setText(buttonText);
-            emptyStateButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
-                            new AuthUI.IdpConfig.EmailBuilder().build());
-                    // Authenticate
-                    startActivityForResult(
-                            AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setIsSmartLockEnabled(false, true)
-                                    .setAvailableProviders(providers)
-                                    .build(),
-                            RC_SIGN_IN);
-                }
+            emptyStateButton.setOnClickListener(view -> {
+                List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                        new AuthUI.IdpConfig.EmailBuilder().build());
+                // Authenticate
+                startActivityForResult(
+                        AuthUI.getInstance()
+                                .createSignInIntentBuilder()
+                                .setIsSmartLockEnabled(false, true)
+                                .setAvailableProviders(providers)
+                                .build(),
+                        RC_SIGN_IN);
             });
         } else {
             emptyStateButton.setVisibility(View.GONE);
@@ -238,24 +238,11 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
                 e.printStackTrace();
             }
 
-            viewHolderEvents.acceptButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //TODO: Holy shit this is ugly
-                    // Get the event detail from event details list
-                    // Then use that event detail to get the id from the eventdetail,id map
-                    // THen pass that iD to the presenter method
-                    // UGH
-                    presenter.acceptEventInvite(FirebaseAuth.getInstance().getUid(), eventDetailEventIdHashMap.get(eventDetailsList.get(position)));
-                }
+            viewHolderEvents.acceptButton.setOnClickListener(view -> {
+                presenter.acceptEventInvite(FirebaseAuth.getInstance().getUid(), eventDetailEventIdHashMap.get(eventDetailsList.get(position)));
             });
 
-            viewHolderEvents.denyButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    presenter.rejectInvite(FirebaseAuth.getInstance().getUid(), eventDetailEventIdHashMap.get(eventDetailsList.get(position)));
-                }
-            });
+            viewHolderEvents.denyButton.setOnClickListener(view -> presenter.rejectEventInvite(FirebaseAuth.getInstance().getUid(), eventDetailEventIdHashMap.get(eventDetailsList.get(position))));
         }
 
         @Override

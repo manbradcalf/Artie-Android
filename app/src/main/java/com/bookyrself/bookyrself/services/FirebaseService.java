@@ -75,13 +75,13 @@ public class FirebaseService {
         Call<User> addUser(@Body User user, @Path("userId") String userId);
 
         @PUT("/users/{userId}/events/{eventId}/isInviteRejected.json")
-        Call<Boolean> rejectInvite(@Body Boolean bool, @Path("userId") String userId, @Path("eventId") String eventId);
+        Flowable<Boolean> rejectInvite(@Body Boolean bool, @Path("userId") String userId, @Path("eventId") String eventId);
 
         @PUT("/users/{userId}/events/{eventId}/isInviteAccepted.json")
-        Call<Boolean> acceptInvite(@Body Boolean bool, @Path("userId") String userId, @Path("eventId") String eventId);
+        Flowable<Boolean> acceptInvite(@Body Boolean bool, @Path("userId") String userId, @Path("eventId") String eventId);
 
         @PUT("/events/{eventId}/users/{userId}.json")
-        Call<Boolean> setEventUserAsAttending(@Body Boolean bool, @Path("userId") String userId, @Path("eventId") String eventId);
+        Flowable<Boolean> setEventUserAsAttending(@Body Boolean bool, @Path("userId") String userId, @Path("eventId") String eventId);
 
 
         @PATCH("/users/{userId}.json")

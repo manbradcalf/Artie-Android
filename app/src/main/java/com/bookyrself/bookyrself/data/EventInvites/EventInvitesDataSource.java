@@ -9,4 +9,8 @@ import io.reactivex.Flowable;
 public interface EventInvitesDataSource {
 
     Flowable<Pair<String, EventDetail>> getPendingEventInvites(String userId);
+
+    Flowable<Boolean> acceptEventInvite(String userId, String eventId);
+
+    Flowable<Boolean> rejectEventInvite(String userId, String eventId);
 }

@@ -14,11 +14,10 @@ import java.util.List;
  * Created by benmedcalf on 3/9/18.
  */
 
-public class EventCreationPresenter implements ContactsRepository.ContactsInteractorListener, EventsInteractor.EventCreationInteractorListener, UsersInteractor.UsersInteractorListener {
+public class EventCreationPresenter implements ContactsRepository.ContactsInteractorListener, UsersInteractor.UsersInteractorListener {
 
     private EventCreationPresenterListener presenterListener;
     private ContactsRepository contactsRepository;
-    private EventsInteractor eventsInteractor;
     private UsersInteractor usersInteractor;
 
     /**
@@ -26,7 +25,6 @@ public class EventCreationPresenter implements ContactsRepository.ContactsIntera
      */
     public EventCreationPresenter(EventCreationPresenterListener listener) {
         this.contactsRepository = MainActivity.getContactsRepo();
-        this.eventsInteractor = new EventsInteractor(this);
         this.usersInteractor = new UsersInteractor(this);
         this.presenterListener = listener;
     }
@@ -36,7 +34,7 @@ public class EventCreationPresenter implements ContactsRepository.ContactsIntera
      */
 
     public void createEvent(EventDetail event) {
-        eventsInteractor.createEvent(event);
+        //
     }
 
     public void getContacts(String userId) {
@@ -68,34 +66,34 @@ public class EventCreationPresenter implements ContactsRepository.ContactsIntera
     /**
      * EventsInteractorListener
      */
-    @Override
-    public void eventDetailReturned(EventDetail event, String eventId) {
-
-    }
-
-    @Override
-    public void addNewlyCreatedEventToUsers(String eventId, List<String> userIdsOfAttendees, String hostUserId) {
-        EventInviteInfo hostEventInviteInfo = new EventInviteInfo();
-        hostEventInviteInfo.setIsInviteAccepted(true);
-        hostEventInviteInfo.setIsHost(true);
-        hostEventInviteInfo.setIsInviteRejected(false);
-        usersInteractor.addEventToUser(hostEventInviteInfo, hostUserId, eventId);
-
-        if (userIdsOfAttendees.size() != 0) {
-            for (String userId : userIdsOfAttendees) {
-                EventInviteInfo eventInviteInfo = new EventInviteInfo();
-                eventInviteInfo.setIsInviteAccepted(false);
-                eventInviteInfo.setIsInviteRejected(false);
-                eventInviteInfo.setIsHost(false);
-                usersInteractor.addEventToUser(eventInviteInfo, userId, eventId);
-            }
-            presenterListener.eventCreated();
-        }
-        //TODO: Wut? I'm tired
-        else {
-            presenterListener.eventCreated();
-        }
-    }
+//    @Override
+//    public void eventDetailReturned(EventDetail event, String eventId) {
+//
+//    }
+//
+//    @Override
+//    public void addNewlyCreatedEventToUsers(String eventId, List<String> userIdsOfAttendees, String hostUserId) {
+//        EventInviteInfo hostEventInviteInfo = new EventInviteInfo();
+//        hostEventInviteInfo.setIsInviteAccepted(true);
+//        hostEventInviteInfo.setIsHost(true);
+//        hostEventInviteInfo.setIsInviteRejected(false);
+//        usersInteractor.addEventToUser(hostEventInviteInfo, hostUserId, eventId);
+//
+//        if (userIdsOfAttendees.size() != 0) {
+//            for (String userId : userIdsOfAttendees) {
+//                EventInviteInfo eventInviteInfo = new EventInviteInfo();
+//                eventInviteInfo.setIsInviteAccepted(false);
+//                eventInviteInfo.setIsInviteRejected(false);
+//                eventInviteInfo.setIsHost(false);
+//                usersInteractor.addEventToUser(eventInviteInfo, userId, eventId);
+//            }
+//            presenterListener.eventCreated();
+//        }
+//        //TODO: Wut? I'm tired
+//        else {
+//            presenterListener.eventCreated();
+//        }
+//    }
 
     @Override
     public void presentError(String error) {

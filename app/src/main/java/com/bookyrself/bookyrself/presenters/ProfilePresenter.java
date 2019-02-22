@@ -8,9 +8,8 @@ import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProfilePresenter implements EventsInteractor.EventsInteractorListener, UsersInteractor.UsersInteractorListener {
+public class ProfilePresenter implements UsersInteractor.UsersInteractorListener {
     private final ProfilePresenterListener listener;
-    private final EventsInteractor eventsInteractor;
     private final UsersInteractor usersInteractor;
 
     /**
@@ -18,7 +17,6 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
      */
     public ProfilePresenter(final ProfilePresenterListener listener) {
         this.listener = listener;
-        this.eventsInteractor = new EventsInteractor(this);
         this.usersInteractor = new UsersInteractor(this);
     }
 
@@ -41,14 +39,14 @@ public class ProfilePresenter implements EventsInteractor.EventsInteractorListen
 
     private void getEventDetails(List<String> eventIds) {
         for (String id : eventIds) {
-            eventsInteractor.getEventDetail(id);
+            //do something i guess
         }
     }
 
-    @Override
-    public void eventDetailReturned(EventDetail event, String eventId) {
-        listener.eventReady(event, eventId);
-    }
+//    @Override
+//    public void eventDetailReturned(EventDetail event, String eventId) {
+//        listener.eventReady(event, eventId);
+//    }
 
     @Override
     public void userDetailReturned(User user, String userId) {

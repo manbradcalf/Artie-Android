@@ -33,39 +33,41 @@ public class EventInvitesRepo implements EventInvitesDataSource {
     public EventInvitesRepo() {
         this.pendingEventInvitesMap = new HashMap<>();
         this.cacheIsDirty = true;
-        this.db = FirebaseDatabase.getInstance().getReference()
-                .child("users")
-                .child(FirebaseAuth.getInstance().getUid())
-                .child("events");
-
-        this.db.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                cacheIsDirty = true;
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                cacheIsDirty = true;
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                cacheIsDirty = true;
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                cacheIsDirty = true;
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                cacheIsDirty = true;
-            }
-        });
+        if (FirebaseAuth.getInstance().getUid() != null) {
+            this.db = FirebaseDatabase.getInstance().getReference()
+                    .child("users")
+                    .child(FirebaseAuth.getInstance().getUid())
+                    .child("events");
 
 
+            this.db.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    cacheIsDirty = true;
+                }
+
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    cacheIsDirty = true;
+                }
+
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                    cacheIsDirty = true;
+                }
+
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    cacheIsDirty = true;
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    cacheIsDirty = true;
+                }
+            });
+
+        }
     }
 
     @Override
@@ -88,10 +90,48 @@ public class EventInvitesRepo implements EventInvitesDataSource {
                             }));
         } else {
             return Flowable.fromIterable(pendingEventInvitesMap.entrySet())
-                    .map(stringEventDetailEntry -> new Pair<>(stringEventDetailEntry.getKey(),stringEventDetailEntry.getValue()));
+                    .map(stringEventDetailEntry -> new Pair<>(stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()));
         }
 
 
+    }
+
+    @Override
+    public Flowable<Boolean> acceptEventInvite(String userId, String eventId) {
+         return FirebaseService.getAPI()
+                .acceptInvite(true, userId, eventId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMap(aBoolean -> FirebaseService.getAPI()
+                        .setEventUserAsAttending(true, userId, eventId)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnError(throwable ->
+                        {
+                            // Present an error to the presenter layer
+                        }))
+                .doOnNext(aBoolean -> {
+                    // Remove from pending invitations cache
+                });
+    }
+
+    @Override
+    public Flowable<Boolean> rejectEventInvite(String userId, String eventId) {
+        return FirebaseService.getAPI().
+                rejectInvite(true, userId, eventId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMap(aBoolean -> FirebaseService.getAPI()
+                        .setEventUserAsAttending(false, userId, eventId)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnError(throwable ->
+                        {
+                            // Present an error to the presenter layer
+                        }))
+                .doOnNext(aBoolean -> {
+                    // Remove from pending invitations cache
+                });
     }
 
     private List<String> getEventIdsOfPendingInvites(HashMap<String, EventInviteInfo> eventsMap) {

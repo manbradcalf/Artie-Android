@@ -13,7 +13,12 @@ import com.bookyrself.bookyrself.services.FirebaseService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import io.reactivex.Flowable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -22,12 +27,10 @@ import retrofit2.Response;
  * Created by benmedcalf on 11/22/17.
  */
 
-public class EventDetailPresenter implements EventsInteractor.EventsInteractorListener, UsersInteractor.UsersInteractorListener {
+public class EventDetailPresenter implements  UsersInteractor.UsersInteractorListener {
 
-    private final EventsInteractor mEventsInteractor;
     private final UsersInteractor mUsersInteractor;
     private final EventDetailPresenterListener mListener;
-    private final FirebaseService mFirebaseService;
     private final List<MiniUser> mMiniUsers;
     private EventDetail mEventDetail;
     private Integer mUserCount;
@@ -38,8 +41,6 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
      */
     public EventDetailPresenter(EventDetailPresenterListener listener) {
         this.mListener = listener;
-        this.mFirebaseService = new FirebaseService();
-        this.mEventsInteractor = new EventsInteractor(this);
         this.mUsersInteractor = new UsersInteractor(this);
         this.mMiniUsers = new ArrayList<>();
     }
@@ -50,12 +51,18 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
     public void getEventDetailData(String eventId) {
         this.eventId = eventId;
         mListener.showProgressbar(true);
-        mEventsInteractor.getEventDetail(eventId);
+        FirebaseService.getAPI().getEventData(eventId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(eventDetail -> {
+                    mListener.presentError("Not an error but this will compile");
+                })
+                .subscribe();
     }
 
     //TODO: Will the final "id" variable here be stuck on the first id assigned?
     public void getUserThumbUrl(final String id) {
-        mFirebaseService.getAPI().getUserThumbUrl(id)
+        FirebaseService.getAPI().getUserThumbUrl(id)
                 .enqueue(new Callback<String>() {
                     @Override
                     public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
@@ -98,21 +105,20 @@ public class EventDetailPresenter implements EventsInteractor.EventsInteractorLi
         return status;
     }
 
-    @Override
     public void eventDetailReturned(EventDetail eventDetail, String eventId) {
 
-        mEventDetail = eventDetail;
-
-        // If users exist, iterate through and retrieve their details
-        if (eventDetail.getUsers() != null) {
-            mUserCount = eventDetail.getUsers().keySet().size();
-            for (String userId : eventDetail.getUsers().keySet()) {
-                mUsersInteractor.getUserDetails(userId);
-            }
-        } else {
-            presentError("Event " + eventId + "has no users");
-            Log.e("EventDetailPresenter", "Event " + eventId + "has no users");
-        }
+//        mEventDetail = eventDetail;
+//
+//        // If users exist, iterate through and retrieve their details
+//        if (eventDetail.getUsers() != null) {
+//            mUserCount = eventDetail.getUsers().keySet().size();
+//            for (String userId : eventDetail.getUsers().keySet()) {
+//                mUsersInteractor.getUserDetails(userId);
+//            }
+//        } else {
+//            presentError("Event " + eventId + "has no users");
+//            Log.e("EventDetailPresenter", "Event " + eventId + "has no users");
+//        }
     }
 
     @Override

@@ -16,17 +16,14 @@ import retrofit2.Response;
 
 public class EventsInteractor {
 
-    private FirebaseService service;
     private EventCreationInteractorListener eventCreationInteractorListener;
     private EventInvitesInteractorListener eventInvitesInteractorListener;
 
     public EventsInteractor(EventCreationInteractorListener listener) {
-        this.service = new FirebaseService();
         this.eventCreationInteractorListener = listener;
     }
 
     public EventsInteractor(EventInvitesInteractorListener listener) {
-        this.service = new FirebaseService();
         this.eventInvitesInteractorListener = listener;
     }
 
@@ -59,7 +56,7 @@ public class EventsInteractor {
             userIds.addAll(event.getUsers().keySet());
         }
 
-        service.getAPI().createEvent(event).enqueue(new Callback<EventCreationResponse>() {
+        FirebaseService.getAPI().createEvent(event).enqueue(new Callback<EventCreationResponse>() {
             @Override
             public void onResponse(Call<EventCreationResponse> call, Response<EventCreationResponse> response) {
                 String eventId = response.body().getName();
@@ -97,4 +94,4 @@ interface EventInvitesInteractorListener extends EventsInteractorListener {
 
     void eventInviteAccepted(boolean accepted, String eventId);
 }
-}
+

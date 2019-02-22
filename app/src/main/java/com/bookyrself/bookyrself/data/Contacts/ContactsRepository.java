@@ -31,43 +31,47 @@ public class ContactsRepository implements ContactsDataSource {
     public ContactsRepository() {
         this.contactsMap = new HashMap<>();
         this.cacheIsDirty = true;
-        this.db = FirebaseDatabase.getInstance().getReference()
-                .child("users")
-                .child(FirebaseAuth.getInstance().getUid())
-                .child("contacts");
 
-        // TODO: Move this into a scheduler to somehow fit the Udacity requirements?
-        this.db.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                cacheIsDirty = true;
-                Log.e("Contacts Repo: ", "Child added");
-            }
+        if (FirebaseAuth.getInstance().getUid() != null) {
+            this.db = FirebaseDatabase.getInstance().getReference()
+                    .child("users")
+                    .child(FirebaseAuth.getInstance().getUid())
+                    .child("contacts");
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                cacheIsDirty = true;
-                Log.e("Contacts Repo: ", "Child changed");
-            }
 
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                cacheIsDirty = true;
-                Log.e("Contacts Repo: ", "Child removed");
-            }
+            // TODO: Move this into a scheduler to somehow fit the Udacity requirements?
+            this.db.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    cacheIsDirty = true;
+                    Log.e("Contacts Repo: ", "Child added");
+                }
 
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                cacheIsDirty = true;
-                Log.e("Contacts Repo: ", "Child moved");
-            }
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    cacheIsDirty = true;
+                    Log.e("Contacts Repo: ", "Child changed");
+                }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                cacheIsDirty = true;
-                Log.e("Contacts Repo: ", databaseError.getMessage());
-            }
-        });
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                    cacheIsDirty = true;
+                    Log.e("Contacts Repo: ", "Child removed");
+                }
+
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    cacheIsDirty = true;
+                    Log.e("Contacts Repo: ", "Child moved");
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    cacheIsDirty = true;
+                    Log.e("Contacts Repo: ", databaseError.getMessage());
+                }
+            });
+        }
     }
 
     /**
