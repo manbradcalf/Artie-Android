@@ -14,13 +14,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 
 public class EventInvitesRepo implements EventInvitesDataSource {
@@ -74,44 +75,65 @@ public class EventInvitesRepo implements EventInvitesDataSource {
     public Flowable<Pair<String, EventDetail>> getPendingEventInvites(String userId) {
 
         if (cacheIsDirty) {
+            cacheIsDirty = false;
             return FirebaseService.getAPI()
                     .getUsersEventInvites(userId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .flatMapIterable(stringEventInviteInfoHashMap -> getEventIdsOfPendingInvites(stringEventInviteInfoHashMap))
-                    .flatMap(eventId -> FirebaseService.getAPI()
-                            .getEventData(eventId)
+                    .map(HashMap::entrySet)
+
+                    // Filter out the invites so only pending invites remain
+                    .map(entries -> {
+                        HashMap<String, EventInviteInfo> pendingInvites = new HashMap<>();
+                        for (Map.Entry<String, EventInviteInfo> entry : entries) {
+                            if (isInvitePendingResponse(entry)) {
+                                pendingInvites.put(entry.getKey(), entry.getValue());
+                            }
+                        }
+                        if (pendingInvites.isEmpty()) {
+                            throw new NoSuchElementException();
+                        } else {
+                            return pendingInvites;
+                        }
+                    })
+
+                    // Now check if the list of pending invites is empty
+                    .firstOrError()
+                    .toFlowable()
+                    .flatMapIterable(HashMap::entrySet)
+
+                    // Fetch event info for each pending invite
+                    .flatMap(eventInvite -> FirebaseService.getAPI()
+                            .getEventData(eventInvite.getKey())
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .map(eventDetail -> {
-                                pendingEventInvitesMap.put(eventId, eventDetail);
-                                cacheIsDirty = false;
-                                return new Pair<>(eventId, eventDetail);
+                                pendingEventInvitesMap.put(eventInvite.getKey(), eventDetail);
+                                return new Pair<>(eventInvite.getKey(), eventDetail);
                             }));
         } else {
-            return Flowable.fromIterable(pendingEventInvitesMap.entrySet())
-                    .map(stringEventDetailEntry -> new Pair<>(stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()));
+            if (pendingEventInvitesMap == null) {
+                throw new NoSuchElementException();
+            } else {
+                return Flowable.fromIterable(pendingEventInvitesMap.entrySet())
+                        .map(stringEventDetailEntry -> new Pair<>(stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()));
+            }
         }
-
-
     }
 
     @Override
     public Flowable<Boolean> acceptEventInvite(String userId, String eventId) {
-         return FirebaseService.getAPI()
+        return FirebaseService.getAPI()
                 .acceptInvite(true, userId, eventId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMap(aBoolean -> FirebaseService.getAPI()
                         .setEventUserAsAttending(true, userId, eventId)
                         .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .doOnError(throwable ->
-                        {
-                            // Present an error to the presenter layer
-                        }))
+                        .observeOn(AndroidSchedulers.mainThread()))
                 .doOnNext(aBoolean -> {
                     // Remove from pending invitations cache
+                    pendingEventInvitesMap.remove(eventId);
                 });
     }
 
@@ -124,31 +146,24 @@ public class EventInvitesRepo implements EventInvitesDataSource {
                 .flatMap(aBoolean -> FirebaseService.getAPI()
                         .setEventUserAsAttending(false, userId, eventId)
                         .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .doOnError(throwable ->
-                        {
-                            // Present an error to the presenter layer
-                        }))
+                        .observeOn(AndroidSchedulers.mainThread()))
                 .doOnNext(aBoolean -> {
                     // Remove from pending invitations cache
+                    pendingEventInvitesMap.remove(eventId);
                 });
     }
 
-    private List<String> getEventIdsOfPendingInvites(HashMap<String, EventInviteInfo> eventsMap) {
+    private Boolean isInvitePendingResponse(Map.Entry<String, EventInviteInfo> eventInvite) {
 
-        List<String> eventIds = new ArrayList<>();
-
-        for (Map.Entry<String, EventInviteInfo> entry : eventsMap.entrySet()) {
-            // If the required event invite information exists
-            if (entry.getValue().getIsInviteRejected() != null && entry.getValue().getIsInviteAccepted() != null
-                    && entry.getValue().getIsHost() != null) {
-                // If the user hasn't responded to the invite (hasn't accepted or rejected invites)
-                if (!entry.getValue().getIsInviteAccepted() && !entry.getValue().getIsInviteRejected()
-                        && !entry.getValue().getIsHost()) {
-                    eventIds.add(entry.getKey());
-                }
-            }
+        if (eventInvite != null) {
+            // All fields are false by default, so if all fields remain false,
+            // It means the user hasn't interacted at all with the invite,
+            // hence the invite is pending
+            return !eventInvite.getValue().getIsInviteAccepted()
+                    && !eventInvite.getValue().getIsInviteRejected()
+                    && !eventInvite.getValue().getIsHost();
+        } else {
+            return false;
         }
-        return eventIds;
     }
 }

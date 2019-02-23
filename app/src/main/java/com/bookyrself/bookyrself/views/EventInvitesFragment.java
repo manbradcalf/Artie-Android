@@ -71,6 +71,10 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (FirebaseAuth.getInstance().getUid() != null) {
+            presenter = new EventInvitesFragmentPresenter(this, FirebaseAuth.getInstance().getUid());
+        }
     }
 
     @Override
@@ -86,13 +90,12 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         recyclerView.setAdapter(adapter);
         toolbar.setTitle(R.string.title_event_invites);
         FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
-            if (firebaseAuth.getCurrentUser() != null) {
+            if (firebaseAuth.getCurrentUser() != null && presenter != null) {
                 // Signed in
-                presenter = new EventInvitesFragmentPresenter(this, FirebaseAuth.getInstance().getUid());
-                presenter.loadPendingInvites(FirebaseAuth.getInstance().getUid());
+                showLoadingState(true);
                 showContent(false);
                 hideEmptyState();
-                showLoadingState(true);
+                presenter.loadPendingInvites(FirebaseAuth.getInstance().getUid());
             } else {
                 // Signed Out
                 showEmptyState(getString(R.string.event_invites_signed_out_header),
@@ -124,6 +127,7 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
 
         Map.Entry<String, EventDetail> entry = new AbstractMap.SimpleEntry<>(eventId,eventDetail);
         events.remove(entry);
+        adapter.notifyDataSetChanged();
 
         if (events.isEmpty()) {
             showEmptyStateForNoInvites();

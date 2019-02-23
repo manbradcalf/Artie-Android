@@ -55,8 +55,9 @@ public class EventDetailPresenter implements  UsersInteractor.UsersInteractorLis
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(eventDetail -> {
-                    mListener.presentError("Not an error but this will compile");
+                    // do something
                 })
+                .doOnError(throwable -> mListener.presentError(throwable.getMessage()))
                 .subscribe();
     }
 

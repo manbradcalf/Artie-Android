@@ -2,6 +2,9 @@ package com.bookyrself.bookyrself.presenters;
 
 import com.bookyrself.bookyrself.data.EventInvites.EventInvitesRepo;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.views.MainActivity;
+
+import java.util.NoSuchElementException;
 
 import io.reactivex.disposables.CompositeDisposable;
 
@@ -17,19 +20,27 @@ public class EventInvitesFragmentPresenter implements BasePresenter {
         this.userId = userId;
         this.listener = listener;
         this.compositeDisposable = new CompositeDisposable();
-        this.eventInvitesRepo = new EventInvitesRepo();
+        this.eventInvitesRepo = MainActivity.getEventInvitesRepo();
     }
 
     public void loadPendingInvites(String userId) {
         compositeDisposable
                 .add(eventInvitesRepo.getPendingEventInvites(userId)
+                        .subscribe(
+                                //onNext
+                                stringEventDetailPair -> listener.eventPendingInvitationResponseReturned(
+                                        stringEventDetailPair.first,
+                                        stringEventDetailPair.second),
 
-                        // Find a way to handle the fact that this stream may not return
-                        // anything. How do I turn off the loading state?
+                                //onError
+                                throwable -> {
+                                    if (throwable instanceof NoSuchElementException) {
+                                        listener.showEmptyStateForNoInvites();
+                                    } else {
+                                        listener.presentError(throwable.getMessage());
+                                    }
+                                }));
 
-                        .forEach(stringEventDetailPair ->
-                                listener.eventPendingInvitationResponseReturned(
-                                        stringEventDetailPair.first, stringEventDetailPair.second)));
     }
 
     public void acceptEventInvite(final String userId, final String eventId, EventDetail eventDetail) {

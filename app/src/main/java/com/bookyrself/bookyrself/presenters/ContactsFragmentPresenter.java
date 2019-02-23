@@ -1,7 +1,5 @@
 package com.bookyrself.bookyrself.presenters;
 
-import android.os.Build;
-
 import com.bookyrself.bookyrself.data.Contacts.ContactsRepository;
 import com.bookyrself.bookyrself.models.SerializedModels.User.User;
 import com.bookyrself.bookyrself.views.MainActivity;
@@ -29,11 +27,11 @@ public class ContactsFragmentPresenter implements ContactsRepository.ContactsInt
      */
     public void loadContacts(String userId) {
 
-            compositeDisposable
-                    .add(contactsRepository.getContactsForUser(userId)
-                    .forEach(stringUserPair ->
-                            contactReturned(stringUserPair.first, stringUserPair.second)));
-        }
+        compositeDisposable
+                .add(contactsRepository.getContactsForUser(userId)
+                        .forEach(stringUserPair ->
+                                contactReturned(stringUserPair.first, stringUserPair.second)));
+    }
 
     /**
      * Interactor Listener
