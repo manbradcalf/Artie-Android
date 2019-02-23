@@ -132,12 +132,9 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                         .transform(new CircleTransform())
                         .into(hostImageView);
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle any errors
-                hostImageView.setImageDrawable(getApplicationContext().getDrawable(R.drawable.ic_profile_black_24dp));
-            }
+        }).addOnFailureListener(exception -> {
+            // Handle any errors
+            hostImageView.setImageDrawable(getApplicationContext().getDrawable(R.drawable.ic_profile_black_24dp));
         });
 
         EventCityState.setText(hostCityState);
@@ -252,31 +249,20 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             userUrl.setText(Html.fromHtml(linkedText));
 
             final StorageReference profileImageReference = mStorageReference.child("images/" + miniUser.getUserId());
-            profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                @Override
-                public void onSuccess(Uri uri) {
+            profileImageReference.getDownloadUrl().addOnSuccessListener(uri ->
                     Picasso.with(mContext)
-                            .load(uri)
-                            .resize(148, 148)
-                            .centerCrop()
-                            .transform(new CircleTransform())
-                            .into(userThumb);
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Handle any errors
-                    userThumb.setImageDrawable(mContext.getDrawable(R.drawable.ic_profile_black_24dp));
-                }
-            });
+                    .load(uri)
+                    .resize(148, 148)
+                    .centerCrop()
+                    .transform(new CircleTransform())
+                    .into(userThumb)).addOnFailureListener(exception ->
+                        // Handle any errors
+                        userThumb.setImageDrawable(mContext.getDrawable(R.drawable.ic_profile_black_24dp)));
 
-            rowView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(mContext, UserDetailActivity.class);
-                    intent.putExtra("userId", miniUser.getUserId());
-                    mContext.startActivity(intent);
-                }
+            rowView.setOnClickListener(v -> {
+                Intent intent = new Intent(mContext, UserDetailActivity.class);
+                intent.putExtra("userId", miniUser.getUserId());
+                mContext.startActivity(intent);
             });
 
             return rowView;

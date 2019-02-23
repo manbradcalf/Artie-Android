@@ -1,12 +1,9 @@
 package com.bookyrself.bookyrself.presenters;
 
-import android.support.v4.util.Pair;
-
 import com.bookyrself.bookyrself.data.EventInvites.EventInvitesRepo;
 import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
 
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Predicate;
 
 
 public class EventInvitesFragmentPresenter implements BasePresenter {
@@ -31,26 +28,22 @@ public class EventInvitesFragmentPresenter implements BasePresenter {
                         // anything. How do I turn off the loading state?
 
                         .forEach(stringEventDetailPair ->
-                                //The first and second are flipped because
-                                // I need to use the detail in the view as the hashmap's key
-                                // in order to get the eventId to pass the to the eventdetail activity
-                                //TODO This seems bass-ackwards. Figure out a different solution
                                 listener.eventPendingInvitationResponseReturned(
-                                        stringEventDetailPair.second, stringEventDetailPair.first)));
+                                        stringEventDetailPair.first, stringEventDetailPair.second)));
     }
 
-    public void acceptEventInvite(final String userId, final String eventId) {
+    public void acceptEventInvite(final String userId, final String eventId, EventDetail eventDetail) {
         compositeDisposable.add(
-                eventInvitesRepo.acceptEventInvite(userId,eventId)
-                        .doOnNext(aBoolean -> listener.removeEventFromList(eventId))
+                eventInvitesRepo.acceptEventInvite(userId, eventId)
+                        .doOnNext(aBoolean -> listener.removeEventFromList(eventId, eventDetail))
                         .doOnError(throwable -> listener.presentError(throwable.getMessage()))
                         .subscribe());
     }
 
-    public void rejectEventInvite(String userId, final String eventId) {
+    public void rejectEventInvite(String userId, final String eventId, EventDetail eventDetail) {
         compositeDisposable.add(
-                eventInvitesRepo.rejectEventInvite(userId,eventId)
-                        .doOnNext(aBoolean -> listener.removeEventFromList(eventId))
+                eventInvitesRepo.rejectEventInvite(userId, eventId)
+                        .doOnNext(aBoolean -> listener.removeEventFromList(eventId, eventDetail))
                         .doOnError(throwable -> listener.presentError(throwable.getMessage()))
                         .subscribe());
     }
@@ -70,12 +63,12 @@ public class EventInvitesFragmentPresenter implements BasePresenter {
      * Contract / Listener
      */
     public interface EventInvitesViewListener {
-        void eventPendingInvitationResponseReturned(EventDetail event, String eventId);
+        void eventPendingInvitationResponseReturned(String eventId, EventDetail event);
 
         void presentError(String message);
 
-        void removeEventFromList(String eventId);
+        void removeEventFromList(String eventId, EventDetail eventDetail);
 
-        void noInvitesReturnedForUser();
+        void showEmptyStateForNoInvites();
     }
 }

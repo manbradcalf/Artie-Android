@@ -25,12 +25,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -57,11 +58,9 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
     Button emptyStateButton;
 
 
-    private HashMap<EventDetail, String> eventDetailEventIdHashMap;
     private RecyclerView.LayoutManager layoutManager;
     private EventsAdapter adapter;
-    private List<EventDetail> eventDetailsList;
-    private HashMap<String,EventDetail> eventDetailHashMap;
+    private List<Map.Entry<String, EventDetail>> events;
     private EventInvitesFragmentPresenter presenter;
 
 
@@ -80,9 +79,7 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event_invites, container, false);
         ButterKnife.bind(this, view);
-//        eventDetailEventIdHashMap = new HashMap<>();
-        eventDetailHashMap = new HashMap<>();
-        eventDetailsList = new ArrayList<>();
+        events = new ArrayList<>();
         adapter = new EventsAdapter();
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
@@ -108,12 +105,11 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
     }
 
     @Override
-    public void eventPendingInvitationResponseReturned(EventDetail event, String eventId) {
+    public void eventPendingInvitationResponseReturned(String eventId, EventDetail event) {
+        events.add(new AbstractMap.SimpleEntry<>(eventId, event));
+        adapter.notifyDataSetChanged();
         showLoadingState(false);
         showContent(true);
-        eventDetailsList.add(event);
-        eventDetailEventIdHashMap.put(event, eventId);
-        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -122,23 +118,21 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         showEmptyState(getString(R.string.error_header), message, "", getActivity().getDrawable(R.drawable.ic_error_empty_state));
     }
 
+
     @Override
-    public void removeEventFromList(String eventId) {
-        if (recyclerView.getVisibility() == View.GONE) {
-            showContent(true);
+    public void removeEventFromList(String eventId, EventDetail eventDetail) {
+
+        Map.Entry<String, EventDetail> entry = new AbstractMap.SimpleEntry<>(eventId,eventDetail);
+        events.remove(entry);
+
+        if (events.isEmpty()) {
+            showEmptyStateForNoInvites();
         }
 
-        for (int i = 0; i < eventDetailsList.size(); i++) {
-            if (eventId.equals(eventDetailEventIdHashMap.get(eventDetailsList.get(i)))) {
-
-                eventDetailsList.remove(i);
-                adapter.notifyDataSetChanged();
-            }
-        }
     }
 
     @Override
-    public void noInvitesReturnedForUser() {
+    public void showEmptyStateForNoInvites() {
         showEmptyState(getString(R.string.empty_state_event_invites_no_invites_header),
                 getString(R.string.empty_state_event_invites_no_invites_subheader),
                 "", getActivity().getDrawable(R.drawable.ic_no_events_black_24dp));
@@ -218,19 +212,23 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
             View view = getLayoutInflater().inflate(R.layout.item_event_invite, parent, false);
             return new ViewHolderEvents(view);
+
         }
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
+
             final ViewHolderEvents viewHolderEvents = (ViewHolderEvents) holder;
-            EventDetail event = eventDetailsList.get(position);
-            viewHolderEvents.eventNameTextView.setText(event.getEventname());
-            viewHolderEvents.eventLocationTextView.setText(event.getCitystate());
+            EventDetail eventDetail = events.get(position).getValue();
+            viewHolderEvents.eventNameTextView.setText(eventDetail.getEventname());
+            viewHolderEvents.eventLocationTextView.setText(eventDetail.getCitystate());
             DateFormat inputformat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+
             try {
-                Date date = inputformat.parse(event.getDate());
+                Date date = inputformat.parse(eventDetail.getDate());
                 DateFormat outputFormat = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
                 String formattedDate = outputFormat.format(date);
                 viewHolderEvents.eventDateTextView.setText(formattedDate);
@@ -239,15 +237,20 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
             }
 
             viewHolderEvents.acceptButton.setOnClickListener(view -> {
-                presenter.acceptEventInvite(FirebaseAuth.getInstance().getUid(), eventDetailEventIdHashMap.get(eventDetailsList.get(position)));
+                presenter.acceptEventInvite(FirebaseAuth.getInstance().getUid(),
+                        events.get(position).getKey(),
+                        events.get(position).getValue());
             });
 
-            viewHolderEvents.denyButton.setOnClickListener(view -> presenter.rejectEventInvite(FirebaseAuth.getInstance().getUid(), eventDetailEventIdHashMap.get(eventDetailsList.get(position))));
+            viewHolderEvents.denyButton.setOnClickListener(view ->
+                    presenter.rejectEventInvite(FirebaseAuth.getInstance().getUid(),
+                            events.get(position).getKey(),
+                            events.get(position).getValue()));
         }
 
         @Override
         public int getItemCount() {
-            return eventDetailsList.size();
+            return events.size();
         }
 
         class ViewHolderEvents extends RecyclerView.ViewHolder {
