@@ -8,7 +8,7 @@ import android.view.MenuItem;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.data.Contacts.ContactsRepository;
-import com.bookyrself.bookyrself.data.EventInvites.EventInvitesRepo;
+import com.bookyrself.bookyrself.data.Events.EventsRepo;
 import com.bookyrself.bookyrself.utils.FragmentViewPager;
 import com.bookyrself.bookyrself.utils.FragmentViewPagerAdapter;
 import com.google.firebase.FirebaseApp;
@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     private static final int CONTACTS_FRAGMENT_INDEX = 2;
     private static final int PROFILE_FRAGMENT_INDEX = 3;
     private static final int EVENTS_INVITE_LIST = 4;
-    private static EventInvitesRepo EVENT_INVITES_REPO = null;
+    private static EventsRepo EVENT_INVITES_REPO = null;
     private static ContactsRepository CONTACTS_REPO = null;
     final ProfileFragment profileFragment = new ProfileFragment();
     final SearchFragment searchFragment = new SearchFragment();
@@ -42,9 +42,9 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
             return CONTACTS_REPO;
     }
 
-    public static EventInvitesRepo getEventInvitesRepo() {
+    public static EventsRepo getEventInvitesRepo() {
         if (EVENT_INVITES_REPO == null) {
-            EVENT_INVITES_REPO = new EventInvitesRepo();
+            EVENT_INVITES_REPO = new EventsRepo();
         }
 
         return EVENT_INVITES_REPO;

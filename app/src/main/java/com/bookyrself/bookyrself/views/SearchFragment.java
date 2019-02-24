@@ -22,7 +22,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents.Hit;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchResponseEvents.Hit;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -75,7 +75,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     private static final int EVENT_SEARCH_FLAG = 1;
     private SearchPresenter presenter;
     private List<Hit> eventsResults;
-    private List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Hit> usersResults;
+    private List<com.bookyrself.bookyrself.data.ResponseModels.SearchResponseUsers.Hit> usersResults;
     private ResultsAdapter adapter;
     private Boolean boolSearchEditable = false;
     private StorageReference storageReference;
@@ -248,7 +248,7 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
     @Override
     public void searchUsersResponseReady
-            (List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Hit> hits) {
+            (List<com.bookyrself.bookyrself.data.ResponseModels.SearchResponseUsers.Hit> hits) {
 
         if (recyclerView.getVisibility() == View.GONE) {
             recyclerView.setVisibility(View.VISIBLE);

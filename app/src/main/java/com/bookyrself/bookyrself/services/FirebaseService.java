@@ -1,22 +1,22 @@
 package com.bookyrself.bookyrself.services;
 
-import com.bookyrself.bookyrself.models.SerializedModels.EventCreationResponse;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.User.EventInviteInfo;
-import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.data.ResponseModels.EventCreationResponse;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ResponseModels.User.EventInviteInfo;
+import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 
 import java.util.HashMap;
 
 import io.reactivex.Flowable;
-import io.reactivex.Observable;
-import io.reactivex.Single;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
@@ -56,9 +56,6 @@ public class FirebaseService {
         @GET("/events/{id}.json")
         Flowable<EventDetail> getEventData(@Path("id") String eventId);
 
-        @GET("/users/{id}/events.json")
-        Call<HashMap<String, EventInviteInfo>> getUsersEventInfo(@Path("id") String userId);
-
         @GET("/users/{id}/picture.json")
         Call<String> getUserThumbUrl(@Path("id") String userId);
 
@@ -91,11 +88,14 @@ public class FirebaseService {
         Call<HashMap<String, Boolean>> addContactToUser(@Body HashMap<String, Boolean> request, @Path("userId") String userId);
 
         @POST("/events.json")
-        Call<EventCreationResponse> createEvent(@Body EventDetail request);
+        Flowable<EventCreationResponse> createEvent(@Body EventDetail request);
 
         //TODO: Clean this up. Find a way to minify the MiniEvent name
         @PUT("/users/{userId}/events/{eventId}.json")
-        Call<EventInviteInfo> addEventToUser(@Body EventInviteInfo eventInviteInfo, @Path("userId") String userId, @Path("eventId") String eventId);
+        Flowable<EventInviteInfo> addEventToUser(@Body EventInviteInfo eventInviteInfo, @Path("userId") String userId, @Path("eventId") String eventId);
+
+        @DELETE("/events/{eventId}/users/{userId}.json")
+        Flowable<Response<Void>> removeUserFromEvent(@Path("eventId") String eventId, @Path("userId") String userId);
 
 
     }

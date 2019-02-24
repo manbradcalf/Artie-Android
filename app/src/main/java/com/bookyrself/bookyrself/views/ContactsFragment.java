@@ -2,7 +2,6 @@ package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -21,12 +20,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 import com.bookyrself.bookyrself.presenters.ContactsFragmentPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -40,7 +38,6 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 
 import static android.app.Activity.RESULT_OK;

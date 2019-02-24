@@ -1,9 +1,8 @@
 package com.bookyrself.bookyrself.presenters;
 
-import com.bookyrself.bookyrself.data.EventsInteractor;
 import com.bookyrself.bookyrself.data.UsersInteractor;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 
 import java.util.ArrayList;
 import java.util.List;

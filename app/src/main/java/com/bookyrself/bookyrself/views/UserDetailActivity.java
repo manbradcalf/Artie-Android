@@ -18,8 +18,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 import com.bookyrself.bookyrself.presenters.UserDetailPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.EventDecorator;

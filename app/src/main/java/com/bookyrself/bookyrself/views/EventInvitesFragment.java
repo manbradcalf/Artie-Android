@@ -17,7 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.presenters.EventInvitesFragmentPresenter;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
@@ -73,7 +73,7 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         super.onCreate(savedInstanceState);
 
         if (FirebaseAuth.getInstance().getUid() != null) {
-            presenter = new EventInvitesFragmentPresenter(this, FirebaseAuth.getInstance().getUid());
+            presenter = new EventInvitesFragmentPresenter(this);
         }
     }
 
@@ -90,7 +90,7 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         recyclerView.setAdapter(adapter);
         toolbar.setTitle(R.string.title_event_invites);
         FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
-            if (firebaseAuth.getCurrentUser() != null && presenter != null) {
+            if (firebaseAuth.getCurrentUser() != null) {
                 // Signed in
                 showLoadingState(true);
                 showContent(false);

@@ -1,23 +1,18 @@
 package com.bookyrself.bookyrself.presenters;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
-import com.bookyrself.bookyrself.data.EventsInteractor;
 import com.bookyrself.bookyrself.data.UsersInteractor;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.MiniUser;
-import com.bookyrself.bookyrself.models.SerializedModels.User.EventInviteInfo;
-import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.MiniUser;
+import com.bookyrself.bookyrself.data.ResponseModels.User.EventInviteInfo;
+import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,13 +22,11 @@ import retrofit2.Response;
  * Created by benmedcalf on 11/22/17.
  */
 
-public class EventDetailPresenter implements  UsersInteractor.UsersInteractorListener {
+public class EventDetailPresenter implements UsersInteractor.UsersInteractorListener {
 
-    private final UsersInteractor mUsersInteractor;
+
     private final EventDetailPresenterListener mListener;
     private final List<MiniUser> mMiniUsers;
-    private EventDetail mEventDetail;
-    private Integer mUserCount;
     private String eventId;
 
     /**
@@ -41,7 +34,6 @@ public class EventDetailPresenter implements  UsersInteractor.UsersInteractorLis
      */
     public EventDetailPresenter(EventDetailPresenterListener listener) {
         this.mListener = listener;
-        this.mUsersInteractor = new UsersInteractor(this);
         this.mMiniUsers = new ArrayList<>();
     }
 

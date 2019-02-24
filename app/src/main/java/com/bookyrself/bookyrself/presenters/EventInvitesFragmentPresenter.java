@@ -1,8 +1,9 @@
 package com.bookyrself.bookyrself.presenters;
 
-import com.bookyrself.bookyrself.data.EventInvites.EventInvitesRepo;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.Events.EventsRepo;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.views.MainActivity;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.NoSuchElementException;
 
@@ -12,20 +13,20 @@ import io.reactivex.disposables.CompositeDisposable;
 public class EventInvitesFragmentPresenter implements BasePresenter {
 
     private final EventInvitesViewListener listener;
-    private EventInvitesRepo eventInvitesRepo;
+    private EventsRepo eventsRepo;
     private CompositeDisposable compositeDisposable;
     private String userId;
 
-    public EventInvitesFragmentPresenter(EventInvitesViewListener listener, String userId) {
-        this.userId = userId;
+    public EventInvitesFragmentPresenter(EventInvitesViewListener listener) {
+        this.userId = FirebaseAuth.getInstance().getUid();
         this.listener = listener;
         this.compositeDisposable = new CompositeDisposable();
-        this.eventInvitesRepo = MainActivity.getEventInvitesRepo();
+        this.eventsRepo = MainActivity.getEventInvitesRepo();
     }
 
     public void loadPendingInvites(String userId) {
         compositeDisposable
-                .add(eventInvitesRepo.getPendingEventInvites(userId)
+                .add(eventsRepo.getEventsWithPendingInvites(userId)
                         .subscribe(
                                 //onNext
                                 stringEventDetailPair -> listener.eventPendingInvitationResponseReturned(
@@ -43,9 +44,10 @@ public class EventInvitesFragmentPresenter implements BasePresenter {
 
     }
 
+
     public void acceptEventInvite(final String userId, final String eventId, EventDetail eventDetail) {
         compositeDisposable.add(
-                eventInvitesRepo.acceptEventInvite(userId, eventId)
+                eventsRepo.acceptEventInvite(userId, eventId)
                         .doOnNext(aBoolean -> listener.removeEventFromList(eventId, eventDetail))
                         .doOnError(throwable -> listener.presentError(throwable.getMessage()))
                         .subscribe());
@@ -53,7 +55,7 @@ public class EventInvitesFragmentPresenter implements BasePresenter {
 
     public void rejectEventInvite(String userId, final String eventId, EventDetail eventDetail) {
         compositeDisposable.add(
-                eventInvitesRepo.rejectEventInvite(userId, eventId)
+                eventsRepo.rejectEventInvite(userId, eventId)
                         .doOnNext(aBoolean -> listener.removeEventFromList(eventId, eventDetail))
                         .doOnError(throwable -> listener.presentError(throwable.getMessage()))
                         .subscribe());

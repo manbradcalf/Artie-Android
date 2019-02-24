@@ -5,15 +5,14 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.Host;
-import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.Host;
+import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 import com.bookyrself.bookyrself.presenters.EventCreationPresenter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.pchmn.materialchips.ChipsInput;
@@ -61,15 +60,15 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_event_creation);
         ButterKnife.bind(this);
-        presenter = new EventCreationPresenter(this);
+
         // TODO: Clean up this wacky variable name
         selectedContactsAndAttendingBooleanMap = new HashMap<>();
         contacts = new ArrayList<>();
         contactsAndUserIdsMap = new HashMap<>();
 
-        presenter.getContacts(FirebaseAuth.getInstance().getUid());
         dateButton.setOnClickListener(view -> {
             DatePickerDialogFragment datePickerDialogFragment = new DatePickerDialogFragment();
             datePickerDialogFragment.setFlag(FLAG_EVENT_CREATION);
@@ -115,6 +114,7 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
                 List<String> tagsList = Arrays.asList(tagsEditText.getText().toString().split(", "));
                 event.setTags(tagsList);
             }
+
             if (date != null) {
                 event.setDate(date);
             } else {
@@ -132,6 +132,11 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
                 Toast.makeText(EventCreationActivity.this, "You must be logged in to host an event!", Toast.LENGTH_SHORT).show();
             }
         });
+
+        if (FirebaseAuth.getInstance().getUid() != null) {
+            presenter = new EventCreationPresenter(this);
+            presenter.subscribe();
+        }
     }
 
 
@@ -150,7 +155,7 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     }
 
     @Override
-    public void dateAdded(String dateSelected) {
+    public void dateSelectedFromDatePickerDialog(String dateSelected) {
 
         // Set the date for the event
         date = dateSelected;
@@ -165,6 +170,11 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
         } catch (ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void presentError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
 }
