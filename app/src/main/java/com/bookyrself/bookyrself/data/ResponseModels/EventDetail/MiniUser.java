@@ -3,7 +3,6 @@ package com.bookyrself.bookyrself.data.ResponseModels.EventDetail;
 import com.google.gson.annotations.SerializedName;
 
 import javax.annotation.Generated;
-//TODO: Rename this to "MiniUser" or something similar?
 @Generated("net.hexar.json2pojo")
 @SuppressWarnings("unused")
 public class MiniUser {
