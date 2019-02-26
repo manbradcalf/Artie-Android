@@ -2,6 +2,7 @@ package com.bookyrself.bookyrself.services;
 
 import com.bookyrself.bookyrself.data.ResponseModels.EventCreationResponse;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.Host;
 import com.bookyrself.bookyrself.data.ResponseModels.User.EventInviteInfo;
 import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 
@@ -56,9 +57,6 @@ public class FirebaseService {
         @GET("/events/{id}.json")
         Flowable<EventDetail> getEventData(@Path("id") String eventId);
 
-        @GET("/users/{id}/picture.json")
-        Call<String> getUserThumbUrl(@Path("id") String userId);
-
         @GET("/users/{id}.json")
         Flowable<User> getUserDetails(@Path("id") String userId);
 
@@ -82,20 +80,22 @@ public class FirebaseService {
 
 
         @PATCH("/users/{userId}.json")
-        Call<User> patchUser(@Body User user, @Path("userId") String userId);
+        Flowable<User> patchUser(@Body User user, @Path("userId") String userId);
 
         @PATCH("/users/{userId}/contacts.json")
-        Call<HashMap<String, Boolean>> addContactToUser(@Body HashMap<String, Boolean> request, @Path("userId") String userId);
+        Flowable<HashMap<String, Boolean>> addContactToUser(@Body HashMap<String, Boolean> request, @Path("userId") String userId);
 
         @POST("/events.json")
         Flowable<EventCreationResponse> createEvent(@Body EventDetail request);
 
-        //TODO: Clean this up. Find a way to minify the MiniEvent name
         @PUT("/users/{userId}/events/{eventId}.json")
         Flowable<EventInviteInfo> addEventToUser(@Body EventInviteInfo eventInviteInfo, @Path("userId") String userId, @Path("eventId") String eventId);
 
         @DELETE("/events/{eventId}/users/{userId}.json")
         Flowable<Response<Void>> removeUserFromEvent(@Path("eventId") String eventId, @Path("userId") String userId);
+
+        @PUT("/events/{eventId}/host.json")
+        Flowable<Host> updateEventHost(@Body Host host,@Path("eventId") String eventId);
 
 
     }
