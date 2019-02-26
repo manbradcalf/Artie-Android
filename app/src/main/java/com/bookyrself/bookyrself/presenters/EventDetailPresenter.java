@@ -1,76 +1,88 @@
 package com.bookyrself.bookyrself.presenters;
 
-import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
 
-import com.bookyrself.bookyrself.data.UsersInteractor;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.MiniUser;
 import com.bookyrself.bookyrself.data.ResponseModels.User.EventInviteInfo;
 import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.NoSuchElementException;
 
+import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Created by benmedcalf on 11/22/17.
  */
 
-public class EventDetailPresenter implements UsersInteractor.UsersInteractorListener {
+public class EventDetailPresenter implements BasePresenter {
 
 
-    private final EventDetailPresenterListener mListener;
-    private final List<MiniUser> mMiniUsers;
+    private final EventDetailPresenterListener listener;
+    private CompositeDisposable compositeDisposable;
     private String eventId;
 
     /**
      * Constructor
      */
-    public EventDetailPresenter(EventDetailPresenterListener listener) {
-        this.mListener = listener;
-        this.mMiniUsers = new ArrayList<>();
+    public EventDetailPresenter(EventDetailPresenterListener listener, String eventId) {
+        this.listener = listener;
+        this.compositeDisposable = new CompositeDisposable();
+        this.eventId = eventId;
     }
 
     /**
      * Methods
      */
     public void getEventDetailData(String eventId) {
-        this.eventId = eventId;
-        mListener.showProgressbar(true);
-        FirebaseService.getAPI().getEventData(eventId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(eventDetail -> {
-                    // do something
-                })
-                .doOnError(throwable -> mListener.presentError(throwable.getMessage()))
-                .subscribe();
+
+        compositeDisposable.add(
+
+                FirebaseService.getAPI()
+                        .getEventData(eventId)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnNext(listener::showEventData)
+                        .doOnError(throwable -> listener.presentError(throwable.getMessage()))
+
+                        // Get the userIds of invited users
+                        .flatMap(eventDetail -> Flowable.fromIterable(eventDetail.getUsers().entrySet()))
+
+                        // Get user details for each user
+                        .map(stringBooleanEntry ->
+                                Flowable.just(
+                                        FirebaseService.getAPI().getUserDetails(stringBooleanEntry.getKey())
+                                                .subscribeOn(Schedulers.io())
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .firstOrError()
+                                                .subscribe(
+                                                        user -> {
+                                                            // Show the view the minified user
+                                                            MiniUser miniUser = minifyUserDetailsForEventDetailDisplay(stringBooleanEntry.getKey(), user);
+                                                            listener.showInvitedUser(new Pair<>(stringBooleanEntry.getKey(), miniUser));
+                                                        },
+                                                        throwable -> {
+
+                                                            // Present error
+                                                            if (throwable instanceof NoSuchElementException) {
+                                                                listener.presentError(String.format("We were unable to find a user with id %s", stringBooleanEntry.getKey()));
+                                                            } else if (throwable.getMessage() != null) {
+                                                                listener.presentError(throwable.getMessage());
+                                                            } else {
+                                                                //TODO: Think of something better
+                                                                listener.presentError("Whoosp!");
+                                                            }
+                                                        }
+                                                )))
+                        .subscribe()
+        );
     }
 
-    //TODO: Will the final "id" variable here be stuck on the first id assigned?
-    public void getUserThumbUrl(final String id) {
-        FirebaseService.getAPI().getUserThumbUrl(id)
-                .enqueue(new Callback<String>() {
-                    @Override
-                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                        String data = response.body();
-                        mListener.userThumbReady(data, id);
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-
-                    }
-                });
-    }
-
-    private MiniUser minifyUserDetailsForEventDetailDisplay(User user, String userId) {
+    private MiniUser minifyUserDetailsForEventDetailDisplay(String userId, User user) {
         MiniUser miniUser = new MiniUser();
         miniUser.setCitystate(user.getCitystate());
         miniUser.setUrl(user.getUrl());
@@ -85,7 +97,7 @@ public class EventDetailPresenter implements UsersInteractor.UsersInteractorList
         if (eventInviteInfo != null) {
             if (eventInviteInfo.getIsInviteRejected() != null) {
                 if (eventInviteInfo.getIsInviteRejected()) {
-                    status = "Rejected";
+                    status = "Not attending";
                 }
             }
 
@@ -98,50 +110,24 @@ public class EventDetailPresenter implements UsersInteractor.UsersInteractorList
         return status;
     }
 
-    public void eventDetailReturned(EventDetail eventDetail, String eventId) {
-
-//        mEventDetail = eventDetail;
-//
-//        // If users exist, iterate through and retrieve their details
-//        if (eventDetail.getUsers() != null) {
-//            mUserCount = eventDetail.getUsers().keySet().size();
-//            for (String userId : eventDetail.getUsers().keySet()) {
-//                mUsersInteractor.getUserDetails(userId);
-//            }
-//        } else {
-//            presentError("Event " + eventId + "has no users");
-//            Log.e("EventDetailPresenter", "Event " + eventId + "has no users");
-//        }
+    @Override
+    public void subscribe() {
+        getEventDetailData(eventId);
     }
 
     @Override
-    public void presentError(String error) {
-        // Surface the error sent from the interactor to the activity
-        mListener.presentError(error);
+    public void unsubscribe() {
+        compositeDisposable.dispose();
     }
 
-    @Override
-    public void userDetailReturned(User user, String userId) {
-        if (user != null) {
-            MiniUser miniUser = minifyUserDetailsForEventDetailDisplay(user, userId);
-            mMiniUsers.add(miniUser);
-            if (mUserCount.equals(mMiniUsers.size())) {
-                mListener.eventDataResponseReady(mEventDetail, mMiniUsers);
-            }
-        } else {
-            mListener.presentError(String.format("User %s was null", userId));
-        }
-    }
 
     /**
      * Contract / Listener
      */
     public interface EventDetailPresenterListener {
-        void eventDataResponseReady(EventDetail data, List<MiniUser> miniUsers);
+        void showEventData(EventDetail data);
 
-        void showProgressbar(Boolean bool);
-
-        void userThumbReady(String response, String id);
+        void showInvitedUser(Pair<String, MiniUser> user);
 
         void presentError(String message);
     }
