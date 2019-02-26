@@ -7,14 +7,14 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class UsersInteractor {
-    private UsersInteractorListener usersInteractorListener;
+public class ProfileInteractor {
+    private ProfileInteractorListener profileInteractorListener;
 
     /**
      * Constructors
      */
-    public UsersInteractor(UsersInteractorListener listener) {
-        this.usersInteractorListener = listener;
+    public ProfileInteractor(ProfileInteractorListener listener) {
+        this.profileInteractorListener = listener;
     }
 
     public void createUser(User user, final String uid) {
@@ -22,41 +22,23 @@ public class UsersInteractor {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 // response
-                usersInteractorListener.userDetailReturned(response.body(), uid);
+                profileInteractorListener.profileReturned(response.body(), uid);
             }
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
                 // failure
-                usersInteractorListener.presentError(t.getMessage());
+                profileInteractorListener.presentError(t.getMessage());
             }
         });
     }
-
-    public void patchUser(User user, final String uID) {
-        FirebaseService.getAPI().patchUser(user, uID).enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                // response
-                usersInteractorListener.userDetailReturned(response.body(), uID);
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                // failure
-                usersInteractorListener.presentError(t.getMessage());
-            }
-        });
-    }
-
-
 
     /**
      * Interfaces
      */
-    public interface UsersInteractorListener {
+    public interface ProfileInteractorListener {
 
-        void userDetailReturned(User user, String userId);
+        void profileReturned(User user, String userId);
 
         void presentError(String error);
 
