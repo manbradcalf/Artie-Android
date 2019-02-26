@@ -2,8 +2,8 @@ package com.bookyrself.bookyrself.views;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -25,7 +25,6 @@ import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.Host;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.MiniUser;
 import com.bookyrself.bookyrself.presenters.EventDetailPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
@@ -33,8 +32,8 @@ import com.squareup.picasso.Picasso;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -78,38 +77,73 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     @BindView(R.id.event_detail_progressBar)
     ProgressBar progressBar;
 
-    private List<MiniUser> miniUsers;
     private EventDetailPresenter presenter;
-    private HashMap<String, String> idAndThumbUrlMap = new HashMap<>();
     private StorageReference storageReference;
+    private List<Pair<String, MiniUser>> invitedUsers;
+    private UsersListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
         ButterKnife.bind(this);
+
+        // Get the storage reference for the thumbnails
         storageReference = FirebaseStorage.getInstance().getReference();
+
+        // Set up the adapter
+        invitedUsers = new ArrayList<>();
+        adapter = new UsersListAdapter(this, invitedUsers, storageReference);
+        usersListView.setAdapter(adapter);
+
+        // Set up initial loading state
         eventDetailContent.setVisibility(View.GONE);
         emptyState.setVisibility(View.GONE);
         String eventId = getIntent().getStringExtra("eventId");
-        presenter = new EventDetailPresenter(this);
-        presenter.getEventDetailData(eventId);
+        setSupportActionBar(Toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        // Set up the presenter
+        presenter = new EventDetailPresenter(this, eventId);
+        presenter.subscribe();
     }
 
     @Override
-    public void eventDataResponseReady(final EventDetail data, final List<MiniUser> miniUsersList) {
+    public void showEventData(final EventDetail eventDetail) {
+
         showProgressbar(false);
-        setSupportActionBar(Toolbar);
-        Toolbar.setTitle(data.getEventname());
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Toolbar.setTitle(eventDetail.getEventname());
 
-        final Host host = data.getHost();
-        final String hostUsername = host.getUsername();
-        String hostCityState = data.getCitystate();
 
+        // Set up the host card
+        Host host = eventDetail.getHost();
+        String hostUsername = host.getUsername();
+        // Show the City State of the event, not the host
+        String hostCityState = eventDetail.getCitystate();
+
+        HostcardView.setOnClickListener(v -> {
+            Intent intent = new Intent(HostcardView.getContext(), UserDetailActivity.class);
+            intent.putExtra("userId", eventDetail.getHost().getUserId());
+            startActivity(intent);
+        });
+
+        HostUsernameTextview.setText(hostUsername);
+        final StorageReference profileImageReference = storageReference.child("images/" + host.getUserId());
+        profileImageReference.getDownloadUrl().addOnSuccessListener(uri -> Picasso.with(getApplicationContext())
+                .load(uri)
+                .resize(148, 148)
+                .centerCrop()
+                .transform(new CircleTransform())
+                .into(hostImageView)).addOnFailureListener(exception -> {
+            // Handle any errors
+            hostImageView.setImageDrawable(getApplicationContext().getDrawable(R.drawable.ic_profile_black_24dp));
+        });
+
+
+        // Set the date
         DateFormat inputformat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         try {
-            Date date = inputformat.parse(data.getDate());
+            Date date = inputformat.parse(eventDetail.getDate());
             DateFormat outputFormat = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
             String formattedDate = outputFormat.format(date);
             DateView.setText(formattedDate);
@@ -117,58 +151,25 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             e.printStackTrace();
         }
 
-        HostUsernameTextview.setText(hostUsername);
-        final StorageReference profileImageReference = storageReference.child("images/" + host.getUserId());
-        profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                Picasso.with(getApplicationContext())
-                        .load(uri)
-                        .resize(148, 148)
-                        .centerCrop()
-                        .transform(new CircleTransform())
-                        .into(hostImageView);
-            }
-        }).addOnFailureListener(exception -> {
-            // Handle any errors
-            hostImageView.setImageDrawable(getApplicationContext().getDrawable(R.drawable.ic_profile_black_24dp));
-        });
 
+        // Set the city state
         EventCityState.setText(hostCityState);
-        miniUsers = miniUsersList;
 
-        for (int i = 0; i < miniUsers.size(); i++) {
-            String userId = miniUsers.get(i).getUserId();
-            presenter.getUserThumbUrl(userId);
-        }
-
-        HostcardView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(HostcardView.getContext(), UserDetailActivity.class);
-                intent.putExtra("userId", data.getHost().getUserId());
-                startActivity(intent);
-            }
-        });
+        // Make it visible
         eventDetailContent.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void showProgressbar(Boolean bool) {
-        if (bool) {
+    public void showInvitedUser(Pair<String, MiniUser> user) {
+        invitedUsers.add(user);
+        adapter.notifyDataSetChanged();
+    }
+
+    public void showProgressbar(Boolean show) {
+        if (show) {
             progressBar.setVisibility(View.VISIBLE);
         } else {
             progressBar.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    public void userThumbReady(String response, String id) {
-
-        idAndThumbUrlMap.put(id, response);
-        if (idAndThumbUrlMap.size() == miniUsers.size()) {
-            UsersListAdapter adapter = new UsersListAdapter(this, miniUsers, storageReference);
-            usersListView.setAdapter(adapter);
         }
     }
 
@@ -179,8 +180,10 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         eventDetailContent.setVisibility(View.GONE);
         emptyStateButton.setVisibility(View.GONE);
         emptyStateImage.setImageDrawable(getDrawable(R.drawable.ic_error_empty_state));
-        emptyStateTextHeader.setText("There was a problem loading the event");
+        emptyStateTextHeader.setText(getString(R.string.error_header));
         emptyStateTextSubHeader.setText(message);
+        emptyStateTextHeader.setVisibility(View.VISIBLE);
+        emptyStateTextSubHeader.setVisibility(View.VISIBLE);
         emptyState.setVisibility(View.VISIBLE);
     }
 
@@ -194,30 +197,28 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     /**
      * Adapter
      */
-    private static class UsersListAdapter extends BaseAdapter {
+    private class UsersListAdapter extends BaseAdapter {
 
         private final StorageReference mStorageReference;
         private Context mContext;
-        private List<MiniUser> mMiniUsers;
         private LayoutInflater mInflater;
 
 
-        private UsersListAdapter(Context context, List<MiniUser> miniUsers, StorageReference storageReference) {
-            mMiniUsers = miniUsers;
+        private UsersListAdapter(Context context, List<Pair<String, MiniUser>> miniUsers, StorageReference storageReference) {
+            invitedUsers = miniUsers;
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mContext = context;
             mStorageReference = storageReference;
-
         }
 
         @Override
         public int getCount() {
-            return mMiniUsers.size();
+            return invitedUsers.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return mMiniUsers.get(position);
+            return invitedUsers.get(position).second;
         }
 
         @Override
@@ -248,13 +249,13 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
             final StorageReference profileImageReference = mStorageReference.child("images/" + miniUser.getUserId());
             profileImageReference.getDownloadUrl().addOnSuccessListener(uri ->
                     Picasso.with(mContext)
-                    .load(uri)
-                    .resize(148, 148)
-                    .centerCrop()
-                    .transform(new CircleTransform())
-                    .into(userThumb)).addOnFailureListener(exception ->
-                        // Handle any errors
-                        userThumb.setImageDrawable(mContext.getDrawable(R.drawable.ic_profile_black_24dp)));
+                            .load(uri)
+                            .resize(148, 148)
+                            .centerCrop()
+                            .transform(new CircleTransform())
+                            .into(userThumb)).addOnFailureListener(exception ->
+                    // Handle any errors
+                    userThumb.setImageDrawable(mContext.getDrawable(R.drawable.ic_profile_black_24dp)));
 
             rowView.setOnClickListener(v -> {
                 Intent intent = new Intent(mContext, UserDetailActivity.class);
