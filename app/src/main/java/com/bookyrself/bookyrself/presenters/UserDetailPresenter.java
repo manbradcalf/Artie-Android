@@ -1,9 +1,10 @@
 package com.bookyrself.bookyrself.presenters;
 
-import com.bookyrself.bookyrself.data.UsersInteractor;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
+
+import java.util.HashMap;
 
 import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -14,19 +15,16 @@ import io.reactivex.schedulers.Schedulers;
  * Created by benmedcalf on 1/13/18.
  */
 
-public class UserDetailPresenter implements UsersInteractor.UserDetailInteractorListener {
+public class UserDetailPresenter implements BasePresenter {
     private final UserDetailPresenterListener listener;
-    private final UsersInteractor usersInteractor;
     private final CompositeDisposable compositeDisposable;
     private final String userId;
 
     /**
      * Constructor
      */
-
     public UserDetailPresenter(String userId, UserDetailPresenterListener listener) {
         this.listener = listener;
-        this.usersInteractor = new UsersInteractor(this);
         this.compositeDisposable = new CompositeDisposable();
         this.userId = userId;
     }
@@ -34,16 +32,13 @@ public class UserDetailPresenter implements UsersInteractor.UserDetailInteractor
     /**
      * Methods
      */
-    public void loadUserInfoWithEvents(final String userId) {
+    private void loadUserInfoWithEvents(final String userId) {
 
         compositeDisposable.add(
-                usersInteractor
-                        .getUserDetails(userId)
+                FirebaseService.getAPI().getUserDetails(userId)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .doOnError(throwable -> {
-                            listener.presentError(throwable.getMessage());
-                        })
+                        .doOnError(throwable -> listener.presentError(throwable.getMessage()))
                         .flatMap(user -> {
 
                             // Notify view that user details have been returned
@@ -52,7 +47,7 @@ public class UserDetailPresenter implements UsersInteractor.UserDetailInteractor
                             return Flowable.fromIterable(user.getEvents().entrySet());
                         })
 
-                        // Map the event infos into event details
+                        // Map the eventInviteInfos into eventDetails
                         .map(stringEventInviteInfoEntry ->
                                 FirebaseService
                                         .getAPI()
@@ -63,30 +58,26 @@ public class UserDetailPresenter implements UsersInteractor.UserDetailInteractor
                                             // notify the view
                                             listener.displayUserEvents(eventDetail, stringEventInviteInfoEntry.getKey());
                                         })
-                                        .doOnError(throwable -> { listener.presentError(throwable.getMessage());
-                                        })
+                                        .doOnError(throwable -> listener.presentError(throwable.getMessage()))
                                         .subscribe())
                         .subscribe());
     }
 
-    @Override
-    public void contactSuccessfullyAdded() {
-        listener.presentSuccess("Added contact!");
-    }
-
     public void addContactToUser(String contactId, String userId) {
-        usersInteractor.addContactToUser(contactId, userId);
+
+        HashMap<String, Boolean> request = new HashMap<>();
+        request.put(contactId, true);
+
+        Flowable.just(FirebaseService.getAPI()
+                .addContactToUser(request, userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        stringBooleanHashMap -> listener.presentSuccess("Added contact!"),
+                        throwable -> listener.presentError(throwable.getMessage())))
+                .subscribe();
     }
 
-    @Override
-    public void presentError(String error) {
-
-    }
-
-    @Override
-    public void userDetailReturned(User user, String userId) {
-
-    }
 
     @Override
     public void subscribe() {
