@@ -1,6 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
 import com.bookyrself.bookyrself.data.Events.EventsRepo;
+import com.bookyrself.bookyrself.data.Profile.ProfileRepo;
 import com.bookyrself.bookyrself.data.ProfileInteractor;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.data.ResponseModels.User.User;
@@ -13,10 +14,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class ProfilePresenter implements BasePresenter, ProfileInteractor.ProfileInteractorListener {
+public class ProfileFragmentPresenter implements BasePresenter, ProfileInteractor.ProfileInteractorListener {
 
     private final ProfilePresenterListener listener;
     private final ProfileInteractor profileInteractor;
+    private final ProfileRepo profileRepo;
     private CompositeDisposable compositeDisposable;
     private EventsRepo eventsRepo;
     private String userId;
@@ -24,10 +26,11 @@ public class ProfilePresenter implements BasePresenter, ProfileInteractor.Profil
     /**
      * Construction
      */
-    public ProfilePresenter(final ProfilePresenterListener listener, String userId) {
+    public ProfileFragmentPresenter(final ProfilePresenterListener listener, String userId) {
         this.listener = listener;
         this.userId = userId;
         this.eventsRepo = MainActivity.getEventsRepo();
+        this.profileRepo = MainActivity.getProfileRepo();
         this.profileInteractor = new ProfileInteractor(this);
         this.compositeDisposable = new CompositeDisposable();
     }
@@ -40,16 +43,14 @@ public class ProfilePresenter implements BasePresenter, ProfileInteractor.Profil
     }
 
     public void patchUser(User user, final String userId) {
-        profileInteractor.patchUser(user, userId);
+        profileRepo.updateProfileInfo(userId, user)
+                .subscribe();
     }
 
-    public void loadProfile() {
+    private void loadProfile() {
         compositeDisposable.add(
 
-                FirebaseService.getAPI().getUserDetails(userId)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
+                profileRepo.getProfileInfo(userId).subscribe(
                                 user -> {
                                     // Notify view the profile is ready
                                     listener.profileInfoReady(userId, user);

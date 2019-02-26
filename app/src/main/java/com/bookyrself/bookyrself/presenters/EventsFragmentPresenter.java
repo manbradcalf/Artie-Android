@@ -26,7 +26,7 @@ public class EventsFragmentPresenter implements BasePresenter {
     public EventsFragmentPresenter(EventsPresenterListener listener) {
         this.listener = listener;
         this.compositeDisposable = new CompositeDisposable();
-        this.eventsRepo = MainActivity.getEventInvitesRepo();
+        this.eventsRepo = MainActivity.getEventsRepo();
     }
 
     /**

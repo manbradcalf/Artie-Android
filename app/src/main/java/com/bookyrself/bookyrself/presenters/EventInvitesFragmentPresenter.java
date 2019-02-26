@@ -21,7 +21,7 @@ public class EventInvitesFragmentPresenter implements BasePresenter {
         this.userId = FirebaseAuth.getInstance().getUid();
         this.listener = listener;
         this.compositeDisposable = new CompositeDisposable();
-        this.eventsRepo = MainActivity.getEventInvitesRepo();
+        this.eventsRepo = MainActivity.getEventsRepo();
     }
 
     public void loadPendingInvites(String userId) {
