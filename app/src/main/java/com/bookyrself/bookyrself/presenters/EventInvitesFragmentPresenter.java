@@ -1,5 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
+import android.util.Log;
+
 import com.bookyrself.bookyrself.data.Events.EventsRepo;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.views.MainActivity;
@@ -24,7 +26,7 @@ public class EventInvitesFragmentPresenter implements BasePresenter {
         this.eventsRepo = MainActivity.getEventsRepo();
     }
 
-    public void loadPendingInvites(String userId) {
+    public void loadPendingInvites() {
         compositeDisposable
                 .add(eventsRepo.getEventsWithPendingInvites(userId)
                         .subscribe(
@@ -39,6 +41,7 @@ public class EventInvitesFragmentPresenter implements BasePresenter {
                                         listener.showEmptyStateForNoInvites();
                                     } else {
                                         listener.presentError(throwable.getMessage());
+                                        Log.e("EventsInvitesFragment: ", throwable.getMessage(), throwable.fillInStackTrace());
                                     }
                                 }));
 
@@ -64,7 +67,7 @@ public class EventInvitesFragmentPresenter implements BasePresenter {
 
     @Override
     public void subscribe() {
-        loadPendingInvites(userId);
+        loadPendingInvites();
     }
 
     @Override
