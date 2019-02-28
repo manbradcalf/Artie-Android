@@ -20,6 +20,7 @@ import java.util.NoSuchElementException;
 
 import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Response;
 
@@ -32,9 +33,9 @@ public class EventsRepo implements EventDataSource {
 
 
     public EventsRepo() {
+        this.cacheIsDirty = true;
         this.eventsWithPendingInvites = new HashMap<>();
         this.allUsersEvents = new HashMap<>();
-        this.cacheIsDirty = true;
         if (FirebaseAuth.getInstance().getUid() != null) {
             this.db = FirebaseDatabase.getInstance().getReference()
                     .child("users")
@@ -75,7 +76,6 @@ public class EventsRepo implements EventDataSource {
     @Override
     public Flowable<Pair<String, EventDetail>> getAllEvents(String userId) {
         if (cacheIsDirty) {
-            cacheIsDirty = false;
             return FirebaseService.getAPI()
                     .getUsersEventInvites(userId)
                     .subscribeOn(Schedulers.io())
@@ -89,12 +89,9 @@ public class EventsRepo implements EventDataSource {
                                 allUsersEvents.put(eventInvite.getKey(), eventDetail);
                                 return new Pair<>(eventInvite.getKey(), eventDetail);
                             }));
-        } else if (allUsersEvents == null) {
-
-            throw new NoSuchElementException();
 
         } else {
-
+            // Cache is clean, get local copy
             return Flowable.fromIterable(allUsersEvents.entrySet())
                     .map(stringEventDetailEntry ->
                             new Pair<>(stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()));
@@ -105,7 +102,6 @@ public class EventsRepo implements EventDataSource {
     public Flowable<Pair<String, EventDetail>> getEventsWithPendingInvites(String userId) {
 
         if (cacheIsDirty) {
-            cacheIsDirty = false;
             return FirebaseService.getAPI()
                     .getUsersEventInvites(userId)
                     .subscribeOn(Schedulers.io())
@@ -115,11 +111,13 @@ public class EventsRepo implements EventDataSource {
                     // Filter out the invites so only pending invites remain
                     .map(entries -> {
                         HashMap<String, EventInviteInfo> pendingInvites = new HashMap<>();
+
                         for (Map.Entry<String, EventInviteInfo> entry : entries) {
                             if (isInvitePendingResponse(entry)) {
                                 pendingInvites.put(entry.getKey(), entry.getValue());
                             }
                         }
+
                         if (pendingInvites.isEmpty()) {
                             throw new NoSuchElementException();
                         } else {
@@ -139,19 +137,26 @@ public class EventsRepo implements EventDataSource {
                             .observeOn(AndroidSchedulers.mainThread())
                             .map(eventDetail -> {
                                 eventsWithPendingInvites.put(eventInvite.getKey(), eventDetail);
+                                cacheIsDirty = false;
                                 return new Pair<>(eventInvite.getKey(), eventDetail);
                             }));
-
-        } else if (eventsWithPendingInvites == null) {
-
-            throw new NoSuchElementException();
-
         } else {
-
-            return Flowable.fromIterable(eventsWithPendingInvites.entrySet())
-                    .map(stringEventDetailEntry ->
-                            new Pair<>(stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()));
-
+            if (!eventsWithPendingInvites.isEmpty()) {
+                // Cache is clean. get local copy
+                return Flowable.fromIterable(eventsWithPendingInvites.entrySet())
+                        .map(stringEventDetailEntry ->
+                                new Pair<>(stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()));
+            } else {
+                //TODO: This seems like a lot of work just to throw a flowable exception to be handled in the presenter
+                return Flowable
+                        .fromIterable(eventsWithPendingInvites.entrySet())
+                        .map(stringEventDetailEntry -> new Pair<>(stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()))
+                        .doOnNext(stringEventDetailEntry -> {
+                            throw new NoSuchElementException();
+                        })
+                        .firstOrError()
+                        .toFlowable();
+            }
         }
     }
 
