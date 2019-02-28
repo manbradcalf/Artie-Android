@@ -100,10 +100,15 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
             showContent(false);
             hideEmptyState();
             showLoadingState(true);
-            presenter.subscribe();
         }
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        presenter.subscribe();
     }
 
     @Override
@@ -166,8 +171,8 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
             calendarDaysWithEventIds.put(calendarDay, eventId);
             calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
         }
-        // If I'm not already hosting
-        else if (!event.getHost().getUserId().equals(FirebaseAuth.getInstance().getUid())) {
+        // If I'm not hosting and there are users invited
+        else if (!event.getHost().getUserId().equals(FirebaseAuth.getInstance().getUid()) && event.getUsers() != null) {
 
             // Loop through all users in the event detail
             // If the user is me

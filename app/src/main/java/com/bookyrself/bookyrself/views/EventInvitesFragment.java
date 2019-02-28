@@ -95,7 +95,6 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
                 showLoadingState(true);
                 showContent(false);
                 hideEmptyState();
-                presenter.loadPendingInvites(FirebaseAuth.getInstance().getUid());
             } else {
                 // Signed Out
                 showEmptyState(getString(R.string.event_invites_signed_out_header),
@@ -105,6 +104,12 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
             }
         });
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        presenter.subscribe();
     }
 
     @Override
