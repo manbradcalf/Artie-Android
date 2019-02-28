@@ -56,7 +56,7 @@ public class UserDetailPresenter implements BasePresenter {
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .doOnNext(eventDetail -> {
                                             // notify the view
-                                            listener.displayUserEvents(eventDetail, stringEventInviteInfoEntry.getKey());
+                                            listener.displayUserEvent(eventDetail, stringEventInviteInfoEntry.getKey());
                                         })
                                         .doOnError(throwable -> listener.presentError(throwable.getMessage()))
                                         .subscribe())
@@ -73,7 +73,9 @@ public class UserDetailPresenter implements BasePresenter {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        stringBooleanHashMap -> listener.presentSuccess("Added contact!"),
+                        stringBooleanHashMap -> {
+                            listener.presentSuccess("Added contact!");
+                        },
                         throwable -> listener.presentError(throwable.getMessage())))
                 .subscribe();
     }
@@ -96,7 +98,7 @@ public class UserDetailPresenter implements BasePresenter {
     public interface UserDetailPresenterListener {
         void displayUserInfo(User userInfo, String userId);
 
-        void displayUserEvents(EventDetail event, String eventId);
+        void displayUserEvent(EventDetail event, String eventId);
 
         void displayLoadingState();
 
