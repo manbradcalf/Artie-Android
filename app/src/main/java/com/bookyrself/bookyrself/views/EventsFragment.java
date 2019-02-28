@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.presenters.EventsFragmentPresenter;
 import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.firebase.ui.auth.AuthUI;
@@ -62,65 +63,78 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
     private EventsFragmentPresenter presenter;
     private List<CalendarDay> acceptedEventsCalendarDays = new ArrayList<>();
     private List<CalendarDay> pendingEventsCalendarDays = new ArrayList<>();
-    private HashMap<CalendarDay, String> calendarDaysWithEventIds;
+    private HashMap<CalendarDay, String> calendarDaysWithEventIds = new HashMap<>();
 
     @Override
-    public void onCreate(Bundle savedInsanceState) {
-        super.onCreate(savedInsanceState);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        presenter = new EventsFragmentPresenter(this);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        // Set up view
         View view = inflater.inflate(R.layout.fragment_events, container, false);
-        presenter = new EventsFragmentPresenter(this);
         ButterKnife.bind(this, view);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), EventCreationActivity.class);
-                startActivityForResult(intent, RC_EVENT_CREATION);
-            }
+        toolbar.setTitle("Your Calendar");
+
+        fab.setOnClickListener(view1 -> {
+            Intent intent = new Intent(getActivity(), EventCreationActivity.class);
+            startActivityForResult(intent, RC_EVENT_CREATION);
         });
         calendarView.setOnDateChangedListener(this);
-        calendarDaysWithEventIds = new HashMap<>();
-        toolbar.setTitle("Your Calendar");
-        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if (firebaseAuth.getCurrentUser() != null) {
-                    // Signed in
-                    presenter.loadUsersEventInfo(FirebaseAuth.getInstance().getUid());
-                    showContent(false);
-                    hideEmptyState();
-                    showLoadingState(true);
-                } else {
-                    // Signed Out
-                    calendarDaysWithEventIds.clear();
-                    pendingEventsCalendarDays.clear();
-                    acceptedEventsCalendarDays.clear();
-                    calendarView.removeDecorators();
-                    showEmptyState(getString(R.string.auth_val_prop_header), getString(R.string.auth_val_prop_subheader), getString(R.string.sign_in), getActivity().getDrawable(R.drawable.ic_no_auth_profile));
-                }
-            }
-        });
+
+        // Determine the view state by the auth state
+        if (FirebaseAuth.getInstance().getUid() == null) {
+            // Signed out
+            showEmptyState(
+                    getString(R.string.events_fragment_empty_state_signed_out_header),
+                    getString(R.string.events_fragment_empty_state_signed_out_subheader),
+                    getString(R.string.sign_in),
+                    getActivity().getDrawable(R.drawable.ic_calendar));
+        } else {
+            // Signed In, load events
+            showContent(false);
+            hideEmptyState();
+            showLoadingState(true);
+        }
+
         return view;
     }
 
-    // Reload the CalendarView after creating a new event or signing in
+    @Override
+    public void onResume() {
+        super.onResume();
+        presenter.subscribe();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        calendarDaysWithEventIds.clear();
+        pendingEventsCalendarDays.clear();
+        acceptedEventsCalendarDays.clear();
+        calendarView.removeDecorators();
+    }
+
+    /**
+     *  Reload the calendar view after signing in or creating event
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            switch (requestCode) {
-                //TODO: Is this pointless duplication or good for readability & updatability?
-                case RC_SIGN_IN:
-                    presenter.loadUsersEventInfo(FirebaseAuth.getInstance().getUid());
-                case RC_EVENT_CREATION:
-                    presenter.loadUsersEventInfo(FirebaseAuth.getInstance().getUid());
-            }
+            presenter.loadUsersEventInfo(FirebaseAuth.getInstance().getUid());
         }
     }
+
 
     @Override
     public void onDateSelected(@NonNull MaterialCalendarView materialCalendarView, @NonNull CalendarDay calendarDay, boolean b) {
@@ -135,6 +149,10 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
         }
     }
 
+    /**
+     * @param event   The event detail of an event listed under a user's node in Firebase
+     * @param eventId The event Id of the event
+     */
     @Override
     public void eventDetailReturned(EventDetail event, String eventId) {
         showContent(true);
@@ -147,26 +165,35 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
         int day = Integer.parseInt(s[2]);
         CalendarDay calendarDay = CalendarDay.from(year, month, day);
 
-        // If I'm not already hosting
-        if (!event.getHost().getUserId().equals(FirebaseAuth.getInstance().getUid())) {
-            // Check all events for my ID. If it's there && true, set accepted. else, set pending.
-            for (Map.Entry<String, Boolean> userIsAttending : event.getUsers().entrySet()) {
-                if (userIsAttending.getValue()) {
-                    acceptedEventsCalendarDays.add(calendarDay);
-                    calendarDaysWithEventIds.put(calendarDay, eventId);
-                    calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
-                } else {
-                    pendingEventsCalendarDays.add(calendarDay);
-                    calendarDaysWithEventIds.put(calendarDay, eventId);
-                    calendarView.addDecorator(new EventDecorator(false, pendingEventsCalendarDays, this.getContext()));
-                }
-            }
-        }
-        // If i'm the host, set me as "accepted"
-        else {
+        // If i'm the host, I'm attending
+        if (event.getHost().getUserId().equals(FirebaseAuth.getInstance().getUid())) {
             acceptedEventsCalendarDays.add(calendarDay);
             calendarDaysWithEventIds.put(calendarDay, eventId);
             calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
+        }
+        // If I'm not hosting and there are users invited
+        else if (!event.getHost().getUserId().equals(FirebaseAuth.getInstance().getUid()) && event.getUsers() != null) {
+
+            // Loop through all users in the event detail
+            // If the user is me
+            // My id is not in the event because the invite was rejected and userId deleted from event
+            for (Map.Entry<String, Boolean> userIsAttending : event.getUsers().entrySet())
+                if (userIsAttending.getKey().equals(FirebaseAuth.getInstance().getUid())) {
+
+                    // and I am attending, set the calendarDay to be attending
+                    if (userIsAttending.getValue()) {
+                        acceptedEventsCalendarDays.add(calendarDay);
+                        calendarDaysWithEventIds.put(calendarDay, eventId);
+                        calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
+                    }
+
+                    // or if I'm not attending yet, set invite to pending
+                    else if (!userIsAttending.getValue()) {
+                        pendingEventsCalendarDays.add(calendarDay);
+                        calendarDaysWithEventIds.put(calendarDay, eventId);
+                        calendarView.addDecorator(new EventDecorator(false, pendingEventsCalendarDays, this.getContext()));
+                    }
+                } else Log.e("Test", "User not attending");
         }
     }
 
@@ -223,20 +250,17 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
         } else {
             emptyStateButton.setVisibility(View.VISIBLE);
             emptyStateButton.setText(buttonText);
-            emptyStateButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
-                            new AuthUI.IdpConfig.EmailBuilder().build());
-                    // Authenticate
-                    startActivityForResult(
-                            AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setIsSmartLockEnabled(false, true)
-                                    .setAvailableProviders(providers)
-                                    .build(),
-                            RC_SIGN_IN);
-                }
+            emptyStateButton.setOnClickListener(view -> {
+                List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                        new AuthUI.IdpConfig.EmailBuilder().build());
+                // Authenticate
+                startActivityForResult(
+                        AuthUI.getInstance()
+                                .createSignInIntentBuilder()
+                                .setIsSmartLockEnabled(false, true)
+                                .setAvailableProviders(providers)
+                                .build(),
+                        RC_SIGN_IN);
             });
         }
     }

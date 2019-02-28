@@ -2,19 +2,19 @@ package com.bookyrself.bookyrself.presenters;
 
 import android.util.Log;
 
-import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Body;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Bool;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Bool_;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Date;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Filter;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Match;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.MultiMatch;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Must;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Must_;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Query;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Range;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents.SearchResponse2;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.SearchResponseUsers;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchRequest.Body;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchRequest.Bool;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchRequest.Bool_;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchRequest.Date;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchRequest.Filter;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchRequest.Match;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchRequest.MultiMatch;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchRequest.Must;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchRequest.Must_;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchRequest.Query;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchRequest.Range;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchResponseEvents.SearchResponse2;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchResponseUsers.SearchResponseUsers;
 import com.bookyrself.bookyrself.services.SearchService;
 
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class SearchPresenter {
                         public void onResponse(Call<SearchResponse2> call, Response<SearchResponse2> response) {
                             Log.i(this.toString(), response.toString());
                             if (response.body() != null) {
-                                List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents.Hit> hits = response.body().getHits().getHits();
+                                List<com.bookyrself.bookyrself.data.ResponseModels.SearchResponseEvents.Hit> hits = response.body().getHits().getHits();
                                 listener.searchEventsResponseReady(hits);
                             }
                         }
@@ -82,7 +82,7 @@ public class SearchPresenter {
                         @Override
                         public void onResponse(Call<SearchResponseUsers> call, Response<SearchResponseUsers> response) {
                             if (response.body() != null) {
-                                List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Hit> hits = response.body().getHits().getHits();
+                                List<com.bookyrself.bookyrself.data.ResponseModels.SearchResponseUsers.Hit> hits = response.body().getHits().getHits();
                                 listener.searchUsersResponseReady(hits);
                             } else if (response.errorBody() != null) {
                                 listener.showError();
@@ -169,9 +169,9 @@ public class SearchPresenter {
      * Contract / Listener
      */
     public interface SearchPresenterListener {
-        void searchEventsResponseReady(List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents.Hit> hits);
+        void searchEventsResponseReady(List<com.bookyrself.bookyrself.data.ResponseModels.SearchResponseEvents.Hit> hits);
 
-        void searchUsersResponseReady(List<com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.Hit> hits);
+        void searchUsersResponseReady(List<com.bookyrself.bookyrself.data.ResponseModels.SearchResponseUsers.Hit> hits);
 
         void startDateChanged(String date);
 

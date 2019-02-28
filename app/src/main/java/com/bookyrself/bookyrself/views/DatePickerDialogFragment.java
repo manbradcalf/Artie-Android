@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.widget.DatePicker;
 
-import com.bookyrself.bookyrself.presenters.DatePickerDialogPresenter;
 import com.bookyrself.bookyrself.presenters.EventCreationPresenter;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
 
@@ -19,7 +18,7 @@ import java.util.Locale;
  */
 
 //TODO: Refactor this class to allow for any presenter, not just mSearchPresenter. See dataReady method
-public class DatePickerDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener, DatePickerDialogPresenter.DatePickerDialogPresenterListener {
+public class DatePickerDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
     public static final int FLAG_EVENT_CREATION = 1;
     public static final int FLAG_START_DATE = 2;
@@ -74,8 +73,6 @@ public class DatePickerDialogFragment extends DialogFragment implements DatePick
         }
     }
 
-
-    @Override
     public void dateSelected(int flag, String date) {
         switch (flag) {
             case FLAG_EVENT_CREATION:

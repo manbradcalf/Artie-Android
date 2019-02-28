@@ -1,121 +1,113 @@
 package com.bookyrself.bookyrself.presenters;
 
-import com.bookyrself.bookyrself.interactors.ContactsInteractor;
-import com.bookyrself.bookyrself.interactors.EventsInteractor;
-import com.bookyrself.bookyrself.interactors.UsersInteractor;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.User.EventInfo;
-import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import com.bookyrself.bookyrself.data.Contacts.ContactsRepository;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ResponseModels.User.EventInviteInfo;
+import com.bookyrself.bookyrself.data.ResponseModels.User.User;
+import com.bookyrself.bookyrself.services.FirebaseService;
+import com.bookyrself.bookyrself.views.MainActivity;
+import com.google.firebase.auth.FirebaseAuth;
+
+import io.reactivex.Flowable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by benmedcalf on 3/9/18.
  */
 
-public class EventCreationPresenter implements ContactsInteractor.ContactsInteractorListener, EventsInteractor.EventCreationInteractorListener, UsersInteractor.UsersInteractorListener {
+public class EventCreationPresenter implements BasePresenter {
 
     private EventCreationPresenterListener presenterListener;
-    private ContactsInteractor contactsInteractor;
-    private EventsInteractor eventsInteractor;
-    private UsersInteractor usersInteractor;
+    private ContactsRepository contactsRepository;
+    private CompositeDisposable compositeDisposable;
 
     /**
      * Constructor
      */
     public EventCreationPresenter(EventCreationPresenterListener listener) {
-        this.contactsInteractor = new ContactsInteractor(this);
-        this.eventsInteractor = new EventsInteractor(this);
-        this.usersInteractor = new UsersInteractor(this);
+        this.contactsRepository = MainActivity.getContactsRepo();
         this.presenterListener = listener;
+        this.compositeDisposable = new CompositeDisposable();
     }
 
     /**
      * Methods
      */
 
+    @Override
+    public void subscribe() {
+        compositeDisposable.add(
+                contactsRepository
+                        .getContactsForUser(FirebaseAuth.getInstance().getUid())
+                        .subscribe(
+                                stringUserPair -> presenterListener.contactReturned(stringUserPair.second, stringUserPair.first),
+                                throwable -> presenterListener.presentError(throwable.getMessage())));
+    }
+
+    @Override
+    public void unsubscribe() {
+        compositeDisposable.dispose();
+    }
+
+
     public void createEvent(EventDetail event) {
-        eventsInteractor.createEvent(event);
+        compositeDisposable.add(
+                FirebaseService.getAPI().createEvent(event)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+
+                        // Set the event to the Host's user
+                        .doOnNext(eventCreationResponse -> {
+
+                            EventInviteInfo hostEventInviteInfo = new EventInviteInfo();
+                            hostEventInviteInfo.setIsInviteAccepted(true);
+                            hostEventInviteInfo.setIsHost(true);
+                            hostEventInviteInfo.setIsInviteRejected(false);
+
+                            FirebaseService.getAPI()
+                                    .addEventToUser(hostEventInviteInfo,
+                                            FirebaseAuth.getInstance().getUid(),
+                                            eventCreationResponse.getName())
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe();
+                        })
+
+                        // Set the event to the invitees
+                        .doOnNext(eventCreationResponse -> {
+
+                            EventInviteInfo inviteeEventInfo = new EventInviteInfo();
+
+                            inviteeEventInfo.setIsHost(false);
+                            inviteeEventInfo.setIsInviteAccepted(false);
+                            inviteeEventInfo.setIsInviteRejected(false);
+
+                            for (String userId : event.getUsers().keySet()) {
+                                Flowable.just(FirebaseService.getAPI()
+                                        .addEventToUser(inviteeEventInfo, userId, eventCreationResponse.getName())
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe());
+                            }
+                        })
+                        .subscribe(
+                                eventCreationResponse -> presenterListener.eventCreated(),
+                                throwable -> {
+                                    presenterListener.presentError(throwable.getMessage());
+                                    Log.e("EventCreationPresenter:", throwable.getMessage());
+                                }));
     }
 
-    public void getContacts(String userId) {
 
-        contactsInteractor.getContactIds(userId);
-    }
-
+    // Called by DatePickerDialogFragment, not the actual EventCreationActivity
     public void setDate(String date) {
-        if (date != null) {
-            presenterListener.dateAdded(date);
-        }
+        presenterListener.dateSelectedFromDatePickerDialog(date);
     }
 
-
-    /**
-     * ContactsInteractor Listeners
-     */
-    @Override
-    public void contactsReturned(HashMap<String, Boolean> contacts) {
-        if (contacts != null) {
-            List<String> contactIds = new ArrayList<>(contacts.keySet());
-            contactsInteractor.getUsersAsContacts(contactIds);
-        }
-    }
-
-    @Override
-    public void userReturned(String id, User user) {
-        if (user != null) {
-            presenterListener.contactReturned(user, id);
-        }
-    }
-
-    @Override
-    public void noUsersReturned() {
-
-    }
-
-    /**
-     * EventsInteractorListener
-     */
-    @Override
-    public void eventDetailReturned(EventDetail event, String eventId) {
-
-    }
-
-    @Override
-    public void addNewlyCreatedEventToUsers(String eventId, List<String> userIdsOfAttendees, String hostUserId) {
-        EventInfo hostEventInfo = new EventInfo();
-        hostEventInfo.setIsInviteAccepted(true);
-        hostEventInfo.setIsHost(true);
-        hostEventInfo.setIsInviteRejected(false);
-        usersInteractor.addEventToUser(hostEventInfo, hostUserId, eventId);
-
-        if (userIdsOfAttendees.size() != 0) {
-            for (String userId : userIdsOfAttendees) {
-                EventInfo eventInfo = new EventInfo();
-                eventInfo.setIsInviteAccepted(false);
-                eventInfo.setIsInviteRejected(false);
-                eventInfo.setIsHost(false);
-                usersInteractor.addEventToUser(eventInfo, userId, eventId);
-            }
-            presenterListener.eventCreated();
-        }
-        //TODO: Wut? I'm tired
-        else {
-            presenterListener.eventCreated();
-        }
-    }
-
-    @Override
-    public void presentError(String error) {
-
-    }
-
-    @Override
-    public void userDetailReturned(User user, String userId) {
-
-    }
 
     /**
      * Contract / Listener
@@ -126,6 +118,8 @@ public class EventCreationPresenter implements ContactsInteractor.ContactsIntera
 
         void eventCreated();
 
-        void dateAdded(String date);
+        void dateSelectedFromDatePickerDialog(String date);
+
+        void presentError(String message);
     }
 }

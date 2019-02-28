@@ -1,7 +1,7 @@
 package com.bookyrself.bookyrself.services;
 
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseEvents.SearchResponse2;
-import com.bookyrself.bookyrself.models.SerializedModels.SearchResponseUsers.SearchResponseUsers;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchResponseEvents.SearchResponse2;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchResponseUsers.SearchResponseUsers;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -34,9 +34,9 @@ public class SearchService {
 
     public interface SearchAPI {
         @POST("/events/_search")
-        Call<SearchResponse2> executeEventsSearch(@Body com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Body query);
+        Call<SearchResponse2> executeEventsSearch(@Body com.bookyrself.bookyrself.data.ResponseModels.SearchRequest.Body query);
 
         @POST("/users/_search")
-        Call<SearchResponseUsers> executeUsersSearch(@Body com.bookyrself.bookyrself.models.SerializedModels.SearchRequest.Body query);
+        Call<SearchResponseUsers> executeUsersSearch(@Body com.bookyrself.bookyrself.data.ResponseModels.SearchRequest.Body query);
     }
 }

@@ -1,63 +1,60 @@
 package com.bookyrself.bookyrself.presenters;
 
-import com.bookyrself.bookyrself.interactors.ContactsInteractor;
-import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.data.Contacts.ContactsRepository;
+import com.bookyrself.bookyrself.data.ResponseModels.User.User;
+import com.bookyrself.bookyrself.views.MainActivity;
+import com.google.firebase.auth.FirebaseAuth;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import io.reactivex.disposables.CompositeDisposable;
 
-public class ContactsFragmentPresenter implements ContactsInteractor.ContactsInteractorListener {
+public class ContactsFragmentPresenter implements ContactsRepository.ContactsInteractorListener {
     private final ContactsPresenterListener presenterListener;
-    private final ContactsInteractor contactsInteractor;
+    private final ContactsRepository contactsRepository;
+    private final CompositeDisposable compositeDisposable;
+    private final String userId = FirebaseAuth.getInstance().getUid();
 
     /**
      * Constructor
      */
     public ContactsFragmentPresenter(ContactsPresenterListener listener) {
         this.presenterListener = listener;
-        this.contactsInteractor = new ContactsInteractor(this);
+        this.contactsRepository = MainActivity.getContactsRepo();
+        this.compositeDisposable = new CompositeDisposable();
     }
 
     /**
      * Methods
      */
-    public void getContactIds(String userId) {
-        contactsInteractor.getContactIds(userId);
-    }
+    public void loadContacts(String userId) {
 
-    public void getContacts(final List<String> ids) {
-        contactsInteractor.getUsersAsContacts(ids);
+        compositeDisposable
+                .add(contactsRepository.getContactsForUser(userId)
+                        .forEach(stringUserPair ->
+                                contactReturned(stringUserPair.first, stringUserPair.second)));
     }
-
 
     /**
      * Interactor Listener
      */
 
     @Override
-    public void contactsReturned(HashMap<String, Boolean> contacts) {
-        if (contacts != null) {
-            List<String> contactIds = new ArrayList<>(contacts.keySet());
-            presenterListener.contactIdsReturned(contactIds);
-        } else {
-            noUsersReturned();
-        }
+    public void subscribe() {
+        loadContacts(userId);
     }
 
     @Override
-    public void userReturned(String id, User user) {
-        presenterListener.contactReturned(id, user);
+    public void unsubscribe() {
+        compositeDisposable.clear();
     }
 
     @Override
-    public void noUsersReturned() {
+    public void contactReturned(String userId, User user) {
+        presenterListener.contactReturned(userId, user);
+    }
+
+    @Override
+    public void noContactsReturned() {
         presenterListener.noContactsReturned();
-    }
-
-    @Override
-    public void presentError(String error) {
-        presenterListener.presentError(error);
     }
 
     /**
@@ -66,8 +63,6 @@ public class ContactsFragmentPresenter implements ContactsInteractor.ContactsInt
     public interface ContactsPresenterListener {
 
         void noContactsReturned();
-
-        void contactIdsReturned(List<String> ids);
 
         void contactReturned(String id, User user);
 

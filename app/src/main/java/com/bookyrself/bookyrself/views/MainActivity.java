@@ -7,14 +7,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.interactors.UsersInteractor;
-import com.bookyrself.bookyrself.models.SerializedModels.User.User;
+import com.bookyrself.bookyrself.data.Contacts.ContactsRepository;
+import com.bookyrself.bookyrself.data.Events.EventsRepo;
+import com.bookyrself.bookyrself.data.Profile.ProfileRepo;
 import com.bookyrself.bookyrself.utils.FragmentViewPager;
 import com.bookyrself.bookyrself.utils.FragmentViewPagerAdapter;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.FirebaseUserMetadata;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
@@ -24,6 +22,9 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     private static final int CONTACTS_FRAGMENT_INDEX = 2;
     private static final int PROFILE_FRAGMENT_INDEX = 3;
     private static final int EVENTS_INVITE_LIST = 4;
+    private static EventsRepo EVENT_INVITES_REPO = null;
+    private static ContactsRepository CONTACTS_REPO = null;
+    private static ProfileRepo PROFILE_REPO = null;
     final ProfileFragment profileFragment = new ProfileFragment();
     final SearchFragment searchFragment = new SearchFragment();
     final EventsFragment eventsFragment = new EventsFragment();
@@ -35,6 +36,29 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     FragmentViewPagerAdapter adapter;
     FragmentViewPager viewPager;
     private BottomNavigationView navigationView;
+
+    public static ContactsRepository getContactsRepo() {
+        if (CONTACTS_REPO == null) {
+            CONTACTS_REPO = new ContactsRepository();
+        }
+            return CONTACTS_REPO;
+    }
+
+    public static EventsRepo getEventsRepo() {
+        if (EVENT_INVITES_REPO == null) {
+            EVENT_INVITES_REPO = new EventsRepo();
+        }
+
+        return EVENT_INVITES_REPO;
+    }
+
+    public static ProfileRepo getProfileRepo() {
+        if (PROFILE_REPO == null) {
+            PROFILE_REPO = new ProfileRepo();
+        }
+
+        return PROFILE_REPO;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

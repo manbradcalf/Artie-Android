@@ -17,7 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.presenters.EventInvitesFragmentPresenter;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,17 +25,18 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class EventInvitesFragment extends Fragment implements BaseFragment, EventInvitesFragmentPresenter.EventInvitesUserDetailPresenterListener {
+public class EventInvitesFragment extends Fragment implements BaseFragment, EventInvitesFragmentPresenter.EventInvitesViewListener {
 
     private static final int RC_SIGN_IN = 123;
 
@@ -57,10 +58,9 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
     Button emptyStateButton;
 
 
-    private HashMap<EventDetail, String> eventDetailEventIdHashMap;
     private RecyclerView.LayoutManager layoutManager;
     private EventsAdapter adapter;
-    private List<EventDetail> eventDetailsList;
+    private List<Map.Entry<String, EventDetail>> events;
     private EventInvitesFragmentPresenter presenter;
 
 
@@ -71,6 +71,10 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (FirebaseAuth.getInstance().getUid() != null) {
+            presenter = new EventInvitesFragmentPresenter(this);
+        }
     }
 
     @Override
@@ -79,42 +83,41 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event_invites, container, false);
         ButterKnife.bind(this, view);
-        eventDetailEventIdHashMap = new HashMap<>();
-        eventDetailsList = new ArrayList<>();
+        events = new ArrayList<>();
         adapter = new EventsAdapter();
-        presenter = new EventInvitesFragmentPresenter(this);
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
         toolbar.setTitle(R.string.title_event_invites);
-        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if (firebaseAuth.getCurrentUser() != null) {
-                    // Signed in
-                    presenter.getEventInvites(FirebaseAuth.getInstance().getUid());
-                    showContent(false);
-                    hideEmptyState();
-                    showLoadingState(true);
-                } else {
-                    // Signed Out
-                    showEmptyState(getString(R.string.auth_val_prop_header),
-                            getString(R.string.empty_state_event_invites_signed_out_subheader),
-                            getString(R.string.sign_in),
-                            getActivity().getDrawable(R.drawable.ic_no_auth_profile));
-                }
+        FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
+            if (firebaseAuth.getCurrentUser() != null) {
+                // Signed in
+                showLoadingState(true);
+                showContent(false);
+                hideEmptyState();
+            } else {
+                // Signed Out
+                showEmptyState(getString(R.string.event_invites_signed_out_header),
+                        getString(R.string.empty_state_event_invites_signed_out_subheader),
+                        getString(R.string.sign_in),
+                        getActivity().getDrawable(R.drawable.ic_invitation));
             }
         });
         return view;
     }
 
     @Override
-    public void eventPendingInvitationResponseReturned(EventDetail event, String eventId) {
+    public void onResume() {
+        super.onResume();
+        presenter.subscribe();
+    }
+
+    @Override
+    public void eventPendingInvitationResponseReturned(String eventId, EventDetail event) {
+        events.add(new AbstractMap.SimpleEntry<>(eventId, event));
+        adapter.notifyDataSetChanged();
         showLoadingState(false);
         showContent(true);
-        eventDetailsList.add(event);
-        eventDetailEventIdHashMap.put(event, eventId);
-        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -123,22 +126,22 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         showEmptyState(getString(R.string.error_header), message, "", getActivity().getDrawable(R.drawable.ic_error_empty_state));
     }
 
+
     @Override
-    public void eventInviteAccepted(boolean accepted, String eventId) {
-        if (recyclerView.getVisibility() == View.GONE) {
-            showContent(true);
+    public void removeEventFromList(String eventId, EventDetail eventDetail) {
+
+        Map.Entry<String, EventDetail> entry = new AbstractMap.SimpleEntry<>(eventId,eventDetail);
+        events.remove(entry);
+        adapter.notifyDataSetChanged();
+
+        if (events.isEmpty()) {
+            showEmptyStateForNoInvites();
         }
 
-        for (int i = 0; i < eventDetailsList.size(); i++) {
-            if (eventId.equals(eventDetailEventIdHashMap.get(eventDetailsList.get(i)))) {
-                eventDetailsList.remove(eventDetailsList.get(i));
-                adapter.notifyDataSetChanged();
-            }
-        }
     }
 
     @Override
-    public void noInvitesReturnedForUser() {
+    public void showEmptyStateForNoInvites() {
         showEmptyState(getString(R.string.empty_state_event_invites_no_invites_header),
                 getString(R.string.empty_state_event_invites_no_invites_subheader),
                 "", getActivity().getDrawable(R.drawable.ic_no_events_black_24dp));
@@ -180,20 +183,17 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         if (!buttonText.equals("")) {
             emptyStateButton.setVisibility(View.VISIBLE);
             emptyStateButton.setText(buttonText);
-            emptyStateButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
-                            new AuthUI.IdpConfig.EmailBuilder().build());
-                    // Authenticate
-                    startActivityForResult(
-                            AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setIsSmartLockEnabled(false, true)
-                                    .setAvailableProviders(providers)
-                                    .build(),
-                            RC_SIGN_IN);
-                }
+            emptyStateButton.setOnClickListener(view -> {
+                List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                        new AuthUI.IdpConfig.EmailBuilder().build());
+                // Authenticate
+                startActivityForResult(
+                        AuthUI.getInstance()
+                                .createSignInIntentBuilder()
+                                .setIsSmartLockEnabled(false, true)
+                                .setAvailableProviders(providers)
+                                .build(),
+                        RC_SIGN_IN);
             });
         } else {
             emptyStateButton.setVisibility(View.GONE);
@@ -221,19 +221,23 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
             View view = getLayoutInflater().inflate(R.layout.item_event_invite, parent, false);
             return new ViewHolderEvents(view);
+
         }
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
+
             final ViewHolderEvents viewHolderEvents = (ViewHolderEvents) holder;
-            EventDetail event = eventDetailsList.get(position);
-            viewHolderEvents.eventNameTextView.setText(event.getEventname());
-            viewHolderEvents.eventLocationTextView.setText(event.getCitystate());
+            EventDetail eventDetail = events.get(position).getValue();
+            viewHolderEvents.eventNameTextView.setText(eventDetail.getEventname());
+            viewHolderEvents.eventLocationTextView.setText(eventDetail.getCitystate());
             DateFormat inputformat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+
             try {
-                Date date = inputformat.parse(event.getDate());
+                Date date = inputformat.parse(eventDetail.getDate());
                 DateFormat outputFormat = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
                 String formattedDate = outputFormat.format(date);
                 viewHolderEvents.eventDateTextView.setText(formattedDate);
@@ -241,29 +245,21 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
                 e.printStackTrace();
             }
 
-            viewHolderEvents.acceptButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //TODO: Holy shit this is ugly
-                    // Get the event detail from event details list
-                    // Then use that event detail to get the id from the eventdetail,id map
-                    // THen pass that iD to the presenter method
-                    // UGH
-                    presenter.acceptEventInvite(FirebaseAuth.getInstance().getUid(), eventDetailEventIdHashMap.get(eventDetailsList.get(position)));
-                }
+            viewHolderEvents.acceptButton.setOnClickListener(view -> {
+                presenter.acceptEventInvite(FirebaseAuth.getInstance().getUid(),
+                        events.get(position).getKey(),
+                        events.get(position).getValue());
             });
 
-            viewHolderEvents.denyButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    presenter.rejectInvite(FirebaseAuth.getInstance().getUid(), eventDetailEventIdHashMap.get(eventDetailsList.get(position)));
-                }
-            });
+            viewHolderEvents.denyButton.setOnClickListener(view ->
+                    presenter.rejectEventInvite(FirebaseAuth.getInstance().getUid(),
+                            events.get(position).getKey(),
+                            events.get(position).getValue()));
         }
 
         @Override
         public int getItemCount() {
-            return eventDetailsList.size();
+            return events.size();
         }
 
         class ViewHolderEvents extends RecyclerView.ViewHolder {

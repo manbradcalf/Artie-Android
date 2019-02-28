@@ -1,71 +1,90 @@
 package com.bookyrself.bookyrself.presenters;
 
-import com.bookyrself.bookyrself.interactors.EventsInteractor;
-import com.bookyrself.bookyrself.interactors.UsersInteractor;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
+import android.util.Log;
+
+import com.bookyrself.bookyrself.data.Events.EventsRepo;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.views.MainActivity;
+import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.NoSuchElementException;
+
+import io.reactivex.disposables.CompositeDisposable;
 
 
-public class EventInvitesFragmentPresenter implements UsersInteractor.UsersEventInvitesInteractorListener, EventsInteractor.EventInvitesInteractorListener {
+public class EventInvitesFragmentPresenter implements BasePresenter {
 
-    private final EventInvitesUserDetailPresenterListener listener;
-    private UsersInteractor userInteractor;
-    private EventsInteractor eventsInteractor;
+    private final EventInvitesViewListener listener;
+    private EventsRepo eventsRepo;
+    private CompositeDisposable compositeDisposable;
+    private String userId;
 
-    public EventInvitesFragmentPresenter(EventInvitesUserDetailPresenterListener listener) {
+    public EventInvitesFragmentPresenter(EventInvitesViewListener listener) {
+        this.userId = FirebaseAuth.getInstance().getUid();
         this.listener = listener;
-
-        //TODO: Should i do this elsewhere?
-        this.userInteractor = new UsersInteractor(this);
-        this.eventsInteractor = new EventsInteractor(this);
+        this.compositeDisposable = new CompositeDisposable();
+        this.eventsRepo = MainActivity.getEventsRepo();
     }
 
-    public void getEventInvites(String userId) {
-        userInteractor.getUserInvites(userId);
+    public void loadPendingInvites() {
+        compositeDisposable
+                .add(eventsRepo.getEventsWithPendingInvites(userId)
+                        .subscribe(
+                                //onNext
+                                stringEventDetailPair -> listener.eventPendingInvitationResponseReturned(
+                                        stringEventDetailPair.first,
+                                        stringEventDetailPair.second),
+
+                                //onError
+                                throwable -> {
+                                    if (throwable instanceof NoSuchElementException) {
+                                        listener.showEmptyStateForNoInvites();
+                                    } else {
+                                        listener.presentError(throwable.getMessage());
+                                        Log.e("EventsInvitesFragment: ", throwable.getMessage(), throwable.fillInStackTrace());
+                                    }
+                                }));
+
     }
 
-    public void acceptEventInvite(String userId, String eventId) {
-        eventsInteractor.acceptEventInvite(userId, eventId);
+
+    public void acceptEventInvite(final String userId, final String eventId, EventDetail eventDetail) {
+        compositeDisposable.add(
+                eventsRepo.acceptEventInvite(userId, eventId)
+                        .doOnNext(aBoolean -> listener.removeEventFromList(eventId, eventDetail))
+                        .doOnError(throwable -> listener.presentError(throwable.getMessage()))
+                        .subscribe());
     }
 
-    public void rejectInvite(String userId, String eventId) {
-        eventsInteractor.rejectEventInvite(userId, eventId);
+    public void rejectEventInvite(String userId, final String eventId, EventDetail eventDetail) {
+        compositeDisposable.add(
+                eventsRepo.rejectEventInvite(userId, eventId)
+                        .doOnNext(aBoolean -> listener.removeEventFromList(eventId, eventDetail))
+                        .doOnError(throwable -> listener.presentError(throwable.getMessage()))
+                        .subscribe());
+    }
+
+
+    @Override
+    public void subscribe() {
+        loadPendingInvites();
     }
 
     @Override
-    public void eventInviteAccepted(boolean accepted, String eventId) {
-        listener.eventInviteAccepted(accepted, eventId);
-    }
-
-    @Override
-    public void eventIdOfEventWithPendingInvitesReturned(String eventId) {
-        eventsInteractor.getEventDetail(eventId);
-    }
-
-    @Override
-    public void eventDetailReturned(EventDetail event, String eventId) {
-        listener.eventPendingInvitationResponseReturned(event, eventId);
-    }
-
-    @Override
-    public void presentError(String error) {
-        listener.presentError(error);
-    }
-
-    @Override
-    public void noInvitesReturnedForUser() {
-        listener.noInvitesReturnedForUser();
+    public void unsubscribe() {
+        compositeDisposable.clear();
     }
 
     /**
      * Contract / Listener
      */
-    public interface EventInvitesUserDetailPresenterListener {
-        void eventPendingInvitationResponseReturned(EventDetail event, String eventId);
+    public interface EventInvitesViewListener {
+        void eventPendingInvitationResponseReturned(String eventId, EventDetail event);
 
         void presentError(String message);
 
-        void eventInviteAccepted(boolean accepted, String eventId);
+        void removeEventFromList(String eventId, EventDetail eventDetail);
 
-        void noInvitesReturnedForUser();
+        void showEmptyStateForNoInvites();
     }
 }

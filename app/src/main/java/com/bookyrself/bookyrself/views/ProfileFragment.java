@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -25,20 +24,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.models.SerializedModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.models.SerializedModels.User.User;
-import com.bookyrself.bookyrself.presenters.ProfilePresenter;
+import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ResponseModels.User.User;
+import com.bookyrself.bookyrself.presenters.ProfileFragmentPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseUserMetadata;
-import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -59,7 +54,7 @@ import butterknife.ButterKnife;
 
 import static android.app.Activity.RESULT_OK;
 
-public class ProfileFragment extends Fragment implements BaseFragment, OnDateSelectedListener, ProfilePresenter.ProfilePresenterListener {
+public class ProfileFragment extends Fragment implements BaseFragment, OnDateSelectedListener, ProfileFragmentPresenter.ProfilePresenterListener {
 
     private static final int RC_SIGN_IN = 123;
     private static final int RC_PROFILE_EDIT = 456;
@@ -99,7 +94,7 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
     @BindView(R.id.profile_events_calendar)
     MaterialCalendarView calendarView;
 
-    private ProfilePresenter presenter;
+    private ProfileFragmentPresenter presenter;
     private StorageReference storageReference;
     private HashMap<CalendarDay, String> calendarDaysWithEventIds;
     private User user;
@@ -108,7 +103,12 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+        presenter = new ProfileFragmentPresenter(this, FirebaseAuth.getInstance().getUid());
+        user = new User();
+        storageReference = FirebaseStorage.getInstance().getReference();
+        calendarDaysWithEventIds = new HashMap<>();
     }
 
     @Override
@@ -118,32 +118,29 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, view);
         setHasOptionsMenu(true);
-        presenter = new ProfilePresenter(this);
         ((AppCompatActivity) Objects.requireNonNull(getActivity())).setSupportActionBar(toolbar);
-        user = new User();
-        storageReference = FirebaseStorage.getInstance().getReference();
-        calendarDaysWithEventIds = new HashMap<>();
         toolbar.setTitle(R.string.title_profile);
-        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                //TODO: How to handle a situation where FB has no data for the FirebaseAuth user
-                if (firebaseAuth.getCurrentUser() != null) {
-                    // Signed in
-                    presenter.getUser(FirebaseAuth.getInstance().getUid());
-                    showContent(false);
-                    hideEmptyState();
-                    showLoadingState(true);
-                } else {
-                    // Signed Out
-                    showEmptyState(getString(R.string.auth_val_prop_header),
-                            getString(R.string.auth_val_prop_subheader),
-                            getString(R.string.sign_in),
-                            getActivity().getDrawable(R.drawable.ic_no_auth_profile));
-                }
-            }
-        });
+
         return view;
+    }
+
+    @Override
+    public void onResume() {
+
+        super.onResume();
+
+        if (FirebaseAuth.getInstance().getUid() != null) {
+            showContent(false);
+            hideEmptyState();
+            showLoadingState(true);
+            presenter.subscribe();
+        } else {
+            showEmptyState(getString(R.string.auth_val_prop_header),
+                    getString(R.string.auth_val_prop_subheader),
+                    getString(R.string.sign_in),
+                    getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+        }
+
     }
 
     @Override
@@ -172,14 +169,14 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
     }
 
     @Override
-    public void profileInfoReady(User user, String userId) {
+    public void profileInfoReady(String userId, User user) {
         setLayout(user);
         showContent(true);
     }
 
     // TODO: Find a way to not repeat myself for this, EventsFragment and UserDetailActivity
     @Override
-    public void eventReady(EventDetail event, String eventId) {
+    public void eventReady(String eventId, EventDetail event) {
         //TODO: Move this date parsing logic to presenter level
         String[] s = event.getDate().split("-");
         int year = Integer.parseInt(s[0]);
@@ -208,16 +205,6 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         showEmptyState(getString(R.string.error_header), error, "", getActivity().getDrawable(R.drawable.ic_error_empty_state));
     }
 
-    @Override
-    public void showLoadingState(Boolean show) {
-        if (show) {
-            progressbar.setVisibility(View.VISIBLE);
-        } else {
-            progressbar.setVisibility(View.GONE);
-        }
-
-    }
-
     private void setLayout(final User user) {
         if (user != null) {
             emptyState.setVisibility(View.GONE);
@@ -233,7 +220,6 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
                         String.format("<a href=\"%s\">%s</a> ", ("http://" + user.getUrl()), user.getUrl());
                 urlTextView.setText(Html.fromHtml(linkedText));
             }
-
 
             if (user.getTags() != null) {
                 tagsTextView.setText(user.getTags().toString().replaceAll("\\[|]|, $", ""));
@@ -252,48 +238,26 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         }
 
         // Both edit buttons start the profile creation activity
-        editBioButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                editProfile(user);
-            }
-        });
-        editInfoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                editProfile(user);
-            }
-        });
+        editBioButton.setOnClickListener(view -> editProfile(user));
+        editInfoButton.setOnClickListener(view -> editProfile(user));
 
         // Load profile image
         final StorageReference profileImageReference = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
-        profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                Picasso.with(getActivity().getApplicationContext())
-                        .load(uri)
-                        .resize(148, 148)
-                        .centerCrop()
-                        .transform(new CircleTransform())
-                        .into(profileImage);
-
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle any errors
-                profileImage.setImageDrawable(getContext().getDrawable((R.drawable.ic_add_a_photo_black_24dp)));
-            }
+        profileImageReference.getDownloadUrl().addOnSuccessListener(uri -> Picasso.with(getActivity().getApplicationContext())
+                .load(uri)
+                .resize(148, 148)
+                .centerCrop()
+                .transform(new CircleTransform())
+                .into(profileImage)).addOnFailureListener(exception -> {
+            // Handle any errors
+            profileImage.setImageDrawable(getContext().getDrawable((R.drawable.ic_add_a_photo_black_24dp)));
         });
 
-        profileImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Choose Picture"), RC_PHOTO_SELECT);
-            }
+        profileImage.setOnClickListener(view -> {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Choose Picture"), RC_PHOTO_SELECT);
         });
     }
 
@@ -338,37 +302,12 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
                             showToast("Signing Up!");
                         } else {
                             // Successfully signed in
-                            presenter.getUser(FirebaseAuth.getInstance().getCurrentUser().getUid());
                             showLoadingState(true);
                             showToast("Signing In!");
                         }
                         return;
                     case RC_PROFILE_EDIT:
-                        if (data.getStringExtra("bio") != null) {
-                            user.setBio(data.getStringExtra("bio"));
-                        }
-                        if (data.getStringExtra("username") != null) {
-                            user.setUsername(data.getStringExtra("username"));
-                            UserProfileChangeRequest changeRequest = new UserProfileChangeRequest.Builder()
-                                    .setDisplayName(data.getStringExtra("username"))
-                                    .build();
-                            fbUser.updateProfile(changeRequest);
-                        }
-                        if (data.getStringExtra("location") != null) {
-                            user.setCitystate(data.getStringExtra("location"));
-                        }
-                        if (data.getStringExtra("tags") != null) {
-                            List<String> tagsList = Arrays.asList(data.getStringExtra("tags").split(", "));
-                            user.setTags(tagsList);
-                        }
-
-                        if (data.getStringExtra("url") != null) {
-                            user.setUrl(data.getStringExtra("url"));
-                        }
-                        if (user != null) {
-                            presenter.patchUser(user, fbUser.getUid());
-                            showToast("Updated Profile!");
-                        }
+                        showToast("Profile Updated!");
                         return;
                     case RC_PHOTO_SELECT:
                         Uri selectedimg = data.getData();
@@ -384,31 +323,17 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
                         // Upload to firebase
                         StorageReference profilePhotoRef = storageReference.child("images/" + fbUser.getUid());
                         UploadTask uploadTask = profilePhotoRef.putFile(selectedimg);
-                        uploadTask.addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                showToast("upload failed");
-                                Picasso.with(getActivity().getApplicationContext()).load(R.drawable.ic_user).into(profileImage);
-                            }
-                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                showToast("upload succeeded");
-                            }
-                        });
+                        uploadTask.addOnFailureListener(e -> {
+                            showToast("upload failed");
+                            Picasso.with(getActivity().getApplicationContext()).load(R.drawable.ic_user).into(profileImage);
+                        }).addOnSuccessListener(taskSnapshot -> showToast("upload succeeded"));
                 }
             }
         } else if (response == null) {
             // User pressed back button
             showToast("Canceled");
-            return;
-        }
-        if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
-            showToast("No Connection");
-            return;
-        }
-        if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
-            showToast("Unknown Error");
+        } else if (response.getError() != null) {
+            showToast(response.getError().getMessage());
         }
     }
 

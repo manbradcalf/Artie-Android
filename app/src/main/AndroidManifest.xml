@@ -37,6 +37,7 @@
         <activity
             android:name=".views.ProfileEditActivity"
             android:label="ProfileCreation"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <meta-data
