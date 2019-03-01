@@ -72,9 +72,7 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (FirebaseAuth.getInstance().getUid() != null) {
-            presenter = new EventInvitesFragmentPresenter(this);
-        }
+        presenter = new EventInvitesFragmentPresenter(this);
     }
 
     @Override
@@ -89,20 +87,9 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
         toolbar.setTitle(R.string.title_event_invites);
-        FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
-            if (firebaseAuth.getCurrentUser() != null) {
-                // Signed in
-                showLoadingState(true);
-                showContent(false);
-                hideEmptyState();
-            } else {
-                // Signed Out
-                showEmptyState(getString(R.string.event_invites_signed_out_header),
-                        getString(R.string.empty_state_event_invites_signed_out_subheader),
-                        getString(R.string.sign_in),
-                        getActivity().getDrawable(R.drawable.ic_invitation));
-            }
-        });
+        hideEmptyState();
+        showLoadingState(true);
+
         return view;
     }
 
@@ -114,9 +101,9 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
 
     @Override
     public void eventPendingInvitationResponseReturned(String eventId, EventDetail event) {
+        showLoadingState(false);
         events.add(new AbstractMap.SimpleEntry<>(eventId, event));
         adapter.notifyDataSetChanged();
-        showLoadingState(false);
         showContent(true);
     }
 
@@ -130,7 +117,7 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
     @Override
     public void removeEventFromList(String eventId, EventDetail eventDetail) {
 
-        Map.Entry<String, EventDetail> entry = new AbstractMap.SimpleEntry<>(eventId,eventDetail);
+        Map.Entry<String, EventDetail> entry = new AbstractMap.SimpleEntry<>(eventId, eventDetail);
         events.remove(entry);
         adapter.notifyDataSetChanged();
 
@@ -207,6 +194,14 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
         emptyStateImage.setVisibility(View.GONE);
         emptyStateTextHeader.setVisibility(View.GONE);
         emptyStateTextSubHeader.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void showSignedOutEmptyState() {
+        showEmptyState(getString(R.string.event_invites_signed_out_header),
+                getString(R.string.empty_state_event_invites_signed_out_subheader),
+                getString(R.string.sign_in),
+                getActivity().getDrawable(R.drawable.ic_invitation));
     }
 
     /**

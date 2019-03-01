@@ -177,9 +177,12 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                             .map(stringUserPair -> stringUserPair.first)
                             .filter(s -> s.equals(userId))
                             .subscribe(s -> {
-                                addUserToContactsTextView.setText(R.string.user_detail_contact_already_added);
-                                addUserToContactsCardview.setClickable(false);
-                            }));
+                                        addUserToContactsTextView.setText(R.string.user_detail_contact_already_added);
+                                        addUserToContactsCardview.setClickable(false);
+                                    },
+                                    throwable -> {
+                                        Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }));
         }
 
         final StorageReference profileImageReference = storageReference.child("images/" + userID);
@@ -214,7 +217,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         CalendarDay calendarDay = CalendarDay.from(year, month, day);
 
         // If there are users for this event
-        if (!event.getUsers().entrySet().isEmpty()) {
+        if (!event.getUsers().entrySet().isEmpty() && event.getUsers() != null) {
             // Loop through the users
             for (Map.Entry<String, Boolean> userIsAttending : event.getUsers().entrySet()) {
                 // If this event's user is the user we're viewing and they're attending

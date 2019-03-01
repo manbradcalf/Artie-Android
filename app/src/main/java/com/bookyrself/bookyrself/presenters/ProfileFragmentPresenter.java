@@ -5,14 +5,12 @@ import com.bookyrself.bookyrself.data.Profile.ProfileRepo;
 import com.bookyrself.bookyrself.data.ProfileInteractor;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.data.ResponseModels.User.User;
-import com.bookyrself.bookyrself.services.FirebaseService;
 import com.bookyrself.bookyrself.views.MainActivity;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.NoSuchElementException;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class ProfileFragmentPresenter implements BasePresenter, ProfileInteractor.ProfileInteractorListener {
 
@@ -26,9 +24,8 @@ public class ProfileFragmentPresenter implements BasePresenter, ProfileInteracto
     /**
      * Construction
      */
-    public ProfileFragmentPresenter(final ProfilePresenterListener listener, String userId) {
+    public ProfileFragmentPresenter(final ProfilePresenterListener listener) {
         this.listener = listener;
-        this.userId = userId;
         this.eventsRepo = MainActivity.getEventsRepo();
         this.profileRepo = MainActivity.getProfileRepo();
         this.profileInteractor = new ProfileInteractor(this);
@@ -51,18 +48,18 @@ public class ProfileFragmentPresenter implements BasePresenter, ProfileInteracto
         compositeDisposable.add(
 
                 profileRepo.getProfileInfo(userId).subscribe(
-                                user -> {
-                                    // Notify view the profile is ready
-                                    listener.profileInfoReady(userId, user);
-                                },
-                                throwable -> {
-                                    if (throwable instanceof NoSuchElementException) {
-                                        listener.presentError("We were unable to find your profile");
-                                    } else {
-                                        listener.presentError(throwable.getMessage());
-                                    }
+                        user -> {
+                            // Notify view the profile is ready
+                            listener.profileInfoReady(userId, user);
+                        },
+                        throwable -> {
+                            if (throwable instanceof NoSuchElementException) {
+                                listener.presentError("We were unable to find your profile");
+                            } else {
+                                listener.presentError(throwable.getMessage());
+                            }
 
-                                }));
+                        }));
     }
 
     private void loadEventDetails() {
@@ -82,8 +79,13 @@ public class ProfileFragmentPresenter implements BasePresenter, ProfileInteracto
 
     @Override
     public void subscribe() {
-        loadProfile();
-        loadEventDetails();
+        if (FirebaseAuth.getInstance().getUid() != null) {
+            userId = FirebaseAuth.getInstance().getUid();
+            loadProfile();
+            loadEventDetails();
+        } else {
+            listener.showSignedOutEmptyState();
+        }
     }
 
     @Override
@@ -93,9 +95,9 @@ public class ProfileFragmentPresenter implements BasePresenter, ProfileInteracto
 
 
     /**
-     * Contract / Listener
+     * PresenterListener Definition
      */
-    public interface ProfilePresenterListener {
+    public interface ProfilePresenterListener extends BasePresenterListener {
 
         void profileInfoReady(String userId, User user);
 

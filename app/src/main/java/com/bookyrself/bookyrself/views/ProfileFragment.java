@@ -105,7 +105,7 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        presenter = new ProfileFragmentPresenter(this, FirebaseAuth.getInstance().getUid());
+        presenter = new ProfileFragmentPresenter(this);
         user = new User();
         storageReference = FirebaseStorage.getInstance().getReference();
         calendarDaysWithEventIds = new HashMap<>();
@@ -135,10 +135,7 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
             showLoadingState(true);
             presenter.subscribe();
         } else {
-            showEmptyState(getString(R.string.auth_val_prop_header),
-                    getString(R.string.auth_val_prop_subheader),
-                    getString(R.string.sign_in),
-                    getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+            showSignedOutEmptyState();
         }
 
     }
@@ -157,10 +154,7 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
                 if (getContext() != null) {
                     AuthUI.getInstance().signOut(getContext());
                     showContent(false);
-                    showEmptyState(getString(R.string.auth_val_prop_header),
-                            getString(R.string.auth_val_prop_subheader),
-                            getString(R.string.sign_in),
-                            getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+                    showSignedOutEmptyState();
                 }
                 return true;
             default:
@@ -177,25 +171,31 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
     // TODO: Find a way to not repeat myself for this, EventsFragment and UserDetailActivity
     @Override
     public void eventReady(String eventId, EventDetail event) {
-        //TODO: Move this date parsing logic to presenter level
-        String[] s = event.getDate().split("-");
-        int year = Integer.parseInt(s[0]);
-        // I have to do weird logic on the month because months are 0 indexed
-        // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
-        int month = Integer.parseInt(s[1]) - 1;
-        int day = Integer.parseInt(s[2]);
-        CalendarDay calendarDay = CalendarDay.from(year, month, day);
 
-        for (Map.Entry<String, Boolean> isUserAttending : event.getUsers().entrySet()) {
-            // If the
-            if (isUserAttending.getValue() || event.getHost().getUserId().equals(FirebaseAuth.getInstance().getUid())) {
-                acceptedEventsCalendarDays.add(calendarDay);
-                calendarDaysWithEventIds.put(calendarDay, eventId);
-                calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
-            } else {
-                pendingEventsCalendarDays.add(calendarDay);
-                calendarDaysWithEventIds.put(calendarDay, eventId);
-                calendarView.addDecorator(new EventDecorator(false, pendingEventsCalendarDays, this.getContext()));
+        if (event.getUsers() != null) {
+            if (!event.getUsers().isEmpty()) {
+
+                //TODO: Move this date parsing logic to presenter level
+                String[] s = event.getDate().split("-");
+                int year = Integer.parseInt(s[0]);
+                // I have to do weird logic on the month because months are 0 indexed
+                // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
+                int month = Integer.parseInt(s[1]) - 1;
+                int day = Integer.parseInt(s[2]);
+                CalendarDay calendarDay = CalendarDay.from(year, month, day);
+
+                for (Map.Entry<String, Boolean> isUserAttending : event.getUsers().entrySet()) {
+                    // If the
+                    if (isUserAttending.getValue() || event.getHost().getUserId().equals(FirebaseAuth.getInstance().getUid())) {
+                        acceptedEventsCalendarDays.add(calendarDay);
+                        calendarDaysWithEventIds.put(calendarDay, eventId);
+                        calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
+                    } else {
+                        pendingEventsCalendarDays.add(calendarDay);
+                        calendarDaysWithEventIds.put(calendarDay, eventId);
+                        calendarView.addDecorator(new EventDecorator(false, pendingEventsCalendarDays, this.getContext()));
+                    }
+                }
             }
         }
     }
@@ -261,28 +261,6 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         });
     }
 
-    private void editProfile(User user) {
-        Intent intent = new Intent(getActivity(), ProfileEditActivity.class);
-
-        // Add intent extras to pre-populate edittexts in ProfileEditActivity
-        if (user.getUsername() != null) {
-            intent.putExtra("Username", user.getUsername());
-        }
-        if (user.getBio() != null) {
-            intent.putExtra("Bio", user.getBio());
-        }
-        if (user.getCitystate() != null) {
-            intent.putExtra("Location", user.getCitystate());
-        }
-        if (user.getTags() != null) {
-            intent.putExtra("Tags", String.valueOf(user.getTags()));
-        }
-        if (user.getUrl() != null) {
-            intent.putExtra("Url", user.getUrl());
-        }
-
-        startActivityForResult(intent, RC_PROFILE_EDIT);
-    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -350,10 +328,6 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         }
     }
 
-    private void showToast(String message) {
-        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-    }
-
     @Override
     public void showContent(boolean show) {
         if (show) {
@@ -388,20 +362,17 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         if (!buttonText.equals("")) {
             emptyStateButton.setVisibility(View.VISIBLE);
             emptyStateButton.setText(buttonText);
-            emptyStateButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
-                            new AuthUI.IdpConfig.EmailBuilder().build());
-                    // Authenticate
-                    startActivityForResult(
-                            AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setIsSmartLockEnabled(false, true)
-                                    .setAvailableProviders(providers)
-                                    .build(),
-                            RC_SIGN_IN);
-                }
+            emptyStateButton.setOnClickListener(view -> {
+                List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
+                        new AuthUI.IdpConfig.EmailBuilder().build());
+                // Authenticate
+                startActivityForResult(
+                        AuthUI.getInstance()
+                                .createSignInIntentBuilder()
+                                .setIsSmartLockEnabled(false, true)
+                                .setAvailableProviders(providers)
+                                .build(),
+                        RC_SIGN_IN);
             });
         } else {
             emptyStateButton.setVisibility(View.GONE);
@@ -417,8 +388,45 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         emptyStateImage.setVisibility(View.GONE);
     }
 
+
+    @Override
+    public void showSignedOutEmptyState() {
+        showEmptyState(getString(R.string.auth_val_prop_header),
+                getString(R.string.auth_val_prop_subheader),
+                getString(R.string.sign_in),
+                getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+    }
+
     private boolean isNewSignUp() {
         FirebaseUserMetadata metadata = FirebaseAuth.getInstance().getCurrentUser().getMetadata();
         return metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp();
+    }
+
+    private void editProfile(User user) {
+        Intent intent = new Intent(getActivity(), ProfileEditActivity.class);
+
+        // Add intent extras to pre-populate edittexts in ProfileEditActivity
+        if (user.getUsername() != null) {
+            intent.putExtra("Username", user.getUsername());
+        }
+        if (user.getBio() != null) {
+            intent.putExtra("Bio", user.getBio());
+        }
+        if (user.getCitystate() != null) {
+            intent.putExtra("Location", user.getCitystate());
+        }
+        if (user.getTags() != null) {
+            intent.putExtra("Tags", String.valueOf(user.getTags()));
+        }
+        if (user.getUrl() != null) {
+            intent.putExtra("Url", user.getUrl());
+        }
+
+        startActivityForResult(intent, RC_PROFILE_EDIT);
+    }
+
+    //TODO: Is this necessary?
+    private void showToast(String message) {
+        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
     }
 }
