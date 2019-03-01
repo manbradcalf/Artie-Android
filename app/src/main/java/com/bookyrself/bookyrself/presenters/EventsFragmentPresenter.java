@@ -65,7 +65,7 @@ public class EventsFragmentPresenter implements BasePresenter {
 
     @Override
     public void unsubscribe() {
-        compositeDisposable.dispose();
+        compositeDisposable.clear();
     }
 
     /**

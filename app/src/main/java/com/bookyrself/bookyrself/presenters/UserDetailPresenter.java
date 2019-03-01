@@ -89,7 +89,7 @@ public class UserDetailPresenter implements BasePresenter {
 
     @Override
     public void unsubscribe() {
-        compositeDisposable.dispose();
+        compositeDisposable.clear();
     }
 
 
