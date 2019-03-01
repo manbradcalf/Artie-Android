@@ -105,7 +105,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
 
         compositeDisposable = new CompositeDisposable();
         userID = getIntent().getStringExtra("userId");
-        userDetailPresenter = new UserDetailPresenter(userID, this);
+        userDetailPresenter = new UserDetailPresenter(this);
         userDetailPresenter.subscribe();
         Toolbar.setTitle("User Details");
         calendarView.setOnDateChangedListener(this);
