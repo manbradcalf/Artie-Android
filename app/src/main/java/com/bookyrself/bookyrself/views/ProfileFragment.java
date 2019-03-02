@@ -59,6 +59,7 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
     private static final int RC_SIGN_IN = 123;
     private static final int RC_PROFILE_EDIT = 456;
     private static final int RC_PHOTO_SELECT = 789;
+
     @BindView(R.id.profile_content)
     RelativeLayout profileContent;
     @BindView(R.id.bio_body_profile_activity)
@@ -137,7 +138,6 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         } else {
             showSignedOutEmptyState();
         }
-
     }
 
     @Override
@@ -168,14 +168,12 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         showContent(true);
     }
 
-    // TODO: Find a way to not repeat myself for this, EventsFragment and UserDetailActivity
     @Override
     public void eventReady(String eventId, EventDetail event) {
 
         if (event.getUsers() != null) {
             if (!event.getUsers().isEmpty()) {
 
-                //TODO: Move this date parsing logic to presenter level
                 String[] s = event.getDate().split("-");
                 int year = Integer.parseInt(s[0]);
                 // I have to do weird logic on the month because months are 0 indexed
@@ -185,7 +183,7 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
                 CalendarDay calendarDay = CalendarDay.from(year, month, day);
 
                 for (Map.Entry<String, Boolean> isUserAttending : event.getUsers().entrySet()) {
-                    // If the
+                    // If the user is attending or is the host
                     if (isUserAttending.getValue() || event.getHost().getUserId().equals(FirebaseAuth.getInstance().getUid())) {
                         acceptedEventsCalendarDays.add(calendarDay);
                         calendarDaysWithEventIds.put(calendarDay, eventId);
@@ -202,7 +200,10 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
 
     @Override
     public void presentError(String error) {
-        showEmptyState(getString(R.string.error_header), error, "", getActivity().getDrawable(R.drawable.ic_error_empty_state));
+        showEmptyState(getString(R.string.error_header),
+                error,
+                "",
+                getActivity().getDrawable(R.drawable.ic_error_empty_state));
     }
 
     private void setLayout(final User user) {
@@ -231,15 +232,16 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
             if (user.getBio() != null) {
                 bioTextView.setText(user.getBio());
             }
+
+            // Both edit buttons start the profile creation activity
+            editBioButton.setOnClickListener(view -> editProfile(user));
+            editInfoButton.setOnClickListener(view -> editProfile(user));
+
             profileContent.setVisibility(View.VISIBLE);
         } else {
-            userNameTextView.setText("user not in fb db");
+            userNameTextView.setText(R.string.user_not_in_db);
             profileContent.setVisibility(View.GONE);
         }
-
-        // Both edit buttons start the profile creation activity
-        editBioButton.setOnClickListener(view -> editProfile(user));
-        editInfoButton.setOnClickListener(view -> editProfile(user));
 
         // Load profile image
         final StorageReference profileImageReference = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
@@ -276,7 +278,7 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
                             // Creating user object to push to FB DB
                             user.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
                             user.setUsername(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
-                            presenter.createUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
+                            presenter.updateUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
                             showToast("Signing Up!");
                         } else {
                             // Successfully signed in
@@ -425,7 +427,7 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         startActivityForResult(intent, RC_PROFILE_EDIT);
     }
 
-    //TODO: Is this necessary?
+    // I toast a lot in this fragment so I added this for brevity and readability
     private void showToast(String message) {
         Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
     }
