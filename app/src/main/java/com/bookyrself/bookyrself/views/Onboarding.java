@@ -50,15 +50,12 @@ public class Onboarding extends AppCompatActivity {
         android.support.v4.app.FragmentTransaction fragmentTransaction = fm.beginTransaction();
         fragmentTransaction.add(R.id.onboarding_fragment, onBoardingFragment);
         fragmentTransaction.commit();
-        onBoardingFragment.setOnRightOutListener(new PaperOnboardingOnRightOutListener() {
-            @Override
-            public void onRightOut() {
-                editor.putBoolean(getString(R.string.has_seen_onboarding_key), true);
-                editor.apply();
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
+        onBoardingFragment.setOnRightOutListener(() -> {
+            editor.putBoolean(getString(R.string.has_seen_onboarding_key), true);
+            editor.apply();
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 
