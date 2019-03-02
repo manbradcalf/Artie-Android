@@ -90,6 +90,8 @@ public class EventsRepo implements EventDataSource {
                     .getUsersEventInvites(userId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
+                    .firstOrError()
+                    .toFlowable()
                     .flatMapIterable(HashMap::entrySet)
                     .flatMap(eventInvite -> FirebaseService.getAPI()
                             .getEventData(eventInvite.getKey())
@@ -100,8 +102,11 @@ public class EventsRepo implements EventDataSource {
                                 // Populate list of strings describing attending events for the widget
                                 if (eventInvite.getValue().getIsInviteAccepted() ||
                                         eventInvite.getValue().getIsInviteAccepted()) {
-                                    attendingEventsStrings.add(String.format("%s in %s on %s", eventDetail.getEventname(), eventDetail.getCitystate(), eventDetail.getDate()));
-                                    tinyDB.putListString("attendingEventsString", attendingEventsStrings);
+
+                                    if (!attendingEventsStrings.contains(String.format("%s in %s on %s", eventDetail.getEventname(), eventDetail.getCitystate(), eventDetail.getDate()))) {
+                                        attendingEventsStrings.add(String.format("%s in %s on %s", eventDetail.getEventname(), eventDetail.getCitystate(), eventDetail.getDate()));
+                                        tinyDB.putListString("attendingEventsString", attendingEventsStrings);
+                                    }
                                 }
                                 // Regardless, add all events to allUserEvents hashmap
                                 allUsersEvents.put(eventInvite.getKey(), eventDetail);
