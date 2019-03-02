@@ -24,7 +24,8 @@ public class UserDetailPresenter implements BasePresenter {
     /**
      * Constructor
      */
-    public UserDetailPresenter(UserDetailPresenterListener listener) {
+    public UserDetailPresenter(String userId, UserDetailPresenterListener listener) {
+        this.userId = userId;
         this.listener = listener;
         this.compositeDisposable = new CompositeDisposable();
     }
@@ -80,11 +81,7 @@ public class UserDetailPresenter implements BasePresenter {
 
     @Override
     public void subscribe() {
-        if (FirebaseAuth.getInstance().getUid() != null) {
-            userId = FirebaseAuth.getInstance().getUid();
-            loadUserInfoWithEvents(userId);
-        }
-
+        loadUserInfoWithEvents(userId);
     }
 
     @Override
