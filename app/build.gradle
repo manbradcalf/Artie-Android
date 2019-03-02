@@ -1,6 +1,21 @@
 apply plugin: 'com.android.application'
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 
 android {
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['alias.pwd']
+            keyPassword keystoreProperties['alias.pwd']
+            storeFile file('release.jsk')
+            storePassword keystoreProperties['alias.pwd']
+        }
+    }
+
+
     compileSdkVersion 27
     buildToolsVersion "28.0.3"
     defaultConfig {
@@ -16,6 +31,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
