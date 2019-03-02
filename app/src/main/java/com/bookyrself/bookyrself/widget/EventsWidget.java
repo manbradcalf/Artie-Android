@@ -3,22 +3,30 @@ package com.bookyrself.bookyrself.widget;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
+import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.widget.Adapter;
+import android.widget.ListView;
 import android.widget.RemoteViews;
 
 import com.bookyrself.bookyrself.R;
+
+import butterknife.BindView;
 
 /**
  * Implementation of App Widget functionality.
  */
 public class EventsWidget extends AppWidgetProvider {
 
+
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
 
-        CharSequence widgetText = context.getString(R.string.appwidget_text);
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.events_widget);
-        views.setTextViewText(R.id.appwidget_text, widgetText);
+
+        // Set up the collection
+        views.setRemoteAdapter(R.id.events_widget_list, new Intent(context, EventsWidgetService.class));
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
@@ -30,6 +38,7 @@ public class EventsWidget extends AppWidgetProvider {
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
         }
+        super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 
     @Override
