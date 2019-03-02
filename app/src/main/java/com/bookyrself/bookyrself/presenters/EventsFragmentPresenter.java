@@ -1,5 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
+import android.content.Context;
+
 import com.bookyrself.bookyrself.data.Events.EventsRepo;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.views.MainActivity;
@@ -24,10 +26,10 @@ public class EventsFragmentPresenter implements BasePresenter {
     /**
      * Constructor
      */
-    public EventsFragmentPresenter(EventsPresenterListener presenterListener) {
+    public EventsFragmentPresenter(EventsPresenterListener presenterListener, Context context) {
         this.presenterListener = presenterListener;
         this.compositeDisposable = new CompositeDisposable();
-        this.eventsRepo = MainActivity.getEventsRepo();
+        this.eventsRepo = MainActivity.getEventsRepo(context);
     }
 
     /**

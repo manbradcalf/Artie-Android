@@ -1,5 +1,6 @@
 package com.bookyrself.bookyrself.presenters;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.bookyrself.bookyrself.data.Events.EventsRepo;
@@ -19,11 +20,11 @@ public class EventInvitesFragmentPresenter implements BasePresenter {
     private CompositeDisposable compositeDisposable;
     private String userId;
 
-    public EventInvitesFragmentPresenter(EventInvitesViewListener listener) {
+    public EventInvitesFragmentPresenter(EventInvitesViewListener listener, Context context) {
         this.userId = FirebaseAuth.getInstance().getUid();
         this.presenterListener = listener;
         this.compositeDisposable = new CompositeDisposable();
-        this.eventsRepo = MainActivity.getEventsRepo();
+        this.eventsRepo = MainActivity.getEventsRepo(context);
     }
 
 
