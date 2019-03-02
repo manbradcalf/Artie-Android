@@ -72,7 +72,7 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        presenter = new EventInvitesFragmentPresenter(this);
+        presenter = new EventInvitesFragmentPresenter(this, getContext());
     }
 
     @Override

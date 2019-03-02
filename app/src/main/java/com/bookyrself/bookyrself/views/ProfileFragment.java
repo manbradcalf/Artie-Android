@@ -105,7 +105,7 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        presenter = new ProfileFragmentPresenter(this);
+        presenter = new ProfileFragmentPresenter(this, getContext());
         user = new User();
         storageReference = FirebaseStorage.getInstance().getReference();
         calendarDaysWithEventIds = new HashMap<>();

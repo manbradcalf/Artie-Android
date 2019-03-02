@@ -198,10 +198,10 @@ public class ContactsFragment extends Fragment implements BaseFragment, Contacts
 
     @Override
     public void showSignedOutEmptyState() {
-        showEmptyState(getString(R.string.auth_val_prop_header),
-                getString(R.string.auth_val_prop_subheader),
+        showEmptyState(getString(R.string.contacts_empty_state_signed_out_header),
+                getString(R.string.contacts_empty_state_no_content_subheader),
                 getString(R.string.sign_in),
-                getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+                getActivity().getDrawable(R.drawable.ic_person_add_black_24dp));
     }
 
 
@@ -253,13 +253,10 @@ public class ContactsFragment extends Fragment implements BaseFragment, Contacts
 
             viewHolderContacts.userNameTextView.setText(contacts.get(position).getUsername());
             viewHolderContacts.userCityStateTextView.setText(contacts.get(position).getCitystate());
-            viewHolderContacts.userCardView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(getActivity(), UserDetailActivity.class);
-                    intent.putExtra("userId", contactsMap.get(contacts.get(position)));
-                    startActivity(intent);
-                }
+            viewHolderContacts.userCardView.setOnClickListener(view -> {
+                Intent intent = new Intent(getActivity(), UserDetailActivity.class);
+                intent.putExtra("userId", contactsMap.get(contacts.get(position)));
+                startActivity(intent);
             });
         }
 

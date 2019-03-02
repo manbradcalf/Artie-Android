@@ -69,7 +69,7 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        presenter = new EventsFragmentPresenter(this);
+        presenter = new EventsFragmentPresenter(this, getContext());
     }
 
     @Override
