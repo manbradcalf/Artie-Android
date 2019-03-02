@@ -24,10 +24,6 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
-/**
- * Created by benmedcalf on 11/22/17.
- */
-
 public class FirebaseService {
 
     private static FirebaseService.FirebaseApi INSTANCE;
@@ -41,13 +37,13 @@ public class FirebaseService {
             interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
-
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL_BOOKYRSELF_FIREBASE)
                     .client(client)
                     .addConverterFactory(GsonConverterFactory.create())
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .build();
+
             INSTANCE = retrofit.create(FirebaseService.FirebaseApi.class);
         }
         return INSTANCE;
@@ -67,7 +63,7 @@ public class FirebaseService {
         Flowable<HashMap<String, Boolean>> getUserContacts(@Path("id") String userId);
 
         @PUT("/users/{userId}.json")
-        Call<User> addUser(@Body User user, @Path("userId") String userId);
+        Flowable<User> addUser(@Body User user, @Path("userId") String userId);
 
         @PUT("/users/{userId}/events/{eventId}/isInviteRejected.json")
         Flowable<Boolean> rejectInvite(@Body Boolean bool, @Path("userId") String userId, @Path("eventId") String eventId);
