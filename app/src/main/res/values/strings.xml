@@ -66,6 +66,10 @@
     <string name="events_fragment_empty_state_signed_out_header">You\'re signed out!</string>
     <string name="profile_edit_title">Edit Your Profile</string>
     <string name="user_detail_contact_already_added">This user is already a contact!</string>
+    <string name="user_not_in_db">User not found</string>
+    <string name="contact_button_signed_out">Log in to add this contact!</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 
 
 </resources>
