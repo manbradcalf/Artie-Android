@@ -50,9 +50,9 @@ public class EventInvitesFragmentPresenter implements BasePresenter {
                     .add(eventsRepo.getEventsWithPendingInvites(userId)
                             .subscribe(
                                     //onNext
-                                    stringEventDetailPair -> presenterListener.eventPendingInvitationResponseReturned(
-                                            stringEventDetailPair.first,
-                                            stringEventDetailPair.second),
+                                    stringEventDetailSimpleEntry -> presenterListener.eventPendingInvitationResponseReturned(
+                                            stringEventDetailSimpleEntry.getKey(),
+                                            stringEventDetailSimpleEntry.getValue()),
 
                                     //onError
                                     throwable -> {

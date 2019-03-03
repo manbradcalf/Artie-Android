@@ -1,13 +1,12 @@
 package com.bookyrself.bookyrself.presenters;
 
-import android.support.v4.util.Pair;
-
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.MiniUser;
 import com.bookyrself.bookyrself.data.ResponseModels.User.EventInviteInfo;
 import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
 
+import java.util.AbstractMap;
 import java.util.NoSuchElementException;
 
 import io.reactivex.Flowable;
@@ -63,7 +62,7 @@ public class EventDetailPresenter implements BasePresenter {
                                                         user -> {
                                                             // Show the view the minified user
                                                             MiniUser miniUser = minifyUserDetailsForEventDetailDisplay(stringBooleanEntry.getKey(), user);
-                                                            listener.showInvitedUser(new Pair<>(stringBooleanEntry.getKey(), miniUser));
+                                                            listener.showInvitedUser(new AbstractMap.SimpleEntry<>(stringBooleanEntry.getKey(), miniUser));
                                                         },
                                                         throwable -> {
 
@@ -127,7 +126,7 @@ public class EventDetailPresenter implements BasePresenter {
     public interface EventDetailPresenterListener {
         void showEventData(EventDetail data);
 
-        void showInvitedUser(Pair<String, MiniUser> user);
+        void showInvitedUser(AbstractMap.SimpleEntry<String, MiniUser> user);
 
         void presentError(String message);
     }

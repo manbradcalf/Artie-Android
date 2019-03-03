@@ -32,10 +32,12 @@ import com.squareup.picasso.Picasso;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -79,7 +81,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
 
     private EventDetailPresenter presenter;
     private StorageReference storageReference;
-    private List<Pair<String, MiniUser>> invitedUsers;
+    private List<Map.Entry<String, MiniUser>> invitedUsers;
     private UsersListAdapter adapter;
 
     @Override
@@ -160,7 +162,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     }
 
     @Override
-    public void showInvitedUser(Pair<String, MiniUser> user) {
+    public void showInvitedUser(AbstractMap.SimpleEntry<String, MiniUser> user) {
         invitedUsers.add(user);
         adapter.notifyDataSetChanged();
     }
@@ -204,7 +206,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         private LayoutInflater mInflater;
 
 
-        private UsersListAdapter(Context context, List<Pair<String, MiniUser>> miniUsers, StorageReference storageReference) {
+        private UsersListAdapter(Context context, List<Map.Entry<String, MiniUser>> miniUsers, StorageReference storageReference) {
             invitedUsers = miniUsers;
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mContext = context;
@@ -218,7 +220,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
 
         @Override
         public Object getItem(int position) {
-            return invitedUsers.get(position).second;
+            return invitedUsers.get(position).getValue();
         }
 
         @Override

@@ -31,8 +31,8 @@ public class ContactsFragmentPresenter implements BasePresenter {
             compositeDisposable
                     .add(contactsRepository.getContactsForUser(userId)
                             .subscribe(
-                                    stringUserPair ->
-                                            presenterListener.contactReturned(stringUserPair.first, stringUserPair.second),
+                                    stringUserEntry ->
+                                            presenterListener.contactReturned(stringUserEntry.getKey(), stringUserEntry.getValue()),
                                     throwable -> {
                                         if (throwable instanceof NoSuchElementException) {
                                             presenterListener.noContactsReturned();

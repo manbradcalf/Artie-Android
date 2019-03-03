@@ -44,7 +44,7 @@ public class EventCreationPresenter implements BasePresenter {
                 contactsRepository
                         .getContactsForUser(FirebaseAuth.getInstance().getUid())
                         .subscribe(
-                                stringUserPair -> presenterListener.contactReturned(stringUserPair.second, stringUserPair.first),
+                                stringUserEntry -> presenterListener.contactReturned(stringUserEntry.getValue(), stringUserEntry.getKey()),
                                 throwable -> presenterListener.presentError(throwable.getMessage())));
     }
 

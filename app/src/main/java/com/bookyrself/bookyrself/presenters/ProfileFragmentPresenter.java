@@ -65,7 +65,13 @@ public class ProfileFragmentPresenter implements BasePresenter {
 
     private void loadEventDetails() {
         compositeDisposable.add(eventsRepo.getAllEvents(userId)
-                .subscribe(stringEventDetailPair -> listener.eventReady(stringEventDetailPair.first, stringEventDetailPair.second),
+                .subscribe(
+                        // Success
+                        stringEventDetailEntry ->
+                                listener.eventReady(
+                                        stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()),
+
+                        // Error
                         throwable -> listener.presentError(throwable.getMessage())));
     }
 

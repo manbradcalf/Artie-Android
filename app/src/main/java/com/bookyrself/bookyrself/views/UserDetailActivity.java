@@ -180,7 +180,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                             .getContactsForUser(FirebaseAuth.getInstance().getUid())
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
-                            .map(stringUserPair -> stringUserPair.first)
+                            .map(Map.Entry::getKey)
                             .filter(s -> s.equals(userId))
                             .subscribe(s -> {
                                         addUserToContactsTextView.setText(R.string.user_detail_contact_already_added);
@@ -246,7 +246,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         contentView.setVisibility(View.GONE);
         emptyStateButton.setVisibility(View.GONE);
         emptyStateImageView.setImageDrawable(getDrawable(R.drawable.ic_error_empty_state));
-        emptyStateTextHeader.setText("There was a problem loading the user");
+        emptyStateTextHeader.setText(R.string.user_detail_error_header);
         emptyStateTextSubHeader.setText(String.format("Error fetching userID %s", id));
         emptyState.setVisibility(View.VISIBLE);
     }

@@ -2,11 +2,9 @@ package com.bookyrself.bookyrself.data.Contacts;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 import android.util.Log;
 
 import com.bookyrself.bookyrself.data.ResponseModels.User.User;
-import com.bookyrself.bookyrself.presenters.BasePresenter;
 import com.bookyrself.bookyrself.services.FirebaseService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -15,13 +13,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 public class ContactsRepository implements ContactsDataSource {
@@ -80,7 +77,7 @@ public class ContactsRepository implements ContactsDataSource {
      * Methods
      */
     @Override
-    public Flowable<Pair<String, User>> getContactsForUser(String userId) {
+    public Flowable<Map.Entry<String, User>> getContactsForUser(String userId) {
 
         if (cacheIsDirty) {
             // Cache is dirty, get from network
@@ -99,19 +96,12 @@ public class ContactsRepository implements ContactsDataSource {
                             .map(user -> {
                                 contactsMap.put(entry.getKey(), user);
                                 cacheIsDirty = false;
-                                return new Pair<>(entry.getKey(), user);
+                                return new AbstractMap.SimpleEntry<>(entry.getKey(), user);
                             }));
         } else {
             // Cache is clean, get local copy
             return Flowable.fromIterable(contactsMap.entrySet())
-                    .map(stringUserEntry -> new Pair<>(stringUserEntry.getKey(), stringUserEntry.getValue()));
+                    .map(stringUserEntry -> new AbstractMap.SimpleEntry<>(stringUserEntry.getKey(), stringUserEntry.getValue()));
         }
-    }
-
-
-    public interface ContactsRepositoryListener {
-
-        void contactReturned(String userId, User contact);
-
     }
 }

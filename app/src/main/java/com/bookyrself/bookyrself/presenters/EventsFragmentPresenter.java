@@ -41,9 +41,9 @@ public class EventsFragmentPresenter implements BasePresenter {
                     .add(eventsRepo.getAllEvents(userId)
                             .subscribe(
                                     //onNext
-                                    stringEventDetailPair -> presenterListener.eventDetailReturned(
-                                            stringEventDetailPair.second,
-                                            stringEventDetailPair.first),
+                                    stringEventDetailEntry -> presenterListener.eventDetailReturned(
+                                            stringEventDetailEntry.getValue(),
+                                            stringEventDetailEntry.getKey()),
 
                                     //onError
                                     throwable -> {
