@@ -7,6 +7,8 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -166,6 +168,14 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         emailUserTextView.setText(getString(R.string.email_user, user.getUsername()));
         userEmailAddress = user.getEmail();
         emailUserCardview.setOnClickListener(v -> emailUser());
+
+        // Set URL
+        urlTextView.setClickable(true);
+        urlTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+        String linkedText =
+                String.format("<a href=\"%s\">%s</a> ", ("http://" + user.getUrl()), user.getUrl());
+        urlTextView.setText(Html.fromHtml(linkedText));
 
         // Determine if this user is a contact
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
