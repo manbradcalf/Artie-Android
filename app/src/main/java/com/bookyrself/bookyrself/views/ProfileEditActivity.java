@@ -13,17 +13,15 @@ import android.widget.Toast;
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.data.Profile.ProfileRepo;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.Host;
-import com.bookyrself.bookyrself.data.ResponseModels.User.EventInviteInfo;
 import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.NoSuchElementException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -102,7 +100,8 @@ public class ProfileEditActivity extends AppCompatActivity {
             }
 
             // Update the user
-            profileRepo.updateProfileInfo(FirebaseAuth.getInstance().getUid(), user)
+            profileRepo.updateProfileInfo(
+                    FirebaseAuth.getInstance().getUid(), user)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
 
@@ -111,26 +110,17 @@ public class ProfileEditActivity extends AppCompatActivity {
                             .getUsersEventInvites(FirebaseAuth.getInstance().getUid())
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread()))
+                    .firstOrError()
+                    .toFlowable()
 
-                    // Only get events I am hosting
-                    .map(stringEventInviteInfoHashMap -> {
-
-                        HashMap<String, EventInviteInfo> events = new HashMap<>();
-
-                        for (Map.Entry<String, EventInviteInfo> entry : stringEventInviteInfoHashMap.entrySet()) {
-                            if (entry.getValue().getIsHost()) {
-                                events.put(entry.getKey(), entry.getValue());
-                            }
-                        }
-                        return events;
-                    })
-
-                    // Emit an eventId for each event I'm hosting
                     .flatMapIterable(HashMap::entrySet)
-                    .map(Map.Entry::getKey)
+
+                    // Only get events I'm hosting
+                    // TODO: What if i'm not hosting any? Does it throw a NoSuchElementException?
+                    .filter(stringEventInviteInfoEntry -> stringEventInviteInfoEntry.getValue().getIsHost())
 
                     // Update the events I'm hosting with the new data
-                    .map(eventIdOfHostedEvent -> {
+                    .doOnNext(eventInviteInfoEntry -> {
 
                         Host host = new Host();
                         host.setUserId(FirebaseAuth.getInstance().getUid());
@@ -138,8 +128,8 @@ public class ProfileEditActivity extends AppCompatActivity {
                         host.setUrl(user.getUrl());
                         host.setCitystate(user.getCitystate());
 
-                        return FirebaseService.getAPI()
-                                .updateEventHost(host, eventIdOfHostedEvent)
+                        FirebaseService.getAPI()
+                                .updateEventHost(host, eventInviteInfoEntry.getKey())
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe();
@@ -158,8 +148,23 @@ public class ProfileEditActivity extends AppCompatActivity {
                                 finish();
                             },
                             throwable -> {
-                                Toast.makeText(this, "Unable to update profile!", Toast.LENGTH_SHORT).show();
-                                        Log.e("ProfileEditActivity: ",throwable.getMessage(), throwable);
+
+                                if (throwable instanceof NoSuchElementException) {
+                                    // User has no events to update, so update the FBUser and bail
+                                    Log.e(this.getLocalClassName(), "User has no events to update");
+                                    UserProfileChangeRequest profileUpdate = new UserProfileChangeRequest.Builder()
+                                            .setDisplayName(usernameEditText.getText().toString())
+                                            .build();
+                                    FirebaseAuth.getInstance().getCurrentUser().updateProfile(profileUpdate);
+
+                                    // Bail
+                                    setResult(Activity.RESULT_OK, returnIntent);
+                                    finish();
+
+                                } else {
+                                    Toast.makeText(this, "Unable to update profile!", Toast.LENGTH_SHORT).show();
+                                    Log.e("ProfileEditActivity: ", throwable.getMessage(), throwable);
+                                }
                             });
         });
     }
