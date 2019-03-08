@@ -48,6 +48,8 @@ public class ContactsFragmentPresenter implements BasePresenter {
         if (FirebaseAuth.getInstance().getUid() != null) {
             userId = FirebaseAuth.getInstance().getUid();
             loadContacts();
+        } else {
+            presenterListener.showSignedOutEmptyState();
         }
 
     }
