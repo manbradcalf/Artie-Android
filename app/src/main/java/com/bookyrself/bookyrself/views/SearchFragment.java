@@ -139,78 +139,58 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             }
         }
 
-        searchViewWhat.setOnSearchClickListener(new View.OnClickListener()
-
-        {
-            @Override
-            public void onClick(View view) {
-                searchViewWhere.setVisibility((View.VISIBLE));
-                fromButton.setVisibility(View.VISIBLE);
-                toButton.setVisibility(View.VISIBLE);
-                searchButton.setVisibility((View.VISIBLE));
-                eventsButton.setVisibility(View.VISIBLE);
-                usersButton.setVisibility(View.VISIBLE);
-                searchButton.setText(R.string.search_fragment_search_button_text);
-            }
+        searchViewWhat.setOnSearchClickListener(view -> {
+            searchViewWhere.setVisibility((View.VISIBLE));
+            fromButton.setVisibility(View.VISIBLE);
+            toButton.setVisibility(View.VISIBLE);
+            searchButton.setVisibility((View.VISIBLE));
+            eventsButton.setVisibility(View.VISIBLE);
+            usersButton.setVisibility(View.VISIBLE);
+            searchButton.setText(R.string.search_fragment_search_button_text);
         });
 
 
-        fromButton.setOnClickListener(new View.OnClickListener()
-
-        {
-            @Override
-            public void onClick(View view) {
-                DatePickerDialogFragment dialog = new DatePickerDialogFragment();
-                dialog.setFlag(FLAG_START_DATE);
-                dialog.setSearchPresenter(presenter);
-                dialog.show(getActivity().getFragmentManager(), "datePicker");
-            }
+        fromButton.setOnClickListener(view -> {
+            DatePickerDialogFragment dialog = new DatePickerDialogFragment();
+            dialog.setFlag(FLAG_START_DATE);
+            dialog.setSearchPresenter(presenter);
+            dialog.show(getActivity().getFragmentManager(), "datePicker");
         });
 
-        toButton.setOnClickListener(new View.OnClickListener()
-
-        {
-            @Override
-            public void onClick(View view) {
-                DatePickerDialogFragment dialog = new DatePickerDialogFragment();
-                dialog.setFlag(FLAG_END_DATE);
-                dialog.setSearchPresenter(presenter);
-                dialog.show(getActivity().getFragmentManager(), "datePicker");
-            }
+        toButton.setOnClickListener(view -> {
+            DatePickerDialogFragment dialog = new DatePickerDialogFragment();
+            dialog.setFlag(FLAG_END_DATE);
+            dialog.setSearchPresenter(presenter);
+            dialog.show(getActivity().getFragmentManager(), "datePicker");
         });
 
-        searchButton.setOnClickListener(new View.OnClickListener()
-
-        {
-            @Override
-            public void onClick(View view) {
-                if (!boolSearchEditable) {
-                    if (eventsButton.isChecked()) {
-                        eventsResults = null;
-                        usersResults = null;
-                        presenter.executeSearch(
-                                EVENT_SEARCH_FLAG,
-                                searchViewWhat.getQuery().toString(),
-                                searchViewWhere.getQuery().toString(),
-                                fromButton.getText().toString(),
-                                toButton.getText().toString());
-                        showFullSearchBar(false);
-                    } else if (usersButton.isChecked()) {
-                        eventsResults = null;
-                        usersResults = null;
-                        presenter.executeSearch(
-                                USER_SEARCH_FLAG,
-                                searchViewWhat.getQuery().toString(),
-                                searchViewWhere.getQuery().toString(),
-                                fromButton.getText().toString(),
-                                toButton.getText().toString());
-                        showFullSearchBar(false);
-                    }
-                } else {
-                    boolSearchEditable = false;
-                    searchButton.setText(R.string.search_fragment_search_button_text);
-                    showFullSearchBar(true);
+        searchButton.setOnClickListener(view -> {
+            if (!boolSearchEditable) {
+                if (eventsButton.isChecked()) {
+                    eventsResults = null;
+                    usersResults = null;
+                    presenter.executeSearch(
+                            EVENT_SEARCH_FLAG,
+                            searchViewWhat.getQuery().toString(),
+                            searchViewWhere.getQuery().toString(),
+                            fromButton.getText().toString(),
+                            toButton.getText().toString());
+                    showFullSearchBar(false);
+                } else if (usersButton.isChecked()) {
+                    eventsResults = null;
+                    usersResults = null;
+                    presenter.executeSearch(
+                            USER_SEARCH_FLAG,
+                            searchViewWhat.getQuery().toString(),
+                            searchViewWhere.getQuery().toString(),
+                            fromButton.getText().toString(),
+                            toButton.getText().toString());
+                    showFullSearchBar(false);
                 }
+            } else {
+                boolSearchEditable = false;
+                searchButton.setText(R.string.search_fragment_search_button_text);
+                showFullSearchBar(true);
             }
         });
 
