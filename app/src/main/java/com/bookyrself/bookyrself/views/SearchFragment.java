@@ -1,7 +1,6 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -23,10 +22,10 @@ import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.data.ResponseModels.SearchResponseEvents.Hit;
+import com.bookyrself.bookyrself.data.ResponseModels.SearchResponseEvents._source;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
@@ -69,10 +68,10 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
     @BindView(R.id.search_recycler_view)
     RecyclerView recyclerView;
 
-    public static final int FLAG_START_DATE = 2;
-    public static final int FLAG_END_DATE = 3;
     private static final int USER_SEARCH_FLAG = 0;
     private static final int EVENT_SEARCH_FLAG = 1;
+    public static final int FLAG_START_DATE = 2;
+    public static final int FLAG_END_DATE = 3;
     private SearchPresenter presenter;
     private List<Hit> eventsResults;
     private List<com.bookyrself.bookyrself.data.ResponseModels.SearchResponseUsers.Hit> usersResults;
@@ -117,8 +116,6 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         searchViewWhere.setQueryHint(getString(R.string.search_where_query_hint));
         fromButton.setVisibility(View.GONE);
         toButton.setVisibility(View.GONE);
-        usersButton.setVisibility(View.GONE);
-        eventsButton.setVisibility(View.GONE);
         radioGroup.check(R.id.users_toggle);
         searchButton.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
@@ -299,10 +296,12 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
             Intent intent = new Intent(getActivity(), EventDetailActivity.class);
             intent.putExtra("eventId", id);
             startActivity(intent);
-        } else {
+        } else if (flag == USER_SEARCH_FLAG) {
             Intent intent = new Intent(getActivity(), UserDetailActivity.class);
             intent.putExtra("userId", id);
             startActivity(intent);
+        } else {
+            Log.e(this.getTag(), "Unknown Item type selected");
         }
     }
 
@@ -385,23 +384,34 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
 
         private void buildEventViewHolder(RecyclerView.ViewHolder holder, final int position) {
             if (eventsResults.size() > position) {
+
+                _source event = eventsResults.get(position).get_source();
                 ViewHolderEvents viewHolderEvents = (ViewHolderEvents) holder;
-                viewHolderEvents.eventNameTextView.setText(eventsResults
-                        .get(position)
-                        .get_source()
-                        .getEventname());
-                //TODO: Do I need to show hosted by in Event Search Response Item?
-                viewHolderEvents.eventHostTextView.setText(getString(R.string.event_item_hosted_by,
-                        eventsResults.get(position)
-                                .get_source()
-                                .getHost()
-                                .getUsername()));
 
-                viewHolderEvents.eventCityStateTextView.setText(getString(R.string.event_item_citystate,
-                        eventsResults.get(position)
-                                .get_source()
-                                .getCitystate()));
+                // Set Event Name
+                if (event.getEventname() != null) {
+                    viewHolderEvents.eventNameTextView.setText(event.getEventname());
+                }
 
+
+                // Set Hostname
+                if (event.getHost() != null) {
+                    if (event.getHost().getUsername() != null) {
+                        viewHolderEvents.eventHostTextView.setText(getString(R.string.event_item_hosted_by,
+                                event.getHost().getUsername()));
+                    }
+                }
+
+                // Set Event Location
+                if (event.getCitystate() != null) {
+                    viewHolderEvents.eventCityStateTextView.setText(getString(R.string.event_item_citystate,
+                            event.getCitystate()));
+                }
+
+
+                // Set Event Image
+                //TODO: How to add an image to an event? Also there is no picture property for events
+                // Would need to use event unique key like we do for users
                 Picasso.with(getActivity().getApplicationContext())
                         .load(eventsResults
                                 .get(position)
@@ -414,14 +424,9 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         .centerCrop()
                         .into(viewHolderEvents.eventImageThumb);
 
-                viewHolderEvents.eventCardView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        itemSelected(eventsResults
-                                .get(position)
-                                .get_id(), EVENT_VIEW_TYPE);
-                    }
-                });
+                viewHolderEvents.eventCardView.setOnClickListener(v -> itemSelected(eventsResults
+                        .get(position)
+                        .get_id(), EVENT_VIEW_TYPE));
             }
 
         }
