@@ -228,7 +228,7 @@ public class ContactsFragment extends Fragment implements BaseFragment, Contacts
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
             final ViewHolderContacts viewHolderContacts = (ViewHolderContacts) holder;
-            if (Single.just(contacts.get(position)) != null) {
+            if (contacts.get(position).getTags() != null) {
                 StringBuilder listString = new StringBuilder();
                 for (String s : contacts.get(position).getTags()) {
                     listString.append(s + ", ");
