@@ -37,7 +37,7 @@ public class EventDetailPresenter implements BasePresenter {
     /**
      * Methods
      */
-    public void getEventDetailData(String eventId) {
+    private void getEventDetailData(String eventId) {
 
         compositeDisposable.add(
 
@@ -46,7 +46,6 @@ public class EventDetailPresenter implements BasePresenter {
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnNext(listener::showEventData)
-                        .doOnError(throwable -> listener.presentError(throwable.getMessage()))
 
                         // Get the userIds of invited users
                         .flatMap(eventDetail -> Flowable.fromIterable(eventDetail.getUsers().entrySet()))
@@ -77,8 +76,9 @@ public class EventDetailPresenter implements BasePresenter {
                                                             }
                                                         }
                                                 )))
-                        .subscribe()
-        );
+                        .subscribe(
+                                disposableFlowable -> {},
+                                throwable -> listener.presentError(throwable.getMessage())));
     }
 
     private MiniUser minifyUserDetailsForEventDetailDisplay(String userId, User user) {
