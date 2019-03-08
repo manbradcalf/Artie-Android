@@ -1,6 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.bookyrself.bookyrself.data.Events.EventsRepo;
 import com.bookyrself.bookyrself.data.Profile.ProfileRepo;
@@ -72,7 +73,13 @@ public class ProfileFragmentPresenter implements BasePresenter {
                                         stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()),
 
                         // Error
-                        throwable -> listener.presentError(throwable.getMessage())));
+                        throwable -> {
+                            if (throwable instanceof NoSuchElementException) {
+                                Log.e(getClass().getName(), String.format("User %s has no events", userId));
+                            } else {
+                                listener.presentError(throwable.getMessage());
+                            }
+                        }));
     }
 
     @Override
