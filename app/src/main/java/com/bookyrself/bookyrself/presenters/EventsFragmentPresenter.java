@@ -1,5 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
+import android.content.Context;
+
 import com.bookyrself.bookyrself.data.Events.EventsRepo;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.views.MainActivity;
@@ -15,56 +17,63 @@ import io.reactivex.disposables.CompositeDisposable;
 
 public class EventsFragmentPresenter implements BasePresenter {
 
-    private final EventsPresenterListener listener;
+    private final EventsPresenterListener presenterListener;
     private final EventsRepo eventsRepo;
     private final CompositeDisposable compositeDisposable;
+    private String userId;
 
 
     /**
      * Constructor
      */
-    public EventsFragmentPresenter(EventsPresenterListener listener) {
-        this.listener = listener;
+    public EventsFragmentPresenter(EventsPresenterListener presenterListener, Context context) {
+        this.presenterListener = presenterListener;
         this.compositeDisposable = new CompositeDisposable();
-        this.eventsRepo = MainActivity.getEventsRepo();
+        this.eventsRepo = MainActivity.getEventsRepo(context);
     }
 
     /**
      * Methods
      */
-    public void loadUsersEventInfo(final String userId) {
-        compositeDisposable
-                .add(eventsRepo.getAllEvents(userId)
-                        .subscribe(
-                                //onNext
-                                stringEventDetailPair -> listener.eventDetailReturned(
-                                        stringEventDetailPair.second,
-                                        stringEventDetailPair.first),
+    private void loadUsersEventInfo() {
 
-                                //onError
-                                throwable -> {
-                                    if (throwable instanceof NoSuchElementException) {
-                                        listener.noEventDetailsReturned();
-                                    } else {
-                                        listener.presentError(throwable.getMessage());
-                                    }
-                                }));
+            compositeDisposable
+                    .add(eventsRepo.getAllEvents(userId)
+                            .subscribe(
+                                    //onNext
+                                    stringEventDetailPair -> presenterListener.eventDetailReturned(
+                                            stringEventDetailPair.second,
+                                            stringEventDetailPair.first),
+
+                                    //onError
+                                    throwable -> {
+                                        if (throwable instanceof NoSuchElementException) {
+                                            presenterListener.noEventDetailsReturned();
+                                        } else {
+                                            presenterListener.presentError(throwable.getMessage());
+                                        }
+                                    }));
     }
 
     @Override
     public void subscribe() {
-        loadUsersEventInfo(FirebaseAuth.getInstance().getUid());
+        if (FirebaseAuth.getInstance().getUid() != null){
+            userId = FirebaseAuth.getInstance().getUid();
+            loadUsersEventInfo();
+        } else {
+            presenterListener.showSignedOutEmptyState();
+        }
     }
 
     @Override
     public void unsubscribe() {
-        compositeDisposable.dispose();
+        compositeDisposable.clear();
     }
 
     /**
-     * Contract / Listener
+     * PresenterListener Definition
      */
-    public interface EventsPresenterListener {
+    public interface EventsPresenterListener extends BasePresenterListener {
 
         void eventDetailReturned(EventDetail event, String eventId);
 

@@ -5,13 +5,15 @@ import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 import com.bookyrself.bookyrself.views.MainActivity;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.NoSuchElementException;
+
 import io.reactivex.disposables.CompositeDisposable;
 
-public class ContactsFragmentPresenter implements ContactsRepository.ContactsInteractorListener {
+public class ContactsFragmentPresenter implements BasePresenter {
     private final ContactsPresenterListener presenterListener;
     private final ContactsRepository contactsRepository;
     private final CompositeDisposable compositeDisposable;
-    private final String userId = FirebaseAuth.getInstance().getUid();
+    private String userId;
 
     /**
      * Constructor
@@ -25,21 +27,29 @@ public class ContactsFragmentPresenter implements ContactsRepository.ContactsInt
     /**
      * Methods
      */
-    public void loadContacts(String userId) {
+    private void loadContacts() {
+            compositeDisposable
+                    .add(contactsRepository.getContactsForUser(userId)
+                            .subscribe(
+                                    stringUserPair ->
+                                            presenterListener.contactReturned(stringUserPair.first, stringUserPair.second),
+                                    throwable -> {
+                                        if (throwable instanceof NoSuchElementException) {
+                                            presenterListener.noContactsReturned();
+                                        } else {
+                                            presenterListener.presentError(throwable.getMessage());
+                                        }
+                                    }));
+        }
 
-        compositeDisposable
-                .add(contactsRepository.getContactsForUser(userId)
-                        .forEach(stringUserPair ->
-                                contactReturned(stringUserPair.first, stringUserPair.second)));
-    }
-
-    /**
-     * Interactor Listener
-     */
 
     @Override
     public void subscribe() {
-        loadContacts(userId);
+        if (FirebaseAuth.getInstance().getUid() != null) {
+            userId = FirebaseAuth.getInstance().getUid();
+            loadContacts();
+        }
+
     }
 
     @Override
@@ -47,20 +57,11 @@ public class ContactsFragmentPresenter implements ContactsRepository.ContactsInt
         compositeDisposable.clear();
     }
 
-    @Override
-    public void contactReturned(String userId, User user) {
-        presenterListener.contactReturned(userId, user);
-    }
-
-    @Override
-    public void noContactsReturned() {
-        presenterListener.noContactsReturned();
-    }
 
     /**
-     * Presenter Listener Definition
+     * PresenterListener Definition
      */
-    public interface ContactsPresenterListener {
+    public interface ContactsPresenterListener extends BasePresenterListener {
 
         void noContactsReturned();
 

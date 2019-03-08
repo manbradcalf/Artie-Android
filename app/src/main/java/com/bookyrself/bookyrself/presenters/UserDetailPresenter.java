@@ -3,6 +3,7 @@ package com.bookyrself.bookyrself.presenters;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.HashMap;
 
@@ -18,15 +19,15 @@ import io.reactivex.schedulers.Schedulers;
 public class UserDetailPresenter implements BasePresenter {
     private final UserDetailPresenterListener listener;
     private final CompositeDisposable compositeDisposable;
-    private final String userId;
+    private String userId;
 
     /**
      * Constructor
      */
     public UserDetailPresenter(String userId, UserDetailPresenterListener listener) {
+        this.userId = userId;
         this.listener = listener;
         this.compositeDisposable = new CompositeDisposable();
-        this.userId = userId;
     }
 
     /**
@@ -44,6 +45,7 @@ public class UserDetailPresenter implements BasePresenter {
                             // Notify view that user details have been returned
                             listener.displayUserInfo(user, userId);
 
+                            //TODO: Fix NPE here when loading a user detail
                             return Flowable.fromIterable(user.getEvents().entrySet());
                         })
 
@@ -54,12 +56,8 @@ public class UserDetailPresenter implements BasePresenter {
                                         .getEventData(stringEventInviteInfoEntry.getKey())
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
-                                        .doOnNext(eventDetail -> {
-                                            // notify the view
-                                            listener.displayUserEvent(eventDetail, stringEventInviteInfoEntry.getKey());
-                                        })
-                                        .doOnError(throwable -> listener.presentError(throwable.getMessage()))
-                                        .subscribe())
+                                        .subscribe(eventDetail -> listener.displayUserEvent(eventDetail, stringEventInviteInfoEntry.getKey()),
+                                                throwable -> listener.presentError(throwable.getMessage())))
                         .subscribe());
     }
 
@@ -88,7 +86,7 @@ public class UserDetailPresenter implements BasePresenter {
 
     @Override
     public void unsubscribe() {
-        compositeDisposable.dispose();
+        compositeDisposable.clear();
     }
 
 

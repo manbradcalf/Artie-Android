@@ -90,7 +90,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
     private String userEmailAddress;
     private String userID;
     private HashMap<CalendarDay, String> calendarDaysWithEventIds;
-    private UserDetailPresenter userDetailPresenter;
+    private UserDetailPresenter presenter;
     private List<CalendarDay> acceptedEventsCalendarDays = new ArrayList<>();
     private ContactsRepository contactsRepository = MainActivity.getContactsRepo();
 
@@ -103,16 +103,22 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         setContentView(R.layout.activity_user_detail);
         ButterKnife.bind(this);
 
+        storageReference = FirebaseStorage.getInstance().getReference();
+        calendarDaysWithEventIds = new HashMap<>();
         compositeDisposable = new CompositeDisposable();
         userID = getIntent().getStringExtra("userId");
-        userDetailPresenter = new UserDetailPresenter(userID, this);
-        userDetailPresenter.subscribe();
-        Toolbar.setTitle("User Details");
+        presenter = new UserDetailPresenter(userID, this);
         calendarView.setOnDateChangedListener(this);
-        calendarDaysWithEventIds = new HashMap<>();
-        storageReference = FirebaseStorage.getInstance().getReference();
+        Toolbar.setTitle("User Details");
+
         emptyState.setVisibility(View.GONE);
         displayLoadingState();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        presenter.subscribe();
     }
 
     @Override
@@ -166,7 +172,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
 
             // Since I'm signed in and thus able to add user as contact,
             // set the default click listener for the contact add button
-            addUserToContactsCardview.setOnClickListener(v -> userDetailPresenter.addContactToUser(userID, FirebaseAuth.getInstance().getCurrentUser().getUid()));
+            addUserToContactsCardview.setOnClickListener(v -> presenter.addContactToUser(userID, FirebaseAuth.getInstance().getCurrentUser().getUid()));
 
             // Check if this user is already contact and if so update the textview to portray that
             compositeDisposable.add(
@@ -177,9 +183,14 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                             .map(stringUserPair -> stringUserPair.first)
                             .filter(s -> s.equals(userId))
                             .subscribe(s -> {
-                                addUserToContactsTextView.setText(R.string.user_detail_contact_already_added);
-                                addUserToContactsCardview.setClickable(false);
-                            }));
+                                        addUserToContactsTextView.setText(R.string.user_detail_contact_already_added);
+                                        addUserToContactsCardview.setClickable(false);
+                                    },
+                                    throwable -> {
+                                        Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }));
+        } else{
+            addUserToContactsTextView.setText(R.string.contact_button_signed_out);
         }
 
         final StorageReference profileImageReference = storageReference.child("images/" + userID);
@@ -213,16 +224,18 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         int day = Integer.parseInt(s[2]);
         CalendarDay calendarDay = CalendarDay.from(year, month, day);
 
-        // If there are users for this event
-        if (!event.getUsers().entrySet().isEmpty()) {
-            // Loop through the users
-            for (Map.Entry<String, Boolean> userIsAttending : event.getUsers().entrySet()) {
-                // If this event's user is the user we're viewing and they're attending
-                if (userIsAttending.getKey().equals(userID) && userIsAttending.getValue()) {
-                    // add this event to the user's calendar
-                    acceptedEventsCalendarDays.add(calendarDay);
-                    calendarDaysWithEventIds.put(calendarDay, eventId);
-                    calendarView.addDecorator(new EventDecorator(userIsAttending.getValue(), acceptedEventsCalendarDays, getApplicationContext()));
+        if (event.getUsers() != null) {
+            // If there are users for this event
+            if (!event.getUsers().entrySet().isEmpty()) {
+                // Loop through the users
+                for (Map.Entry<String, Boolean> userIsAttending : event.getUsers().entrySet()) {
+                    // If this event's user is the user we're viewing and they're attending
+                    if (userIsAttending.getKey().equals(userID) && userIsAttending.getValue()) {
+                        // add this event to the user's calendar
+                        acceptedEventsCalendarDays.add(calendarDay);
+                        calendarDaysWithEventIds.put(calendarDay, eventId);
+                        calendarView.addDecorator(new EventDecorator(userIsAttending.getValue(), acceptedEventsCalendarDays, getApplicationContext()));
+                    }
                 }
             }
         }

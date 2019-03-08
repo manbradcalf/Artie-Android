@@ -69,7 +69,7 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        presenter = new EventsFragmentPresenter(this);
+        presenter = new EventsFragmentPresenter(this, getContext());
     }
 
     @Override
@@ -90,11 +90,7 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
         // Determine the view state by the auth state
         if (FirebaseAuth.getInstance().getUid() == null) {
             // Signed out
-            showEmptyState(
-                    getString(R.string.events_fragment_empty_state_signed_out_header),
-                    getString(R.string.events_fragment_empty_state_signed_out_subheader),
-                    getString(R.string.sign_in),
-                    getActivity().getDrawable(R.drawable.ic_calendar));
+            showSignedOutEmptyState();
         } else {
             // Signed In, load events
             showContent(false);
@@ -131,7 +127,7 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            presenter.loadUsersEventInfo(FirebaseAuth.getInstance().getUid());
+            presenter.subscribe();
         }
     }
 
@@ -271,6 +267,15 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
         emptyState.setVisibility(View.GONE);
         emptyStateTextHeader.setVisibility(View.GONE);
         emptyStateTextSubHeader.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void showSignedOutEmptyState() {
+        showEmptyState(
+                getString(R.string.events_fragment_empty_state_signed_out_header),
+                getString(R.string.events_fragment_empty_state_signed_out_subheader),
+                getString(R.string.sign_in),
+                getActivity().getDrawable(R.drawable.ic_calendar));
     }
 }
 

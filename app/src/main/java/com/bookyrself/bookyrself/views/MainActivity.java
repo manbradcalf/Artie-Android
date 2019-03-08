@@ -1,5 +1,6 @@
 package com.bookyrself.bookyrself.views;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -44,11 +45,10 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
             return CONTACTS_REPO;
     }
 
-    public static EventsRepo getEventsRepo() {
+    public static EventsRepo getEventsRepo(Context context) {
         if (EVENT_INVITES_REPO == null) {
-            EVENT_INVITES_REPO = new EventsRepo();
+            EVENT_INVITES_REPO = new EventsRepo(context);
         }
-
         return EVENT_INVITES_REPO;
     }
 

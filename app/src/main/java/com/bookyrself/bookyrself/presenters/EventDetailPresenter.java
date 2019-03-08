@@ -117,7 +117,7 @@ public class EventDetailPresenter implements BasePresenter {
 
     @Override
     public void unsubscribe() {
-        compositeDisposable.dispose();
+        compositeDisposable.clear();
     }
 
 

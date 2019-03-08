@@ -16,9 +16,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 public class ContactsRepository implements ContactsDataSource {
@@ -85,15 +88,18 @@ public class ContactsRepository implements ContactsDataSource {
                     .getUserContacts(userId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .flatMapIterable(HashMap::keySet)
-                    .flatMap(s -> FirebaseService.getAPI()
-                            .getUserDetails(s)
+                    .map(HashMap::entrySet)
+                    .firstOrError()
+                    .toFlowable()
+                    .flatMapIterable(entries -> entries)
+                    .flatMap(entry -> FirebaseService.getAPI()
+                            .getUserDetails(entry.getKey())
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .map(user -> {
-                                contactsMap.put(s, user);
+                                contactsMap.put(entry.getKey(), user);
                                 cacheIsDirty = false;
-                                return new Pair<>(s, user);
+                                return new Pair<>(entry.getKey(), user);
                             }));
         } else {
             // Cache is clean, get local copy
@@ -103,11 +109,9 @@ public class ContactsRepository implements ContactsDataSource {
     }
 
 
-    public interface ContactsInteractorListener extends BasePresenter {
+    public interface ContactsRepositoryListener {
 
         void contactReturned(String userId, User contact);
-
-        void noContactsReturned();
 
     }
 }

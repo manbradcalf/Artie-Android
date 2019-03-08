@@ -101,7 +101,7 @@ public class ProfileEditActivity extends AppCompatActivity {
                 user.setUrl(urlEditText.getText().toString());
             }
 
-            //TODO: Should this be in a presenter? works fine for its simple purpose here
+            // Update the user
             profileRepo.updateProfileInfo(FirebaseAuth.getInstance().getUid(), user)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

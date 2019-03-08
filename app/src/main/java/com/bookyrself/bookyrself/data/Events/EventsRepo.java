@@ -1,5 +1,6 @@
 package com.bookyrself.bookyrself.data.Events;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
@@ -7,6 +8,7 @@ import android.support.v4.util.Pair;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.data.ResponseModels.User.EventInviteInfo;
 import com.bookyrself.bookyrself.services.FirebaseService;
+import com.bookyrself.bookyrself.utils.TinyDB;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -14,28 +16,35 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Response;
 
 public class EventsRepo implements EventDataSource {
 
+
+    private ArrayList<String> attendingEventsStrings;
+
     private HashMap<String, EventDetail> eventsWithPendingInvites;
     private HashMap<String, EventDetail> allUsersEvents;
     private boolean cacheIsDirty;
     private DatabaseReference db;
+    private TinyDB tinyDB;
 
 
-    public EventsRepo() {
+    public EventsRepo(Context context) {
         this.cacheIsDirty = true;
         this.eventsWithPendingInvites = new HashMap<>();
         this.allUsersEvents = new HashMap<>();
+        this.attendingEventsStrings = new ArrayList<>();
+        this.tinyDB = new TinyDB(context);
+
         if (FirebaseAuth.getInstance().getUid() != null) {
             this.db = FirebaseDatabase.getInstance().getReference()
                     .child("users")
@@ -75,17 +84,31 @@ public class EventsRepo implements EventDataSource {
 
     @Override
     public Flowable<Pair<String, EventDetail>> getAllEvents(String userId) {
+
         if (cacheIsDirty) {
             return FirebaseService.getAPI()
                     .getUsersEventInvites(userId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
+                    .firstOrError()
+                    .toFlowable()
                     .flatMapIterable(HashMap::entrySet)
                     .flatMap(eventInvite -> FirebaseService.getAPI()
                             .getEventData(eventInvite.getKey())
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .map(eventDetail -> {
+
+                                // Populate list of strings describing attending events for the widget
+                                if (eventInvite.getValue().getIsInviteAccepted() ||
+                                        eventInvite.getValue().getIsInviteAccepted()) {
+
+                                    if (!attendingEventsStrings.contains(String.format("%s in %s on %s", eventDetail.getEventname(), eventDetail.getCitystate(), eventDetail.getDate()))) {
+                                        attendingEventsStrings.add(String.format("%s in %s on %s", eventDetail.getEventname(), eventDetail.getCitystate(), eventDetail.getDate()));
+                                        tinyDB.putListString("attendingEventsString", attendingEventsStrings);
+                                    }
+                                }
+                                // Regardless, add all events to allUserEvents hashmap
                                 allUsersEvents.put(eventInvite.getKey(), eventDetail);
                                 return new Pair<>(eventInvite.getKey(), eventDetail);
                             }));
