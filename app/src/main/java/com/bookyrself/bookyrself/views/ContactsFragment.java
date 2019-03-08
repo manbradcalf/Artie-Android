@@ -100,11 +100,14 @@ public class ContactsFragment extends Fragment implements BaseFragment, Contacts
     @Override
     public void onResume() {
         super.onResume();
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            showSignedOutEmptyState();
-        } else {
-            presenter.subscribe();
-        }
+        presenter.subscribe();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        contacts.clear();
+        presenter.unsubscribe();
     }
 
     @Override
