@@ -34,6 +34,7 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseUserMetadata;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -284,29 +285,37 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
                             // Successfully signed in
                             showLoadingState(true);
                             showToast("Signing In!");
+                            presenter.subscribe();
                         }
+                        setMenuVisibility(true);
                         return;
                     case RC_PROFILE_EDIT:
                         showToast("Profile Updated!");
                         return;
                     case RC_PHOTO_SELECT:
-                        Uri selectedimg = data.getData();
-
-                        // Set the image to the profileImageThumb
-                        Picasso.with(getActivity().getApplicationContext())
-                                .load(selectedimg)
-                                .resize(148, 148)
-                                .centerCrop()
-                                .transform(new CircleTransform())
-                                .into(profileImage);
+                        Uri selectedImage = data.getData();
 
                         // Upload to firebase
-                        StorageReference profilePhotoRef = storageReference.child("images/" + fbUser.getUid());
-                        UploadTask uploadTask = profilePhotoRef.putFile(selectedimg);
-                        uploadTask.addOnFailureListener(e -> {
+                        StorageReference profilePhotoRef = storageReference.child("images/users/" + fbUser.getUid());
+                        UploadTask uploadTask = profilePhotoRef.putFile(selectedImage);
+
+                        uploadTask.addOnSuccessListener(taskSnapshot -> {
+
+                            // Set the image to the profileImageThumb
+                            Picasso.with(getActivity().getApplicationContext())
+                                    .load(selectedImage)
+                                    .resize(148, 148)
+                                    .centerCrop()
+                                    .transform(new CircleTransform())
+                                    .into(profileImage);
+
+                            showToast("upload succeeded");
+
+                        }).addOnFailureListener(e -> {
                             showToast("upload failed");
                             Picasso.with(getActivity().getApplicationContext()).load(R.drawable.ic_user).into(profileImage);
-                        }).addOnSuccessListener(taskSnapshot -> showToast("upload succeeded"));
+
+                        });
                 }
             }
         } else if (response == null) {
@@ -397,6 +406,8 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
                 getString(R.string.auth_val_prop_subheader),
                 getString(R.string.sign_in),
                 getActivity().getDrawable(R.drawable.ic_no_auth_profile));
+
+        setMenuVisibility(false);
     }
 
     private boolean isNewSignUp() {
