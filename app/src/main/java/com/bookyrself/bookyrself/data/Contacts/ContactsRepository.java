@@ -31,6 +31,11 @@ public class ContactsRepository implements ContactsDataSource {
         this.contactsMap = new HashMap<>();
         this.cacheIsDirty = true;
 
+        FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
+            contactsMap.clear();
+            cacheIsDirty = true;
+        });
+
         if (FirebaseAuth.getInstance().getUid() != null) {
             this.db = FirebaseDatabase.getInstance().getReference()
                     .child("users")
