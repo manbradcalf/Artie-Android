@@ -203,7 +203,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             addUserToContactsTextView.setText(R.string.contact_button_signed_out);
         }
 
-        final StorageReference profileImageReference = storageReference.child("images/" + userID);
+        final StorageReference profileImageReference = storageReference.child("images/users/" + userID);
         profileImageReference
                 .getDownloadUrl()
                 .addOnSuccessListener(uri -> {

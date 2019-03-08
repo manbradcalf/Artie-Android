@@ -244,7 +244,7 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         }
 
         // Load profile image
-        final StorageReference profileImageReference = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
+        final StorageReference profileImageReference = storageReference.child("images/users/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
         profileImageReference.getDownloadUrl().addOnSuccessListener(uri -> Picasso.with(getActivity().getApplicationContext())
                 .load(uri)
                 .resize(148, 148)

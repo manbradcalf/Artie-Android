@@ -25,7 +25,6 @@ import com.bookyrself.bookyrself.presenters.ContactsFragmentPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
@@ -92,6 +91,7 @@ public class ContactsFragment extends Fragment implements BaseFragment, Contacts
     public void showLoadingState(boolean show) {
         if (show && progressbar.getVisibility() == View.GONE) {
             progressbar.setVisibility(View.VISIBLE);
+            hideEmptyState();
         } else {
             progressbar.setVisibility(View.GONE);
         }
@@ -183,6 +183,7 @@ public class ContactsFragment extends Fragment implements BaseFragment, Contacts
 
     @Override
     public void contactReturned(String id, User user) {
+
         showLoadingState(false);
         hideEmptyState();
         showContent(true);
@@ -235,24 +236,20 @@ public class ContactsFragment extends Fragment implements BaseFragment, Contacts
                 viewHolderContacts.userTagsTextView.setText(listString.toString().replaceAll(", $", ""));
             }
 
-            final StorageReference profileImageReference = storageReference.child("/images/" + contactsMap.get(contacts.get(position)));
+            final StorageReference profileImageReference = storageReference.child("/images/users/" + contactsMap.get(contacts.get(position)));
             profileImageReference
                     .getDownloadUrl()
                     .addOnSuccessListener(uri -> Picasso.with(getActivity())
-                    .load(uri)
-                    .placeholder(R.drawable.round)
-                    .error(R.drawable.round)
-                    .transform(new CircleTransform())
-                    .resize(100, 100)
-                    .into(viewHolderContacts.userProfileImageThumb)).addOnFailureListener(new OnFailureListener() {
-
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    // Handle any errors
-                    Log.e("ContactsFragment: ", "image not dowloaded");
-                    viewHolderContacts.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_profile_black_24dp));
-                }
-            });
+                            .load(uri)
+                            .placeholder(R.drawable.round)
+                            .error(R.drawable.round)
+                            .transform(new CircleTransform())
+                            .resize(100, 100)
+                            .into(viewHolderContacts.userProfileImageThumb)).addOnFailureListener(e -> {
+                                // Handle any errors
+                                Log.e("ContactsFragment: ", "image not dowloaded");
+                                viewHolderContacts.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_profile_black_24dp));
+                            });
 
             viewHolderContacts.userNameTextView.setText(contacts.get(position).getUsername());
             viewHolderContacts.userCityStateTextView.setText(contacts.get(position).getCitystate());

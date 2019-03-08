@@ -248,7 +248,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
                     String.format("<a href=\"%s\">%s</a> ", ("http://" + miniUser.getUrl()), miniUser.getUrl());
             userUrl.setText(Html.fromHtml(linkedText));
 
-            final StorageReference profileImageReference = mStorageReference.child("images/" + miniUser.getUserId());
+            final StorageReference profileImageReference = mStorageReference.child("images/users/" + miniUser.getUserId());
             profileImageReference.getDownloadUrl().addOnSuccessListener(uri ->
                     Picasso.with(mContext)
                             .load(uri)

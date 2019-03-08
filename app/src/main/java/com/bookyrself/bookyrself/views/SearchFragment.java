@@ -471,34 +471,21 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                 }
 
 
-                final StorageReference profileImageReference = storageReference.child("images/" + usersResults.get(position).get_id());
-                profileImageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        Picasso.with(getContext())
-                                .load(uri)
-                                .resize(148, 148)
-                                .centerCrop()
-                                .transform(new CircleTransform())
-                                .into(viewHolderUsers.userProfileImageThumb);
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle any errors
-                        viewHolderUsers.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_person_white_16dp));
-                        Log.e("ProfileImage not loaded", exception.getLocalizedMessage());
-                    }
-                });
+                final StorageReference profileImageReference = storageReference.child("images/users/" + usersResults.get(position).get_id());
+                profileImageReference.getDownloadUrl().addOnSuccessListener(uri -> Picasso.with(getContext())
+                        .load(uri)
+                        .resize(148, 148)
+                        .centerCrop()
+                        .transform(new CircleTransform())
+                        .into(viewHolderUsers.userProfileImageThumb)).addOnFailureListener(exception -> {
+                            // Handle any errors
+                            viewHolderUsers.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_person_white_16dp));
+                            Log.e("ProfileImage not loaded", exception.getLocalizedMessage());
+                        });
 
-                viewHolderUsers.userCardView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        itemSelected(usersResults
-                                .get(position)
-                                .get_id(), USER_VIEW_TYPE);
-                    }
-                });
+                viewHolderUsers.userCardView.setOnClickListener(v -> itemSelected(usersResults
+                        .get(position)
+                        .get_id(), USER_VIEW_TYPE));
             }
         }
 
