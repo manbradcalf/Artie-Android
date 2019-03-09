@@ -116,7 +116,6 @@ public class ProfileEditActivity extends AppCompatActivity {
                     .flatMapIterable(HashMap::entrySet)
 
                     // Only get events I'm hosting
-                    // TODO: What if i'm not hosting any? Does it throw a NoSuchElementException?
                     .filter(stringEventInviteInfoEntry -> stringEventInviteInfoEntry.getValue().getIsHost())
 
                     // Update the events I'm hosting with the new data

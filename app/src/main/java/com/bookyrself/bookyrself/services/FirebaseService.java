@@ -11,7 +11,6 @@ import java.util.HashMap;
 import io.reactivex.Flowable;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -63,7 +62,7 @@ public class FirebaseService {
         Flowable<HashMap<String, Boolean>> getUserContacts(@Path("id") String userId);
 
         @PUT("/users/{userId}.json")
-        Flowable<User> addUser(@Body User user, @Path("userId") String userId);
+        Flowable<User> updateUser(@Body User user, @Path("userId") String userId);
 
         @PUT("/users/{userId}/events/{eventId}/isInviteRejected.json")
         Flowable<Boolean> rejectInvite(@Body Boolean bool, @Path("userId") String userId, @Path("eventId") String eventId);
@@ -91,7 +90,11 @@ public class FirebaseService {
         Flowable<Response<Void>> removeUserFromEvent(@Path("eventId") String eventId, @Path("userId") String userId);
 
         @PUT("/events/{eventId}/host.json")
-        Flowable<Host> updateEventHost(@Body Host host,@Path("eventId") String eventId);
+        Flowable<Host> updateEventHost(@Body Host host, @Path("eventId") String eventId);
+
+        @PUT("/users/{userId}/unavailable_dates/{date}.json")
+        Flowable<Boolean> setDateUnavailableForUser(@Body Boolean unavailable, @Path("userId") String userId,
+                                                    @Path("date") String date);
 
 
     }

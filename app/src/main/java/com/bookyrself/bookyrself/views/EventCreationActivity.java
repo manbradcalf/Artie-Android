@@ -71,7 +71,7 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     private EventCreationPresenter presenter;
     private List<User> contacts;
     private Map<User, String> contactsAndUserIdsMap;
-    private HashMap<String, Boolean> selectedContactsAndAttendingBooleanMap;
+    private HashMap<String, Boolean> selectedContacts;
     private String date;
     private Uri selectedImage;
     private int FLAG_EVENT_CREATION = 1;
@@ -83,8 +83,7 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
         setContentView(R.layout.activity_event_creation);
         ButterKnife.bind(this);
 
-        // TODO: Clean up this wacky variable name
-        selectedContactsAndAttendingBooleanMap = new HashMap<>();
+        selectedContacts = new HashMap<>();
         contacts = new ArrayList<>();
         contactsAndUserIdsMap = new HashMap<>();
         storageReference = FirebaseStorage.getInstance().getReference();
@@ -117,9 +116,9 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
                     String userId = contactsAndUserIdsMap.get(user);
 
                     // Set userId's attending boolean to false
-                    selectedContactsAndAttendingBooleanMap.put(userId, false);
+                    selectedContacts.put(userId, false);
                 }
-                event.setUsers(selectedContactsAndAttendingBooleanMap);
+                event.setUsers(selectedContacts);
             } else {
                 Toast.makeText(getApplicationContext(), "Please select contacts to invite!", Toast.LENGTH_LONG).show();
                 return;

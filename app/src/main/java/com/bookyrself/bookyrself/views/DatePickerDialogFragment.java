@@ -17,7 +17,6 @@ import java.util.Locale;
  * Created by benmedcalf on 10/2/17.
  */
 
-//TODO: Refactor this class to allow for any presenter, not just mSearchPresenter. See dataReady method
 public class DatePickerDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
     public static final int FLAG_EVENT_CREATION = 1;

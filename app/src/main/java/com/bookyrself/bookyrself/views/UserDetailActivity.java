@@ -243,7 +243,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             // add this event to the user's calendar
             acceptedEventsCalendarDays.add(calendarDay);
             calendarDaysWithEventIds.put(calendarDay, eventId);
-            calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, getApplicationContext()));
+            calendarView.addDecorator(new EventDecorator(EventDecorator.INVITE_ACCEPTED, acceptedEventsCalendarDays, getApplicationContext()));
 
         } else if (event.getUsers() != null) {
             // If there are users for this event
@@ -255,7 +255,12 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                         // add this event to the user's calendar
                         acceptedEventsCalendarDays.add(calendarDay);
                         calendarDaysWithEventIds.put(calendarDay, eventId);
-                        calendarView.addDecorator(new EventDecorator(userIsAttending.getValue(), acceptedEventsCalendarDays, getApplicationContext()));
+                        if (userIsAttending.getValue()) {
+                            calendarView.addDecorator(new EventDecorator(EventDecorator.INVITE_ACCEPTED, acceptedEventsCalendarDays, getApplicationContext()));
+                        } else {
+                            calendarView.addDecorator(new EventDecorator(EventDecorator.INVITE_PENDING, acceptedEventsCalendarDays, getApplicationContext()));
+                        }
+
                     }
                 }
             }
