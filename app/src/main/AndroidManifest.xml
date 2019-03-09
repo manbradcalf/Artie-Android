@@ -58,7 +58,8 @@
         <activity
             android:name=".views.EventCreationActivity"
             android:label="@string/title_activity_event_creation"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustPan"/>
         <service
             android:name=".widget.EventsWidgetService"
             android:exported="false"

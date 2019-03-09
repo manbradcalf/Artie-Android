@@ -95,7 +95,7 @@ public class EventCreationPresenter implements BasePresenter {
                             }
                         })
                         .subscribe(
-                                eventCreationResponse -> presenterListener.eventCreated(),
+                                eventCreationResponse -> presenterListener.eventCreated(eventCreationResponse.getName()),
                                 throwable -> {
                                     presenterListener.presentError(throwable.getMessage());
                                     Log.e("EventCreationPresenter:", throwable.getMessage());
@@ -116,7 +116,7 @@ public class EventCreationPresenter implements BasePresenter {
 
         void contactReturned(User contact, String userId);
 
-        void eventCreated();
+        void eventCreated(String eventId);
 
         void dateSelectedFromDatePickerDialog(String date);
 

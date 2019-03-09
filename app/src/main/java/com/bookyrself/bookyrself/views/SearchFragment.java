@@ -2,7 +2,6 @@ package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
@@ -25,7 +24,6 @@ import com.bookyrself.bookyrself.data.ResponseModels.SearchResponseEvents.Hit;
 import com.bookyrself.bookyrself.data.ResponseModels.SearchResponseEvents._source;
 import com.bookyrself.bookyrself.presenters.SearchPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
@@ -409,26 +407,30 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                 }
 
 
-                // Set Event Image
-                //TODO: How to add an image to an event? Also there is no picture property for events
-                // Would need to use event unique key like we do for users
-                Picasso.with(getActivity().getApplicationContext())
-                        .load(eventsResults
-                                .get(position)
-                                .get_source()
-                                .getPicture())
-                        .placeholder(R.drawable.round)
-                        .error(R.drawable.round)
-                        .transform(new CircleTransform())
-                        .resizeDimen(R.dimen.user_image_thumb_list_height, R.dimen.user_image_thumb_list_width)
-                        .centerCrop()
-                        .into(viewHolderEvents.eventImageThumb);
+                // Set Event Image thumbnail
 
+                final StorageReference eventImageReference = storageReference.child("images/events/" + eventsResults.get(position).get_id());
+                eventImageReference.getDownloadUrl().addOnSuccessListener(uri -> {
+
+                    // Add downloaded image to event item's ImageView
+                    Picasso.with(getContext())
+                            .load(uri)
+                            .resize(148, 148)
+                            .centerCrop()
+                            .transform(new CircleTransform())
+                            .into(viewHolderEvents.eventImageThumb);
+                }).addOnFailureListener(exception -> {
+
+                    // Set placeholder image, log error
+                    viewHolderEvents.eventImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_calendar_black_24dp));
+                    Log.e("Event image  not loaded", exception.getLocalizedMessage());
+                });
+
+                // Set onClickListener to fire off intent in itemSelected()
                 viewHolderEvents.eventCardView.setOnClickListener(v -> itemSelected(eventsResults
                         .get(position)
                         .get_id(), EVENT_VIEW_TYPE));
             }
-
         }
 
         private void buildUserViewHolder(final RecyclerView.ViewHolder holder, final int position) {
@@ -439,35 +441,41 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
                         .get_source()
                         .getCitystate());
 
+                // Set username
                 viewHolderUsers.userNameTextView.setText(usersResults
                         .get(position)
                         .get_source()
                         .getUsername());
 
-                //TODO Are null catches the solution here?
+                // Set tags
                 if (usersResults.get(position).get_source().getTags() != null) {
                     StringBuilder listString = new StringBuilder();
                     for (String s : usersResults.get(position).get_source().getTags()) {
                         listString.append(s + ", ");
                     }
-
                     // Regex to trim the trailing comma
                     viewHolderUsers.userTagsTextView.setText(listString.toString().replaceAll(", $", ""));
                 }
 
 
+                // Set user image thumbnail
                 final StorageReference profileImageReference = storageReference.child("images/users/" + usersResults.get(position).get_id());
-                profileImageReference.getDownloadUrl().addOnSuccessListener(uri -> Picasso.with(getContext())
+                profileImageReference.getDownloadUrl().addOnSuccessListener(uri ->
+
+                        // Add downloaded image to the user item's ImageView
+                        Picasso.with(getContext())
                         .load(uri)
                         .resize(148, 148)
                         .centerCrop()
                         .transform(new CircleTransform())
-                        .into(viewHolderUsers.userProfileImageThumb)).addOnFailureListener(exception -> {
+                        .into(viewHolderUsers.userProfileImageThumb))
+                        .addOnFailureListener(exception -> {
                             // Handle any errors
                             viewHolderUsers.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_person_white_16dp));
                             Log.e("ProfileImage not loaded", exception.getLocalizedMessage());
                         });
 
+                // Set onClickListener to fire off intent in itemSelected()
                 viewHolderUsers.userCardView.setOnClickListener(v -> itemSelected(usersResults
                         .get(position)
                         .get_id(), USER_VIEW_TYPE));

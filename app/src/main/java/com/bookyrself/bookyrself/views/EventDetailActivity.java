@@ -2,7 +2,9 @@ package com.bookyrself.bookyrself.views;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -25,6 +27,8 @@ import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.Host;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.MiniUser;
 import com.bookyrself.bookyrself.presenters.EventDetailPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
@@ -48,6 +52,8 @@ import butterknife.ButterKnife;
 
 public class EventDetailActivity extends AppCompatActivity implements EventDetailPresenter.EventDetailPresenterListener {
 
+    @BindView(R.id.event_image_detail)
+    ImageView eventImage;
     @BindView(R.id.event_detail_date)
     TextView DateView;
     @BindView(R.id.item_event_detail_username)
@@ -83,6 +89,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
     private StorageReference storageReference;
     private List<Map.Entry<String, MiniUser>> invitedUsers;
     private UsersListAdapter adapter;
+    private String eventId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +108,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         // Set up initial loading state
         eventDetailContent.setVisibility(View.GONE);
         emptyState.setVisibility(View.GONE);
-        String eventId = getIntent().getStringExtra("eventId");
+        eventId = getIntent().getStringExtra("eventId");
         setSupportActionBar(Toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -130,7 +137,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
         });
 
         HostUsernameTextview.setText(hostUsername);
-        final StorageReference profileImageReference = storageReference.child("images/" + host.getUserId());
+        final StorageReference profileImageReference = storageReference.child("images/users/" + host.getUserId());
         profileImageReference.getDownloadUrl().addOnSuccessListener(uri -> Picasso.with(getApplicationContext())
                 .load(uri)
                 .resize(148, 148)
@@ -156,6 +163,19 @@ public class EventDetailActivity extends AppCompatActivity implements EventDetai
 
         // Set the city state
         EventCityState.setText(hostCityState);
+
+        // Set the image
+        final StorageReference eventImageReference = storageReference.child("images/events/" + eventId);
+        eventImageReference.getDownloadUrl().addOnSuccessListener(uri -> {
+            Picasso.with(getApplicationContext())
+                    .load(uri)
+                    .resize(148, 148)
+                    .centerCrop()
+                    .transform(new CircleTransform())
+                    .into(eventImage);
+        }).addOnFailureListener(exception -> {
+            eventImage.setImageDrawable(getDrawable(R.drawable.ic_calendar_black_24dp));
+        });
 
         // Make it visible
         eventDetailContent.setVisibility(View.VISIBLE);
