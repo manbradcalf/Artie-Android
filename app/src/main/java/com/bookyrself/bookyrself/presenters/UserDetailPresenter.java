@@ -46,7 +46,6 @@ public class UserDetailPresenter implements BasePresenter {
                             // Notify view that user details have been returned
                             listener.displayUserInfo(user, userId);
 
-                            //TODO: Fix NPE here when loading a user detail
                             return Flowable.fromIterable(user.getEvents().entrySet());
                         })
                         .firstOrError()

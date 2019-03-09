@@ -70,14 +70,13 @@ public class EventDetailPresenter implements BasePresenter {
                                                                 listener.presentError(String.format("We were unable to find a user with id %s", stringBooleanEntry.getKey()));
                                                             } else if (throwable.getMessage() != null) {
                                                                 listener.presentError(throwable.getMessage());
-                                                            } else {
-                                                                //TODO: Think of something better
-                                                                listener.presentError("Whoosp!");
                                                             }
+                                                            throwable.printStackTrace();
                                                         }
                                                 )))
                         .subscribe(
-                                disposableFlowable -> {},
+                                disposableFlowable -> {
+                                },
                                 throwable -> listener.presentError(throwable.getMessage())));
     }
 

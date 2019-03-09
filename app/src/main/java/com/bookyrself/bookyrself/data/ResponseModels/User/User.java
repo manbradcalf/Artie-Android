@@ -31,6 +31,17 @@ public class User implements ChipInterface {
     @SerializedName("username")
     private String mUsername;
 
+    public HashMap<String, Boolean> getUnavailableDates() {
+        return mUnavailableDates;
+    }
+
+    public void setUnavailableDates(HashMap<String, Boolean> mUnavailableDates) {
+        this.mUnavailableDates = mUnavailableDates;
+    }
+
+    @SerializedName("unavailable_dates")
+    private HashMap<String, Boolean> mUnavailableDates;
+
     public String getBio() {
         return mBio;
     }

@@ -17,11 +17,15 @@ import java.util.HashSet;
 
 public class EventDecorator implements DayViewDecorator {
     private final Context context;
-    private final boolean isEventInviteAccepted;
+    private final int eventType;
     private final HashSet<CalendarDay> dates;
+    public static final int INVITE_PENDING = 0;
+    public static final int INVITE_ACCEPTED = 1;
+    public static final int USER_IS_HOST = 2;
+    public static final int DATE_UNAVAILABLE = 3;
 
-    public EventDecorator(boolean isEventInviteAccepted, Collection<CalendarDay> dates, @NonNull Context context) {
-        this.isEventInviteAccepted = isEventInviteAccepted;
+    public EventDecorator(int eventType, Collection<CalendarDay> dates, @NonNull Context context) {
+        this.eventType = eventType;
         this.dates = new HashSet<>(dates);
         this.context = context;
     }
@@ -34,10 +38,18 @@ public class EventDecorator implements DayViewDecorator {
 
     @Override
     public void decorate(DayViewFacade view) {
-        if (isEventInviteAccepted) {
-            view.setBackgroundDrawable(context.getDrawable(R.drawable.calendar_day_event_invite_accepted_background));
-        } else {
-            view.setBackgroundDrawable(context.getDrawable(R.drawable.calendar_day_event_invite_not_accepted_background));
+
+        switch (eventType) {
+            case INVITE_PENDING:
+                view.setBackgroundDrawable(context.getDrawable(R.drawable.calendar_day_event_invite_pending_background));
+            case INVITE_ACCEPTED:
+                view.setBackgroundDrawable(context.getDrawable(R.drawable.calendar_day_event_invite_accepted_background));
+            case USER_IS_HOST:
+                view.setBackgroundDrawable(context.getDrawable(R.drawable.calendar_day_event_invite_accepted_background));
+            case DATE_UNAVAILABLE:
+                view.setBackgroundDrawable(context.getDrawable(R.drawable.calendar_day_date_unavailable_background));
+
+
         }
     }
 }

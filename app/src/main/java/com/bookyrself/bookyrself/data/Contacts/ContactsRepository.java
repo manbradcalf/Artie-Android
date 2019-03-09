@@ -42,8 +42,6 @@ public class ContactsRepository implements ContactsDataSource {
                     .child(FirebaseAuth.getInstance().getUid())
                     .child("contacts");
 
-
-            // TODO: Move this into a scheduler to somehow fit the Udacity requirements?
             this.db.addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {

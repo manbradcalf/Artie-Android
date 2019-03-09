@@ -165,7 +165,7 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
         if (event.getHost().getUserId().equals(FirebaseAuth.getInstance().getUid())) {
             acceptedEventsCalendarDays.add(calendarDay);
             calendarDaysWithEventIds.put(calendarDay, eventId);
-            calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
+            calendarView.addDecorator(new EventDecorator(EventDecorator.USER_IS_HOST, acceptedEventsCalendarDays, this.getContext()));
         }
         // If I'm not hosting and there are users invited
         else if (!event.getHost().getUserId().equals(FirebaseAuth.getInstance().getUid()) && event.getUsers() != null) {
@@ -180,14 +180,14 @@ public class EventsFragment extends Fragment implements BaseFragment, OnDateSele
                     if (userIsAttending.getValue()) {
                         acceptedEventsCalendarDays.add(calendarDay);
                         calendarDaysWithEventIds.put(calendarDay, eventId);
-                        calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
+                        calendarView.addDecorator(new EventDecorator(EventDecorator.INVITE_ACCEPTED, acceptedEventsCalendarDays, this.getContext()));
                     }
 
                     // or if I'm not attending yet, set invite to pending
                     else if (!userIsAttending.getValue()) {
                         pendingEventsCalendarDays.add(calendarDay);
                         calendarDaysWithEventIds.put(calendarDay, eventId);
-                        calendarView.addDecorator(new EventDecorator(false, pendingEventsCalendarDays, this.getContext()));
+                        calendarView.addDecorator(new EventDecorator(EventDecorator.INVITE_PENDING, pendingEventsCalendarDays, this.getContext()));
                     }
                 } else Log.e("Test", "User not attending");
         }

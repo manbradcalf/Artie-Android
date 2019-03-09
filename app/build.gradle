@@ -67,13 +67,14 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage:16.1.0'
     implementation 'com.firebaseui:firebase-ui-auth:3.3.1'
 
-    // Handy libraries developed by Square
+    // Handy libraries developed by Square and others
     implementation 'com.jakewharton:butterknife:8.8.1'
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
     implementation 'com.squareup.picasso:picasso:2.5.2'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
     implementation 'com.github.prolificinteractive:material-calendarview:1.5.0'
     implementation 'com.ramotion.paperonboarding:paper-onboarding:1.1.1'
+    implementation 'id.zelory:compressor:2.1.0'
     implementation group: 'com.google.android.gms', name: 'play-services-tasks', version: '16.0.1'
     implementation project(':chips:library')
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'

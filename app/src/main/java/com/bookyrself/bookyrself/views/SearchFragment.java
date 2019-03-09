@@ -98,6 +98,20 @@ public class SearchFragment extends Fragment implements SearchPresenter.SearchPr
         storageReference = FirebaseStorage.getInstance().getReference();
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        searchViewWhat.clearFocus();
+        searchViewWhere.clearFocus();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        searchViewWhere.clearFocus();
+        searchViewWhat.clearFocus();
+    }
+
     private void setLayout() {
         emptyStateButton.setVisibility(View.GONE);
         if (presenter == null) {

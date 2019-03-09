@@ -7,9 +7,8 @@ import java.util.List;
 import javax.annotation.Generated;
 
 @Generated("net.hexar.json2pojo")
+
 @SuppressWarnings("unused")
-//TODO: Rename this class? This is being used as a user most places
-//TODO: Add URL property to this model and to the ES mapping
 public class _source {
 
     @SerializedName("bio")

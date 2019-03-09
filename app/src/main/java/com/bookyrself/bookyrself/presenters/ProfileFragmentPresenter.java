@@ -40,7 +40,7 @@ public class ProfileFragmentPresenter implements BasePresenter {
      */
     public void updateUser(User user, final String userId) {
         compositeDisposable.add(
-                FirebaseService.getAPI().addUser(user, userId)
+                FirebaseService.getAPI().updateUser(user, userId)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(userResponse -> listener.profileInfoReady(userId, user),
@@ -96,6 +96,14 @@ public class ProfileFragmentPresenter implements BasePresenter {
     @Override
     public void unsubscribe() {
         compositeDisposable.clear();
+    }
+
+
+    public void markDateAsUnavailable(String userId, String date) {
+        FirebaseService.getAPI().setDateUnavailableForUser(true, userId, date)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe();
     }
 
 

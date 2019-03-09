@@ -1,5 +1,7 @@
 package com.bookyrself.bookyrself.views;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -27,6 +29,7 @@ import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 import com.bookyrself.bookyrself.presenters.ProfileFragmentPresenter;
+import com.bookyrself.bookyrself.services.FirebaseService;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.firebase.ui.auth.AuthUI;
@@ -34,7 +37,6 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseUserMetadata;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -43,8 +45,11 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.squareup.picasso.Picasso;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +107,7 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
     private User user;
     private List<CalendarDay> acceptedEventsCalendarDays = new ArrayList<>();
     private List<CalendarDay> pendingEventsCalendarDays = new ArrayList<>();
+    private List<CalendarDay> unavailableDates = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -188,11 +194,11 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
                     if (isUserAttending.getValue() || event.getHost().getUserId().equals(FirebaseAuth.getInstance().getUid())) {
                         acceptedEventsCalendarDays.add(calendarDay);
                         calendarDaysWithEventIds.put(calendarDay, eventId);
-                        calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, this.getContext()));
+                        calendarView.addDecorator(new EventDecorator(EventDecorator.INVITE_ACCEPTED, acceptedEventsCalendarDays, this.getContext()));
                     } else {
                         pendingEventsCalendarDays.add(calendarDay);
                         calendarDaysWithEventIds.put(calendarDay, eventId);
-                        calendarView.addDecorator(new EventDecorator(false, pendingEventsCalendarDays, this.getContext()));
+                        calendarView.addDecorator(new EventDecorator(EventDecorator.INVITE_PENDING, pendingEventsCalendarDays, this.getContext()));
                     }
                 }
             }
@@ -239,6 +245,26 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
             editInfoButton.setOnClickListener(view -> editProfile(user));
 
             profileContent.setVisibility(View.VISIBLE);
+
+            if (user.getUnavailableDates() != null) {
+
+                for (String date : user.getUnavailableDates().keySet()) {
+
+                    String[] s = date.split("-");
+                    int year = Integer.parseInt(s[0]);
+                    // I have to do weird logic on the month because months are 0 indexed
+                    // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
+                    int month = Integer.parseInt(s[1]) - 1;
+                    int day = Integer.parseInt(s[2]);
+
+                    CalendarDay calendarDay = CalendarDay.from(year, month, day);
+                    unavailableDates.add(calendarDay);
+
+                    calendarView.addDecorator(new EventDecorator(EventDecorator.DATE_UNAVAILABLE, unavailableDates, this.getContext()));
+                }
+            }
+
+
         } else {
             userNameTextView.setText(R.string.user_not_in_db);
             profileContent.setVisibility(View.GONE);
@@ -276,10 +302,26 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
                     case RC_SIGN_IN:
                         if (isNewSignUp()) {
                             // Successfully signed up
-                            // Creating user object to push to FB DB
+
+                            // Clear out activity's old user data if it exists
+                            if (user.getTags() != null) {
+                                user.setTags(null);
+                            }
+                            if (user.getBio() != null) {
+                                user.setBio(null);
+                            }
+                            if (user.getCitystate() != null) {
+                                user.setCitystate(null);
+                            }
+                            if (user.getUrl() != null) {
+                                user.setUrl(null);
+                            }
+
+                            // Update user object to push to FB DB
                             user.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
                             user.setUsername(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
                             presenter.updateUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
+
                             showToast("Signing Up!");
                         } else {
                             // Successfully signed in
@@ -336,6 +378,21 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
             Intent intent = new Intent(getActivity(), EventDetailActivity.class);
             intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
             startActivity(intent);
+        } else {
+            // Show a dialog asking if you want to mark the date as unavailable
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
+            dialogBuilder.setTitle("Mark Date as unavailable?");
+            dialogBuilder.setCancelable(true);
+
+            dialogBuilder.setPositiveButton("Yes", (dialogInterface, i) -> {
+
+                // Mark date unavailable
+                String pattern = "yyyy-MM-dd";
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+                String date = simpleDateFormat.format(calendarDay.getDate());
+                presenter.markDateAsUnavailable(FirebaseAuth.getInstance().getUid(), date);
+
+            }).setNegativeButton("Cancel", null).show();
         }
     }
 
