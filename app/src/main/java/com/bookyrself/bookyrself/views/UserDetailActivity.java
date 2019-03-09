@@ -9,6 +9,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -197,9 +198,12 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                                         addUserToContactsCardview.setClickable(false);
                                     },
                                     throwable -> {
-                                        Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                        if (throwable.getMessage() != null) {
+                                            Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                        throwable.printStackTrace();
                                     }));
-        } else{
+        } else {
             addUserToContactsTextView.setText(R.string.contact_button_signed_out);
         }
 
@@ -234,7 +238,14 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         int day = Integer.parseInt(s[2]);
         CalendarDay calendarDay = CalendarDay.from(year, month, day);
 
-        if (event.getUsers() != null) {
+        if (event.getHost().getUserId().equals(userID)) {
+            // If the user is hosting this event
+            // add this event to the user's calendar
+            acceptedEventsCalendarDays.add(calendarDay);
+            calendarDaysWithEventIds.put(calendarDay, eventId);
+            calendarView.addDecorator(new EventDecorator(true, acceptedEventsCalendarDays, getApplicationContext()));
+
+        } else if (event.getUsers() != null) {
             // If there are users for this event
             if (!event.getUsers().entrySet().isEmpty()) {
                 // Loop through the users

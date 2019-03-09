@@ -34,7 +34,6 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseUserMetadata;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -276,10 +275,26 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
                     case RC_SIGN_IN:
                         if (isNewSignUp()) {
                             // Successfully signed up
-                            // Creating user object to push to FB DB
+
+                            // Clear out activity's old user data if it exists
+                            if (user.getTags() != null) {
+                                user.setTags(null);
+                            }
+                            if (user.getBio() != null) {
+                                user.setBio(null);
+                            }
+                            if (user.getCitystate() != null) {
+                                user.setCitystate(null);
+                            }
+                            if (user.getUrl() != null) {
+                                user.setUrl(null);
+                            }
+
+                            // Update user object to push to FB DB
                             user.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
                             user.setUsername(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
                             presenter.updateUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
+
                             showToast("Signing Up!");
                         } else {
                             // Successfully signed in
