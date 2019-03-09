@@ -1,9 +1,10 @@
 package com.bookyrself.bookyrself.presenters;
 
+import android.util.Log;
+
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.HashMap;
 
@@ -48,6 +49,8 @@ public class UserDetailPresenter implements BasePresenter {
                             //TODO: Fix NPE here when loading a user detail
                             return Flowable.fromIterable(user.getEvents().entrySet());
                         })
+                        .firstOrError()
+                        .toFlowable()
 
                         // Map the eventInviteInfos into eventDetails
                         .map(stringEventInviteInfoEntry ->
@@ -58,7 +61,10 @@ public class UserDetailPresenter implements BasePresenter {
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe(eventDetail -> listener.displayUserEvent(eventDetail, stringEventInviteInfoEntry.getKey()),
                                                 throwable -> listener.presentError(throwable.getMessage())))
-                        .subscribe());
+                        .subscribe(
+                                disposable -> {
+                                },
+                                throwable -> Log.e(getClass().getName(), throwable.getMessage())));
     }
 
     public void addContactToUser(String contactId, String userId) {

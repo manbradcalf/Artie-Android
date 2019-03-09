@@ -93,8 +93,8 @@
                                 android:id="@+id/tags_user_detail_activity"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:gravity="center_horizontal"
-                                android:text="Tags, Tag, Ta"
+                                android:layout_gravity="center_horizontal"
+                                android:text="Tags"
                                 android:textAppearance="@android:style/TextAppearance.Material.Body1" />
 
                             <TextView
@@ -102,7 +102,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_horizontal"
-                                android:text="awebsite.com"
+                                android:text="User's website"
                                 android:textAppearance="@android:style/TextAppearance.Material.Body1" />
 
                         </LinearLayout>

@@ -1,6 +1,7 @@
 package com.bookyrself.bookyrself.presenters;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.bookyrself.bookyrself.data.Events.EventsRepo;
 import com.bookyrself.bookyrself.data.Profile.ProfileRepo;
@@ -65,8 +66,20 @@ public class ProfileFragmentPresenter implements BasePresenter {
 
     private void loadEventDetails() {
         compositeDisposable.add(eventsRepo.getAllEvents(userId)
-                .subscribe(stringEventDetailPair -> listener.eventReady(stringEventDetailPair.first, stringEventDetailPair.second),
-                        throwable -> listener.presentError(throwable.getMessage())));
+                .subscribe(
+                        // Success
+                        stringEventDetailEntry ->
+                                listener.eventReady(
+                                        stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()),
+
+                        // Error
+                        throwable -> {
+                            if (throwable instanceof NoSuchElementException) {
+                                Log.e(getClass().getName(), String.format("User %s has no events", userId));
+                            } else {
+                                listener.presentError(throwable.getMessage());
+                            }
+                        }));
     }
 
     @Override

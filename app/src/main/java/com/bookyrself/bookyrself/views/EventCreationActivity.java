@@ -1,11 +1,14 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
@@ -14,9 +17,18 @@ import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.Host;
 import com.bookyrself.bookyrself.data.ResponseModels.User.User;
 import com.bookyrself.bookyrself.presenters.EventCreationPresenter;
+import com.bookyrself.bookyrself.utils.CircleTransform;
+import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.pchmn.materialchips.ChipsInput;
+import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,9 +38,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import id.zelory.compressor.Compressor;
 
 public class EventCreationActivity extends AppCompatActivity implements EventCreationPresenter.EventCreationPresenterListener {
 
@@ -49,12 +63,17 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     FloatingActionButton submitButton;
     @BindView(R.id.search_contacts_event_creation)
     ChipsInput contactChipsInput;
+    @BindView(R.id.event_image)
+    ImageView eventImage;
 
+    private static final int RC_PHOTO_SELECT = 789;
+    private StorageReference storageReference;
     private EventCreationPresenter presenter;
     private List<User> contacts;
     private Map<User, String> contactsAndUserIdsMap;
     private HashMap<String, Boolean> selectedContactsAndAttendingBooleanMap;
     private String date;
+    private Uri selectedImage;
     private int FLAG_EVENT_CREATION = 1;
 
     @Override
@@ -68,6 +87,15 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
         selectedContactsAndAttendingBooleanMap = new HashMap<>();
         contacts = new ArrayList<>();
         contactsAndUserIdsMap = new HashMap<>();
+        storageReference = FirebaseStorage.getInstance().getReference();
+
+        eventImage.setImageDrawable(getDrawable((R.drawable.ic_add_a_photo_black_24dp)));
+        eventImage.setOnClickListener(view -> {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Choose Picture"), RC_PHOTO_SELECT);
+        });
 
         dateButton.setOnClickListener(view -> {
             DatePickerDialogFragment datePickerDialogFragment = new DatePickerDialogFragment();
@@ -139,9 +167,42 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        IdpResponse response = IdpResponse.fromResultIntent(data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == RC_PHOTO_SELECT) {
+
+                selectedImage = data.getData();
+
+                Picasso.with(getApplicationContext())
+                        .load(selectedImage)
+                        .resize(148, 148)
+                        .centerCrop()
+                        .transform(new CircleTransform())
+                        .into(eventImage);
+
+            }
+        } else if (response == null) {
+            // User pressed back button
+            Toast.makeText(this, "Canceled", Toast.LENGTH_SHORT).show();
+        } else if (response.getError() != null) {
+            Toast.makeText(this, response.getError().getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     @Override
-    public void eventCreated() {
+    public void eventCreated(String eventId) {
+
+        // Upload to firebase
+
+        StorageReference profilePhotoRef = storageReference.child("images/events/" + eventId);
+        UploadTask uploadTask = profilePhotoRef.putFile(selectedImage);
+        uploadTask.addOnSuccessListener(taskSnapshot -> Toast.makeText(this, "image upload completed", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(this, "image upload failed", Toast.LENGTH_SHORT).show());
+
         Intent returnIntent = new Intent();
         setResult(RESULT_OK, returnIntent);
         finish();

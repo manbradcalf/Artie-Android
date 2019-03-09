@@ -66,6 +66,8 @@ public class ProfileRepo implements ProfileDataSource {
 
         return FirebaseService.getAPI()
                 .getUserDetails(userId)
+                .firstOrError()
+                .toFlowable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

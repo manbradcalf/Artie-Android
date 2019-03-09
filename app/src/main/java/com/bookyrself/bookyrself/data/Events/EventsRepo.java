@@ -3,7 +3,6 @@ package com.bookyrself.bookyrself.data.Events;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 
 import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.data.ResponseModels.User.EventInviteInfo;
@@ -16,6 +15,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,7 +83,7 @@ public class EventsRepo implements EventDataSource {
     }
 
     @Override
-    public Flowable<Pair<String, EventDetail>> getAllEvents(String userId) {
+    public Flowable<Map.Entry<String, EventDetail>> getAllEvents(String userId) {
 
         if (cacheIsDirty) {
             return FirebaseService.getAPI()
@@ -110,19 +110,19 @@ public class EventsRepo implements EventDataSource {
                                 }
                                 // Regardless, add all events to allUserEvents hashmap
                                 allUsersEvents.put(eventInvite.getKey(), eventDetail);
-                                return new Pair<>(eventInvite.getKey(), eventDetail);
+                                return new AbstractMap.SimpleEntry<>(eventInvite.getKey(), eventDetail);
                             }));
 
         } else {
             // Cache is clean, get local copy
             return Flowable.fromIterable(allUsersEvents.entrySet())
                     .map(stringEventDetailEntry ->
-                            new Pair<>(stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()));
+                            new AbstractMap.SimpleEntry<>(stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()));
         }
     }
 
     @Override
-    public Flowable<Pair<String, EventDetail>> getEventsWithPendingInvites(String userId) {
+    public Flowable<AbstractMap.SimpleEntry<String, EventDetail>> getEventsWithPendingInvites(String userId) {
 
         if (cacheIsDirty) {
             return FirebaseService.getAPI()
@@ -161,19 +161,18 @@ public class EventsRepo implements EventDataSource {
                             .map(eventDetail -> {
                                 eventsWithPendingInvites.put(eventInvite.getKey(), eventDetail);
                                 cacheIsDirty = false;
-                                return new Pair<>(eventInvite.getKey(), eventDetail);
+                                return new AbstractMap.SimpleEntry<>(eventInvite.getKey(), eventDetail);
                             }));
         } else {
             if (!eventsWithPendingInvites.isEmpty()) {
                 // Cache is clean. get local copy
                 return Flowable.fromIterable(eventsWithPendingInvites.entrySet())
                         .map(stringEventDetailEntry ->
-                                new Pair<>(stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()));
+                                new AbstractMap.SimpleEntry<>(stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()));
             } else {
-                //TODO: This seems like a lot of work just to throw a flowable exception to be handled in the presenter
                 return Flowable
                         .fromIterable(eventsWithPendingInvites.entrySet())
-                        .map(stringEventDetailEntry -> new Pair<>(stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()))
+                        .map(stringEventDetailEntry -> new AbstractMap.SimpleEntry<>(stringEventDetailEntry.getKey(), stringEventDetailEntry.getValue()))
                         .doOnNext(stringEventDetailEntry -> {
                             throw new NoSuchElementException();
                         })

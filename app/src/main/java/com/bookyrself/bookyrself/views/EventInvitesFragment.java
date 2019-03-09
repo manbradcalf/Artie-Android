@@ -78,7 +78,7 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+
         View view = inflater.inflate(R.layout.fragment_event_invites, container, false);
         ButterKnife.bind(this, view);
         events = new ArrayList<>();
@@ -97,6 +97,12 @@ public class EventInvitesFragment extends Fragment implements BaseFragment, Even
     public void onResume() {
         super.onResume();
         presenter.subscribe();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        presenter.unsubscribe();
     }
 
     @Override

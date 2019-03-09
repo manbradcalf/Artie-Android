@@ -9,40 +9,53 @@
 
 
     <android.support.v7.widget.Toolbar
+        app:layout_constraintTop_toTopOf="parent"
         android:id="@+id/event_creation_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        app:layout_constraintBottom_toTopOf="@id/search_contacts_event_creation_wrapper"
         app:popupTheme="@style/AppTheme.PopupOverlay"
         app:title="@string/event_creation_title"
         app:titleTextColor="@android:color/white" />
 
+    <ImageView
+        android:id='@+id/event_image'
+        android:layout_width="148dp"
+        android:layout_height="148dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="16dp"
+        android:layout_marginTop="?attr/actionBarSize"
+        app:layout_constraintBottom_toTopOf="@id/search_contacts_event_creation_wrapper"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/event_creation_toolbar" />
+
     <LinearLayout
         android:id="@+id/search_contacts_event_creation_wrapper"
-        app:layout_constraintTop_toBottomOf="@id/event_creation_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp">
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/event_image">
 
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_person_add_black_24dp"
-        android:layout_gravity="center"
-        android:padding="16dp"/>
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/ic_person_add_black_24dp"
+            android:padding="16dp" />
 
-    <com.pchmn.materialchips.ChipsInput
-        android:id="@+id/search_contacts_event_creation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:textAlignment="center"
-        android:drawableStart="@drawable/ic_edit_black_24dp"
-        app:hint="@string/event_creation_artists_hint"
-        app:layout_constraintTop_toBottomOf="@id/event_creation_toolbar" />
+        <com.pchmn.materialchips.ChipsInput
+            android:id="@+id/search_contacts_event_creation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:drawableStart="@drawable/ic_edit_black_24dp"
+            android:textAlignment="center"
+            app:hint="@string/event_creation_artists_hint"
+            app:layout_constraintTop_toBottomOf="@id/event_creation_toolbar" />
 
     </LinearLayout>
 
@@ -58,41 +71,42 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+
             <EditText
-                android:inputType="text"
-                android:maxLines="1"
-                android:scrollHorizontally="true"
                 android:id="@+id/event_creation_event_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:drawableStart="@drawable/ic_edit_black_24dp"
                 android:drawablePadding="16dp"
-                android:hint="@string/event_creation_event_name" />
-
-            <EditText
+                android:hint="@string/event_creation_event_name"
                 android:inputType="text"
                 android:maxLines="1"
-                android:scrollHorizontally="true"
+                android:scrollHorizontally="true" />
+
+            <EditText
                 android:id="@+id/event_creation_city_state"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:drawableStart="@drawable/ic_map_black_24dp"
                 android:drawablePadding="16dp"
-                android:hint="@string/event_creation_city_state" />
-
-            <EditText
+                android:hint="@string/event_creation_city_state"
                 android:inputType="text"
                 android:maxLines="1"
+                android:scrollHorizontally="true" />
+
+            <EditText
                 android:id="@+id/event_creation_tags"
-                android:scrollHorizontally="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:drawableStart="@drawable/ic_tags_black_24dp"
                 android:drawablePadding="16dp"
-                android:hint="@string/event_creation_tags" />
+                android:hint="@string/event_creation_tags"
+                android:inputType="text"
+                android:maxLines="1"
+                android:scrollHorizontally="true" />
 
             <EditText
                 android:id="@+id/event_creation_date_button"

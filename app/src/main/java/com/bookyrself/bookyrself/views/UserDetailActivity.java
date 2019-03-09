@@ -7,6 +7,8 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -167,6 +169,14 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         userEmailAddress = user.getEmail();
         emailUserCardview.setOnClickListener(v -> emailUser());
 
+        // Set URL
+        urlTextView.setClickable(true);
+        urlTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+        String linkedText =
+                String.format("<a href=\"%s\">%s</a> ", ("http://" + user.getUrl()), user.getUrl());
+        urlTextView.setText(Html.fromHtml(linkedText));
+
         // Determine if this user is a contact
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
 
@@ -180,7 +190,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
                             .getContactsForUser(FirebaseAuth.getInstance().getUid())
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
-                            .map(stringUserPair -> stringUserPair.first)
+                            .map(Map.Entry::getKey)
                             .filter(s -> s.equals(userId))
                             .subscribe(s -> {
                                         addUserToContactsTextView.setText(R.string.user_detail_contact_already_added);
@@ -193,7 +203,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
             addUserToContactsTextView.setText(R.string.contact_button_signed_out);
         }
 
-        final StorageReference profileImageReference = storageReference.child("images/" + userID);
+        final StorageReference profileImageReference = storageReference.child("images/users/" + userID);
         profileImageReference
                 .getDownloadUrl()
                 .addOnSuccessListener(uri -> {
@@ -246,7 +256,7 @@ public class UserDetailActivity extends AppCompatActivity implements UserDetailP
         contentView.setVisibility(View.GONE);
         emptyStateButton.setVisibility(View.GONE);
         emptyStateImageView.setImageDrawable(getDrawable(R.drawable.ic_error_empty_state));
-        emptyStateTextHeader.setText("There was a problem loading the user");
+        emptyStateTextHeader.setText(R.string.user_detail_error_header);
         emptyStateTextSubHeader.setText(String.format("Error fetching userID %s", id));
         emptyState.setVisibility(View.VISIBLE);
     }
