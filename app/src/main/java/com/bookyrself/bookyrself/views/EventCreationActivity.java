@@ -1,7 +1,6 @@
 package com.bookyrself.bookyrself.views;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -13,9 +12,9 @@ import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.Host;
-import com.bookyrself.bookyrself.data.ResponseModels.User.User;
+import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ServerModels.EventDetail.Host;
+import com.bookyrself.bookyrself.data.ServerModels.User.User;
 import com.bookyrself.bookyrself.presenters.EventCreationPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.firebase.ui.auth.IdpResponse;
@@ -26,9 +25,6 @@ import com.google.firebase.storage.UploadTask;
 import com.pchmn.materialchips.ChipsInput;
 import com.squareup.picasso.Picasso;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -38,11 +34,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import id.zelory.compressor.Compressor;
 
 public class EventCreationActivity extends AppCompatActivity implements EventCreationPresenter.EventCreationPresenterListener {
 
