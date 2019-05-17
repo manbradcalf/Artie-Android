@@ -12,8 +12,8 @@ import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.data.Profile.ProfileRepo;
-import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.Host;
-import com.bookyrself.bookyrself.data.ResponseModels.User.User;
+import com.bookyrself.bookyrself.data.ServerModels.EventDetail.Host;
+import com.bookyrself.bookyrself.data.ServerModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.UserProfileChangeRequest;

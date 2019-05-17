@@ -1,10 +1,10 @@
 package com.bookyrself.bookyrself.services;
 
-import com.bookyrself.bookyrself.data.ResponseModels.EventCreationResponse;
-import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.Host;
-import com.bookyrself.bookyrself.data.ResponseModels.User.EventInviteInfo;
-import com.bookyrself.bookyrself.data.ResponseModels.User.User;
+import com.bookyrself.bookyrself.data.ServerModels.EventCreationResponse;
+import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ServerModels.EventDetail.Host;
+import com.bookyrself.bookyrself.data.ServerModels.User.EventInviteInfo;
+import com.bookyrself.bookyrself.data.ServerModels.User.User;
 
 import java.util.HashMap;
 

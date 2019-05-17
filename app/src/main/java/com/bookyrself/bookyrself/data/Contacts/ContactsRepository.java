@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.bookyrself.bookyrself.data.ResponseModels.User.User;
+import com.bookyrself.bookyrself.data.ServerModels.User.User;
 import com.bookyrself.bookyrself.services.FirebaseService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;

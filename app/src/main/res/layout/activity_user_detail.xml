@@ -28,42 +28,23 @@
                     app:titleTextColor="@color/colorAccentLight" />
             </android.support.design.widget.AppBarLayout>
 
-            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            <RelativeLayout
                 android:id="@+id/user_detail_content"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="?attr/actionBarSize">
 
                 <ProgressBar
+                    android:translationZ="2dp"
                     android:id="@+id/profile_image_progressbar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true" />
 
-                <ImageView
-                    android:id='@+id/profile_image_user_detail_activity'
-                    android:layout_margin="16dp"
-                    android:layout_width="128dp"
-                    android:layout_height="128dp"
-                    android:layout_centerHorizontal="true" />
-
-                <TextView
-                    android:id="@+id/username_user_detail_activity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/profile_image_user_detail_activity"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="8dp"
-                    android:text="User Name"
-                    android:textAppearance="@android:style/TextAppearance.Material.Display1"
-                    android:textColor="@color/common_google_signin_btn_text_dark_focused" />
-
-
                 <LinearLayout
                     android:id="@+id/linearLayout"
                     android:layout_width="400dp"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/username_user_detail_activity"
                     android:layout_centerInParent="true"
                     android:layout_marginTop="16dp"
                     android:orientation="vertical">
@@ -75,11 +56,30 @@
                         android:layout_gravity="center_horizontal"
                         app:contentPadding="16dp">
 
+                        <ImageView
+                            android:id='@+id/profile_image_user_detail_activity'
+                            android:layout_margin="16dp"
+                            android:layout_width="128dp"
+                            android:layout_height="128dp"
+                            android:layout_gravity="start" />
+
                         <LinearLayout
+                            android:id="@+id/main_info_content"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
+                            android:layout_gravity="center_vertical|end"
                             android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/username_user_detail_activity"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="top|center_horizontal"
+                                android:layout_marginTop="8dp"
+                                android:text="User Name"
+                                android:textAppearance="@android:style/TextAppearance.Material.Display1"
+                                android:textColor="@color/common_google_signin_btn_text_dark_focused" />
+
 
                             <TextView
                                 android:id="@+id/city_state_user_detail_activity"

@@ -20,11 +20,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.data.ResponseModels.User.User;
+import com.bookyrself.bookyrself.data.ServerModels.User.User;
 import com.bookyrself.bookyrself.presenters.ContactsFragmentPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
@@ -37,7 +36,6 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Single;
 
 import static android.app.Activity.RESULT_OK;
 

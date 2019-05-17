@@ -1,7 +1,6 @@
 package com.bookyrself.bookyrself.views;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -26,10 +25,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.data.ResponseModels.User.User;
+import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ServerModels.User.User;
 import com.bookyrself.bookyrself.presenters.ProfileFragmentPresenter;
-import com.bookyrself.bookyrself.services.FirebaseService;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.firebase.ui.auth.AuthUI;
@@ -48,8 +46,6 @@ import com.squareup.picasso.Picasso;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

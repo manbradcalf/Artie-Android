@@ -17,7 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.presenters.EventsFragmentPresenter;
 import com.bookyrself.bookyrself.utils.EventDecorator;
 import com.firebase.ui.auth.AuthUI;
