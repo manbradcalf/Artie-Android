@@ -42,14 +42,14 @@ public class EventDecorator implements DayViewDecorator {
         switch (eventType) {
             case INVITE_PENDING:
                 view.setBackgroundDrawable(context.getDrawable(R.drawable.calendar_day_event_invite_pending_background));
+                break;
             case INVITE_ACCEPTED:
-                view.setBackgroundDrawable(context.getDrawable(R.drawable.calendar_day_event_invite_accepted_background));
             case USER_IS_HOST:
                 view.setBackgroundDrawable(context.getDrawable(R.drawable.calendar_day_event_invite_accepted_background));
+                break;
             case DATE_UNAVAILABLE:
                 view.setBackgroundDrawable(context.getDrawable(R.drawable.calendar_day_date_unavailable_background));
-
-
+                break;
         }
     }
 }
