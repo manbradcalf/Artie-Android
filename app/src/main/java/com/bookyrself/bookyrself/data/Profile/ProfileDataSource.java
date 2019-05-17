@@ -1,6 +1,6 @@
 package com.bookyrself.bookyrself.data.Profile;
 
-import com.bookyrself.bookyrself.data.ResponseModels.User.User;
+import com.bookyrself.bookyrself.data.ServerModels.User.User;
 
 import io.reactivex.Flowable;
 

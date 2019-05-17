@@ -1,6 +1,6 @@
 package com.bookyrself.bookyrself.data.Events;
 
-import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail;
 
 import java.util.AbstractMap;
 import java.util.Map;
