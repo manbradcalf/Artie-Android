@@ -1,7 +1,7 @@
 package com.bookyrself.bookyrself.presenters
 
 import com.bookyrself.bookyrself.data.Contacts.ContactsRepository
-import com.bookyrself.bookyrself.data.ResponseModels.User.User
+import com.bookyrself.bookyrself.data.ServerModels.User.User
 import com.bookyrself.bookyrself.views.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.disposables.CompositeDisposable

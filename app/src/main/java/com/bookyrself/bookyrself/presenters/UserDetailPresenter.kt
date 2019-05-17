@@ -1,9 +1,9 @@
 package com.bookyrself.bookyrself.presenters
 
 import android.util.Log
-import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail
-import com.bookyrself.bookyrself.data.ResponseModels.User.EventInviteInfo
-import com.bookyrself.bookyrself.data.ResponseModels.User.User
+import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
+import com.bookyrself.bookyrself.data.ServerModels.User.EventInviteInfo
+import com.bookyrself.bookyrself.data.ServerModels.User.User
 import com.bookyrself.bookyrself.services.FirebaseService
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers

@@ -3,7 +3,7 @@ package com.bookyrself.bookyrself.presenters
 import android.content.Context
 import android.util.Log
 import com.bookyrself.bookyrself.data.Events.EventsRepository
-import com.bookyrself.bookyrself.data.ResponseModels.EventDetail.EventDetail
+import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.views.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.disposables.CompositeDisposable
