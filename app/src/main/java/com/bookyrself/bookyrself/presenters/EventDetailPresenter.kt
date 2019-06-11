@@ -28,19 +28,19 @@ class EventDetailPresenter(private val listener: EventDetailPresenterListener, p
 
         compositeDisposable.add(
 
-                FirebaseService.getAPI()
+                FirebaseService.instance
                         .getEventData(eventId)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnNext { listener.showEventData(it) }
 
                         // Get the userIds of invited users
-                        .flatMap<kotlin.collections.Map.Entry<String, Boolean>> { eventDetail: EventDetail -> eventDetail.users.entries.toFlowable() }
+                        .flatMap<Map.Entry<String, Boolean>> { eventDetail: EventDetail -> eventDetail.users.entries.toFlowable() }
 
                         // Get user details for each user
                         .map { stringBooleanEntry ->
                             Flowable.just<Disposable>(
-                                    FirebaseService.getAPI().getUserDetails(stringBooleanEntry.key)
+                                    FirebaseService.instance.getUserDetails(stringBooleanEntry.key)
                                             .subscribeOn(Schedulers.io())
                                             .observeOn(AndroidSchedulers.mainThread())
                                             .firstOrError()

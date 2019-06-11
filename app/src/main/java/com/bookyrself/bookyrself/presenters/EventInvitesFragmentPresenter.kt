@@ -13,10 +13,10 @@ import java.util.*
 class EventInvitesFragmentPresenter(private val presenterListener: EventInvitesViewListener, context: Context) : BasePresenter {
     private val eventsRepo: EventsRepository
     private val compositeDisposable: CompositeDisposable
-    private var userId: String? = null
+    var userId: String
 
     init {
-        this.userId = FirebaseAuth.getInstance().uid
+        this.userId = FirebaseAuth.getInstance().uid.toString()
         this.compositeDisposable = CompositeDisposable()
         this.eventsRepo = MainActivity.getEventsRepo(context)
     }
@@ -25,7 +25,7 @@ class EventInvitesFragmentPresenter(private val presenterListener: EventInvitesV
     fun acceptEventInvite(userId: String, eventId: String, eventDetail: EventDetail) {
         compositeDisposable.add(
                 eventsRepo.acceptEventInvite(userId, eventId)
-                        .doOnNext { aBoolean -> presenterListener.removeEventFromList(eventId, eventDetail) }
+                        .doOnNext { presenterListener.removeEventFromList(eventId, eventDetail) }
                         .doOnError { throwable -> throwable.message?.let { presenterListener.presentError(it) } }
                         .subscribe())
     }
@@ -33,7 +33,7 @@ class EventInvitesFragmentPresenter(private val presenterListener: EventInvitesV
     fun rejectEventInvite(userId: String, eventId: String, eventDetail: EventDetail) {
         compositeDisposable.add(
                 eventsRepo.rejectEventInvite(userId, eventId)
-                        .doOnNext { aBoolean -> presenterListener.removeEventFromList(eventId, eventDetail) }
+                        .doOnNext { presenterListener.removeEventFromList(eventId, eventDetail) }
                         .doOnError { throwable -> throwable.message?.let { presenterListener.presentError(it) } }
                         .subscribe())
     }
@@ -41,8 +41,7 @@ class EventInvitesFragmentPresenter(private val presenterListener: EventInvitesV
     private fun loadPendingInvites() {
 
         compositeDisposable
-                .add(eventsRepo.getEventsWithPendingInvites(userId)
-                        .subscribe(
+                .add(eventsRepo.getEventsWithPendingInvites(userId)!!.subscribe(
                                 //onNext
                                 { stringEventDetailSimpleEntry ->
                                     presenterListener.eventPendingInvitationResponseReturned(
@@ -64,7 +63,7 @@ class EventInvitesFragmentPresenter(private val presenterListener: EventInvitesV
 
     override fun subscribe() {
         if (FirebaseAuth.getInstance().uid != null) {
-            userId = FirebaseAuth.getInstance().uid
+            userId = FirebaseAuth.getInstance().uid!!
             loadPendingInvites()
         } else {
             presenterListener.showSignedOutEmptyState()

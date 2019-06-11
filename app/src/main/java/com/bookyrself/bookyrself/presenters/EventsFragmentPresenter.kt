@@ -27,7 +27,7 @@ class EventsFragmentPresenter(private val presenterListener: EventsPresenterList
     private fun loadUsersEventInfo() {
 
         compositeDisposable
-                .add(eventsRepo.getAllEvents(userId)
+                .add(eventsRepo.getAllEvents(userId!!)
                         .subscribe(
                                 //onNext
                                 { stringEventDetailEntry ->
