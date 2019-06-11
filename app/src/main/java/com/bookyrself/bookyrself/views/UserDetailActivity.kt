@@ -149,10 +149,9 @@ class UserDetailActivity : AppCompatActivity(), UserDetailPresenter.UserDetailPr
             // Check if this user is already contact and if so update the textview to portray that
             compositeDisposable!!.add(
                     contactsRepository
-                            .getContactsForUser(FirebaseAuth.getInstance().uid)
+                            .getContactsForUser(FirebaseAuth.getInstance().uid!!)
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
-//                            .map<String>(Function<Entry<String, User>, String> { it.key })
                             .map { it.key }
                             .filter { s -> s == userId }
                             .subscribe({ s ->
