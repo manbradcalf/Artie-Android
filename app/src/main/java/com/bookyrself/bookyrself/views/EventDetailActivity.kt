@@ -64,23 +64,23 @@ class EventDetailActivity : AppCompatActivity(), EventDetailPresenter.EventDetai
         presenter!!.subscribe()
     }
 
-    override fun showEventData(eventDetail: EventDetail) {
+    override fun showEventData(eventDetailData: EventDetail) {
 
         showProgressbar(false)
-        event_detail_collapsing_toolbar!!.title = eventDetail.eventname
+        event_detail_collapsing_toolbar!!.title = eventDetailData.eventname
         event_detail_collapsing_toolbar!!.setExpandedTitleColor(resources.getColor(R.color.cardview_light_background))
         event_detail_collapsing_toolbar!!.setCollapsedTitleTextColor(resources.getColor(R.color.cardview_light_background))
 
         // Set up the host card
-        val host = eventDetail.host
+        val host = eventDetailData.host
         val hostUsername = host.username
 
         // Show the City State of the event, not the host
-        val hostCityState = eventDetail.citystate
+        val hostCityState = eventDetailData.citystate
 
         event_detail_host_item!!.setOnClickListener {
             val intent = Intent(event_detail_host_item!!.context, UserDetailActivity::class.java)
-            intent.putExtra("userId", eventDetail.host.userId)
+            intent.putExtra("userId", eventDetailData.host.userId)
             startActivity(intent)
         }
 
@@ -102,7 +102,7 @@ class EventDetailActivity : AppCompatActivity(), EventDetailPresenter.EventDetai
         // Set the date
         val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
         try {
-            val date = inputFormat.parse(eventDetail.date)
+            val date = inputFormat.parse(eventDetailData.date)
             val outputFormat = SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US)
             val formattedDate = outputFormat.format(date)
             event_detail_date!!.text = formattedDate

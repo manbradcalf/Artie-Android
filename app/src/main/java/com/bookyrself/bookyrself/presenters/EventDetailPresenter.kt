@@ -108,7 +108,7 @@ class EventDetailPresenter(private val listener: EventDetailPresenterListener, p
      * Contract / Listener
      */
     interface EventDetailPresenterListener {
-        fun showEventData(data: EventDetail)
+        fun showEventData(eventDetailData: EventDetail)
 
         fun showInvitedUser(user: AbstractMap.SimpleEntry<String, MiniUser>)
 
