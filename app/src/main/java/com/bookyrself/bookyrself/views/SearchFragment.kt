@@ -176,7 +176,10 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
             empty_state_view!!.visibility = View.GONE
         }
 
-        eventsResults = hits
+        eventsResults = hits.filter {
+            it._source.eventname != null
+                    && it._source.citystate != null
+        }
         adapter!!.setViewType(EVENT_VIEW_TYPE)
         boolSearchEditable = true
         search_btn.setText(R.string.search_fragment_edit_search_btn_text)
@@ -203,7 +206,12 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
             empty_state_view!!.visibility = View.GONE
         }
 
-        usersResults = hits
+        usersResults =
+                hits.filter {
+                    it._source.username != null
+                            && it._source.citystate != null
+                            && it._source.tags != null
+                }
         adapter!!.setViewType(USER_VIEW_TYPE)
         boolSearchEditable = true
         search_btn.text = "Edit Search"
