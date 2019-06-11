@@ -38,10 +38,10 @@ class ProfileFragmentPresenter
      */
     fun updateUser(user: User, userId: String) {
         compositeDisposable.add(
-                FirebaseService.getAPI().updateUser(user, userId)
+                FirebaseService.instance.updateUser(user, userId)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe({ userResponse -> listener.profileInfoReady(userId, user) },
+                        .subscribe({ listener.profileInfoReady(userId, user) },
                                 { throwable -> throwable.message?.let { listener.presentError(it) } }))
     }
 
@@ -63,7 +63,7 @@ class ProfileFragmentPresenter
     }
 
     private fun loadEventDetails() {
-        compositeDisposable.add(eventsRepo.getAllEvents(userId)
+        compositeDisposable.add(eventsRepo.getAllEvents(userId!!)
                 .subscribe(
                         // Success
                         { stringEventDetailEntry ->
@@ -97,7 +97,7 @@ class ProfileFragmentPresenter
 
 
     fun markDateAsUnavailable(userId: String, date: String) {
-        FirebaseService.getAPI().setDateUnavailableForUser(true, userId, date)
+        FirebaseService.instance.setDateUnavailableForUser(true, userId, date)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe()

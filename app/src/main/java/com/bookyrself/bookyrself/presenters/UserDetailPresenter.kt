@@ -29,7 +29,7 @@ class UserDetailPresenter
     private fun loadUserInfoWithEvents(userId: String) {
 
         compositeDisposable.add(
-                FirebaseService.getAPI().getUserDetails(userId)
+                FirebaseService.instance.getUserDetails(userId)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnError { throwable -> throwable.message?.let { listener.presentError(it) } }
@@ -38,13 +38,14 @@ class UserDetailPresenter
                             // Notify view that user details have been returned
                             listener.displayUserInfo(user, userId)
 
+                            // Get the user's event invitations
                             Flowable.fromIterable<Map.Entry<String, EventInviteInfo>>(user.events.entries)
                         }
 
                         // Map the eventInviteInfos into eventDetails
                         .map<Disposable> { stringEventInviteInfoEntry ->
                             FirebaseService
-                                    .getAPI()
+                                    .instance
                                     .getEventData(stringEventInviteInfoEntry.key)
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
@@ -52,7 +53,7 @@ class UserDetailPresenter
                                             { throwable -> throwable.message?.let { listener.presentError(it) } })
                         }
                         .subscribe(
-                                { disposable -> },
+                                { },
                                 { throwable -> Log.e(javaClass.name, throwable.message) }))
     }
 
@@ -61,13 +62,13 @@ class UserDetailPresenter
         val request = HashMap<String, Boolean>()
         request[contactId] = true
 
-        Flowable.just<Disposable>(FirebaseService.getAPI()
+        Flowable.just<Disposable>(FirebaseService.instance
                 .addContactToUser(request, userId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         { listener.presentSuccess("Added contact!") },
-                        { throwable -> throwable.message?.let { listener.presentError(it) } }))
+                        { throwable -> throwable.message.let { listener.presentError(it!!) } }))
                 .subscribe()
     }
 

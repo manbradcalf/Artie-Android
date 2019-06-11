@@ -31,7 +31,7 @@ class EventCreationPresenter(private val presenterListener: EventCreationPresent
     override fun subscribe() {
         compositeDisposable.add(
                 contactsRepository
-                        .getContactsForUser(FirebaseAuth.getInstance().uid)
+                        .getContactsForUser(FirebaseAuth.getInstance().uid!!)
                         .subscribe(
                                 { stringUserEntry -> presenterListener.contactReturned(stringUserEntry.value, stringUserEntry.key) },
                                 { throwable -> throwable.message?.let { presenterListener.presentError(it) } }))
@@ -44,7 +44,7 @@ class EventCreationPresenter(private val presenterListener: EventCreationPresent
 
     fun createEvent(event: EventDetail) {
         compositeDisposable.add(
-                FirebaseService.getAPI().createEvent(event)
+                FirebaseService.instance.createEvent(event)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
 
@@ -56,9 +56,9 @@ class EventCreationPresenter(private val presenterListener: EventCreationPresent
                             hostEventInviteInfo.isHost = true
                             hostEventInviteInfo.isInviteRejected = false
 
-                            FirebaseService.getAPI()
+                            FirebaseService.instance
                                     .addEventToUser(hostEventInviteInfo,
-                                            FirebaseAuth.getInstance().uid,
+                                            FirebaseAuth.getInstance().uid!!,
                                             eventCreationResponse.name)
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
@@ -75,7 +75,7 @@ class EventCreationPresenter(private val presenterListener: EventCreationPresent
                             inviteeEventInfo.isInviteRejected = false
 
                             for (userId in event.users.keys) {
-                                Flowable.just<Disposable>(FirebaseService.getAPI()
+                                Flowable.just<Disposable>(FirebaseService.instance
                                         .addEventToUser(inviteeEventInfo, userId, eventCreationResponse.name)
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())

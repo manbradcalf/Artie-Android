@@ -64,7 +64,7 @@ public class ProfileRepo implements ProfileDataSource {
     @Override
     public Flowable<User> getProfileInfo(String userId) {
 
-        return FirebaseService.getAPI()
+        return FirebaseService.INSTANCE.getInstance()
                 .getUserDetails(userId)
                 .firstOrError()
                 .toFlowable()
@@ -74,7 +74,7 @@ public class ProfileRepo implements ProfileDataSource {
 
     @Override
     public Flowable<User> updateProfileInfo(String userId, User user) {
-        return FirebaseService.getAPI()
+        return FirebaseService.INSTANCE.getInstance()
                 .patchUser(user,userId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());

@@ -99,7 +99,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
             }
         }
 
-        search_what.setOnSearchClickListener { view ->
+        search_what.setOnSearchClickListener {
             search_where.visibility = View.VISIBLE
             from_button.visibility = View.VISIBLE
             to_button.visibility = View.VISIBLE
@@ -124,7 +124,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
             dialog.show(activity!!.fragmentManager, "datePicker")
         }
 
-        search_btn.setOnClickListener { view ->
+        search_btn.setOnClickListener {
             if (!boolSearchEditable!!) {
                 if (events_toggle.isChecked) {
                     eventsResults = null
@@ -176,7 +176,10 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
             empty_state_view!!.visibility = View.GONE
         }
 
-        eventsResults = hits
+        eventsResults = hits.filter {
+            it._source.eventname != null
+                    && it._source.citystate != null
+        }
         adapter!!.setViewType(EVENT_VIEW_TYPE)
         boolSearchEditable = true
         search_btn.setText(R.string.search_fragment_edit_search_btn_text)
@@ -203,7 +206,12 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
             empty_state_view!!.visibility = View.GONE
         }
 
-        usersResults = hits
+        usersResults =
+                hits.filter {
+                    it._source.username != null
+                            && it._source.citystate != null
+                            && it._source.tags != null
+                }
         adapter!!.setViewType(USER_VIEW_TYPE)
         boolSearchEditable = true
         search_btn.text = "Edit Search"
@@ -330,21 +338,21 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
 
                 // Set Event Name
                 if (event.eventname != null) {
-                    viewHolderEvents.eventNameTextView!!.text = event.eventname
+                    viewHolderEvents.eventNameTextView.text = event.eventname
                 }
 
 
                 // Set Hostname
                 if (event.host != null) {
                     if (event.host.username != null) {
-                        viewHolderEvents.eventHostTextView!!.text = getString(R.string.event_item_hosted_by,
+                        viewHolderEvents.eventHostTextView.text = getString(R.string.event_item_hosted_by,
                                 event.host.username)
                     }
                 }
 
                 // Set Event Location
                 if (event.citystate != null) {
-                    viewHolderEvents.eventCityStateTextView!!.text = getString(R.string.event_item_citystate,
+                    viewHolderEvents.eventCityStateTextView.text = getString(R.string.event_item_citystate,
                             event.citystate)
                 }
 
@@ -364,12 +372,12 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                 }.addOnFailureListener { exception ->
 
                     // Set placeholder image, log error
-                    viewHolderEvents.eventImageThumb!!.setImageDrawable(context!!.getDrawable(R.drawable.ic_calendar_black_24dp))
+                    viewHolderEvents.eventImageThumb.setImageDrawable(context!!.getDrawable(R.drawable.ic_calendar_black_24dp))
                     Log.e("Event image  not loaded", exception.localizedMessage)
                 }
 
                 // Set onClickListener to fire off intent in itemSelected()
-                viewHolderEvents.eventCardView!!.setOnClickListener { v ->
+                viewHolderEvents.eventCardView.setOnClickListener {
                     itemSelected(eventsResults!![position]
                             ._id, EVENT_VIEW_TYPE)
                 }
@@ -379,10 +387,10 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         private fun buildUserViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             if (usersResults!!.size > position) {
                 val viewHolderUsers = holder as ViewHolderUsers
-                viewHolderUsers.userCityStateTextView!!.text = usersResults!![position]._source.citystate
+                viewHolderUsers.userCityStateTextView.text = usersResults!![position]._source.citystate
 
                 // Set username
-                viewHolderUsers.userNameTextView!!.text = usersResults!![position]._source.username
+                viewHolderUsers.userNameTextView.text = usersResults!![position]._source.username
 
                 // Set tags
                 if (usersResults!![position]._source.tags != null) {
@@ -391,7 +399,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                         listString.append("$s, ")
                     }
                     // Regex to trim the trailing comma
-                    viewHolderUsers.userTagsTextView!!.text = listString.toString().replace(", $".toRegex(), "")
+                    viewHolderUsers.userTagsTextView.text = listString.toString().replace(", $".toRegex(), "")
                 }
 
 
@@ -409,7 +417,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                 }
                         .addOnFailureListener { exception ->
                             // Handle any errors
-                            viewHolderUsers.userProfileImageThumb!!.setImageDrawable(context!!.getDrawable(R.drawable.ic_person_white_16dp))
+                            viewHolderUsers.userProfileImageThumb.setImageDrawable(context!!.getDrawable(R.drawable.ic_person_white_16dp))
                             Log.e("ProfileImage not loaded", exception.localizedMessage)
                         }
 

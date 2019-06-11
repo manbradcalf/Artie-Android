@@ -18,7 +18,7 @@ class ContactsFragmentPresenter(private val presenterListener: ContactsPresenter
      */
     private fun loadContacts() {
         compositeDisposable
-                .add(contactsRepository.getContactsForUser(userId)
+                .add(contactsRepository.getContactsForUser(userId!!)
                         .subscribe(
                                 { stringUserEntry -> presenterListener.contactReturned(stringUserEntry.key, stringUserEntry.value) },
                                 { throwable ->
