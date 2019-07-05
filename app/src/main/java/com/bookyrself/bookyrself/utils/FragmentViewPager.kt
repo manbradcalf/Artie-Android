@@ -1,10 +1,10 @@
 package com.bookyrself.bookyrself.utils
 
 import android.content.Context
-import android.support.v4.view.ViewPager
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.MotionEvent
+import androidx.viewpager.widget.ViewPager
 
 /**
  * Created by benmedcalf on 4/2/18.
