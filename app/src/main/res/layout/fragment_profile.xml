@@ -26,13 +26,13 @@
         android:layout_alignParentTop="true"
         android:paddingBottom="?attr/actionBarSize">
 
-        <android.support.design.widget.CoordinatorLayout
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:id="@+id/coordinator_layout_user_detail_activity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:context="com.bookyrself.bookyrself.views.ProfileActivity">
 
-            <android.support.v7.widget.Toolbar
+            <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar_profile"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
@@ -75,7 +75,7 @@
                     android:orientation="vertical">
 
                     <!--Main Info Card -->
-                    <android.support.v7.widget.CardView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
@@ -126,9 +126,9 @@
                             </LinearLayout>
                         </RelativeLayout>
 
-                    </android.support.v7.widget.CardView>
+                    </androidx.cardview.widget.CardView>
 
-                    <android.support.v7.widget.CardView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
@@ -168,7 +168,7 @@
 
                         </RelativeLayout>
 
-                    </android.support.v7.widget.CardView>
+                    </androidx.cardview.widget.CardView>
 
 
                     <com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -182,7 +182,7 @@
 
             </RelativeLayout>
 
-        </android.support.design.widget.CoordinatorLayout>
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     </ScrollView>
 

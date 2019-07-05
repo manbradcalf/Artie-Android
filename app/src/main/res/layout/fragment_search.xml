@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context="com.bookyrself.bookyrself.views.SearchFragment">
 
-    <android.support.design.widget.AppBarLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,7 +15,7 @@
         android:backgroundTint="@color/cardview_light_background"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.v7.widget.SearchView
+        <androidx.appcompat.widget.SearchView
             android:id="@+id/search_what"
             style="@style/SearchViewStyleWhat"
             android:layout_width="match_parent"
@@ -25,7 +25,7 @@
             android:layout_marginTop="15dp"
             android:queryHint="@string/search_what_query_hint" />
 
-        <android.support.v7.widget.SearchView
+        <androidx.appcompat.widget.SearchView
             android:id="@+id/search_where"
             style="@style/SearchViewStyleWhere"
             android:layout_width="match_parent"
@@ -103,7 +103,7 @@
 
         </RadioGroup>
 
-    </android.support.design.widget.AppBarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -124,7 +124,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true" />
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/search_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
