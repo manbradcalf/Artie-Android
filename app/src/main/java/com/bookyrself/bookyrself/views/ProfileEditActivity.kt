@@ -3,10 +3,9 @@ package com.bookyrself.bookyrself.views
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
-import butterknife.ButterKnife
+import androidx.appcompat.app.AppCompatActivity
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.Profile.ProfileRepo
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.Host
@@ -51,7 +50,7 @@ class ProfileEditActivity : AppCompatActivity() {
 
             // Update the user
             profileRepo!!.updateProfileInfo(
-                    FirebaseAuth.getInstance().uid, user)
+                    FirebaseAuth.getInstance().uid!!, user)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
 

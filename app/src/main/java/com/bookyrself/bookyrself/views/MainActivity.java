@@ -2,10 +2,10 @@ package com.bookyrself.bookyrself.views;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.data.Contacts.ContactsRepository;
@@ -13,6 +13,7 @@ import com.bookyrself.bookyrself.data.Events.EventsRepository;
 import com.bookyrself.bookyrself.data.Profile.ProfileRepo;
 import com.bookyrself.bookyrself.utils.FragmentViewPager;
 import com.bookyrself.bookyrself.utils.FragmentViewPagerAdapter;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.FirebaseDatabase;
 

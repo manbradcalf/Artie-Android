@@ -3,13 +3,13 @@ package com.bookyrself.bookyrself.views;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail;
@@ -18,6 +18,7 @@ import com.bookyrself.bookyrself.data.ServerModels.User.User;
 import com.bookyrself.bookyrself.presenters.EventCreationPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;

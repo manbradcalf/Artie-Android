@@ -5,14 +5,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.FrameLayout;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.bookyrself.bookyrself.R;
 import com.ramotion.paperonboarding.PaperOnboardingFragment;
 import com.ramotion.paperonboarding.PaperOnboardingPage;
-import com.ramotion.paperonboarding.listeners.PaperOnboardingOnRightOutListener;
 
 import java.util.ArrayList;
 
@@ -47,7 +48,7 @@ public class Onboarding extends AppCompatActivity {
         elements.add(scr2);
         elements.add(scr3);
         PaperOnboardingFragment onBoardingFragment = PaperOnboardingFragment.newInstance(elements);
-        android.support.v4.app.FragmentTransaction fragmentTransaction = fm.beginTransaction();
+        FragmentTransaction fragmentTransaction = fm.beginTransaction();
         fragmentTransaction.add(R.id.onboarding_fragment, onBoardingFragment);
         fragmentTransaction.commit();
         onBoardingFragment.setOnRightOutListener(() -> {

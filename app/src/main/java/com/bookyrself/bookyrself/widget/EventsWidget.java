@@ -4,14 +4,9 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.widget.Adapter;
-import android.widget.ListView;
 import android.widget.RemoteViews;
 
 import com.bookyrself.bookyrself.R;
-
-import butterknife.BindView;
 
 /**
  * Implementation of App Widget functionality.

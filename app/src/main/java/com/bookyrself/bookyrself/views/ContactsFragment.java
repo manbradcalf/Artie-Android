@@ -3,12 +3,6 @@ package com.bookyrself.bookyrself.views;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +12,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.data.ServerModels.User.User;
@@ -244,10 +245,10 @@ public class ContactsFragment extends Fragment implements BaseFragment, Contacts
                             .transform(new CircleTransform())
                             .resize(100, 100)
                             .into(viewHolderContacts.userProfileImageThumb)).addOnFailureListener(e -> {
-                                // Handle any errors
-                                Log.e("ContactsFragment: ", "image not dowloaded");
-                                viewHolderContacts.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_profile_black_24dp));
-                            });
+                // Handle any errors
+                Log.e("ContactsFragment: ", "image not dowloaded");
+                viewHolderContacts.userProfileImageThumb.setImageDrawable(getContext().getDrawable(R.drawable.ic_profile_black_24dp));
+            });
 
             viewHolderContacts.userNameTextView.setText(contacts.get(position).getUsername());
             viewHolderContacts.userCityStateTextView.setText(contacts.get(position).getCitystate());
