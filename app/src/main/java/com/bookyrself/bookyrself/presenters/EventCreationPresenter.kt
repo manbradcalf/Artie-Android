@@ -1,7 +1,5 @@
 package com.bookyrself.bookyrself.presenters
 
-import android.util.Log
-
 import com.bookyrself.bookyrself.data.Contacts.ContactsRepository
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.ServerModels.User.EventInviteInfo
@@ -9,7 +7,6 @@ import com.bookyrself.bookyrself.data.ServerModels.User.User
 import com.bookyrself.bookyrself.services.FirebaseService
 import com.bookyrself.bookyrself.views.MainActivity
 import com.google.firebase.auth.FirebaseAuth
-
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -50,44 +47,43 @@ class EventCreationPresenter(private val presenterListener: EventCreationPresent
 
                         // Set the event to the Host's user
                         .doOnNext { eventCreationResponse ->
-
                             val hostEventInviteInfo = EventInviteInfo()
                             hostEventInviteInfo.isInviteAccepted = true
                             hostEventInviteInfo.isHost = true
                             hostEventInviteInfo.isInviteRejected = false
 
-                            FirebaseService.instance
-                                    .addEventToUser(hostEventInviteInfo,
-                                            FirebaseAuth.getInstance().uid!!,
-                                            eventCreationResponse.name)
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe()
+                            eventCreationResponse.name?.let { eventName ->
+                                FirebaseAuth.getInstance().uid?.let { userId ->
+                                    FirebaseService.instance
+                                            .addEventToUser(hostEventInviteInfo,
+                                                    userId,
+                                                    eventName)
+                                            .subscribeOn(Schedulers.io())
+                                            .observeOn(AndroidSchedulers.mainThread())
+                                            .subscribe()
+                                }
+                            }
                         }
 
                         // Set the event to the invitees
                         .doOnNext { eventCreationResponse ->
-
                             val inviteeEventInfo = EventInviteInfo()
-
                             inviteeEventInfo.isHost = false
                             inviteeEventInfo.isInviteAccepted = false
                             inviteeEventInfo.isInviteRejected = false
 
                             for (userId in event.users.keys) {
                                 Flowable.just<Disposable>(FirebaseService.instance
-                                        .addEventToUser(inviteeEventInfo, userId, eventCreationResponse.name)
+                                        .addEventToUser(inviteeEventInfo, userId, eventCreationResponse.name!!)
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe())
                             }
                         }
                         .subscribe(
-                                { eventCreationResponse -> presenterListener.eventCreated(eventCreationResponse.name) },
-                                { throwable ->
-                                    throwable.message?.let { presenterListener.presentError(it) }
-                                    Log.e("EventCreationPresenter:", throwable.message)
-                                }))
+                                { eventCreationResponse -> eventCreationResponse.name?.let { presenterListener.eventCreated(it) } },
+                                { throwable -> throwable.message?.let { presenterListener.presentError(it) } }
+                        ))
     }
 
 

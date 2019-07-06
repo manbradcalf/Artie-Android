@@ -73,7 +73,7 @@ class EventDetailPresenter(private val listener: EventDetailPresenterListener, p
         miniUser.url = user.url
         miniUser.username = user.username
         miniUser.userId = userId
-        miniUser.attendingStatus = getAttendingStatus(user.events[eventId])
+        miniUser.attendingStatus = getAttendingStatus(user.events!![eventId])
         return miniUser
     }
 

@@ -48,7 +48,7 @@ class ProfileFragmentPresenter
     private fun loadProfile() {
         compositeDisposable.add(
 
-                profileRepo.getProfileInfo(userId).subscribe(
+                profileRepo.getProfileInfo(userId!!).subscribe(
                         { user ->
                             // Notify view the profile is ready
                             listener.profileInfoReady(userId, user)

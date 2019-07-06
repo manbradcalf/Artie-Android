@@ -39,7 +39,7 @@ class UserDetailPresenter
                             listener.displayUserInfo(user, userId)
 
                             // Get the user's event invitations
-                            Flowable.fromIterable<Map.Entry<String, EventInviteInfo>>(user.events.entries)
+                            Flowable.fromIterable<Map.Entry<String, EventInviteInfo>>(user.events!!.entries)
                         }
 
                         // Map the eventInviteInfos into eventDetails
