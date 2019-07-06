@@ -18,10 +18,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
-            app:maxLines="3"
-            app:contentScrim="@color/colorPrimary"
             android:theme="@style/AppTheme.AppBarOverlay"
+            app:contentScrim="@color/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:maxLines="3"
             app:titleTextColor="@color/colorAccentLight">
 
             <ImageView
@@ -35,11 +35,11 @@
                 app:layout_collapseParallaxMultiplier="0.7" />
 
             <androidx.appcompat.widget.Toolbar
-                android:theme="@style/ToolbarTheme"
                 android:id="@+id/event_detail_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin"/>
+                android:theme="@style/ToolbarTheme"
+                app:layout_collapseMode="pin" />
 
         </net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout>
 
@@ -102,13 +102,12 @@
                 android:textAlignment="center"
                 android:textAppearance="@android:style/TextAppearance.Material.Subhead" />
 
-            <ListView
+
+            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/event_detail_users_list"
                 android:layout_width="400dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal">
-
-            </ListView>
+                android:layout_gravity="center_horizontal"/>
 
         </LinearLayout>
 
