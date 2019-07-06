@@ -22,6 +22,7 @@ import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.empty_state_template.*
 import kotlinx.android.synthetic.main.fragment_search.*
+import kotlinx.android.synthetic.main.item_event.view.*
 
 class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
 
@@ -321,12 +322,10 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         }
 
         override fun getItemCount(): Int {
-            return if (eventsResults != null) {
-                eventsResults!!.size
-            } else if (usersResults != null) {
-                usersResults!!.size
-            } else {
-                0
+            return when {
+                eventsResults != null -> eventsResults!!.size
+                usersResults != null -> usersResults!!.size
+                else -> 0
             }
         }
 
@@ -431,42 +430,27 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         /**
          * ViewHolder for events
          */
-        internal inner class ViewHolderEvents(view: View) : RecyclerView.ViewHolder(view) {
-            var eventCardView: CardView
-            var eventCityStateTextView: TextView
-            var eventHostTextView: TextView
-            var eventNameTextView: TextView
-            var eventImageThumb: ImageView
-
-            init {
-                eventCardView = view.findViewById(R.id.event_item_card)
-                eventCityStateTextView = view.findViewById(R.id.event_item_line2)
-                eventHostTextView = view.findViewById(R.id.event_item_line3)
-                eventNameTextView = view.findViewById(R.id.event_item_line1)
-                eventImageThumb = view.findViewById(R.id.event_item_image)
-            }
+        internal inner class ViewHolderEvents(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            var eventCardView: CardView = itemView.event_item_card
+            var eventCityStateTextView: TextView = itemView.event_item_line2
+            var eventHostTextView: TextView = itemView.event_item_line3
+            var eventNameTextView: TextView = itemView.event_item_line1
+            var eventImageThumb: ImageView = itemView.event_item_image
         }
+
 
         /**
          * ViewHolder for users
          */
         internal inner class ViewHolderUsers(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            var userCardView: CardView
-            var userCityStateTextView: TextView
-            var userNameTextView: TextView
-            var userTagsTextView: TextView
-            var userProfileImageThumb: ImageView
-
-
-            init {
-                userCardView = itemView.findViewById(R.id.search_result_card_users)
-                userCityStateTextView = itemView.findViewById(R.id.user_location_search_result)
-                userNameTextView = itemView.findViewById(R.id.username_search_result)
-                userTagsTextView = itemView.findViewById(R.id.user_tag_search_result)
-                userProfileImageThumb = itemView.findViewById(R.id.user_image_search_result)
-            }
+            var userCardView: CardView = itemView.findViewById(R.id.search_result_card_users)
+            var userCityStateTextView: TextView = itemView.findViewById(R.id.user_location_search_result)
+            var userNameTextView: TextView = itemView.findViewById(R.id.username_search_result)
+            var userTagsTextView: TextView = itemView.findViewById(R.id.user_tag_search_result)
+            var userProfileImageThumb: ImageView = itemView.findViewById(R.id.user_image_search_result)
         }
     }
+
 
     companion object {
         const val USER_SEARCH_FLAG = 0

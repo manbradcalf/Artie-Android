@@ -25,6 +25,7 @@ class ProfileEditActivity : AppCompatActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //TODO: Move to viewmodel
         this.profileRepo = MainActivity.getProfileRepo()
         setContentView(R.layout.activity_profile_edit)
 
@@ -50,6 +51,7 @@ class ProfileEditActivity : AppCompatActivity() {
             user.tags = tagsList
 
             // Update the user
+            //TODO: Move to viewmodel
             profileRepo!!.updateProfileInfo(
                     FirebaseAuth.getInstance().uid!!, user)
                     .subscribeOn(Schedulers.io())

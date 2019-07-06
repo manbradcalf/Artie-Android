@@ -23,16 +23,15 @@ class UserDetailViewModel(userId: String) : ViewModel() {
 
     private fun loadUserData(userId: String) {
         val userJob = FirebaseServiceCoroutines.instance.getUserDetails(userId)
-        // update UI with the user's value
 
         CoroutineScope(Dispatchers.Main).launch {
-            // get the user from network job and set it to livedata
             val userDetailResponse = userJob.await()
+
+            //TODO Handle network errors here via sealed Result class
+            // https://stackoverflow.com/questions/54077592/kotlin-coroutines-handle-error-and-implementation
             user.value = userDetailResponse
 
-            // create list of eventIds to fetch
             val eventIds = userDetailResponse.events?.keys
-            // Loop through each eventId and fetch via a network job
             loadUsersEvents(eventIds)
         }
     }
@@ -60,10 +59,11 @@ class UserDetailViewModel(userId: String) : ViewModel() {
         }
     }
 
-    class UserDetailViewModelFactory(private val mParam: String) : ViewModelProvider.Factory {
+    //TODO: Genericize this?
+    class UserDetailViewModelFactory(private val userId: String) : ViewModelProvider.Factory {
 
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return UserDetailViewModel(mParam) as T
+            return UserDetailViewModel(userId) as T
         }
     }
 }
