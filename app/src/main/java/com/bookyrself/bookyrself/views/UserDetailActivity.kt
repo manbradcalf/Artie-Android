@@ -10,8 +10,8 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.bookyrself.bookyrself.R
-import com.bookyrself.bookyrself.ViewModels.UserDetailViewModel
-import com.bookyrself.bookyrself.ViewModels.UserDetailViewModel.UserDetailViewModelFactory
+import com.bookyrself.bookyrself.viewmodels.UserDetailViewModel
+import com.bookyrself.bookyrself.viewmodels.UserDetailViewModel.UserDetailViewModelFactory
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.ServerModels.User.User
 import com.bookyrself.bookyrself.utils.CircleTransform

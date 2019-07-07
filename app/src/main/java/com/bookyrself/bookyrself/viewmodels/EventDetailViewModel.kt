@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.ViewModels
+package com.bookyrself.bookyrself.viewmodels
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

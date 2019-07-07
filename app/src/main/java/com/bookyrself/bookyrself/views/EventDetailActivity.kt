@@ -12,8 +12,8 @@ import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bookyrself.bookyrself.R
-import com.bookyrself.bookyrself.ViewModels.EventDetailViewModel
-import com.bookyrself.bookyrself.ViewModels.EventDetailViewModel.EventDetailViewModelFactory
+import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel
+import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel.EventDetailViewModelFactory
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.MiniUser
 import com.bookyrself.bookyrself.utils.CircleTransform
@@ -22,7 +22,6 @@ import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_event_detail.*
 import kotlinx.android.synthetic.main.empty_state_template.*
-import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.item_event_detail_user.*
 import kotlinx.android.synthetic.main.item_event_detail_user.view.*
 import java.text.ParseException
