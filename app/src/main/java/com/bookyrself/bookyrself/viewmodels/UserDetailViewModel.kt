@@ -67,5 +67,3 @@ class UserDetailViewModel(userId: String) : ViewModel() {
         }
     }
 }
-
-
