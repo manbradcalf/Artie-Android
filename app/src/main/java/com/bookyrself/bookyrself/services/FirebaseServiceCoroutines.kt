@@ -7,7 +7,6 @@ import com.bookyrself.bookyrself.data.ServerModels.EventDetail.Host
 import com.bookyrself.bookyrself.data.ServerModels.User.EventInviteInfo
 import com.bookyrself.bookyrself.data.ServerModels.User.User
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
-import kotlinx.coroutines.Deferred
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
@@ -39,53 +38,50 @@ object FirebaseServiceCoroutines {
 
     interface FirebaseApi {
         @GET("/events/{id}.json")
-        fun getEventData(@Path("id") eventId: String): Deferred<EventDetail>
+        suspend fun getEventData(@Path("id") eventId: String): Response<EventDetail>
 
         @GET("/users/{id}.json")
-        fun getUserDetails(@Path("id") userId: String): Deferred<User>
+        suspend fun getUserDetails(@Path("id") userId: String): Response<User>
 
         @GET("/users/{id}/events.json")
-        fun getUsersEventInvites(@Path("id") userId: String): Deferred<HashMap<String, EventInviteInfo>>
+        suspend fun getUsersEventInvites(@Path("id") userId: String): Response<HashMap<String, EventInviteInfo>>
 
         @GET("/users/{id}/contacts.json")
-        fun getUserContacts(@Path("id") userId: String): Deferred<HashMap<String, Boolean>>
+        suspend fun getUserContacts(@Path("id") userId: String): Response<HashMap<String, Boolean>>
 
         @PUT("/users/{userId}.json")
-        fun updateUser(@Body user: User, @Path("userId") userId: String): Deferred<User>
+        suspend fun updateUser(@Body user: User, @Path("userId") userId: String): Response<User>
 
         @PUT("/users/{userId}/events/{eventId}/isInviteRejected.json")
-        fun rejectInvite(@Body bool: Boolean?, @Path("userId") userId: String, @Path("eventId") eventId: String): Deferred<Boolean>
+        suspend fun rejectInvite(@Body bool: Boolean?, @Path("userId") userId: String, @Path("eventId") eventId: String): Response<Boolean>
 
         @PUT("/users/{userId}/events/{eventId}/isInviteAccepted.json")
-        fun acceptInvite(@Body bool: Boolean?, @Path("userId") userId: String, @Path("eventId") eventId: String): Deferred<Boolean>
+        suspend fun acceptInvite(@Body bool: Boolean?, @Path("userId") userId: String, @Path("eventId") eventId: String): Response<Boolean>
 
         @PUT("/events/{eventId}/users/{userId}.json")
-        fun setEventUserAsAttending(@Body bool: Boolean?, @Path("userId") userId: String, @Path("eventId") eventId: String): Deferred<Boolean>
-
+        suspend fun setEventUserAsAttending(@Body bool: Boolean?, @Path("userId") userId: String, @Path("eventId") eventId: String): Response<Boolean>
 
         @PATCH("/users/{userId}.json")
-        fun patchUser(@Body user: User, @Path("userId") userId: String): Deferred<User>
+        suspend fun patchUser(@Body user: User, @Path("userId") userId: String): Response<User>
 
         //TODO: contactWasAdded will always be true. Should I update this? Firebase wont take a post or put with no body and I need the value to be "true" here
         @PUT("/users/{userId}/contacts/{contactId}.json")
-        fun addContactToUserAsync(@Body isContact: Boolean, @Path("userId") userId: String, @Path("contactId") contactId: String): Deferred<Boolean>
+        suspend fun addContactToUserAsync(@Body isContact: Boolean, @Path("userId") userId: String, @Path("contactId") contactId: String): Response<Boolean>
 
         @POST("/events.json")
-        fun createEvent(@Body request: EventDetail): Deferred<EventCreationResponse>
+        suspend fun createEvent(@Body request: EventDetail): Response<EventCreationResponse>
 
         @PUT("/users/{userId}/events/{eventId}.json")
-        fun addEventToUser(@Body eventInviteInfo: EventInviteInfo, @Path("userId") userId: String, @Path("eventId") eventId: String): Deferred<EventInviteInfo>
+        suspend fun addEventToUser(@Body eventInviteInfo: EventInviteInfo, @Path("userId") userId: String, @Path("eventId") eventId: String): Response<EventInviteInfo>
 
         @DELETE("/events/{eventId}/users/{userId}.json")
-        fun removeUserFromEvent(@Path("eventId") eventId: String, @Path("userId") userId: String): Deferred<Response<Void>>
+        suspend fun removeUserFromEvent(@Path("eventId") eventId: String, @Path("userId") userId: String): Response<Response<Void>>
 
         @PUT("/events/{eventId}/host.json")
-        fun updateEventHost(@Body host: Host, @Path("eventId") eventId: String): Deferred<Host>
+        suspend fun updateEventHost(@Body host: Host, @Path("eventId") eventId: String): Response<Host>
 
         @PUT("/users/{userId}/unavailable_dates/{date}.json")
-        fun setDateUnavailableForUser(@Body unavailable: Boolean?, @Path("userId") userId: String,
-                                      @Path("date") date: String): Deferred<Boolean>
-
-
+        suspend fun setDateUnavailableForUser(@Body unavailable: Boolean?, @Path("userId") userId: String,
+                                              @Path("date") date: String): Response<Boolean>
     }
 }
