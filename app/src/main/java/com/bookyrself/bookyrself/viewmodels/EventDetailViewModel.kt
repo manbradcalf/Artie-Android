@@ -6,10 +6,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.MiniUser
 import com.bookyrself.bookyrself.data.ServerModels.User.EventInviteInfo
+import com.bookyrself.bookyrself.data.ServerModels.User.User
 import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class EventDetailViewModel(val eventId: String) : ViewModel() {
 
@@ -21,14 +23,17 @@ class EventDetailViewModel(val eventId: String) : ViewModel() {
     }
 
     private fun loadEvent(eventId: String) {
-        val eventDetailJob = FirebaseServiceCoroutines.instance.getEventData(eventId)
 
-        CoroutineScope(Dispatchers.Main).launch {
-            val eventDetailResponse = eventDetailJob.await()
-            event.value = eventDetailResponse
-
-            val userIds = eventDetailResponse.users?.keys
-            loadEventsUsers(userIds)
+        CoroutineScope(Dispatchers.IO).launch {
+            val eventDetailCall = FirebaseServiceCoroutines.instance.getEventData(eventId)
+            if (eventDetailCall.isSuccessful) {
+                val eventDetailResponse = eventDetailCall.body()
+                val userIds = eventDetailResponse?.users?.keys
+                loadEventsUsers(userIds)
+                withContext(Dispatchers.Main) {
+                    event.value = eventDetailResponse
+                }
+            }
         }
     }
 
@@ -38,19 +43,22 @@ class EventDetailViewModel(val eventId: String) : ViewModel() {
         CoroutineScope(Dispatchers.Main).launch {
             userIds?.forEach { userId ->
                 //TODO handle network errors here via sealed Result class:
-                // https://stackoverflow.com/questions/54077592/kotlin-coroutines-handle-error-and-implementation
-                val userDetailResponse = FirebaseServiceCoroutines.instance.getUserDetails(userId).await()
+                val userDetailResponse = FirebaseServiceCoroutines.instance.getUserDetails(userId)
 
-                val miniUser = minifyUserDetailsForEventDetailDisplay(userId, userDetailResponse)
-                val inviteeWithUserId = Pair(userId, miniUser)
-                listOfInvitees.add(inviteeWithUserId)
+                if (userDetailResponse.isSuccessful) {
+                    // TODO: ugly not null assertion for unwrapping userDetailResponse.body
+                    val miniUser = minifyUserDetailsForEventDetailDisplay(userId, userDetailResponse.body()!!)
+                    val inviteeWithUserId = Pair(userId, miniUser)
+                    listOfInvitees.add(inviteeWithUserId)
+                }
+
             }
 
             invitees.value = listOfInvitees
         }
     }
 
-    private fun minifyUserDetailsForEventDetailDisplay(userId: String, user: com.bookyrself.bookyrself.data.ServerModels.User.User): MiniUser {
+    private fun minifyUserDetailsForEventDetailDisplay(userId: String, user: User): MiniUser {
         val miniUser = MiniUser()
         miniUser.citystate = user.citystate
         miniUser.url = user.url
