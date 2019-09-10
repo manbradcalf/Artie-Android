@@ -9,43 +9,51 @@ import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.collections.set
+import kotlinx.coroutines.withContext
 
 class UserDetailViewModel(userId: String) : ViewModel() {
 
     var user = MutableLiveData<User?>()
     var events = MutableLiveData<HashMap<EventDetail, String>>()
     var contactWasAdded = MutableLiveData<Boolean>()
+    var responseErrorMessage = MutableLiveData<String>()
 
     init {
         loadUserData(userId)
     }
 
     private fun loadUserData(userId: String) {
-        val userJob = FirebaseServiceCoroutines.instance.getUserDetails(userId)
 
-        CoroutineScope(Dispatchers.Main).launch {
-            val userDetailResponse = userJob.await()
-
-            //TODO Handle network errors here via sealed Result class
-            // https://stackoverflow.com/questions/54077592/kotlin-coroutines-handle-error-and-implementation
-            user.value = userDetailResponse
-
-            val eventIds = userDetailResponse.events?.keys
-            loadUsersEvents(eventIds)
+        CoroutineScope(Dispatchers.IO).launch {
+            val userResponse = FirebaseServiceCoroutines.instance.getUserDetails(userId)
+            withContext(Dispatchers.Main) {
+                if (userResponse.isSuccessful) {
+                    user.value = userResponse.body()
+                    val eventIds = userResponse.body()?.events?.keys
+                    loadUsersEvents(eventIds)
+                } else {
+                    responseErrorMessage.value = userResponse.message()
+                }
+            }
         }
     }
 
-    private fun loadUsersEvents(eventIds: Set<String>?) {
+    private suspend fun loadUsersEvents(eventIds: Set<String>?) {
         val eventsHashMap = HashMap<EventDetail, String>()
 
-        CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             eventIds?.forEach { eventId ->
-                val eventJob = FirebaseServiceCoroutines.instance.getEventData(eventId)
-                val eventDetailResponse = eventJob.await()
-                eventsHashMap[eventDetailResponse] = eventId
+                val eventDetailResponse = FirebaseServiceCoroutines.instance.getEventData(eventId)
+                withContext(Dispatchers.Main) {
+                    if (eventDetailResponse.isSuccessful) {
+                        val eventDetail = eventDetailResponse.body()
+                        if (eventDetail != null) {
+                            eventsHashMap[eventDetail] = eventId
+                            events.value = eventsHashMap
+                        }
+                    }
+                }
             }
-            events.value = eventsHashMap
         }
     }
 
@@ -54,7 +62,7 @@ class UserDetailViewModel(userId: String) : ViewModel() {
         val addContactJob = FirebaseServiceCoroutines.instance.addContactToUserAsync(true, userId, contactId)
 
         CoroutineScope(Dispatchers.Main).launch {
-            val response = addContactJob.await()
+            val response = addContactJob
             contactWasAdded.value = response
         }
     }

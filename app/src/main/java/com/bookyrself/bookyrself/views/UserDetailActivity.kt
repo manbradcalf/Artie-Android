@@ -10,12 +10,12 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.bookyrself.bookyrself.R
-import com.bookyrself.bookyrself.viewmodels.UserDetailViewModel
-import com.bookyrself.bookyrself.viewmodels.UserDetailViewModel.UserDetailViewModelFactory
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.ServerModels.User.User
 import com.bookyrself.bookyrself.utils.CircleTransform
 import com.bookyrself.bookyrself.utils.EventDecorator
+import com.bookyrself.bookyrself.viewmodels.UserDetailViewModel
+import com.bookyrself.bookyrself.viewmodels.UserDetailViewModel.UserDetailViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import com.prolificinteractive.materialcalendarview.CalendarDay
@@ -77,6 +77,10 @@ class UserDetailActivity : ScopedActivity(), OnDateSelectedListener {
 
         model.contactWasAdded.observe(this) { contactWasAdded ->
             presentSuccess("Contact successfully added")
+        }
+
+        model.responseErrorMessage.observe(this) {
+            presentError(it)
         }
     }
 
