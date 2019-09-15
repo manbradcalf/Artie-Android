@@ -35,7 +35,9 @@ class ProfileEditActivity : AppCompatActivity() {
         profile_edit_username.setText(intent.getStringExtra("Username"))
         profile_edit_url.setText(intent.getStringExtra("Url"))
 
-        intent.getStringExtra("Tags").let { profile_edit_tags.setText(it.replace("\\[|]|, $".toRegex(), "")) }
+        if (intent.getStringExtra("Tags") != null) {
+            intent.getStringExtra("Tags").let { profile_edit_tags.setText(it.replace("\\[|]|, $".toRegex(), "")) }
+        }
 
         profile_edit_fab.setOnClickListener {
             val user = User()
