@@ -51,6 +51,8 @@ class UserDetailViewModel(userId: String) : ViewModel() {
                             eventsHashMap[eventDetail] = eventId
                             events.value = eventsHashMap
                         }
+                    } else {
+                        responseErrorMessage.value = eventDetailResponse.message()
                     }
                 }
             }
@@ -59,11 +61,15 @@ class UserDetailViewModel(userId: String) : ViewModel() {
 
     fun addContactToUser(contactId: String, userId: String) {
 
-        val addContactJob = FirebaseServiceCoroutines.instance.addContactToUserAsync(true, userId, contactId)
-
         CoroutineScope(Dispatchers.Main).launch {
-            val response = addContactJob
-            contactWasAdded.value = response
+            val addContactResponse = FirebaseServiceCoroutines.instance.addContactToUserAsync(true, userId, contactId)
+            if (addContactResponse.isSuccessful) {
+                if (addContactResponse.body() != null) {
+                    contactWasAdded.value = addContactResponse.body()
+                }
+            } else {
+                responseErrorMessage.value = addContactResponse.message()
+            }
         }
     }
 
