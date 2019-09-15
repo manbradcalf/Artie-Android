@@ -165,6 +165,7 @@ class UserDetailActivity : ScopedActivity(), OnDateSelectedListener {
             }
         } else {
             // If I'm signed out
+            //TODO: Add intent to login here
             add_user_to_contacts_textview.setText(R.string.contact_button_signed_out)
         }
 
