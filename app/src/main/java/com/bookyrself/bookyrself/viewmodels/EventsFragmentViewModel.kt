@@ -2,6 +2,7 @@ package com.bookyrself.bookyrself.viewmodels
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
 import com.bookyrself.bookyrself.services.clients.UsersClient
@@ -51,6 +52,14 @@ class EventsFragmentViewModel : ViewModel() {
                     }
                 }
             }
+        }
+    }
+
+    //TODO: Genericize this?
+    class EventsFragmentViewModelFactory(): ViewModelProvider.Factory {
+
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return EventsFragmentViewModel() as T
         }
     }
 }

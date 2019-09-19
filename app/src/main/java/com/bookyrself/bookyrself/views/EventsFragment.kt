@@ -10,12 +10,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
-import butterknife.ButterKnife
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.utils.EventDecorator
 import com.bookyrself.bookyrself.viewmodels.EventsFragmentViewModel
+import com.bookyrself.bookyrself.viewmodels.EventsFragmentViewModel.EventsFragmentViewModelFactory
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.prolificinteractive.materialcalendarview.CalendarDay
@@ -23,26 +24,36 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener
 import kotlinx.android.synthetic.main.empty_state_template.*
 import kotlinx.android.synthetic.main.fragment_events.*
+import kotlinx.android.synthetic.main.fragment_events.view.*
 import java.util.*
 import kotlin.collections.HashMap
 
-class EventsFragment: Fragment(), OnDateSelectedListener {
+class EventsFragment : Fragment(), OnDateSelectedListener {
 
-    private var model: EventsFragmentViewModel = EventsFragmentViewModel()
+    lateinit var model: EventsFragmentViewModel
     private val acceptedEventsCalendarDays = ArrayList<CalendarDay>()
     private val pendingEventsCalendarDays = ArrayList<CalendarDay>()
     private val calendarDaysWithEventIds = HashMap<CalendarDay, String>()
 
+    override fun onResume() {
+        initData()
+        super.onResume()
+    }
+
+
     private fun initData() {
+        model = ViewModelProviders.of(this,
+                EventsFragmentViewModelFactory()).get(EventsFragmentViewModel::class.java)
+
         model.eventDetailsHashMap.observe(this) { events ->
             if (events.isNotEmpty()) {
+                showContent(true)
                 for (event in events) {
                     eventDetailReturned(event.key, event.value)
                 }
             } else {
                 noEventDetailsReturned()
             }
-            showContent(true)
         }
         model.errorMessage.observe(this) {
             presentError(it)
@@ -55,7 +66,7 @@ class EventsFragment: Fragment(), OnDateSelectedListener {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        initData()
+        val view = inflater.inflate(R.layout.fragment_events, container, false)
 
         // Set up view
         events_toolbar?.title = "Your Calendar"
@@ -76,7 +87,6 @@ class EventsFragment: Fragment(), OnDateSelectedListener {
             hideEmptyState()
             showLoadingState(true)
         }
-
         return view
     }
 
@@ -160,6 +170,7 @@ class EventsFragment: Fragment(), OnDateSelectedListener {
 
     private fun noEventDetailsReturned() {
         showContent(true)
+        hideEmptyState()
     }
 
     fun presentError(error: String) {
