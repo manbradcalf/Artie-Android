@@ -1,10 +1,8 @@
 package com.bookyrself.bookyrself.viewmodels
 
-import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
-import com.bookyrself.bookyrself.presenters.BasePresenterListener
 import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
 import com.bookyrself.bookyrself.services.clients.UsersClient
 import com.google.firebase.auth.FirebaseAuth
@@ -16,7 +14,7 @@ import kotlinx.coroutines.withContext
 /**
  * Created by benmedcalf on 3/11/18.
  */
-class EventsFragmetViewModel: ViewModel() {
+class EventsFragmentViewModel : ViewModel() {
     private var userId: String? = null
     var eventDetailsHashMap = MutableLiveData<HashMap<EventDetail, String>>()
     var errorMessage = MutableLiveData<String>()
