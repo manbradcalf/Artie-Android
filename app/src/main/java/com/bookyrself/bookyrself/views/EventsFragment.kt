@@ -24,7 +24,6 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener
 import kotlinx.android.synthetic.main.empty_state_template.*
 import kotlinx.android.synthetic.main.fragment_events.*
-import kotlinx.android.synthetic.main.fragment_events.view.*
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -36,10 +35,31 @@ class EventsFragment : Fragment(), OnDateSelectedListener {
     private val calendarDaysWithEventIds = HashMap<CalendarDay, String>()
 
     override fun onResume() {
+        initView()
         initData()
         super.onResume()
     }
 
+    private fun initView() {
+        // Set up view
+        // Determine the view state by the auth state
+        if (FirebaseAuth.getInstance().uid == null) {
+            // Signed out
+            showSignedOutEmptyState()
+        } else {
+            // Signed In, load events
+            showContent(true)
+            hideEmptyState()
+        }
+
+        events_toolbar?.title = "Your Calendar"
+
+        event_creation_fab?.setOnClickListener {
+            val intent = Intent(activity, EventCreationActivity::class.java)
+            startActivityForResult(intent, RC_EVENT_CREATION)
+        }
+        events_calendar?.setOnDateChangedListener(this)
+    }
 
     private fun initData() {
         model = ViewModelProviders.of(this,
@@ -66,28 +86,7 @@ class EventsFragment : Fragment(), OnDateSelectedListener {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_events, container, false)
-
-        // Set up view
-        events_toolbar?.title = "Your Calendar"
-
-        event_creation_fab?.setOnClickListener {
-            val intent = Intent(activity, EventCreationActivity::class.java)
-            startActivityForResult(intent, RC_EVENT_CREATION)
-        }
-        events_calendar?.setOnDateChangedListener(this)
-
-        // Determine the view state by the auth state
-        if (FirebaseAuth.getInstance().uid == null) {
-            // Signed out
-            showSignedOutEmptyState()
-        } else {
-            // Signed In, load events
-            showContent(false)
-            hideEmptyState()
-            showLoadingState(true)
-        }
-        return view
+        return inflater.inflate(R.layout.fragment_events, container, false)
     }
 
     override fun onDestroyView() {
@@ -249,7 +248,6 @@ class EventsFragment : Fragment(), OnDateSelectedListener {
     }
 
     companion object {
-
         private const val RC_SIGN_IN = 123
         private const val RC_EVENT_CREATION = 456
     }
