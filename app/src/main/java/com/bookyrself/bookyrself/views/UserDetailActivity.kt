@@ -75,7 +75,7 @@ class UserDetailActivity : ScopedActivity(), OnDateSelectedListener {
             }
         }
 
-        model.contactWasAdded.observe(this) { contactWasAdded ->
+        model.contactWasAdded.observe(this) {
             presentSuccess("Contact successfully added")
         }
 
