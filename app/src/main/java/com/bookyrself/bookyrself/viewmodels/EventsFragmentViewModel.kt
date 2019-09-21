@@ -1,5 +1,6 @@
 package com.bookyrself.bookyrself.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -24,6 +25,7 @@ class EventsFragmentViewModel : ViewModel() {
     init {
         if (FirebaseAuth.getInstance().uid != null) {
             userId = FirebaseAuth.getInstance().uid
+            loadUsersEventInfo(userId!!)
         } else {
             signedOutMessage.value = "Sign in to see your events!"
         }
@@ -40,14 +42,13 @@ class EventsFragmentViewModel : ViewModel() {
                 userResponse.body()?.events?.keys?.forEach { eventId ->
                     val eventDetailResponse = FirebaseServiceCoroutines.instance.getEventData(eventId)
                     withContext(Dispatchers.Main) {
-                        if (eventDetailResponse.isSuccessful) {
-                            val eventDetail = eventDetailResponse.body()
-                            if (eventDetail != null) {
-                                events[eventDetail] = eventId
-                                eventDetailsHashMap.value = events
-                            } else {
-                                errorMessage.value = eventDetailResponse.message()
-                            }
+                        if (eventDetailResponse.isSuccessful && eventDetailResponse.body() != null) {
+                            events[eventDetailResponse.body()!!] = eventId
+                            eventDetailsHashMap.value = events
+                        } else if (eventDetailResponse.isSuccessful && eventDetailResponse.body() == null) {
+                            Log.e("EventsFragmentViewModel", "No data for eventId $eventId")
+                        } else {
+                            errorMessage.value = eventDetailResponse.message()
                         }
                     }
                 }
@@ -56,7 +57,7 @@ class EventsFragmentViewModel : ViewModel() {
     }
 
     //TODO: Genericize this?
-    class EventsFragmentViewModelFactory(): ViewModelProvider.Factory {
+    class EventsFragmentViewModelFactory() : ViewModelProvider.Factory {
 
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return EventsFragmentViewModel() as T
