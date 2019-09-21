@@ -6,7 +6,6 @@ import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.Host
 import com.bookyrself.bookyrself.data.ServerModels.User.EventInviteInfo
 import com.bookyrself.bookyrself.data.ServerModels.User.User
-import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
@@ -30,7 +29,6 @@ object FirebaseServiceCoroutines {
                 .baseUrl(BASE_URL_BOOKYRSELF_FIREBASE)
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(CoroutineCallAdapterFactory())
                 .build()
 
         retrofit.create(FirebaseApi::class.java)
