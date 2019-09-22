@@ -29,7 +29,7 @@ class ProfileFragmentPresenter
 
     init {
         this.eventsRepo = MainActivity.getEventsRepo(context)
-        this.profileRepo = MainActivity.getProfileRepo()
+        this.profileRepo = MainActivity.profileRepo
         this.compositeDisposable = CompositeDisposable()
     }
 

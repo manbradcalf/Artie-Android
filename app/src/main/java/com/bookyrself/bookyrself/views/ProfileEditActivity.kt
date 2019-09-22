@@ -26,7 +26,7 @@ class ProfileEditActivity : AppCompatActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //TODO: Move to viewmodel
-        this.profileRepo = MainActivity.getProfileRepo()
+        this.profileRepo = MainActivity.profileRepo
         setContentView(R.layout.activity_profile_edit)
 
         // Set any existing data

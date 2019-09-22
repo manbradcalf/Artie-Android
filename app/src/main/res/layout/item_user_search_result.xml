@@ -36,7 +36,7 @@
             android:textColor="@android:color/black" />
 
         <TextView
-            android:id="@+id/user_location_search_result"
+            android:id="@+id/user_citystate_search_result"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/username_search_result"
@@ -47,7 +47,7 @@
             android:id="@+id/user_tag_search_result"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/user_location_search_result"
+            android:layout_below="@id/user_citystate_search_result"
             android:layout_marginTop="@dimen/text_margin_very_small"
             android:layout_toEndOf="@id/user_image_search_result" />
 

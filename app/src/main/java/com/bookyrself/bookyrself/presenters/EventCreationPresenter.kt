@@ -19,7 +19,7 @@ import io.reactivex.schedulers.Schedulers
 
 class EventCreationPresenter(private val presenterListener: EventCreationPresenterListener) : BasePresenter {
 
-    private val contactsRepository: ContactsRepository = MainActivity.getContactsRepo()
+    private val contactsRepository: ContactsRepository = MainActivity.contactsRepo
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     /**

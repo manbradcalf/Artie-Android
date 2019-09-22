@@ -21,7 +21,6 @@ class EventInvitesFragmentPresenter(private val presenterListener: EventInvitesV
         this.eventsRepo = MainActivity.getEventsRepo(context)
     }
 
-
     fun acceptEventInvite(userId: String, eventId: String, eventDetail: EventDetail) {
         compositeDisposable.add(
                 eventsRepo.acceptEventInvite(userId, eventId)

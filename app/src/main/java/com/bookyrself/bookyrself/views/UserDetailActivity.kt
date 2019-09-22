@@ -37,7 +37,7 @@ import kotlin.collections.HashMap
 class UserDetailActivity : ScopedActivity(), OnDateSelectedListener {
 
     private var storageReference = FirebaseStorage.getInstance().reference
-    private val contactsRepository = MainActivity.getContactsRepo()
+    private val contactsRepository = MainActivity.contactsRepo
     private val compositeDisposable = CompositeDisposable()
     private var userId: String? = null
 
