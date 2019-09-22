@@ -139,9 +139,9 @@ class SearchPresenter
      * Contract / Listener
      */
     interface SearchPresenterListener {
-        fun searchEventsResponseReady(hits: List<com.bookyrself.bookyrself.data.ServerModels.SearchResponseEvents.Hit>)
+        fun searchEventsResponseReady(hits: MutableList<com.bookyrself.bookyrself.data.ServerModels.SearchResponseEvents.Hit>)
 
-        fun searchUsersResponseReady(hits: List<com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers.Hit>)
+        fun searchUsersResponseReady(hits: MutableList<com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers.Hit>)
 
         fun startDateChanged(date: String)
 
