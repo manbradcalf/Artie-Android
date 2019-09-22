@@ -34,34 +34,15 @@ class EventsFragment : Fragment(), OnDateSelectedListener {
     private val pendingEventsCalendarDays = ArrayList<CalendarDay>()
     private val calendarDaysWithEventIds = HashMap<CalendarDay, String>()
 
-    override fun onResume() {
-        initView()
-        initData()
-        super.onResume()
-    }
-
-    private fun initView() {
+    private fun init() {
         // Set up view
-        // Determine the view state by the auth state
-        if (FirebaseAuth.getInstance().uid == null) {
-            // Signed out
-            showSignedOutEmptyState()
-        } else {
-            // Signed In, load events
-            showContent(true)
-            hideEmptyState()
-        }
-
         events_toolbar?.title = "Your Calendar"
-
         event_creation_fab?.setOnClickListener {
             val intent = Intent(activity, EventCreationActivity::class.java)
             startActivityForResult(intent, RC_EVENT_CREATION)
         }
         events_calendar?.setOnDateChangedListener(this)
-    }
 
-    private fun initData() {
         model = ViewModelProviders.of(this,
                 EventsFragmentViewModelFactory()).get(EventsFragmentViewModel::class.java)
 
@@ -80,8 +61,16 @@ class EventsFragment : Fragment(), OnDateSelectedListener {
         }
 
         model.signedOutMessage.observe(this) {
-            showSignedOutEmptyState()
+            if (FirebaseAuth.getInstance().uid == null) {
+                showContent(false)
+                showSignedOutEmptyState()
+            }
         }
+    }
+
+    override fun onResume() {
+        init()
+        super.onResume()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -97,17 +86,11 @@ class EventsFragment : Fragment(), OnDateSelectedListener {
         events_calendar?.removeDecorators()
     }
 
-    /**
-     * Reload the calendar view after signing in or creating event
-     *
-     * @param requestCode
-     * @param resultCode
-     * @param data
-     */
+    // Re-init after signing in or creating event
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK) {
-            initData()
+            init()
         }
     }
 
@@ -192,7 +175,7 @@ class EventsFragment : Fragment(), OnDateSelectedListener {
         }
     }
 
-    fun showLoadingState(show: Boolean) {
+    private fun showLoadingState(show: Boolean) {
         if (show) {
             events_progressbar?.visibility = View.VISIBLE
         } else {

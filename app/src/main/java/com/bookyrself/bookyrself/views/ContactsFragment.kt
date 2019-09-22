@@ -1,5 +1,6 @@
 package com.bookyrself.bookyrself.views
 
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -7,114 +8,96 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.ProgressBar
-import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
-import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.ServerModels.User.User
-import com.bookyrself.bookyrself.presenters.ContactsFragmentPresenter
 import com.bookyrself.bookyrself.utils.CircleTransform
+import com.bookyrself.bookyrself.viewmodels.ContactsFragmentViewModel
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.empty_state_template.*
+import kotlinx.android.synthetic.main.fragment_contacts.*
+import kotlinx.android.synthetic.main.item_user_search_result.view.*
+import java.util.*
 
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.HashMap
+class ContactsFragment : Fragment(), BaseFragment {
+    var storageReference = FirebaseStorage.getInstance().reference
+    var contactsMap = hashMapOf<User, String>()
+    var contacts = listOf<User>()
 
-import butterknife.BindView
-import butterknife.ButterKnife
-
-import android.app.Activity.RESULT_OK
-
-class ContactsFragment : Fragment(), BaseFragment, ContactsFragmentPresenter.ContactsPresenterListener {
-    @BindView(R.id.contacts_recyclerview)
-    internal var recyclerView: RecyclerView? = null
-    @BindView(R.id.toolbar_contacts_fragment)
-    internal var toolbar: Toolbar? = null
-    @BindView(R.id.contacts_fragment_progressbar)
-    internal var progressbar: ProgressBar? = null
-    @BindView(R.id.contacts_empty_state)
-    internal var emptyState: LinearLayout? = null
-    @BindView(R.id.empty_state_text_header)
-    internal var emptyStateTextHeader: TextView? = null
-    @BindView(R.id.empty_state_image)
-    internal var emptyStateImage: ImageView? = null
-    @BindView(R.id.empty_state_text_subheader)
-    internal var emptyStateTextSubHeader: TextView? = null
-    @BindView(R.id.empty_state_button)
-    internal var emptyStateButton: Button? = null
-
-    private var adapter: ContactsAdapter? = null
-    private var presenter: ContactsFragmentPresenter? = null
-    private var layoutManager: RecyclerView.LayoutManager? = null
-    private var contacts: MutableList<User>? = null
-    private var contactsMap: MutableMap<User, String>? = null
-    private var storageReference: StorageReference? = null
+    lateinit var adapter: ContactsAdapter
+    lateinit var layoutManager: RecyclerView.LayoutManager
+    lateinit var model: ContactsFragmentViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_contacts, container, false)
-        ButterKnife.bind(this, view)
-        toolbar!!.setTitle(R.string.contacts_toolbar)
-        contactsMap = HashMap()
-        contacts = ArrayList()
-        presenter = ContactsFragmentPresenter(this)
-        adapter = ContactsAdapter()
-        recyclerView!!.adapter = adapter
-        layoutManager = LinearLayoutManager(activity)
-        recyclerView!!.layoutManager = layoutManager
-        storageReference = FirebaseStorage.getInstance().reference
-        showLoadingState(true)
-
-        return view
-    }
-
-    override fun showLoadingState(show: Boolean) {
-        if (show && progressbar!!.visibility == View.GONE) {
-            progressbar!!.visibility = View.VISIBLE
-            hideEmptyState()
-        } else {
-            progressbar!!.visibility = View.GONE
-        }
+        return inflater.inflate(R.layout.fragment_contacts, container, false)
     }
 
     override fun onResume() {
+        initView()
+        initData()
         super.onResume()
-        presenter!!.subscribe()
     }
 
-    override fun onPause() {
-        super.onPause()
-        contacts!!.clear()
-        presenter!!.unsubscribe()
+    private fun initData() {
+        model = ViewModelProviders.of(this,
+                ContactsFragmentViewModel.ContactsFragmentViewModelFactory())
+                .get(ContactsFragmentViewModel::class.java)
+
+        model.contactsHashMap.observe(this) {
+
+            // Now we have data so lets fire up the adapter
+            adapter = ContactsAdapter()
+            contacts_recyclerview.adapter = adapter
+            layoutManager = LinearLayoutManager(activity)
+            contacts_recyclerview.layoutManager = layoutManager
+            showLoadingState(false)
+            hideEmptyState()
+            showContent(true)
+
+            //TODO: Double check this data conversion here
+            contacts = it.keys.asSequence().toList()
+            contactsMap = it
+            adapter?.notifyDataSetChanged()
+        }
+    }
+
+    private fun initView() {
+        toolbar_contacts_fragment.setTitle(R.string.contacts_toolbar)
+        showLoadingState(true)
+    }
+
+    override fun showLoadingState(show: Boolean) {
+        if (show && contacts_fragment_progressbar.visibility == View.GONE) {
+            contacts_fragment_progressbar.visibility = View.VISIBLE
+            hideEmptyState()
+        } else {
+            contacts_fragment_progressbar.visibility = View.GONE
+        }
     }
 
     override fun showEmptyState(header: String, subHeader: String, buttonText: String, image: Drawable?) {
         showContent(false)
         showLoadingState(false)
-        emptyState!!.visibility = View.VISIBLE
-        emptyStateImage!!.visibility = View.VISIBLE
-        emptyStateTextHeader!!.visibility = View.VISIBLE
-        emptyStateTextSubHeader!!.visibility = View.VISIBLE
+        empty_state_view.visibility = View.VISIBLE
+        empty_state_image.visibility = View.VISIBLE
+        empty_state_text_header.visibility = View.VISIBLE
+        empty_state_text_subheader.visibility = View.VISIBLE
 
-        emptyStateTextHeader!!.text = header
-        emptyStateTextSubHeader!!.text = subHeader
-        emptyStateImage!!.setImageDrawable(image)
+        empty_state_text_header.text = header
+        empty_state_text_subheader.text = subHeader
+        empty_state_image.setImageDrawable(image)
         if (buttonText != "") {
-            emptyStateButton!!.visibility = View.VISIBLE
-            emptyStateButton!!.text = buttonText
-            emptyStateButton!!.setOnClickListener { view ->
-                val providers = Arrays.asList(AuthUI.IdpConfig.GoogleBuilder().build(),
+            empty_state_button.visibility = View.VISIBLE
+            empty_state_button.text = buttonText
+            empty_state_button.setOnClickListener { view ->
+                val providers = listOf(AuthUI.IdpConfig.GoogleBuilder().build(),
                         AuthUI.IdpConfig.EmailBuilder().build())
                 // Authenticate
                 startActivityForResult(
@@ -126,23 +109,22 @@ class ContactsFragment : Fragment(), BaseFragment, ContactsFragmentPresenter.Con
                         RC_SIGN_IN)
             }
         } else {
-            emptyStateButton!!.visibility = View.GONE
+            empty_state_button.visibility = View.GONE
         }
     }
 
     override fun hideEmptyState() {
-        emptyStateButton!!.visibility = View.GONE
-        emptyState!!.visibility = View.GONE
-        emptyStateImage!!.visibility = View.GONE
-        emptyStateTextHeader!!.visibility = View.GONE
-        emptyStateTextSubHeader!!.visibility = View.GONE
+        empty_state_button.visibility = View.GONE
+        empty_state_image.visibility = View.GONE
+        empty_state_text_header.visibility = View.GONE
+        empty_state_text_subheader.visibility = View.GONE
     }
 
     override fun showContent(show: Boolean) {
         if (show) {
-            recyclerView!!.visibility = View.VISIBLE
+            contacts_recyclerview.visibility = View.VISIBLE
         } else {
-            recyclerView!!.visibility = View.GONE
+            contacts_recyclerview.visibility = View.GONE
         }
     }
 
@@ -153,27 +135,16 @@ class ContactsFragment : Fragment(), BaseFragment, ContactsFragmentPresenter.Con
                 RC_SIGN_IN -> {
                     hideEmptyState()
                     showLoadingState(true)
-                    presenter!!.subscribe()
                 }
             }
         }
     }
 
-    override fun noContactsReturned() {
+    fun noContactsReturned() {
         showEmptyState(getString(R.string.contacts_empty_state_no_content_header),
                 getString(R.string.contacts_empty_state_no_content_subheader),
                 "",
                 activity!!.getDrawable(R.drawable.ic_person_add_black_24dp))
-    }
-
-    override fun contactReturned(id: String, user: User) {
-
-        showLoadingState(false)
-        hideEmptyState()
-        showContent(true)
-        contacts!!.add(user)
-        contactsMap!![user] = id
-        adapter!!.notifyDataSetChanged()
     }
 
     override fun presentError(error: String) {
@@ -190,79 +161,63 @@ class ContactsFragment : Fragment(), BaseFragment, ContactsFragmentPresenter.Con
                 activity!!.getDrawable(R.drawable.ic_person_add_black_24dp))
     }
 
-
     /**
      * RecyclerView Adapter
      */
-    internal inner class ContactsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    inner class ContactsAdapter : RecyclerView.Adapter<ContactsAdapter.ViewHolderContacts>() {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-            val view = layoutInflater.inflate(R.layout.item_user_search_result, parent, false)
-            return ViewHolderContacts(view)
-        }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderContacts =
+                ViewHolderContacts(LayoutInflater.from(parent.context).inflate(R.layout.item_user_search_result, parent, false))
 
-        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            val viewHolderContacts = holder as ViewHolderContacts
-            if (contacts!![position].tags != null) {
-                val listString = StringBuilder()
-                for (s in contacts!![position].tags!!) {
-                    listString.append("$s, ")
-                }
-                viewHolderContacts.userTagsTextView!!.text = listString.toString().replace(", $".toRegex(), "")
-            }
+        override fun onBindViewHolder(holder: ViewHolderContacts, position: Int) = holder.bind(contacts[position], position)
 
-            val profileImageReference = storageReference!!.child("/images/users/" + contactsMap!![contacts!![position]]!!)
-            profileImageReference
-                    .downloadUrl
-                    .addOnSuccessListener { uri ->
-                        Picasso.with(activity)
-                                .load(uri)
-                                .placeholder(R.drawable.round)
-                                .error(R.drawable.round)
-                                .transform(CircleTransform())
-                                .resize(100, 100)
-                                .into(viewHolderContacts.userProfileImageThumb)
-                    }.addOnFailureListener { e ->
-                        // Handle any errors
-                        Log.e("ContactsFragment: ", "image not dowloaded")
-                        viewHolderContacts.userProfileImageThumb!!.setImageDrawable(context!!.getDrawable(R.drawable.ic_profile_black_24dp))
+        override fun getItemCount() = contacts.size
+
+        inner class ViewHolderContacts(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            fun bind(item: User, position: Int) = with(itemView) {
+                val contactUserName = this.username_search_result
+                val contactPhoto = this.user_image_search_result
+                val contactTags = this.user_tag_search_result
+                val contactCityState = this.user_citystate_search_result
+
+                contactUserName.text = item.username
+                contactCityState.text = item.citystate
+
+                if (item.tags != null) {
+                    val listString = StringBuilder()
+                    for (s in item.tags!!) {
+                        listString.append("$s, ")
                     }
+                    contactTags.text = listString.toString().replace(", $".toRegex(), "")
+                }
 
-            viewHolderContacts.userNameTextView!!.text = contacts!![position].username
-            viewHolderContacts.userCityStateTextView!!.text = contacts!![position].citystate
-            viewHolderContacts.userCardView!!.setOnClickListener { view ->
-                val intent = Intent(activity, UserDetailActivity::class.java)
-                intent.putExtra("userId", contactsMap!![contacts!![position]])
-                startActivity(intent)
-            }
-        }
+                val profileImageReference = storageReference!!.child("/images/users/" + contactsMap!![contacts!![position]]!!)
+                profileImageReference.downloadUrl.addOnSuccessListener { uri ->
+                    Picasso.with(activity)
+                            .load(uri)
+                            .placeholder(R.drawable.round)
+                            .error(R.drawable.round)
+                            .transform(CircleTransform())
+                            .resize(100, 100)
+                            .into(contactPhoto)
+                }.addOnFailureListener {
+                    // Handle any errors
+                    Log.e("ContactsFragment", "user image not downloaded")
+                    contactPhoto.setImageDrawable(context!!.getDrawable(R.drawable.ic_profile_black_24dp))
+                }
 
-
-        override fun getItemCount(): Int {
-            return contacts!!.size
-        }
-
-        internal inner class ViewHolderContacts(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-            @BindView(R.id.search_result_card_users)
-            var userCardView: CardView? = null
-            @BindView(R.id.user_location_search_result)
-            var userCityStateTextView: TextView? = null
-            @BindView(R.id.username_search_result)
-            var userNameTextView: TextView? = null
-            @BindView(R.id.user_tag_search_result)
-            var userTagsTextView: TextView? = null
-            @BindView(R.id.user_image_search_result)
-            var userProfileImageThumb: ImageView? = null
-
-            init {
-                ButterKnife.bind(this, itemView)
+                itemView.setOnClickListener {
+                    val intent = Intent(activity, UserDetailActivity::class.java)
+                    intent.putExtra("userId", contactsMap[contacts[position]])
+                    startActivity(intent)
+                }
             }
         }
     }
 
     companion object {
-
-        private val RC_SIGN_IN = 123
+        private const val RC_SIGN_IN = 123
     }
 }
+
+
