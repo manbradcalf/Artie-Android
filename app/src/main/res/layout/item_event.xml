@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
 xmlns:card_view="http://schemas.android.com/tools"
 android:id="@+id/event_item_card"
 android:layout_width="match_parent"
@@ -52,4 +52,4 @@ card_view:cardElevation="@dimen/card_recycler_elevation">
         android:layout_toEndOf="@id/event_item_image" />
 
 </RelativeLayout>
-</android.support.v7.widget.CardView>
+</androidx.cardview.widget.CardView>

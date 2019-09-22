@@ -3,10 +3,9 @@ package com.bookyrself.bookyrself.views
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
-import butterknife.ButterKnife
+import androidx.appcompat.app.AppCompatActivity
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.Profile.ProfileRepo
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.Host
@@ -26,15 +25,19 @@ class ProfileEditActivity : AppCompatActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        this.profileRepo = MainActivity.getProfileRepo()
+        //TODO: Move to viewmodel
+        this.profileRepo = MainActivity.profileRepo
         setContentView(R.layout.activity_profile_edit)
 
         // Set any existing data
         profile_edit_bio.setText(intent.getStringExtra("Bio"))
         profile_edit_location.setText(intent.getStringExtra("Location"))
         profile_edit_username.setText(intent.getStringExtra("Username"))
-        profile_edit_tags.setText(intent.getStringExtra("Tags").replace("\\[|]|, $".toRegex(), ""))
         profile_edit_url.setText(intent.getStringExtra("Url"))
+
+        if (intent.getStringExtra("Tags") != null) {
+            intent.getStringExtra("Tags").let { profile_edit_tags.setText(it.replace("\\[|]|, $".toRegex(), "")) }
+        }
 
         profile_edit_fab.setOnClickListener {
             val user = User()
@@ -50,8 +53,9 @@ class ProfileEditActivity : AppCompatActivity() {
             user.tags = tagsList
 
             // Update the user
+            //TODO: Move to viewmodel
             profileRepo!!.updateProfileInfo(
-                    FirebaseAuth.getInstance().uid, user)
+                    FirebaseAuth.getInstance().uid!!, user)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
 

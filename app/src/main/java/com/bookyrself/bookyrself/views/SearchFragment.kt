@@ -2,16 +2,16 @@ package com.bookyrself.bookyrself.views
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.CardView
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.ServerModels.SearchResponseEvents.Hit
@@ -22,17 +22,15 @@ import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.empty_state_template.*
 import kotlinx.android.synthetic.main.fragment_search.*
+import kotlinx.android.synthetic.main.item_event.view.*
 
 class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
-
-
     private var presenter: SearchPresenter? = null
-    private var eventsResults: List<Hit>? = null
-    private var usersResults: List<com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers.Hit>? = null
+    private var eventsResults = mutableListOf<Hit>()
+    private var usersResults = mutableListOf<com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers.Hit>()
     private var adapter: ResultsAdapter? = null
     private var boolSearchEditable: Boolean? = false
     private var storageReference: StorageReference? = null
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -127,8 +125,8 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         search_btn.setOnClickListener {
             if (!boolSearchEditable!!) {
                 if (events_toggle.isChecked) {
-                    eventsResults = null
-                    usersResults = null
+                    eventsResults.clear()
+                    usersResults.clear()
                     presenter!!.executeSearch(
                             EVENT_SEARCH_FLAG,
                             search_what.query.toString(),
@@ -137,8 +135,8 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                             to_button.text.toString())
                     showFullSearchBar(false)
                 } else if (users_toggle.isChecked) {
-                    eventsResults = null
-                    usersResults = null
+                    eventsResults.clear()
+                    usersResults.clear()
                     presenter!!.executeSearch(
                             USER_SEARCH_FLAG,
                             search_what.query.toString(),
@@ -157,7 +155,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
     }
 
 
-    override fun searchEventsResponseReady(hits: List<Hit>) {
+    override fun searchEventsResponseReady(hits: MutableList<Hit>) {
 
         if (search_recycler_view.visibility == View.GONE) {
             search_recycler_view.visibility = View.VISIBLE
@@ -177,9 +175,9 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         }
 
         eventsResults = hits.filter {
-            it._source.eventname != null
-                    && it._source.citystate != null
-        }
+            it._source != null && it._source.citystate != null
+        }.toMutableList()
+
         adapter!!.setViewType(EVENT_VIEW_TYPE)
         boolSearchEditable = true
         search_btn.setText(R.string.search_fragment_edit_search_btn_text)
@@ -187,7 +185,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         showProgressbar(false)
     }
 
-    override fun searchUsersResponseReady(hits: List<com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers.Hit>) {
+    override fun searchUsersResponseReady(hits: MutableList<com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers.Hit>) {
 
         if (search_recycler_view.visibility == View.GONE) {
             search_recycler_view.visibility = View.VISIBLE
@@ -206,12 +204,11 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
             empty_state_view!!.visibility = View.GONE
         }
 
-        usersResults =
-                hits.filter {
-                    it._source.username != null
-                            && it._source.citystate != null
-                            && it._source.tags != null
-                }
+        usersResults = hits.filter {
+            it._source.username != null
+                    && it._source.citystate != null
+                    && it._source.tags != null
+        }.toMutableList()
         adapter!!.setViewType(USER_VIEW_TYPE)
         boolSearchEditable = true
         search_btn.text = "Edit Search"
@@ -280,7 +277,6 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         showFullSearchBar(false)
     }
 
-
     /**
      * Adapter
      */
@@ -290,7 +286,6 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         fun setViewType(viewType: Int) {
             mViewType = viewType
         }
-
 
         override fun getItemViewType(position: Int): Int {
             return mViewType
@@ -311,9 +306,9 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
-            if (usersResults != null && holder.itemViewType == USER_VIEW_TYPE) {
+            if (usersResults.isNotEmpty() && holder.itemViewType == USER_VIEW_TYPE) {
                 buildUserViewHolder(holder, position)
-            } else if (eventsResults != null && holder.itemViewType == EVENT_VIEW_TYPE) {
+            } else if (eventsResults.isNotEmpty() && holder.itemViewType == EVENT_VIEW_TYPE) {
                 buildEventViewHolder(holder, position)
             } else {
                 Log.e(this.javaClass.toString(), "Provided neither Event or User viewholder type")
@@ -321,17 +316,15 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         }
 
         override fun getItemCount(): Int {
-            return if (eventsResults != null) {
-                eventsResults!!.size
-            } else if (usersResults != null) {
-                usersResults!!.size
-            } else {
-                0
+            return when {
+                eventsResults.isNotEmpty() -> eventsResults!!.size
+                usersResults.isNotEmpty() -> usersResults!!.size
+                else -> 0
             }
         }
 
         private fun buildEventViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            if (eventsResults!!.size > position) {
+            if (eventsResults.size > position) {
 
                 val event = eventsResults!![position]._source
                 val viewHolderEvents = holder as ViewHolderEvents
@@ -431,42 +424,27 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         /**
          * ViewHolder for events
          */
-        internal inner class ViewHolderEvents(view: View) : RecyclerView.ViewHolder(view) {
-            var eventCardView: CardView
-            var eventCityStateTextView: TextView
-            var eventHostTextView: TextView
-            var eventNameTextView: TextView
-            var eventImageThumb: ImageView
-
-            init {
-                eventCardView = view.findViewById(R.id.event_item_card)
-                eventCityStateTextView = view.findViewById(R.id.event_item_line2)
-                eventHostTextView = view.findViewById(R.id.event_item_line3)
-                eventNameTextView = view.findViewById(R.id.event_item_line1)
-                eventImageThumb = view.findViewById(R.id.event_item_image)
-            }
+        internal inner class ViewHolderEvents(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            var eventCardView: CardView = itemView.event_item_card
+            var eventCityStateTextView: TextView = itemView.event_item_line2
+            var eventHostTextView: TextView = itemView.event_item_line3
+            var eventNameTextView: TextView = itemView.event_item_line1
+            var eventImageThumb: ImageView = itemView.event_item_image
         }
+
 
         /**
          * ViewHolder for users
          */
         internal inner class ViewHolderUsers(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            var userCardView: CardView
-            var userCityStateTextView: TextView
-            var userNameTextView: TextView
-            var userTagsTextView: TextView
-            var userProfileImageThumb: ImageView
-
-
-            init {
-                userCardView = itemView.findViewById(R.id.search_result_card_users)
-                userCityStateTextView = itemView.findViewById(R.id.user_location_search_result)
-                userNameTextView = itemView.findViewById(R.id.username_search_result)
-                userTagsTextView = itemView.findViewById(R.id.user_tag_search_result)
-                userProfileImageThumb = itemView.findViewById(R.id.user_image_search_result)
-            }
+            var userCardView: CardView = itemView.findViewById(R.id.search_result_card_users)
+            var userCityStateTextView: TextView = itemView.findViewById(R.id.user_citystate_search_result)
+            var userNameTextView: TextView = itemView.findViewById(R.id.username_search_result)
+            var userTagsTextView: TextView = itemView.findViewById(R.id.user_tag_search_result)
+            var userProfileImageThumb: ImageView = itemView.findViewById(R.id.user_image_search_result)
         }
     }
+
 
     companion object {
         const val USER_SEARCH_FLAG = 0

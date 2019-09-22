@@ -3,8 +3,10 @@ package com.pchmn.materialchips.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.support.v4.widget.NestedScrollView;
 import android.util.AttributeSet;
+import android.view.View;
+
+import androidx.core.widget.NestedScrollView;
 
 import com.pchmn.materialchips.R;
 import com.pchmn.materialchips.util.ViewUtil;
@@ -28,22 +30,21 @@ public class ScrollViewMaxHeight extends NestedScrollView {
 
         try {
             mMaxHeight = a.getDimensionPixelSize(R.styleable.ScrollViewMaxHeight_maxHeight, ViewUtil.dpToPx(300));
-        }
-        finally {
+        } finally {
             a.recycle();
         }
     }
 
     public void setMaxHeight(int height) {
         mMaxHeight = height;
-        int heightMeasureSpec = MeasureSpec.makeMeasureSpec(mMaxHeight, MeasureSpec.AT_MOST);
+        int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(mMaxHeight, View.MeasureSpec.AT_MOST);
         measure(mWidthMeasureSpec, heightMeasureSpec);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         mWidthMeasureSpec = widthMeasureSpec;
-        heightMeasureSpec = MeasureSpec.makeMeasureSpec(mMaxHeight, MeasureSpec.AT_MOST);
+        heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(mMaxHeight, View.MeasureSpec.AT_MOST);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 }

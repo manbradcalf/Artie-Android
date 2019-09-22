@@ -3,19 +3,19 @@ package com.bookyrself.bookyrself.views
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.text.util.Linkify
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.ImageView
-import android.widget.TextView
+import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.observe
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bookyrself.bookyrself.R
+import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel
+import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel.EventDetailViewModelFactory
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.MiniUser
-import com.bookyrself.bookyrself.presenters.EventDetailPresenter
 import com.bookyrself.bookyrself.utils.CircleTransform
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -23,6 +23,7 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_event_detail.*
 import kotlinx.android.synthetic.main.empty_state_template.*
 import kotlinx.android.synthetic.main.item_event_detail_user.*
+import kotlinx.android.synthetic.main.item_event_detail_user.view.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -31,13 +32,13 @@ import java.util.*
  * Created by benmedcalf on 11/22/17.
  */
 
-class EventDetailActivity : AppCompatActivity(), EventDetailPresenter.EventDetailPresenterListener {
+class EventDetailActivity : ScopedActivity() {
 
-    private var presenter: EventDetailPresenter? = null
-    private var storageReference: StorageReference? = null
-    private var invitedUsers: MutableList<Map.Entry<String, MiniUser>>? = null
-    private var adapter: UsersListAdapter? = null
-    private var eventId: String? = null
+    lateinit var storageReference: StorageReference
+    lateinit var model: EventDetailViewModel
+    lateinit var invitedUsers: MutableList<Pair<String, MiniUser>>
+    private lateinit var adapter: UsersListAdapter
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,23 +49,39 @@ class EventDetailActivity : AppCompatActivity(), EventDetailPresenter.EventDetai
 
         // Set up the adapter
         invitedUsers = ArrayList()
-        adapter = UsersListAdapter(this, invitedUsers!!, storageReference!!)
+        adapter = UsersListAdapter(this, storageReference)
         event_detail_users_list.adapter = adapter
+        val recyclerView = event_detail_users_list
+        val layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = layoutManager
 
         // Set up initial loading state
         event_detail_linearlayout!!.visibility = View.GONE
         event_detail_empty_state.visibility = View.GONE
-        eventId = intent.getStringExtra("eventId")
         setSupportActionBar(event_detail_toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         showProgressbar(true)
 
-        // Set up the presenter
-        presenter = EventDetailPresenter(this, eventId!!)
-        presenter!!.subscribe()
+        initData(intent.getStringExtra("eventId"))
     }
 
-    override fun showEventData(eventDetailData: EventDetail) {
+    private fun initData(eventId: String) {
+        // Set up the model
+        model = ViewModelProviders.of(this,
+                EventDetailViewModelFactory(eventId))
+                .get(EventDetailViewModel::class.java)
+
+        model.event.observe(this) { eventDetail ->
+            showEventData(eventDetail!!, eventId)
+        }
+
+        model.invitees.observe(this) { invitees ->
+            showInvitedUsers(invitees)
+        }
+    }
+
+    private fun showEventData(eventDetailData: EventDetail, eventId: String) {
 
         showProgressbar(false)
         event_detail_collapsing_toolbar!!.title = eventDetailData.eventname
@@ -85,7 +102,7 @@ class EventDetailActivity : AppCompatActivity(), EventDetailPresenter.EventDetai
         }
 
         item_event_detail_username!!.text = hostUsername
-        val profileImageReference = storageReference!!.child("images/users/" + host.userId)
+        val profileImageReference = storageReference.child("images/users/" + host.userId)
         profileImageReference.downloadUrl.addOnSuccessListener { uri ->
             Picasso.with(applicationContext)
                     .load(uri)
@@ -115,7 +132,7 @@ class EventDetailActivity : AppCompatActivity(), EventDetailPresenter.EventDetai
         item_event_detail_citystate!!.text = hostCityState
 
         // Set the image
-        val eventImageReference = storageReference!!.child("images/events/" + eventId!!)
+        val eventImageReference = storageReference.child("images/events/$eventId")
         eventImageReference.downloadUrl.addOnSuccessListener { uri ->
             Picasso.with(applicationContext)
                     .load(uri)
@@ -128,9 +145,9 @@ class EventDetailActivity : AppCompatActivity(), EventDetailPresenter.EventDetai
         event_detail_linearlayout!!.visibility = View.VISIBLE
     }
 
-    override fun showInvitedUser(user: AbstractMap.SimpleEntry<String, MiniUser>) {
-        invitedUsers!!.add(user)
-        adapter!!.notifyDataSetChanged()
+    private fun showInvitedUsers(users: MutableList<Pair<String, MiniUser>>) {
+        invitedUsers = users
+        adapter.notifyDataSetChanged()
     }
 
     private fun showProgressbar(show: Boolean) {
@@ -154,6 +171,10 @@ class EventDetailActivity : AppCompatActivity(), EventDetailPresenter.EventDetai
         event_detail_empty_state!!.visibility = View.VISIBLE
     }
 
+    override fun presentSuccess(message: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
@@ -163,44 +184,26 @@ class EventDetailActivity : AppCompatActivity(), EventDetailPresenter.EventDetai
     /**
      * Adapter
      */
-    private inner class UsersListAdapter constructor(private val mContext: Context, miniUsers: MutableList<Map.Entry<String, MiniUser>>, private val mStorageReference: StorageReference) : BaseAdapter() {
+    inner class UsersListAdapter constructor(private val mContext: Context, private val mStorageReference: StorageReference) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-        private val mInflater: LayoutInflater
-
-
-        init {
-            invitedUsers = miniUsers
-            mInflater = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+            val view = layoutInflater.inflate(R.layout.item_event_detail_user, parent, false)
+            return InviteeViewHolder(view)
         }
 
-        override fun getCount(): Int {
-            return invitedUsers!!.size
-        }
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
-        override fun getItem(position: Int): Any {
-            return invitedUsers!![position].value
-        }
+            val viewHolder = holder as InviteeViewHolder
 
-        override fun getItemId(position: Int): Long {
-            return position.toLong()
-        }
+            val miniUser = invitedUsers[position].second
 
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val rowView = mInflater.inflate(R.layout.item_event_detail_user, parent, false)
-            val userThumb = rowView.findViewById<ImageView>(R.id.item_event_detail_userthumb)
-            val userName = rowView.findViewById<TextView>(R.id.item_event_detail_username)
-            val cityState = rowView.findViewById<TextView>(R.id.item_event_detail_citystate)
-            val userUrl = rowView.findViewById<TextView>(R.id.item_event_detail_url)
-            val attendingStatusTextView = rowView.findViewById<TextView>(R.id.item_event_detail_attending_textview)
 
-            val miniUser = getItem(position) as MiniUser
-
-            userName.text = miniUser.username
-            cityState.text = miniUser.citystate
-            attendingStatusTextView.text = miniUser.attendingStatus
-            userUrl.text = miniUser.url
-            userUrl.isClickable = true
-            Linkify.addLinks(userUrl, Linkify.WEB_URLS)
+            viewHolder.userName.text = miniUser.username
+            viewHolder.cityState.text = miniUser.citystate
+            viewHolder.attendingStatusTextView.text = miniUser.attendingStatus
+            viewHolder.userUrl.text = miniUser.url
+            viewHolder.userUrl.isClickable = true
+            Linkify.addLinks(viewHolder.userUrl, Linkify.WEB_URLS)
 
 
             val profileImageReference = mStorageReference.child("images/users/" + miniUser.userId)
@@ -210,19 +213,35 @@ class EventDetailActivity : AppCompatActivity(), EventDetailPresenter.EventDetai
                         .resize(148, 148)
                         .centerCrop()
                         .transform(CircleTransform())
-                        .into(userThumb)
+                        .into(viewHolder.userThumb)
             }.addOnFailureListener {
                 // Handle any errors
-                userThumb.setImageDrawable(mContext.getDrawable(R.drawable.ic_profile_black_24dp))
+                viewHolder.userThumb.setImageDrawable(mContext.getDrawable(R.drawable.ic_profile_black_24dp))
             }
 
-            rowView.setOnClickListener {
+            viewHolder.rowView.setOnClickListener {
                 val intent = Intent(mContext, UserDetailActivity::class.java)
                 intent.putExtra("userId", miniUser.userId)
                 mContext.startActivity(intent)
             }
+        }
 
-            return rowView
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
+
+        override fun getItemCount(): Int {
+            return invitedUsers.size
+        }
+
+
+        inner class InviteeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            val rowView = itemView.search_result_card_users
+            val userThumb = rowView.item_event_detail_userthumb
+            val userName = rowView.item_event_detail_username
+            val cityState = rowView.item_event_detail_citystate
+            val userUrl = rowView.item_event_detail_url
+            val attendingStatusTextView = rowView.item_event_detail_attending_textview
         }
     }
 }

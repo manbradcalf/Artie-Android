@@ -9,7 +9,7 @@ import java.util.*
 
 class ContactsFragmentPresenter(private val presenterListener: ContactsPresenterListener) : BasePresenter {
 
-    private val contactsRepository: ContactsRepository = MainActivity.getContactsRepo()
+    private val contactsRepository: ContactsRepository = MainActivity.contactsRepo
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
     private var userId: String? = null
 

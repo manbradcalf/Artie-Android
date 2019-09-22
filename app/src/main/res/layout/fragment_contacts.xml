@@ -6,13 +6,13 @@
     android:layout_height="match_parent"
     tools:context="com.bookyrself.bookyrself.views.ContactsFragment">
 
-    <android.support.design.widget.AppBarLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_contacts_fragment"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -21,7 +21,7 @@
             app:titleTextColor="@color/colorAccentLight" />
 
 
-    </android.support.design.widget.AppBarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <ProgressBar
         android:id="@+id/contacts_fragment_progressbar"
@@ -37,7 +37,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/contacts_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

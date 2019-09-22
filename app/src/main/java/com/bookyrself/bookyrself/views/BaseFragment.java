@@ -12,4 +12,8 @@ interface BaseFragment {
 
     void hideEmptyState();
 
+    void presentError(String message);
+
+    void showSignedOutEmptyState();
+
 }
