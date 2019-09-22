@@ -25,6 +25,7 @@ class EventsFragmentViewModel : ViewModel() {
     init {
         if (FirebaseAuth.getInstance().uid != null) {
             userId = FirebaseAuth.getInstance().uid
+            //TODO: Why do I have to !! here if i'm null checking above
             loadUsersEventInfo(userId!!)
         } else {
             signedOutMessage.value = "Sign in to see your events!"
