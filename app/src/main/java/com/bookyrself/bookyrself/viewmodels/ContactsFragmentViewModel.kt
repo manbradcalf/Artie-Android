@@ -15,14 +15,14 @@ import kotlinx.coroutines.withContext
 class ContactsFragmentViewModel : ViewModel() {
     var contactsHashMap = MutableLiveData<HashMap<User, String>>()
     var errorMessage = MutableLiveData<String>()
-    var signedOutMessage = MutableLiveData<String>()
+    var authState = MutableLiveData<Boolean>()
 
     init {
         if (FirebaseAuth.getInstance().uid != null) {
             //TODO: Why do I have to !! here if i'm null checking above
             loadContacts(FirebaseAuth.getInstance().uid!!)
         }
-
+        authState.value = FirebaseAuth.getInstance().uid != null
     }
 
     private fun loadContacts(userId: String) {
@@ -37,13 +37,20 @@ class ContactsFragmentViewModel : ViewModel() {
                     val contactsUserInfoResponse =
                             FirebaseServiceCoroutines.instance.getUserDetails(contactId)
                     withContext(Dispatchers.Main) {
-                        if (contactsUserInfoResponse.isSuccessful && contactsUserInfoResponse.body() != null) {
-                            contacts[contactsUserInfoResponse.body()!!] = contactId
-                            contactsHashMap.value = contacts
-                        } else if (contactsUserInfoResponse.isSuccessful && contactsUserInfoResponse.body() == null) {
-                            Log.e("ContactsViewModel", "No data for userId $contactId")
-                        } else {
-                            errorMessage.value = contactsUserInfoResponse.message()
+                        if (contactsUserInfoResponse.isSuccessful) {
+                            when {
+                                // User has contacts
+                                contactsUserInfoResponse.body() != null -> {
+                                    contacts[contactsUserInfoResponse.body()!!] = contactId
+                                    contactsHashMap.value = contacts
+                                }
+                                // User does not have contacts
+                                contactsUserInfoResponse.body() == null -> {
+                                    Log.e("ContactsViewModel", "No data for userId $contactId")
+                                    contactsHashMap.value = contacts
+                                }
+                                else -> errorMessage.value = contactsUserInfoResponse.message()
+                            }
                         }
                     }
                 }
