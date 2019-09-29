@@ -23,7 +23,6 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.empty_state_template.*
 import kotlinx.android.synthetic.main.fragment_contacts.*
 import kotlinx.android.synthetic.main.item_user_search_result.view.*
-import java.util.*
 
 class ContactsFragment : Fragment(), BaseFragment {
     var storageReference = FirebaseStorage.getInstance().reference
@@ -40,18 +39,21 @@ class ContactsFragment : Fragment(), BaseFragment {
     }
 
     override fun onResume() {
-        initView()
-        initData()
+        init()
         super.onResume()
     }
 
-    private fun initData() {
+    private fun init() {
+        // Set up initial view
+        toolbar_contacts_fragment.setTitle(R.string.contacts_toolbar)
+        showLoadingState(true)
+
+        // create and observe the view model
         model = ViewModelProviders.of(this,
                 ContactsFragmentViewModel.ContactsFragmentViewModelFactory())
                 .get(ContactsFragmentViewModel::class.java)
 
         model.contactsHashMap.observe(this) {
-
             // Now we have data so lets fire up the adapter
             adapter = ContactsAdapter()
             contacts_recyclerview.adapter = adapter
@@ -64,13 +66,15 @@ class ContactsFragment : Fragment(), BaseFragment {
             //TODO: Double check this data conversion here
             contacts = it.keys.asSequence().toList()
             contactsMap = it
-            adapter?.notifyDataSetChanged()
+            adapter.notifyDataSetChanged()
         }
-    }
 
-    private fun initView() {
-        toolbar_contacts_fragment.setTitle(R.string.contacts_toolbar)
-        showLoadingState(true)
+        model.authState.observe(this) { userIsSignedIn ->
+            if (!userIsSignedIn) {
+                showLoadingState(false)
+                showSignedOutEmptyState()
+            }
+        }
     }
 
     override fun showLoadingState(show: Boolean) {
@@ -85,18 +89,18 @@ class ContactsFragment : Fragment(), BaseFragment {
     override fun showEmptyState(header: String, subHeader: String, buttonText: String, image: Drawable?) {
         showContent(false)
         showLoadingState(false)
-        empty_state_view.visibility = View.VISIBLE
-        empty_state_image.visibility = View.VISIBLE
-        empty_state_text_header.visibility = View.VISIBLE
-        empty_state_text_subheader.visibility = View.VISIBLE
+        empty_state_view?.visibility = View.VISIBLE
+        empty_state_image?.visibility = View.VISIBLE
+        empty_state_text_header?.visibility = View.VISIBLE
+        empty_state_text_subheader?.visibility = View.VISIBLE
 
-        empty_state_text_header.text = header
-        empty_state_text_subheader.text = subHeader
-        empty_state_image.setImageDrawable(image)
+        empty_state_text_header?.text = header
+        empty_state_text_subheader?.text = subHeader
+        empty_state_image?.setImageDrawable(image)
         if (buttonText != "") {
-            empty_state_button.visibility = View.VISIBLE
-            empty_state_button.text = buttonText
-            empty_state_button.setOnClickListener { view ->
+            empty_state_button?.visibility = View.VISIBLE
+            empty_state_button?.text = buttonText
+            empty_state_button?.setOnClickListener { view ->
                 val providers = listOf(AuthUI.IdpConfig.GoogleBuilder().build(),
                         AuthUI.IdpConfig.EmailBuilder().build())
                 // Authenticate
@@ -109,7 +113,7 @@ class ContactsFragment : Fragment(), BaseFragment {
                         RC_SIGN_IN)
             }
         } else {
-            empty_state_button.visibility = View.GONE
+            empty_state_button?.visibility = View.GONE
         }
     }
 
