@@ -84,6 +84,5 @@ object FirebaseService {
         fun setDateUnavailableForUser(@Body unavailable: Boolean?, @Path("userId") userId: String,
                                       @Path("date") date: String): Flowable<Boolean>
 
-
     }
 }
