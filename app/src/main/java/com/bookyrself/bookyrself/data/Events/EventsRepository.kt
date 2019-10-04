@@ -127,7 +127,7 @@ class EventsRepository(context: Context) : EventDataSource {
                     .observeOn(AndroidSchedulers.mainThread())
                     .map<Set<Map.Entry<String, EventInviteInfo>>> { it.entries }
                     .flatMapIterable { entries -> entries }
-                    .filter { entry -> isInvitePendingResponse(entry) }
+                    .filter { entry -> !isInvitePendingResponse(entry) }
 
                     // Now check if the list of pending invites is empty
                     .firstOrError()
@@ -197,14 +197,5 @@ class EventsRepository(context: Context) : EventDataSource {
                                 eventsWithPendingInvites.remove(eventId)
                             }
                 }
-    }
-
-    private fun isInvitePendingResponse(eventInvite: Map.Entry<String, EventInviteInfo>?): Boolean {
-        // All fields are false by default, so if all fields remain false,
-        // because every interaction flips a flag to true,
-        // it means the user hasn't interacted at all with the invite so the invite is pending
-        return ((!eventInvite?.value?.isInviteAccepted!!)
-                && (!eventInvite.value.isInviteRejected!!)
-                && (!eventInvite.value.isHost!!))
     }
 }
