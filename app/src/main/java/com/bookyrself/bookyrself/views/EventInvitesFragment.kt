@@ -5,97 +5,66 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
-import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.presenters.EventInvitesFragmentPresenter
+import com.bookyrself.bookyrself.viewmodels.ContactsFragmentViewModel
+import com.bookyrself.bookyrself.viewmodels.EventInvitesFragmentViewModel
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
-
-import java.text.DateFormat
+import kotlinx.android.synthetic.main.empty_state_template.*
+import kotlinx.android.synthetic.main.fragment_event_invites.*
+import kotlinx.android.synthetic.main.item_event_invite.view.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.AbstractMap
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.Date
-import java.util.Locale
-
-import butterknife.BindView
-import butterknife.ButterKnife
+import java.util.*
 
 
 class EventInvitesFragment : Fragment(), BaseFragment, EventInvitesFragmentPresenter.EventInvitesViewListener {
-
-    @BindView(R.id.event_invites_progress_bar)
-    internal var progressBar: ProgressBar? = null
-    @BindView(R.id.event_invites_recycler_view)
-    internal var recyclerView: RecyclerView? = null
-    @BindView(R.id.toolbar_event_invites_fragment)
-    internal var toolbar: Toolbar? = null
-    @BindView(R.id.event_invites_empty_state)
-    internal var emptyState: View? = null
-    @BindView(R.id.empty_state_text_header)
-    internal var emptyStateTextHeader: TextView? = null
-    @BindView(R.id.empty_state_image)
-    internal var emptyStateImage: ImageView? = null
-    @BindView(R.id.empty_state_text_subheader)
-    internal var emptyStateTextSubHeader: TextView? = null
-    @BindView(R.id.empty_state_button)
-    internal var emptyStateButton: Button? = null
-
-
     private var layoutManager: RecyclerView.LayoutManager? = null
     private var adapter: EventsAdapter? = null
-    private var events: MutableList<Entry<String, EventDetail>>? = null
-    private var presenter: EventInvitesFragmentPresenter? = null
+    private var events: MutableList<Map.Entry<String, EventDetail>>? = null
+    lateinit var model : EventInvitesFragmentViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        presenter = EventInvitesFragmentPresenter(this, context!!)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-
-        val view = inflater.inflate(R.layout.fragment_event_invites, container, false)
-        ButterKnife.bind(this, view)
-        events = ArrayList<Entry<String, EventDetail>>()
-        adapter = EventsAdapter()
-        layoutManager = LinearLayoutManager(activity)
-        recyclerView!!.layoutManager = layoutManager
-        recyclerView!!.adapter = adapter
-        toolbar!!.setTitle(R.string.title_event_invites)
-        hideEmptyState()
-        showLoadingState(true)
-
-        return view
+        return inflater.inflate(R.layout.fragment_event_invites, container, false)
     }
 
     override fun onResume() {
+        init()
         super.onResume()
-        presenter!!.subscribe()
     }
 
-    override fun onPause() {
-        super.onPause()
-        presenter!!.unsubscribe()
+    private fun init() {
+
+        // create and observe the view model
+        model = ViewModelProviders.of(this,
+                ContactsFragmentViewModel.ContactsFragmentViewModelFactory())
+                .get(EventInvitesFragmentViewModel::class.java)
+
+        events = ArrayList()
+        adapter = EventsAdapter()
+        layoutManager = LinearLayoutManager(activity)
+        event_invites_recycler_view?.layoutManager = layoutManager
+        event_invites_recycler_view?.adapter = adapter
+        toolbar_event_invites_fragment?.setTitle(R.string.title_event_invites)
+        hideEmptyState()
+        showLoadingState(true)
     }
 
     override fun eventPendingInvitationResponseReturned(eventId: String, event: EventDetail) {
         showLoadingState(false)
-        events!!.add(AbstractMap.SimpleEntry(eventId, event))
-        adapter!!.notifyDataSetChanged()
+        events?.add(AbstractMap.SimpleEntry(eventId, event))
+        adapter?.notifyDataSetChanged()
         showContent(true)
     }
 
@@ -126,18 +95,18 @@ class EventInvitesFragment : Fragment(), BaseFragment, EventInvitesFragmentPrese
 
     override fun showContent(show: Boolean) {
         if (show) {
-            recyclerView!!.visibility = View.VISIBLE
+            event_invites_recycler_view.visibility = View.VISIBLE
         } else {
-            recyclerView!!.visibility = View.GONE
+            event_invites_recycler_view.visibility = View.GONE
         }
 
     }
 
     override fun showLoadingState(show: Boolean) {
         if (show) {
-            progressBar!!.visibility = View.VISIBLE
+            event_invites_progress_bar.visibility = View.VISIBLE
         } else {
-            progressBar!!.visibility = View.GONE
+            event_invites_progress_bar.visibility = View.GONE
         }
     }
 
@@ -145,18 +114,17 @@ class EventInvitesFragment : Fragment(), BaseFragment, EventInvitesFragmentPrese
 
         showContent(false)
         showLoadingState(false)
-
-        emptyState!!.visibility = View.VISIBLE
-        emptyStateTextHeader!!.visibility = View.VISIBLE
-        emptyStateTextSubHeader!!.visibility = View.VISIBLE
-        emptyStateImage!!.visibility = View.VISIBLE
-        emptyStateTextHeader!!.text = header
-        emptyStateTextSubHeader!!.text = subHeader
-        emptyStateImage!!.setImageDrawable(image)
+        event_invites_empty_state?.visibility = View.VISIBLE
+        empty_state_text_header?.visibility = View.VISIBLE
+        empty_state_text_subheader?.visibility = View.VISIBLE
+        empty_state_image?.visibility = View.VISIBLE
+        empty_state_text_header?.text = header
+        empty_state_text_subheader?.text = subHeader
+        empty_state_image?.setImageDrawable(image)
         if (buttonText != "") {
-            emptyStateButton!!.visibility = View.VISIBLE
-            emptyStateButton!!.text = buttonText
-            emptyStateButton!!.setOnClickListener { view ->
+            empty_state_button?.visibility = View.VISIBLE
+            empty_state_button?.text = buttonText
+            empty_state_button?.setOnClickListener { view ->
                 val providers = Arrays.asList(AuthUI.IdpConfig.GoogleBuilder().build(),
                         AuthUI.IdpConfig.EmailBuilder().build())
                 // Authenticate
@@ -169,16 +137,16 @@ class EventInvitesFragment : Fragment(), BaseFragment, EventInvitesFragmentPrese
                         RC_SIGN_IN)
             }
         } else {
-            emptyStateButton!!.visibility = View.GONE
+            empty_state_button?.visibility = View.GONE
         }
     }
 
     override fun hideEmptyState() {
-        emptyStateButton!!.visibility = View.GONE
-        emptyState!!.visibility = View.GONE
-        emptyStateImage!!.visibility = View.GONE
-        emptyStateTextHeader!!.visibility = View.GONE
-        emptyStateTextSubHeader!!.visibility = View.GONE
+        empty_state_button?.visibility = View.GONE
+        event_invites_empty_state?.visibility = View.GONE
+        empty_state_image?.visibility = View.GONE
+        empty_state_text_header?.visibility = View.GONE
+        empty_state_text_subheader?.visibility = View.GONE
     }
 
     override fun showSignedOutEmptyState() {
@@ -194,40 +162,12 @@ class EventInvitesFragment : Fragment(), BaseFragment, EventInvitesFragmentPrese
     internal inner class EventsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-
             val view = layoutInflater.inflate(R.layout.item_event_invite, parent, false)
             return ViewHolderEvents(view)
-
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
-            val viewHolderEvents = holder as ViewHolderEvents
-            val eventDetail = events!![position].value
-            viewHolderEvents.eventNameTextView!!.setText(eventDetail.getEventname())
-            viewHolderEvents.eventLocationTextView!!.setText(eventDetail.getCitystate())
-            val inputformat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-
-            try {
-                val date = inputformat.parse(eventDetail.getDate())
-                val outputFormat = SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US)
-                val formattedDate = outputFormat.format(date)
-                viewHolderEvents.eventDateTextView!!.text = formattedDate
-            } catch (e: ParseException) {
-                e.printStackTrace()
-            }
-
-            viewHolderEvents.acceptButton!!.setOnClickListener { view ->
-                presenter!!.acceptEventInvite(FirebaseAuth.getInstance().uid!!,
-                        events!![position].key,
-                        events!![position].value)
-            }
-
-            viewHolderEvents.denyButton!!.setOnClickListener { view ->
-                presenter!!.rejectEventInvite(FirebaseAuth.getInstance().uid!!,
-                        events!![position].key,
-                        events!![position].value)
-            }
         }
 
         override fun getItemCount(): Int {
@@ -235,23 +175,39 @@ class EventInvitesFragment : Fragment(), BaseFragment, EventInvitesFragmentPrese
         }
 
         internal inner class ViewHolderEvents(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            @BindView(R.id.event_item_invite_card)
-            var eventCard: CardView? = null
-            @BindView(R.id.event_item_invite_line1)
-            var eventNameTextView: TextView? = null
-            @BindView(R.id.event_item_invite_line3)
-            var eventDateTextView: TextView? = null
-            @BindView(R.id.event_item_invite_line2)
-            var eventLocationTextView: TextView? = null
-            @BindView(R.id.event_item_invite_image)
-            var eventImageThumbnail: ImageView? = null
-            @BindView(R.id.event_item_invite_accept_button)
-            var acceptButton: Button? = null
-            @BindView(R.id.event_item_invite_deny_button)
-            var denyButton: Button? = null
+            fun bind(item: EventDetail, position: Int) = with(itemView) {
+                val eventCard = this.event_item_invite_card
+                val eventNameTextView = this.event_item_invite_line1
+                val eventLocationTextView = this.event_item_invite_line2
+                val eventDateTextView = this.event_item_invite_line3
+                val eventImageThumbnail = this.event_item_invite_image
+                val acceptButton = this.event_item_invite_accept_button
+                val denyButton = this.event_item_invite_deny_button
 
-            init {
-                ButterKnife.bind(this, itemView)
+
+                val eventDetail = events!![position].value
+                eventNameTextView?.text = eventDetail.eventname
+                eventLocationTextView?.text = eventDetail.citystate
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+
+                try {
+                    val date = inputFormat.parse(eventDetail.date)
+                    val outputFormat = SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US)
+                    val formattedDate = outputFormat.format(date)
+                    eventDateTextView?.text = formattedDate
+                } catch (e: ParseException) {
+                    e.printStackTrace()
+                }
+
+                acceptButton?.setOnClickListener {
+                    model.acceptInvite(true,
+                            FirebaseAuth.getInstance().uid!!,
+                            events!![position])
+                }
+
+                denyButton?.setOnClickListener {
+
+                }
             }
         }
     }
