@@ -69,7 +69,7 @@ class ContactsFragment : Fragment(), BaseFragment {
             adapter.notifyDataSetChanged()
         }
 
-        model.authState.observe(this) { userIsSignedIn ->
+        model.isSignedIn.observe(this) { userIsSignedIn ->
             if (!userIsSignedIn) {
                 showLoadingState(false)
                 showSignedOutEmptyState()
@@ -179,8 +179,9 @@ class ContactsFragment : Fragment(), BaseFragment {
 
         inner class ViewHolderContacts(itemView: View) : RecyclerView.ViewHolder(itemView) {
             fun bind(item: User, position: Int) = with(itemView) {
+                val contact = contacts[position]
                 val contactUserName = this.username_search_result
-                val contactPhoto = this.user_image_search_result
+                val contactImageThumbnail = this.user_image_search_result
                 val contactTags = this.user_tag_search_result
                 val contactCityState = this.user_citystate_search_result
 
@@ -195,7 +196,8 @@ class ContactsFragment : Fragment(), BaseFragment {
                     contactTags.text = listString.toString().replace(", $".toRegex(), "")
                 }
 
-                val profileImageReference = storageReference!!.child("/images/users/" + contactsMap!![contacts!![position]]!!)
+                val profileImageReference =
+                        storageReference.child("/images/users/" + contactsMap[contact])
                 profileImageReference.downloadUrl.addOnSuccessListener { uri ->
                     Picasso.with(activity)
                             .load(uri)
@@ -203,11 +205,11 @@ class ContactsFragment : Fragment(), BaseFragment {
                             .error(R.drawable.round)
                             .transform(CircleTransform())
                             .resize(100, 100)
-                            .into(contactPhoto)
+                            .into(contactImageThumbnail)
                 }.addOnFailureListener {
                     // Handle any errors
                     Log.e("ContactsFragment", "user image not downloaded")
-                    contactPhoto.setImageDrawable(context!!.getDrawable(R.drawable.ic_profile_black_24dp))
+                    contactImageThumbnail.setImageDrawable(context!!.getDrawable(R.drawable.ic_profile_black_24dp))
                 }
 
                 itemView.setOnClickListener {

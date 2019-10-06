@@ -15,18 +15,18 @@ import kotlinx.coroutines.withContext
 class ContactsFragmentViewModel : ViewModel() {
     var contactsHashMap = MutableLiveData<HashMap<User, String>>()
     var errorMessage = MutableLiveData<String>()
-    var authState = MutableLiveData<Boolean>()
+    var isSignedIn = MutableLiveData<Boolean>()
 
     init {
-        if (FirebaseAuth.getInstance().uid != null) {
+        isSignedIn.value = FirebaseAuth.getInstance().uid != null
+
+        if (isSignedIn.value == true) {
             //TODO: Why do I have to !! here if i'm null checking above
             loadContacts(FirebaseAuth.getInstance().uid!!)
         }
-        authState.value = FirebaseAuth.getInstance().uid != null
     }
 
     private fun loadContacts(userId: String) {
-        val contacts = HashMap<User, String>()
 
         //TODO: Logic copied from eventfragmentviewmodel, I should generesize?
         CoroutineScope(Dispatchers.IO).launch {
@@ -41,13 +41,11 @@ class ContactsFragmentViewModel : ViewModel() {
                             when {
                                 // User has contacts
                                 contactsUserInfoResponse.body() != null -> {
-                                    contacts[contactsUserInfoResponse.body()!!] = contactId
-                                    contactsHashMap.value = contacts
+                                    contactsHashMap.value?.set(contactsUserInfoResponse.body()!!, contactId)
                                 }
                                 // User does not have contacts
                                 contactsUserInfoResponse.body() == null -> {
                                     Log.e("ContactsViewModel", "No data for userId $contactId")
-                                    contactsHashMap.value = contacts
                                 }
                                 else -> errorMessage.value = contactsUserInfoResponse.message()
                             }
@@ -60,7 +58,6 @@ class ContactsFragmentViewModel : ViewModel() {
 
     //TODO: Genericize this?
     class ContactsFragmentViewModelFactory : ViewModelProvider.Factory {
-
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return ContactsFragmentViewModel() as T
         }

@@ -6,13 +6,24 @@ import androidx.lifecycle.ViewModelProvider
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.ServerModels.User.EventInviteInfo
 import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class EventInvitesFragmentViewModel : ViewModel() {
-    var eventInvites = MutableLiveData<HashMap<EventInviteInfo, String>>()
+    var eventsWithPendingInvites = MutableLiveData<HashMap<EventDetail, String>>()
+    var isSignedIn = MutableLiveData<Boolean>()
+
+    init {
+        isSignedIn.value = FirebaseAuth.getInstance().uid != null
+
+        if (isSignedIn.value == true) {
+            //TODO: Why do I have to !! here if i'm null checking above
+            loadPendingInvites(FirebaseAuth.getInstance().uid!!)
+        }
+    }
 
     fun acceptInvite(eventId: String) {
 
@@ -22,22 +33,35 @@ class EventInvitesFragmentViewModel : ViewModel() {
 
     }
 
-    fun loadPendingInvites(userId: String) {
-        val pendingEventInvites = HashMap<EventInviteInfo, String>()
+    private fun loadPendingInvites(userId: String) {
+        val eventIdsOfPendingEvents = mutableListOf<String>()
+        val eventsOfPendingInvitesHashMap = HashMap<EventDetail, String>()
 
         CoroutineScope(Dispatchers.IO).launch {
             val eventInvitesResponse =
                     FirebaseServiceCoroutines.instance.getUsersEventInvites(userId)
+
             if (eventInvitesResponse.isSuccessful) {
+                // Get all the event invites and grab only pending invites
                 withContext(Dispatchers.Main) {
                     eventInvitesResponse.body()?.forEach { entry ->
                         if (isInvitePendingResponse(entry)) {
-                            // InviteInfo is the key for eventInvites live data because intent creation in recyclerview
-                            // in fragment
-                            pendingEventInvites[entry.value] = entry.key
+                            // InviteInfo is the key for eventInvites live data because intent creation in recyclerview in fragment
+                            eventIdsOfPendingEvents.add(entry.key)
                         }
                     }
 
+                    // Now get all the pending invite details
+                    for (eventId in eventIdsOfPendingEvents) {
+                        val eventWithPendingInviteResponse =
+                                FirebaseServiceCoroutines.instance.getEventData(eventId)
+                        if (eventWithPendingInviteResponse.body() != null) {
+                            // update function local EventDetail, EventId hashmap
+                            eventsOfPendingInvitesHashMap[eventWithPendingInviteResponse.body()!!] = eventId
+                            // set LiveData value to local hashmap
+                            eventsWithPendingInvites.value = eventsOfPendingInvitesHashMap
+                        }
+                    }
                 }
             }
         }
@@ -58,7 +82,6 @@ class EventInvitesFragmentViewModel : ViewModel() {
 
     //TODO: Genericize this?
     class EventInvitesFragmentViewModelFactory : ViewModelProvider.Factory {
-
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return EventInvitesFragmentViewModel() as T
         }
