@@ -14,7 +14,13 @@ import kotlinx.coroutines.withContext
 
 class EventInvitesFragmentViewModel : ViewModel() {
     var eventsWithPendingInvites = MutableLiveData<HashMap<EventDetail, String>>()
+    var noEventswithPendingInvitesReturned = MutableLiveData<Boolean>()
     var isSignedIn = MutableLiveData<Boolean>()
+    val userId = FirebaseAuth.getInstance().uid
+
+    // TODO: I really hate having to manage all these different hashmaps and lists
+    private val eventIdsOfPendingEvents = mutableListOf<String>()
+    private val eventsOfPendingInvitesHashMap = HashMap<EventDetail, String>()
 
     init {
         isSignedIn.value = FirebaseAuth.getInstance().uid != null
@@ -22,21 +28,41 @@ class EventInvitesFragmentViewModel : ViewModel() {
         if (isSignedIn.value == true) {
             //TODO: Why do I have to !! here if i'm null checking above
             loadPendingInvites(FirebaseAuth.getInstance().uid!!)
+
         }
     }
 
-    fun acceptInvite(eventId: String) {
-
-    }
-
-    fun rejectInvite(eventId: String) {
-
+    fun respondToInvite(accepted: Boolean, eventId: String, eventDetail: EventDetail) {
+        when (accepted) {
+            true -> {
+                CoroutineScope(Dispatchers.IO).launch {
+                    val acceptInviteResponse = FirebaseServiceCoroutines.instance.acceptInvite(true, userId!!, eventId)
+                    if (acceptInviteResponse.isSuccessful) {
+                        // TODO: Also need to update the event node
+                        withContext(Dispatchers.Main) {
+                            // TODO: I really hate having to manage all these different hashmaps and lists
+                            eventsOfPendingInvitesHashMap.remove(eventDetail)
+                            eventsWithPendingInvites.value = eventsOfPendingInvitesHashMap
+                        }
+                    }
+                }
+            }
+            false -> {
+                CoroutineScope(Dispatchers.IO).launch {
+                    val rejectInviteResponse = FirebaseServiceCoroutines.instance.rejectInvite(true, userId!!, eventId)
+                    if (rejectInviteResponse.isSuccessful) {
+                        withContext(Dispatchers.Main) {
+                            // TODO: I really hate having to manage all these different hashmaps and lists
+                            eventsOfPendingInvitesHashMap.remove(eventDetail)
+                            eventsWithPendingInvites.value = eventsOfPendingInvitesHashMap
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun loadPendingInvites(userId: String) {
-        val eventIdsOfPendingEvents = mutableListOf<String>()
-        val eventsOfPendingInvitesHashMap = HashMap<EventDetail, String>()
-
         CoroutineScope(Dispatchers.IO).launch {
             val eventInvitesResponse =
                     FirebaseServiceCoroutines.instance.getUsersEventInvites(userId)
@@ -46,21 +72,24 @@ class EventInvitesFragmentViewModel : ViewModel() {
                 withContext(Dispatchers.Main) {
                     eventInvitesResponse.body()?.forEach { entry ->
                         if (isInvitePendingResponse(entry)) {
-                            // InviteInfo is the key for eventInvites live data because intent creation in recyclerview in fragment
                             eventIdsOfPendingEvents.add(entry.key)
                         }
                     }
-
-                    // Now get all the pending invite details
-                    for (eventId in eventIdsOfPendingEvents) {
-                        val eventWithPendingInviteResponse =
-                                FirebaseServiceCoroutines.instance.getEventData(eventId)
-                        if (eventWithPendingInviteResponse.body() != null) {
-                            // update function local EventDetail, EventId hashmap
-                            eventsOfPendingInvitesHashMap[eventWithPendingInviteResponse.body()!!] = eventId
-                            // set LiveData value to local hashmap
-                            eventsWithPendingInvites.value = eventsOfPendingInvitesHashMap
+                    if (eventIdsOfPendingEvents.isNotEmpty()) {
+                        // Now get all the pending invite details
+                        for (eventId in eventIdsOfPendingEvents) {
+                            val eventWithPendingInviteResponse =
+                                    FirebaseServiceCoroutines.instance.getEventData(eventId)
+                            if (eventWithPendingInviteResponse.body() != null) {
+                                // TODO: I really hate having to manage all these different hashmaps and lists
+                                // update function local EventDetail, EventId hashmap
+                                eventsOfPendingInvitesHashMap[eventWithPendingInviteResponse.body()!!] = eventId
+                                // set LiveData value to local hashmap
+                                eventsWithPendingInvites.value = eventsOfPendingInvitesHashMap
+                            }
                         }
+                    } else {
+                        noEventswithPendingInvitesReturned.value = true
                     }
                 }
             }
@@ -76,9 +105,6 @@ class EventInvitesFragmentViewModel : ViewModel() {
                 && (!eventInvite.value.isHost!!))
     }
 
-    fun acceptInvite(accepted: Boolean, userId: String, eventInvite: Map.Entry<String, EventDetail>) {
-
-    }
 
     //TODO: Genericize this?
     class EventInvitesFragmentViewModelFactory : ViewModelProvider.Factory {

@@ -173,48 +173,48 @@ class ContactsFragment : Fragment(), BaseFragment {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderContacts =
                 ViewHolderContacts(LayoutInflater.from(parent.context).inflate(R.layout.item_user_search_result, parent, false))
 
-        override fun onBindViewHolder(holder: ViewHolderContacts, position: Int) = holder.bind(contacts[position], position)
+        override fun onBindViewHolder(holder: ViewHolderContacts, position: Int) = holder.bind(contacts[position])
 
         override fun getItemCount() = contacts.size
 
         inner class ViewHolderContacts(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            fun bind(item: User, position: Int) = with(itemView) {
-                val contact = contacts[position]
-                val contactUserName = this.username_search_result
+            fun bind(contact: User) = with(itemView) {
+                val contactId = contactsMap[contact]
+
+                val contactUserNameTextView = this.username_search_result
                 val contactImageThumbnail = this.user_image_search_result
-                val contactTags = this.user_tag_search_result
-                val contactCityState = this.user_citystate_search_result
+                val contactTagsTextView = this.user_tag_search_result
+                val contactCityStateTextView = this.user_citystate_search_result
 
-                contactUserName.text = item.username
-                contactCityState.text = item.citystate
+                contactUserNameTextView.text = contact.username
+                contactCityStateTextView.text = contact.citystate
 
-                if (item.tags != null) {
+                if (contact.tags != null) {
                     val listString = StringBuilder()
-                    for (s in item.tags!!) {
+                    for (s in contact.tags!!) {
                         listString.append("$s, ")
                     }
-                    contactTags.text = listString.toString().replace(", $".toRegex(), "")
+                    contactTagsTextView.text = listString.toString().replace(", $".toRegex(), "")
                 }
 
-                val profileImageReference =
-                        storageReference.child("/images/users/" + contactsMap[contact])
-                profileImageReference.downloadUrl.addOnSuccessListener { uri ->
-                    Picasso.with(activity)
-                            .load(uri)
-                            .placeholder(R.drawable.round)
-                            .error(R.drawable.round)
-                            .transform(CircleTransform())
-                            .resize(100, 100)
-                            .into(contactImageThumbnail)
-                }.addOnFailureListener {
-                    // Handle any errors
-                    Log.e("ContactsFragment", "user image not downloaded")
-                    contactImageThumbnail.setImageDrawable(context!!.getDrawable(R.drawable.ic_profile_black_24dp))
-                }
+                storageReference.child("/images/users/$contactId").downloadUrl
+                        .addOnSuccessListener { uri ->
+                            Picasso.with(activity)
+                                    .load(uri)
+                                    .placeholder(R.drawable.round)
+                                    .error(R.drawable.round)
+                                    .transform(CircleTransform())
+                                    .resize(100, 100)
+                                    .into(contactImageThumbnail)
+                        }.addOnFailureListener {
+                            // Handle any errors
+                            Log.e("ContactsFragment", "contact image not downloaded")
+                            contactImageThumbnail.setImageDrawable(context!!.getDrawable(R.drawable.ic_profile_black_24dp))
+                        }
 
                 itemView.setOnClickListener {
                     val intent = Intent(activity, UserDetailActivity::class.java)
-                    intent.putExtra("userId", contactsMap[contacts[position]])
+                    intent.putExtra("userId", contactId)
                     startActivity(intent)
                 }
             }

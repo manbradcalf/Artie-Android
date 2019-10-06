@@ -71,24 +71,15 @@ class EventInvitesFragment : Fragment(), BaseFragment {
             eventInvitesHashMap = it
             adapter.notifyDataSetChanged()
         }
+
+        model.noEventswithPendingInvitesReturned.observe(this) {
+            showEmptyStateForNoInvites()
+        }
     }
 
     override fun presentError(message: String) {
         showLoadingState(false)
         showEmptyState(getString(R.string.error_header), message, "", activity!!.getDrawable(R.drawable.ic_error_empty_state))
-    }
-
-
-    fun removeEventFromList(eventId: String, eventDetail: EventDetail) {
-
-        val entry = AbstractMap.SimpleEntry(eventId, eventDetail)
-        eventInvitesHashMap.remove(eventDetail)
-
-        adapter.notifyDataSetChanged()
-
-        if (events.isEmpty()) {
-            showEmptyStateForNoInvites()
-        }
     }
 
     fun showEmptyStateForNoInvites() {
@@ -169,16 +160,16 @@ class EventInvitesFragment : Fragment(), BaseFragment {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderEvents =
                 ViewHolderEvents(LayoutInflater.from(parent.context).inflate(R.layout.item_event_invite, parent, false))
 
-        override fun onBindViewHolder(holder: ViewHolderEvents, position: Int) = holder.bind(events[position], position)
+        override fun onBindViewHolder(holder: ViewHolderEvents, position: Int) = holder.bind(events[position])
 
         override fun getItemCount(): Int {
             return events.size
         }
 
         inner class ViewHolderEvents(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            fun bind(eventDetail: EventDetail) = with(itemView) {
+                val eventId = eventInvitesHashMap[eventDetail]!!
 
-            fun bind(item: EventDetail, position: Int) = with(itemView) {
-                val eventCard = this.event_item_invite_card
                 val eventNameTextView = this.event_item_invite_line1
                 val eventLocationTextView = this.event_item_invite_line2
                 val eventDateTextView = this.event_item_invite_line3
@@ -186,7 +177,7 @@ class EventInvitesFragment : Fragment(), BaseFragment {
                 val acceptButton = this.event_item_invite_accept_button
                 val denyButton = this.event_item_invite_deny_button
 
-                val eventDetail = events[position]
+
                 eventNameTextView?.text = eventDetail.eventname
                 eventLocationTextView?.text = eventDetail.citystate
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
@@ -200,25 +191,31 @@ class EventInvitesFragment : Fragment(), BaseFragment {
                     e.printStackTrace()
                 }
 
-                val eventImageReference = storageReference.child(
-                        "/images/events/" + eventInvitesHashMap[eventDetail])
-                eventImageReference.downloadUrl.addOnSuccessListener { uri ->
-                    Picasso.with(activity)
-                            .load(uri)
-                            .placeholder(R.drawable.round)
-                            .error(R.drawable.round)
-                            .transform(CircleTransform())
-                            .resize(100, 100)
-                            .into(eventImageThumbnail)
+                storageReference.child("/images/events/$eventId").downloadUrl
+                        .addOnSuccessListener { uri ->
+                            Picasso.with(activity)
+                                    .load(uri)
+                                    .placeholder(R.drawable.round)
+                                    .error(R.drawable.round)
+                                    .transform(CircleTransform())
+                                    .resize(100, 100)
+                                    .into(eventImageThumbnail)
+                        }.addOnFailureListener {
+                            Log.e("EventInvitesFragment", "Event image not downloaded")
+                            eventImageThumbnail.setImageDrawable(context!!.getDrawable(R.drawable.ic_calendar))
+                        }
 
-                }.addOnFailureListener {
-                    Log.e("EventInvitesFragment", "Event image not downloaded")
-                    eventImageThumbnail.setImageDrawable(context!!.getDrawable(R.drawable.ic_calendar))
+                acceptButton.setOnClickListener {
+                    model.respondToInvite(true, eventId, eventDetail)
+                }
+
+                denyButton.setOnClickListener {
+                    model.respondToInvite(false, eventId, eventDetail)
                 }
 
                 itemView.setOnClickListener {
                     val intent = Intent(activity, EventDetailActivity::class.java)
-                    intent.putExtra("eventId", eventInvitesHashMap[events[position]])
+                    intent.putExtra("eventId", eventId)
                     startActivity(intent)
                 }
             }
@@ -226,7 +223,6 @@ class EventInvitesFragment : Fragment(), BaseFragment {
     }
 
     companion object {
-
         private val RC_SIGN_IN = 123
     }
 }// Required empty public constructor
