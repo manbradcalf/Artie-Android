@@ -6,8 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import com.bookyrself.bookyrself.views.MainActivity;
-import com.bookyrself.bookyrself.views.Onboarding;
+import com.bookyrself.bookyrself.views.activities.MainActivity;
+import com.bookyrself.bookyrself.views.activities.OnboardingActivity;
 
 public class StartupActivity extends Activity {
 
@@ -20,7 +20,7 @@ public class StartupActivity extends Activity {
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         } else {
-            Intent intent = new Intent(this, Onboarding.class);
+            Intent intent = new Intent(this, OnboardingActivity.class);
             startActivity(intent);
         }
         finish();

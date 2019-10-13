@@ -1,12 +1,8 @@
 package com.bookyrself.bookyrself.viewmodels
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.ServerModels.User.EventInviteInfo
-import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -15,18 +11,38 @@ import kotlinx.coroutines.withContext
 class EventInvitesFragmentViewModel : BaseViewModel() {
     var eventsWithPendingInvites = MutableLiveData<HashMap<EventDetail, String>>()
     var noEventsWithPendingInvitesReturned = MutableLiveData<Boolean>()
-    var isSignedIn = MutableLiveData<Boolean>()
 
     // TODO: I really hate having to manage all these different hashmaps and lists
     private val eventIdsOfPendingEvents = mutableListOf<String>()
     private val eventsOfPendingInvitesHashMap = HashMap<EventDetail, String>()
 
-    init {
-        isSignedIn.value = userId != null
+    override fun load() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val eventInvitesResponse =
+                    service.getUsersEventInvites(userId!!)
 
-        if (isSignedIn.value == true) {
-            //TODO: Why do I have to !! here if i'm null checking above
-            loadPendingInvites(FirebaseAuth.getInstance().uid!!)
+            //TODO: Look at the logic here. I want to notify view if we make a call but there are no pending invites
+            if (eventInvitesResponse.isSuccessful) {
+                // Get all the event invites and grab only pending invites
+                withContext(Dispatchers.Main) {
+                    eventInvitesResponse.body()?.forEach { entry ->
+                        if (isInvitePendingResponse(entry)) {
+                            eventIdsOfPendingEvents.add(entry.key)
+                        }
+                    }
+                    // Now get all the pending invite details
+                    for (eventId in eventIdsOfPendingEvents) {
+                        val eventWithPendingInviteResponse =
+                                service.getEventData(eventId)
+                        if (eventWithPendingInviteResponse.body() != null) {
+                            // update function local EventDetail, EventId hashmap
+                            eventsOfPendingInvitesHashMap[eventWithPendingInviteResponse.body()!!] = eventId
+                            // set LiveData value to local hashmap
+                            eventsWithPendingInvites.value = eventsOfPendingInvitesHashMap
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -37,16 +53,18 @@ class EventInvitesFragmentViewModel : BaseViewModel() {
                     val acceptInviteResponse = service.acceptInvite(true, userId!!, eventId)
                     if (acceptInviteResponse.isSuccessful) {
                         val updateEventDetailWithUserResponse =
-                                service.setEventUserAsAttending(true, userId,eventId)
+                                service.setEventUserAsAttending(true, userId, eventId)
                         if (updateEventDetailWithUserResponse.isSuccessful) {
                             withContext(Dispatchers.Main) {
                                 // TODO: I really hate having to manage all these different hashmaps and lists
                                 eventsOfPendingInvitesHashMap.remove(eventDetail)
                                 eventsWithPendingInvites.value = eventsOfPendingInvitesHashMap
                             }
+                        } else {
+                            // TODO: Failed to update userId node on event object
                         }
                     } else {
-
+                        // TODO: Failed to update invite node on user object
                     }
                 }
             }
@@ -59,40 +77,6 @@ class EventInvitesFragmentViewModel : BaseViewModel() {
                             eventsOfPendingInvitesHashMap.remove(eventDetail)
                             eventsWithPendingInvites.value = eventsOfPendingInvitesHashMap
                         }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun loadPendingInvites(userId: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val eventInvitesResponse =
-                    service.getUsersEventInvites(userId)
-
-            if (eventInvitesResponse.isSuccessful) {
-                // Get all the event invites and grab only pending invites
-                withContext(Dispatchers.Main) {
-                    eventInvitesResponse.body()?.forEach { entry ->
-                        if (isInvitePendingResponse(entry)) {
-                            eventIdsOfPendingEvents.add(entry.key)
-                        }
-                    }
-                    if (eventIdsOfPendingEvents.isNotEmpty()) {
-                        // Now get all the pending invite details
-                        for (eventId in eventIdsOfPendingEvents) {
-                            val eventWithPendingInviteResponse =
-                                    service.getEventData(eventId)
-                            if (eventWithPendingInviteResponse.body() != null) {
-                                // TODO: I really hate having to manage all these different hashmaps and lists
-                                // update function local EventDetail, EventId hashmap
-                                eventsOfPendingInvitesHashMap[eventWithPendingInviteResponse.body()!!] = eventId
-                                // set LiveData value to local hashmap
-                                eventsWithPendingInvites.value = eventsOfPendingInvitesHashMap
-                            }
-                        }
-                    } else {
-                        noEventsWithPendingInvitesReturned.value = true
                     }
                 }
             }

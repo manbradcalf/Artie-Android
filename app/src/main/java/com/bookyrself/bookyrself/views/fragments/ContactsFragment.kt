@@ -1,14 +1,12 @@
-package com.bookyrself.bookyrself.views
+package com.bookyrself.bookyrself.views.fragments
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,14 +16,13 @@ import com.bookyrself.bookyrself.data.ServerModels.User.User
 import com.bookyrself.bookyrself.utils.CircleTransform
 import com.bookyrself.bookyrself.viewmodels.BaseViewModel
 import com.bookyrself.bookyrself.viewmodels.ContactsFragmentViewModel
-import com.firebase.ui.auth.AuthUI
+import com.bookyrself.bookyrself.views.activities.UserDetailActivity
 import com.google.firebase.storage.FirebaseStorage
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.empty_state_template.*
 import kotlinx.android.synthetic.main.fragment_contacts.*
 import kotlinx.android.synthetic.main.item_user_search_result.view.*
 
-class ContactsFragment : Fragment(), BaseFragment {
+class ContactsFragment : BaseFragment() {
     var storageReference = FirebaseStorage.getInstance().reference
     var contactsMap = hashMapOf<User, String>()
     var contacts = listOf<User>()
@@ -56,26 +53,39 @@ class ContactsFragment : Fragment(), BaseFragment {
 
         model.contactsHashMap.observe(this) {
             // Now we have data so lets fire up the adapter
-            adapter = ContactsAdapter()
-            contacts_recyclerview.adapter = adapter
-            layoutManager = LinearLayoutManager(activity)
-            contacts_recyclerview.layoutManager = layoutManager
-            showLoadingState(false)
-            hideEmptyState()
-            showContent(true)
-
-            //TODO: Double check this data conversion here
-            contacts = it.keys.asSequence().toList()
-            contactsMap = it
-            adapter.notifyDataSetChanged()
+            if (!it.isNullOrEmpty()) {
+                showContent(it)
+            } else {
+                noContactsReturned()
+            }
         }
 
         model.isSignedIn.observe(this) { userIsSignedIn ->
             if (!userIsSignedIn) {
                 showLoadingState(false)
                 showSignedOutEmptyState()
+            } else if (!contactsMap.isNullOrEmpty()) {
+                //TODO: Will this be victim of a race condition if contactsMap hasn't been set yet
+                showContent(contactsMap)
+            } else {
+                noContactsReturned()
             }
         }
+    }
+
+    private fun showContent(contactsReturned: HashMap<User, String>?) {
+        adapter = ContactsAdapter()
+        contacts_recyclerview.adapter = adapter
+        layoutManager = LinearLayoutManager(activity)
+        contacts_recyclerview.layoutManager = layoutManager
+        showLoadingState(false)
+        hideEmptyState()
+        showContent(true)
+
+        //TODO: Double check this data conversion here
+        contacts = contactsReturned?.keys?.asSequence()!!.toList()
+        contactsMap = contactsReturned
+        adapter.notifyDataSetChanged()
     }
 
     override fun showLoadingState(show: Boolean) {
@@ -85,44 +95,6 @@ class ContactsFragment : Fragment(), BaseFragment {
         } else {
             contacts_fragment_progressbar.visibility = View.GONE
         }
-    }
-
-    override fun showEmptyState(header: String, subHeader: String, buttonText: String, image: Drawable?) {
-        showContent(false)
-        showLoadingState(false)
-        empty_state_view?.visibility = View.VISIBLE
-        empty_state_image?.visibility = View.VISIBLE
-        empty_state_text_header?.visibility = View.VISIBLE
-        empty_state_text_subheader?.visibility = View.VISIBLE
-
-        empty_state_text_header?.text = header
-        empty_state_text_subheader?.text = subHeader
-        empty_state_image?.setImageDrawable(image)
-        if (buttonText != "") {
-            empty_state_button?.visibility = View.VISIBLE
-            empty_state_button?.text = buttonText
-            empty_state_button?.setOnClickListener { view ->
-                val providers = listOf(AuthUI.IdpConfig.GoogleBuilder().build(),
-                        AuthUI.IdpConfig.EmailBuilder().build())
-                // Authenticate
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                .createSignInIntentBuilder()
-                                .setIsSmartLockEnabled(false, true)
-                                .setAvailableProviders(providers)
-                                .build(),
-                        RC_SIGN_IN)
-            }
-        } else {
-            empty_state_button?.visibility = View.GONE
-        }
-    }
-
-    override fun hideEmptyState() {
-        empty_state_button.visibility = View.GONE
-        empty_state_image.visibility = View.GONE
-        empty_state_text_header.visibility = View.GONE
-        empty_state_text_subheader.visibility = View.GONE
     }
 
     override fun showContent(show: Boolean) {
@@ -145,25 +117,23 @@ class ContactsFragment : Fragment(), BaseFragment {
         }
     }
 
-    fun noContactsReturned() {
+    private fun noContactsReturned() {
         showEmptyState(getString(R.string.contacts_empty_state_no_content_header),
                 getString(R.string.contacts_empty_state_no_content_subheader),
-                "",
                 activity!!.getDrawable(R.drawable.ic_person_add_black_24dp))
     }
 
-    override fun presentError(error: String) {
+    override fun presentError(message: String) {
         showEmptyState(getString(R.string.error_header),
-                error,
-                "",
+                message,
                 activity!!.getDrawable(R.drawable.ic_error_empty_state))
     }
 
     override fun showSignedOutEmptyState() {
         showEmptyState(getString(R.string.contacts_empty_state_signed_out_header),
                 getString(R.string.contacts_empty_state_no_content_subheader),
-                getString(R.string.sign_in),
-                activity!!.getDrawable(R.drawable.ic_person_add_black_24dp))
+                activity!!.getDrawable(R.drawable.ic_person_add_black_24dp),
+                getString(R.string.sign_in))
     }
 
     /**
@@ -220,10 +190,6 @@ class ContactsFragment : Fragment(), BaseFragment {
                 }
             }
         }
-    }
-
-    companion object {
-        private const val RC_SIGN_IN = 123
     }
 }
 

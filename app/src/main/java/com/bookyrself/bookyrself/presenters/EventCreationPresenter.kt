@@ -5,7 +5,7 @@ import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.ServerModels.User.EventInviteInfo
 import com.bookyrself.bookyrself.data.ServerModels.User.User
 import com.bookyrself.bookyrself.services.FirebaseService
-import com.bookyrself.bookyrself.views.MainActivity
+import com.bookyrself.bookyrself.views.activities.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers

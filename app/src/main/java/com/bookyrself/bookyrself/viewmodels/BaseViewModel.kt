@@ -9,12 +9,21 @@ import com.google.firebase.auth.FirebaseAuth
 open class BaseViewModel : ViewModel() {
     val userId = FirebaseAuth.getInstance().uid
     val errorMessage = MutableLiveData<String>()
+    val isSignedIn = MutableLiveData<Boolean>(userId != null)
     val service = FirebaseServiceCoroutines.instance
+
+    init {
+        if (isSignedIn.value == true) {
+            this.load()
+        }
+    }
+
+    open fun load() {}
 
     //TODO: Genericize this?
     class BaseViewModelFactory: ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return BaseViewModel() as T
+            return modelClass.newInstance()
         }
     }
 }

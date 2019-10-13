@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.views
+package com.bookyrself.bookyrself.views.activities
 
 import android.content.Intent
 import android.net.Uri
@@ -17,7 +17,6 @@ import com.bookyrself.bookyrself.utils.EventDecorator
 import com.bookyrself.bookyrself.viewmodels.UserDetailViewModel
 import com.bookyrself.bookyrself.viewmodels.UserDetailViewModel.UserDetailViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.storage.FirebaseStorage
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener
@@ -33,31 +32,25 @@ import kotlin.collections.HashMap
 /**
  * Created by benmedcalf on 1/13/18.
  */
-
-class UserDetailActivity : ScopedActivity(), OnDateSelectedListener {
-
-    private var storageReference = FirebaseStorage.getInstance().reference
+class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
     private val contactsRepository = MainActivity.contactsRepo
     private val compositeDisposable = CompositeDisposable()
     private var userId: String? = null
-
     private var calendarDaysWithEventIds: HashMap<CalendarDay, String> = HashMap()
     private val acceptedEventsCalendarDays = ArrayList<CalendarDay>()
     private val unavailableCalendarDays = ArrayList<CalendarDay>()
 
     lateinit var model: UserDetailViewModel
 
-    public override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_detail)
         userId = intent.getStringExtra("userId")
-
         user_detail_calendar.setOnDateChangedListener(this)
         toolbar_user_detail.title = "User Details"
         user_detail_empty_state.visibility = View.GONE
 
         displayLoadingState()
-
         initData(userId)
     }
 
@@ -76,7 +69,7 @@ class UserDetailActivity : ScopedActivity(), OnDateSelectedListener {
         }
 
         model.contactWasAdded.observe(this) {
-            presentSuccess("Contact successfully added")
+            presentSuccessForContactAdded()
         }
 
         model.errorMessage.observe(this) {
@@ -169,7 +162,7 @@ class UserDetailActivity : ScopedActivity(), OnDateSelectedListener {
             add_user_to_contacts_textview.setText(R.string.contact_button_signed_out)
         }
 
-        val profileImageReference = storageReference.child("images/users/" + this.userId!!)
+        val profileImageReference = imageStorage.child("images/users/" + this.userId!!)
         profileImageReference
                 .downloadUrl
                 .addOnSuccessListener { uri ->
@@ -246,8 +239,8 @@ class UserDetailActivity : ScopedActivity(), OnDateSelectedListener {
     }
 
 
-    override fun presentSuccess(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    private fun presentSuccessForContactAdded() {
+        Toast.makeText(this, "Contact successfully added!", Toast.LENGTH_SHORT).show()
     }
 
     override fun presentError(message: String) {

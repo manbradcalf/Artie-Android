@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.views
+package com.bookyrself.bookyrself.views.activities
 
 import android.content.Context
 import android.os.Bundle
@@ -11,6 +11,7 @@ import com.bookyrself.bookyrself.data.Events.EventsRepository
 import com.bookyrself.bookyrself.data.Profile.ProfileRepo
 import com.bookyrself.bookyrself.utils.FragmentViewPager
 import com.bookyrself.bookyrself.utils.FragmentViewPagerAdapter
+import com.bookyrself.bookyrself.views.fragments.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.FirebaseDatabase

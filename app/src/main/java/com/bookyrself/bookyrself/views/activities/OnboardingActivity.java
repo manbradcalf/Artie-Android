@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.views;
+package com.bookyrself.bookyrself.views.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,7 +17,7 @@ import com.ramotion.paperonboarding.PaperOnboardingPage;
 
 import java.util.ArrayList;
 
-public class Onboarding extends AppCompatActivity {
+public class OnboardingActivity extends AppCompatActivity {
 
     FrameLayout fragmentContainer;
     FragmentManager fm;

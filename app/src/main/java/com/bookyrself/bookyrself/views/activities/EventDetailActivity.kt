@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.views
+package com.bookyrself.bookyrself.views.activities
 
 import android.content.Context
 import android.content.Intent
@@ -12,12 +12,11 @@ import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bookyrself.bookyrself.R
-import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel
-import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel.EventDetailViewModelFactory
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.MiniUser
 import com.bookyrself.bookyrself.utils.CircleTransform
-import com.google.firebase.storage.FirebaseStorage
+import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel
+import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel.EventDetailViewModelFactory
 import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_event_detail.*
@@ -32,9 +31,8 @@ import java.util.*
  * Created by benmedcalf on 11/22/17.
  */
 
-class EventDetailActivity : ScopedActivity() {
+class EventDetailActivity : BaseActivity() {
 
-    lateinit var storageReference: StorageReference
     lateinit var model: EventDetailViewModel
     lateinit var invitedUsers: MutableList<Pair<String, MiniUser>>
     private lateinit var adapter: UsersListAdapter
@@ -44,12 +42,9 @@ class EventDetailActivity : ScopedActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_event_detail)
 
-        // Get the storage reference for the thumbnails
-        storageReference = FirebaseStorage.getInstance().reference
-
         // Set up the adapter
         invitedUsers = ArrayList()
-        adapter = UsersListAdapter(this, storageReference)
+        adapter = UsersListAdapter(this, imageStorage)
         event_detail_users_list.adapter = adapter
         val recyclerView = event_detail_users_list
         val layoutManager = LinearLayoutManager(this)
@@ -102,7 +97,7 @@ class EventDetailActivity : ScopedActivity() {
         }
 
         item_event_detail_username!!.text = hostUsername
-        val profileImageReference = storageReference.child("images/users/" + host.userId)
+        val profileImageReference = imageStorage.child("images/users/" + host.userId)
         profileImageReference.downloadUrl.addOnSuccessListener { uri ->
             Picasso.with(applicationContext)
                     .load(uri)
@@ -132,7 +127,7 @@ class EventDetailActivity : ScopedActivity() {
         item_event_detail_citystate!!.text = hostCityState
 
         // Set the image
-        val eventImageReference = storageReference.child("images/events/$eventId")
+        val eventImageReference = imageStorage.child("images/events/$eventId")
         eventImageReference.downloadUrl.addOnSuccessListener { uri ->
             Picasso.with(applicationContext)
                     .load(uri)
@@ -170,11 +165,6 @@ class EventDetailActivity : ScopedActivity() {
         empty_state_text_subheader!!.visibility = View.VISIBLE
         event_detail_empty_state!!.visibility = View.VISIBLE
     }
-
-    override fun presentSuccess(message: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
 
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()

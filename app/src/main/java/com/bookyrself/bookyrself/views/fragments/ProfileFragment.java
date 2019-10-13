@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.views;
+package com.bookyrself.bookyrself.views.fragments;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -31,6 +31,8 @@ import com.bookyrself.bookyrself.data.ServerModels.User.User;
 import com.bookyrself.bookyrself.presenters.ProfileFragmentPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.EventDecorator;
+import com.bookyrself.bookyrself.views.activities.EventDetailActivity;
+import com.bookyrself.bookyrself.views.activities.ProfileEditActivity;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
@@ -57,7 +59,7 @@ import butterknife.ButterKnife;
 
 import static android.app.Activity.RESULT_OK;
 
-public class ProfileFragment extends Fragment implements BaseFragment, OnDateSelectedListener, ProfileFragmentPresenter.ProfilePresenterListener {
+public class ProfileFragment extends BaseFragment implements OnDateSelectedListener, ProfileFragmentPresenter.ProfilePresenterListener {
 
     private static final int RC_SIGN_IN = 123;
     private static final int RC_PROFILE_EDIT = 456;
@@ -393,7 +395,6 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         }
     }
 
-    @Override
     public void showContent(boolean show) {
         if (show) {
             profileContent.setVisibility(View.VISIBLE);
@@ -402,7 +403,6 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         }
     }
 
-    @Override
     public void showLoadingState(boolean show) {
         if (show) {
             progressbar.setVisibility(View.VISIBLE);
@@ -411,7 +411,6 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         }
     }
 
-    @Override
     public void showEmptyState(String header, String subHeader, String buttonText, Drawable image) {
 
         showContent(false);
@@ -444,23 +443,11 @@ public class ProfileFragment extends Fragment implements BaseFragment, OnDateSel
         }
     }
 
-    @Override
-    public void hideEmptyState() {
-        emptyState.setVisibility(View.GONE);
-        emptyStateTextHeader.setVisibility(View.GONE);
-        emptyStateTextSubHeader.setVisibility(View.GONE);
-        emptyStateButton.setVisibility(View.GONE);
-        emptyStateImage.setVisibility(View.GONE);
-    }
-
-
-    @Override
     public void showSignedOutEmptyState() {
         showEmptyState(getString(R.string.auth_val_prop_header),
                 getString(R.string.auth_val_prop_subheader),
                 getString(R.string.sign_in),
                 getActivity().getDrawable(R.drawable.ic_no_auth_profile));
-
         setMenuVisibility(false);
     }
 

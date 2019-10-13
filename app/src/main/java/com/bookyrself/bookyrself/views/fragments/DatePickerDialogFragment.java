@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.views;
+package com.bookyrself.bookyrself.views.fragments;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;

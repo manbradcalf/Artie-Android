@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.views
+package com.bookyrself.bookyrself.views.fragments
 
 import android.content.Intent
 import android.os.Bundle
@@ -17,6 +17,8 @@ import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.ServerModels.SearchResponseEvents.Hit
 import com.bookyrself.bookyrself.presenters.SearchPresenter
 import com.bookyrself.bookyrself.utils.CircleTransform
+import com.bookyrself.bookyrself.views.activities.EventDetailActivity
+import com.bookyrself.bookyrself.views.activities.UserDetailActivity
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso

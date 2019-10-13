@@ -18,12 +18,7 @@ class EventDetailViewModel(val eventId: String) : BaseViewModel() {
     var event = MutableLiveData<EventDetail?>()
     var invitees = MutableLiveData<MutableList<Pair<String, MiniUser>>>()
 
-    init {
-        loadEvent(eventId)
-    }
-
-    private fun loadEvent(eventId: String) {
-
+    override fun load() {
         CoroutineScope(Dispatchers.IO).launch {
             val eventDetailCall = service.getEventData(eventId)
             if (eventDetailCall.isSuccessful) {
@@ -84,5 +79,14 @@ class EventDetailViewModel(val eventId: String) : BaseViewModel() {
             }
         }
         return status
+    }
+
+
+    //TODO: Genericize this?
+    class EventDetailViewModelFactory(private val eventId: String) : ViewModelProvider.Factory {
+
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return EventDetailViewModel(eventId) as T
+        }
     }
 }

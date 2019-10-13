@@ -8,7 +8,7 @@ import com.bookyrself.bookyrself.data.Profile.ProfileRepo
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.ServerModels.User.User
 import com.bookyrself.bookyrself.services.FirebaseService
-import com.bookyrself.bookyrself.views.MainActivity
+import com.bookyrself.bookyrself.views.activities.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 
 import java.util.NoSuchElementException

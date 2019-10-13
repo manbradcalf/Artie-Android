@@ -14,7 +14,7 @@
             android:id="@+id/relative_layout_profile_activity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:context="com.bookyrself.bookyrself.views.UserDetailActivity">
+            tools:context="com.bookyrself.bookyrself.views.activities.UserDetailActivity">
 
             <com.google.android.material.appbar.AppBarLayout
                 android:layout_width="match_parent"

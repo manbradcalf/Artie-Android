@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.views
+package com.bookyrself.bookyrself.views.fragments
 
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
@@ -9,16 +9,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.utils.EventDecorator
-import com.bookyrself.bookyrself.viewmodels.BaseViewModel
-import com.bookyrself.bookyrself.viewmodels.EventInvitesFragmentViewModel
 import com.bookyrself.bookyrself.viewmodels.EventsFragmentViewModel
 import com.bookyrself.bookyrself.viewmodels.EventsFragmentViewModel.EventsFragmentViewModelFactory
+import com.bookyrself.bookyrself.views.activities.EventCreationActivity
+import com.bookyrself.bookyrself.views.activities.EventDetailActivity
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.prolificinteractive.materialcalendarview.CalendarDay
@@ -29,7 +28,7 @@ import kotlinx.android.synthetic.main.fragment_events.*
 import java.util.*
 import kotlin.collections.HashMap
 
-class EventsFragment : Fragment(), OnDateSelectedListener {
+class EventsFragment : BaseFragment(), OnDateSelectedListener {
 
     lateinit var model: EventsFragmentViewModel
     private val acceptedEventsCalendarDays = ArrayList<CalendarDay>()
@@ -46,8 +45,7 @@ class EventsFragment : Fragment(), OnDateSelectedListener {
         events_calendar?.setOnDateChangedListener(this)
 
         model = ViewModelProviders.of(this,
-                BaseViewModel.BaseViewModelFactory())
-                .get(EventsFragmentViewModel::class.java)
+                EventsFragmentViewModelFactory()).get(EventsFragmentViewModel::class.java)
 
         model.eventDetailsHashMap.observe(this) { events ->
             if (events.isNotEmpty()) {
@@ -158,7 +156,7 @@ class EventsFragment : Fragment(), OnDateSelectedListener {
         hideEmptyState()
     }
 
-    fun presentError(error: String) {
+    override fun presentError(error: String) {
         showContent(false)
         showEmptyState(getString(R.string.error_header), error, "", activity!!.getDrawable(R.drawable.ic_error_empty_state))
     }
@@ -166,7 +164,7 @@ class EventsFragment : Fragment(), OnDateSelectedListener {
 
     //TODO: Should i update min api or somn
     @SuppressLint("RestrictedApi")
-    fun showContent(show: Boolean) {
+    override fun showContent(show: Boolean) {
         if (show) {
             showLoadingState(false)
             hideEmptyState()
@@ -178,7 +176,7 @@ class EventsFragment : Fragment(), OnDateSelectedListener {
         }
     }
 
-    private fun showLoadingState(show: Boolean) {
+    override fun showLoadingState(show: Boolean) {
         if (show) {
             events_progressbar?.visibility = View.VISIBLE
         } else {
@@ -218,14 +216,7 @@ class EventsFragment : Fragment(), OnDateSelectedListener {
         }
     }
 
-    private fun hideEmptyState() {
-        empty_state_button?.visibility = View.GONE
-        empty_state_view?.visibility = View.GONE
-        empty_state_text_header?.visibility = View.GONE
-        empty_state_text_subheader?.visibility = View.GONE
-    }
-
-    fun showSignedOutEmptyState() {
+    override fun showSignedOutEmptyState() {
         showEmptyState(
                 getString(R.string.events_fragment_empty_state_signed_out_header),
                 getString(R.string.events_fragment_empty_state_signed_out_subheader),

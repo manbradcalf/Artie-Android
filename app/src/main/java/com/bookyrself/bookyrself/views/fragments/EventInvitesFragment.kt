@@ -1,13 +1,11 @@
-package com.bookyrself.bookyrself.views
+package com.bookyrself.bookyrself.views.fragments
 
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,10 +15,9 @@ import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.utils.CircleTransform
 import com.bookyrself.bookyrself.viewmodels.BaseViewModel
 import com.bookyrself.bookyrself.viewmodels.EventInvitesFragmentViewModel
-import com.firebase.ui.auth.AuthUI
+import com.bookyrself.bookyrself.views.activities.EventDetailActivity
 import com.google.firebase.storage.FirebaseStorage
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.empty_state_template.*
 import kotlinx.android.synthetic.main.fragment_event_invites.*
 import kotlinx.android.synthetic.main.item_event_invite.view.*
 import java.text.ParseException
@@ -28,11 +25,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class EventInvitesFragment : Fragment(), BaseFragment {
+class EventInvitesFragment : BaseFragment() {
     private var eventInvitesHashMap = hashMapOf<EventDetail, String>()
     private var events = mutableListOf<EventDetail>()
     private var storageReference = FirebaseStorage.getInstance().reference
-
 
     lateinit var model: EventInvitesFragmentViewModel
     lateinit var layoutManager: RecyclerView.LayoutManager
@@ -59,22 +55,22 @@ class EventInvitesFragment : Fragment(), BaseFragment {
                 .get(EventInvitesFragmentViewModel::class.java)
 
         model.eventsWithPendingInvites.observe(this) {
-            adapter = EventInvitesAdapter()
-            event_invites_recycler_view?.adapter = adapter
-            layoutManager = LinearLayoutManager(activity)
-            event_invites_recycler_view?.layoutManager = layoutManager
-            showLoadingState(false)
-            hideEmptyState()
-            showContent(true)
+            if (!it.isNullOrEmpty()) {
+                adapter = EventInvitesAdapter()
+                event_invites_recycler_view?.adapter = adapter
+                layoutManager = LinearLayoutManager(activity)
+                event_invites_recycler_view?.layoutManager = layoutManager
+                showLoadingState(false)
+                hideEmptyState()
+                showContent(true)
 
-            //TODO: Double check this data conversion here
-            events = it.keys.asSequence().toMutableList()
-            eventInvitesHashMap = it
-            adapter.notifyDataSetChanged()
-        }
-
-        model.noEventsWithPendingInvitesReturned.observe(this) {
-            showEmptyStateForNoInvites()
+                //TODO: Double check this data conversion here
+                events = it.keys.asSequence().toMutableList()
+                eventInvitesHashMap = it
+                adapter.notifyDataSetChanged()
+            } else {
+                showEmptyStateForNoInvites()
+            }
         }
 
         model.isSignedIn.observe(this) {
@@ -86,13 +82,15 @@ class EventInvitesFragment : Fragment(), BaseFragment {
 
     override fun presentError(message: String) {
         showLoadingState(false)
-        showEmptyState(getString(R.string.error_header), message, "", activity!!.getDrawable(R.drawable.ic_error_empty_state))
+        showEmptyState(getString(R.string.error_header),
+                message,
+                activity!!.getDrawable(R.drawable.ic_error_empty_state))
     }
 
     private fun showEmptyStateForNoInvites() {
         showEmptyState(getString(R.string.empty_state_event_invites_no_invites_header),
                 getString(R.string.empty_state_event_invites_no_invites_subheader),
-                "", activity!!.getDrawable(R.drawable.ic_no_events_black_24dp))
+                activity!!.getDrawable(R.drawable.ic_no_events_black_24dp))
     }
 
 
@@ -113,50 +111,11 @@ class EventInvitesFragment : Fragment(), BaseFragment {
         }
     }
 
-    override fun showEmptyState(header: String, subHeader: String, buttonText: String, image: Drawable?) {
-
-        showContent(false)
-        showLoadingState(false)
-        event_invites_empty_state?.visibility = View.VISIBLE
-        empty_state_text_header?.visibility = View.VISIBLE
-        empty_state_text_subheader?.visibility = View.VISIBLE
-        empty_state_image?.visibility = View.VISIBLE
-        empty_state_text_header?.text = header
-        empty_state_text_subheader?.text = subHeader
-        empty_state_image?.setImageDrawable(image)
-        if (buttonText != "") {
-            empty_state_button?.visibility = View.VISIBLE
-            empty_state_button?.text = buttonText
-            empty_state_button?.setOnClickListener { view ->
-                val providers = Arrays.asList(AuthUI.IdpConfig.GoogleBuilder().build(),
-                        AuthUI.IdpConfig.EmailBuilder().build())
-                // Authenticate
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                .createSignInIntentBuilder()
-                                .setIsSmartLockEnabled(false, true)
-                                .setAvailableProviders(providers)
-                                .build(),
-                        RC_SIGN_IN)
-            }
-        } else {
-            empty_state_button?.visibility = View.GONE
-        }
-    }
-
-    override fun hideEmptyState() {
-        empty_state_button?.visibility = View.GONE
-        event_invites_empty_state?.visibility = View.GONE
-        empty_state_image?.visibility = View.GONE
-        empty_state_text_header?.visibility = View.GONE
-        empty_state_text_subheader?.visibility = View.GONE
-    }
-
     override fun showSignedOutEmptyState() {
         showEmptyState(getString(R.string.event_invites_signed_out_header),
                 getString(R.string.empty_state_event_invites_signed_out_subheader),
-                getString(R.string.sign_in),
-                activity!!.getDrawable(R.drawable.ic_invitation))
+                activity!!.getDrawable(R.drawable.ic_invitation),
+                getString(R.string.sign_in))
     }
 
     /**

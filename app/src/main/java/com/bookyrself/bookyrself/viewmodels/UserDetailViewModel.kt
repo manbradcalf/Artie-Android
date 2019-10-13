@@ -22,7 +22,6 @@ class UserDetailViewModel(userId: String) : BaseViewModel() {
     }
 
     private fun loadUserData(userId: String) {
-
         CoroutineScope(Dispatchers.IO).launch {
             val userResponse = service.getUserDetails(userId)
             withContext(Dispatchers.Main) {

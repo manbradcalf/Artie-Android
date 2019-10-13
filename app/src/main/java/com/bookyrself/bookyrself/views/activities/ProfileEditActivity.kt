@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.views
+package com.bookyrself.bookyrself.views.activities
 
 import android.app.Activity
 import android.content.Intent
