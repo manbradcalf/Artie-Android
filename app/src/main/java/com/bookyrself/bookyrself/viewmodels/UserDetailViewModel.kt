@@ -11,12 +11,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class UserDetailViewModel(userId: String) : ViewModel() {
+class UserDetailViewModel(userId: String) : BaseViewModel() {
 
     var user = MutableLiveData<User?>()
     var events = MutableLiveData<HashMap<EventDetail, String>>()
     var contactWasAdded = MutableLiveData<Boolean>()
-    var responseErrorMessage = MutableLiveData<String>()
 
     init {
         loadUserData(userId)
@@ -25,14 +24,14 @@ class UserDetailViewModel(userId: String) : ViewModel() {
     private fun loadUserData(userId: String) {
 
         CoroutineScope(Dispatchers.IO).launch {
-            val userResponse = FirebaseServiceCoroutines.instance.getUserDetails(userId)
+            val userResponse = service.getUserDetails(userId)
             withContext(Dispatchers.Main) {
                 if (userResponse.isSuccessful) {
                     user.value = userResponse.body()
                     val eventIds = userResponse.body()?.events?.keys
                     loadUsersEvents(eventIds)
                 } else {
-                    responseErrorMessage.value = userResponse.message()
+                    errorMessage.value = userResponse.message()
                 }
             }
         }
@@ -43,7 +42,7 @@ class UserDetailViewModel(userId: String) : ViewModel() {
 
         CoroutineScope(Dispatchers.IO).launch {
             eventIds?.forEach { eventId ->
-                val eventDetailResponse = FirebaseServiceCoroutines.instance.getEventData(eventId)
+                val eventDetailResponse = service.getEventData(eventId)
                 withContext(Dispatchers.Main) {
                     if (eventDetailResponse.isSuccessful) {
                         val eventDetail = eventDetailResponse.body()
@@ -52,7 +51,7 @@ class UserDetailViewModel(userId: String) : ViewModel() {
                             events.value = eventsHashMap
                         }
                     } else {
-                        responseErrorMessage.value = eventDetailResponse.message()
+                        errorMessage.value = eventDetailResponse.message()
                     }
                 }
             }
@@ -62,13 +61,13 @@ class UserDetailViewModel(userId: String) : ViewModel() {
     fun addContactToUser(contactId: String, userId: String) {
 
         CoroutineScope(Dispatchers.Main).launch {
-            val addContactResponse = FirebaseServiceCoroutines.instance.addContactToUserAsync(true, userId, contactId)
+            val addContactResponse = service.addContactToUserAsync(true, userId, contactId)
             if (addContactResponse.isSuccessful) {
                 if (addContactResponse.body() != null) {
                     contactWasAdded.value = addContactResponse.body()
                 }
             } else {
-                responseErrorMessage.value = addContactResponse.message()
+                errorMessage.value = addContactResponse.message()
             }
         }
     }

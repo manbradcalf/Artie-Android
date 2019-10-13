@@ -12,9 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ContactsFragmentViewModel : ViewModel() {
+class ContactsFragmentViewModel : BaseViewModel() {
     var contactsHashMap = MutableLiveData<HashMap<User, String>>()
-    var errorMessage = MutableLiveData<String>()
     var isSignedIn = MutableLiveData<Boolean>()
 
     init {
@@ -22,6 +21,7 @@ class ContactsFragmentViewModel : ViewModel() {
 
         if (isSignedIn.value == true) {
             //TODO: Why do I have to !! here if i'm null checking above
+
             loadContacts(FirebaseAuth.getInstance().uid!!)
         }
     }
@@ -31,11 +31,11 @@ class ContactsFragmentViewModel : ViewModel() {
         //TODO: Logic copied from eventfragmentviewmodel, I should generesize?
         CoroutineScope(Dispatchers.IO).launch {
             val contactsResponse =
-                    FirebaseServiceCoroutines.instance.getUserContacts(userId)
+                    service.getUserContacts(userId)
             if (contactsResponse.isSuccessful && contactsResponse.body()?.keys != null) {
                 contactsResponse.body()?.keys?.forEach { contactId ->
                     val contactsUserInfoResponse =
-                            FirebaseServiceCoroutines.instance.getUserDetails(contactId)
+                            service.getUserDetails(contactId)
                     withContext(Dispatchers.Main) {
                         if (contactsUserInfoResponse.isSuccessful) {
                             when {

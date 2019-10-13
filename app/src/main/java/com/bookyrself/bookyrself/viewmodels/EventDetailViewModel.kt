@@ -13,7 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class EventDetailViewModel(val eventId: String) : ViewModel() {
+class EventDetailViewModel(val eventId: String) : BaseViewModel() {
 
     var event = MutableLiveData<EventDetail?>()
     var invitees = MutableLiveData<MutableList<Pair<String, MiniUser>>>()
@@ -25,7 +25,7 @@ class EventDetailViewModel(val eventId: String) : ViewModel() {
     private fun loadEvent(eventId: String) {
 
         CoroutineScope(Dispatchers.IO).launch {
-            val eventDetailCall = FirebaseServiceCoroutines.instance.getEventData(eventId)
+            val eventDetailCall = service.getEventData(eventId)
             if (eventDetailCall.isSuccessful) {
                 val eventDetailResponse = eventDetailCall.body()
                 val userIds = eventDetailResponse?.users?.keys
@@ -43,7 +43,7 @@ class EventDetailViewModel(val eventId: String) : ViewModel() {
         CoroutineScope(Dispatchers.Main).launch {
             userIds?.forEach { userId ->
                 //TODO handle network errors here via sealed Result class:
-                val userDetailResponse = FirebaseServiceCoroutines.instance.getUserDetails(userId)
+                val userDetailResponse = service.getUserDetails(userId)
 
                 if (userDetailResponse.isSuccessful) {
                     // TODO: ugly not null assertion for unwrapping userDetailResponse.body
@@ -84,13 +84,5 @@ class EventDetailViewModel(val eventId: String) : ViewModel() {
             }
         }
         return status
-    }
-
-    //TODO: Genericize this?
-    class EventDetailViewModelFactory(private val eventId: String) : ViewModelProvider.Factory {
-
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return EventDetailViewModel(eventId) as T
-        }
     }
 }

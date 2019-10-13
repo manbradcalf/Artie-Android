@@ -16,15 +16,12 @@ import kotlinx.coroutines.withContext
 /**
  * Created by benmedcalf on 3/11/18.
  */
-class EventsFragmentViewModel : ViewModel() {
-    private var userId: String? = null
+class EventsFragmentViewModel : BaseViewModel() {
     var eventDetailsHashMap = MutableLiveData<HashMap<EventDetail, String>>()
-    var errorMessage = MutableLiveData<String>()
     var signedOutMessage = MutableLiveData<String>()
 
     init {
         if (FirebaseAuth.getInstance().uid != null) {
-            userId = FirebaseAuth.getInstance().uid
             //TODO: Why do I have to !! here if i'm null checking above
             loadUsersEventInfo(userId!!)
         } else {
@@ -41,7 +38,7 @@ class EventsFragmentViewModel : ViewModel() {
             val userResponse = UsersClient.service.getUserDetails(userId)
             if (userResponse.isSuccessful && userResponse.body()?.events?.keys != null) {
                 userResponse.body()?.events?.keys?.forEach { eventId ->
-                    val eventDetailResponse = FirebaseServiceCoroutines.instance.getEventData(eventId)
+                    val eventDetailResponse = service.getEventData(eventId)
                     withContext(Dispatchers.Main) {
                         if (eventDetailResponse.isSuccessful && eventDetailResponse.body() != null) {
                             events[eventDetailResponse.body()!!] = eventId
