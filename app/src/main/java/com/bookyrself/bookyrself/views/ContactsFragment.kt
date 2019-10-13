@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.ServerModels.User.User
 import com.bookyrself.bookyrself.utils.CircleTransform
+import com.bookyrself.bookyrself.viewmodels.BaseViewModel
 import com.bookyrself.bookyrself.viewmodels.ContactsFragmentViewModel
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.storage.FirebaseStorage
@@ -50,7 +51,7 @@ class ContactsFragment : Fragment(), BaseFragment {
 
         // create and observe the view model
         model = ViewModelProviders.of(this,
-                ContactsFragmentViewModel.ContactsFragmentViewModelFactory())
+                BaseViewModel.BaseViewModelFactory())
                 .get(ContactsFragmentViewModel::class.java)
 
         model.contactsHashMap.observe(this) {

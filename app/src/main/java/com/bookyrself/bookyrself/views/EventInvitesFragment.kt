@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.utils.CircleTransform
+import com.bookyrself.bookyrself.viewmodels.BaseViewModel
 import com.bookyrself.bookyrself.viewmodels.EventInvitesFragmentViewModel
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.storage.FirebaseStorage
@@ -54,7 +55,7 @@ class EventInvitesFragment : Fragment(), BaseFragment {
 
         // create and observe the view model
         model = ViewModelProviders.of(this,
-                EventInvitesFragmentViewModel.EventInvitesFragmentViewModelFactory())
+                BaseViewModel.BaseViewModelFactory())
                 .get(EventInvitesFragmentViewModel::class.java)
 
         model.eventsWithPendingInvites.observe(this) {
@@ -72,8 +73,14 @@ class EventInvitesFragment : Fragment(), BaseFragment {
             adapter.notifyDataSetChanged()
         }
 
-        model.noEventswithPendingInvitesReturned.observe(this) {
+        model.noEventsWithPendingInvitesReturned.observe(this) {
             showEmptyStateForNoInvites()
+        }
+
+        model.isSignedIn.observe(this) {
+            if (!it) {
+                showSignedOutEmptyState()
+            }
         }
     }
 
@@ -82,7 +89,7 @@ class EventInvitesFragment : Fragment(), BaseFragment {
         showEmptyState(getString(R.string.error_header), message, "", activity!!.getDrawable(R.drawable.ic_error_empty_state))
     }
 
-    fun showEmptyStateForNoInvites() {
+    private fun showEmptyStateForNoInvites() {
         showEmptyState(getString(R.string.empty_state_event_invites_no_invites_header),
                 getString(R.string.empty_state_event_invites_no_invites_subheader),
                 "", activity!!.getDrawable(R.drawable.ic_no_events_black_24dp))

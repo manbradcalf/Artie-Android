@@ -79,7 +79,7 @@ class UserDetailActivity : ScopedActivity(), OnDateSelectedListener {
             presentSuccess("Contact successfully added")
         }
 
-        model.responseErrorMessage.observe(this) {
+        model.errorMessage.observe(this) {
             presentError(it)
         }
     }

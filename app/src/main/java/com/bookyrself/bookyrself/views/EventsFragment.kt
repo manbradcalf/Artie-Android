@@ -15,6 +15,8 @@ import androidx.lifecycle.observe
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.utils.EventDecorator
+import com.bookyrself.bookyrself.viewmodels.BaseViewModel
+import com.bookyrself.bookyrself.viewmodels.EventInvitesFragmentViewModel
 import com.bookyrself.bookyrself.viewmodels.EventsFragmentViewModel
 import com.bookyrself.bookyrself.viewmodels.EventsFragmentViewModel.EventsFragmentViewModelFactory
 import com.firebase.ui.auth.AuthUI
@@ -44,7 +46,8 @@ class EventsFragment : Fragment(), OnDateSelectedListener {
         events_calendar?.setOnDateChangedListener(this)
 
         model = ViewModelProviders.of(this,
-                EventsFragmentViewModelFactory()).get(EventsFragmentViewModel::class.java)
+                BaseViewModel.BaseViewModelFactory())
+                .get(EventsFragmentViewModel::class.java)
 
         model.eventDetailsHashMap.observe(this) { events ->
             if (events.isNotEmpty()) {
