@@ -1,31 +1,27 @@
 package com.bookyrself.bookyrself.viewmodels
 
+import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
-import com.bookyrself.bookyrself.data.ServerModels.EventDetail.MiniUser
-import com.bookyrself.bookyrself.data.ServerModels.User.EventInviteInfo
-import com.bookyrself.bookyrself.data.ServerModels.User.User
-import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.MiniUser
+import com.bookyrself.bookyrself.data.serverModels.User.EventInviteInfo
+import com.bookyrself.bookyrself.data.serverModels.User.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class EventDetailViewModel(val eventId: String) : ViewModel() {
+class EventDetailViewModel(application: Application, private val eventId: String) : BaseViewModel(application, false) {
 
     var event = MutableLiveData<EventDetail?>()
     var invitees = MutableLiveData<MutableList<Pair<String, MiniUser>>>()
 
-    init {
-        loadEvent(eventId)
-    }
-
-    private fun loadEvent(eventId: String) {
-
+    override fun load() {
+        // TODO: Should this use the eventsRepo or nah?
         CoroutineScope(Dispatchers.IO).launch {
-            val eventDetailCall = FirebaseServiceCoroutines.instance.getEventData(eventId)
+            val eventDetailCall = service.getEventData(eventId)
             if (eventDetailCall.isSuccessful) {
                 val eventDetailResponse = eventDetailCall.body()
                 val userIds = eventDetailResponse?.users?.keys
@@ -43,7 +39,7 @@ class EventDetailViewModel(val eventId: String) : ViewModel() {
         CoroutineScope(Dispatchers.Main).launch {
             userIds?.forEach { userId ->
                 //TODO handle network errors here via sealed Result class:
-                val userDetailResponse = FirebaseServiceCoroutines.instance.getUserDetails(userId)
+                val userDetailResponse = service.getUserDetails(userId)
 
                 if (userDetailResponse.isSuccessful) {
                     // TODO: ugly not null assertion for unwrapping userDetailResponse.body
@@ -86,11 +82,10 @@ class EventDetailViewModel(val eventId: String) : ViewModel() {
         return status
     }
 
-    //TODO: Genericize this?
-    class EventDetailViewModelFactory(private val eventId: String) : ViewModelProvider.Factory {
-
+    class EventDetailViewModelFactory(private val application: Application,
+                                      private val eventId: String) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return EventDetailViewModel(eventId) as T
+            return EventDetailViewModel(application, eventId) as T
         }
     }
 }

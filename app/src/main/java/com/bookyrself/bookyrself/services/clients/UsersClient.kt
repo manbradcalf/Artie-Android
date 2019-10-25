@@ -1,7 +1,7 @@
 package com.bookyrself.bookyrself.services.clients
 
-import com.bookyrself.bookyrself.data.ServerModels.User.EventInviteInfo
-import com.bookyrself.bookyrself.data.ServerModels.User.User
+import com.bookyrself.bookyrself.data.serverModels.User.EventInviteInfo
+import com.bookyrself.bookyrself.data.serverModels.User.User
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
