@@ -1,6 +1,6 @@
-package com.bookyrself.bookyrself.data.Contacts;
+package com.bookyrself.bookyrself.data.contacts;
 
-import com.bookyrself.bookyrself.data.ServerModels.User.User;
+import com.bookyrself.bookyrself.data.serverModels.User.User;
 
 import java.util.Map;
 
