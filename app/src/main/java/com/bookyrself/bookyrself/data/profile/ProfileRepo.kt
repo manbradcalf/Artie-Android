@@ -1,6 +1,6 @@
-package com.bookyrself.bookyrself.data.Profile
+package com.bookyrself.bookyrself.data.profile
 
-import com.bookyrself.bookyrself.data.ServerModels.User.User
+import com.bookyrself.bookyrself.data.serverModels.User.User
 import com.bookyrself.bookyrself.services.FirebaseService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ChildEventListener
@@ -53,7 +53,6 @@ class ProfileRepo : ProfileDataSource {
 
 
     override fun getProfileInfo(userId: String): Flowable<User> {
-
         return FirebaseService.instance
                 .getUserDetails(userId)
                 .firstOrError()

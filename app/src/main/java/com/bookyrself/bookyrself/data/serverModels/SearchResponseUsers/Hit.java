@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers;
+package com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -15,7 +15,7 @@ public class Hit {
     @SerializedName("_score")
     private Double m_score;
     @SerializedName("_source")
-    private com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers._source m_source;
+    private com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers._source m_source;
     @SerializedName("_type")
     private String m_type;
 
@@ -43,11 +43,11 @@ public class Hit {
         m_score = _score;
     }
 
-    public com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers._source get_source() {
+    public com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers._source get_source() {
         return m_source;
     }
 
-    public void set_source(com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers._source _source) {
+    public void set_source(com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers._source _source) {
         m_source = _source;
     }
 

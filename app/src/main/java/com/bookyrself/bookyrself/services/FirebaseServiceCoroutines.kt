@@ -1,11 +1,11 @@
 package com.bookyrself.bookyrself.services
 
 
-import com.bookyrself.bookyrself.data.ServerModels.EventCreationResponse
-import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
-import com.bookyrself.bookyrself.data.ServerModels.EventDetail.Host
-import com.bookyrself.bookyrself.data.ServerModels.User.EventInviteInfo
-import com.bookyrself.bookyrself.data.ServerModels.User.User
+import com.bookyrself.bookyrself.data.serverModels.EventCreationResponse
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.Host
+import com.bookyrself.bookyrself.data.serverModels.User.EventInviteInfo
+import com.bookyrself.bookyrself.data.serverModels.User.User
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response

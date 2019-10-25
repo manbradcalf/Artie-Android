@@ -12,8 +12,8 @@ import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bookyrself.bookyrself.R
-import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
-import com.bookyrself.bookyrself.data.ServerModels.EventDetail.MiniUser
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.MiniUser
 import com.bookyrself.bookyrself.utils.CircleTransform
 import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel
 import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel.EventDetailViewModelFactory

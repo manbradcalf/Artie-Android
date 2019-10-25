@@ -12,9 +12,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.data.ServerModels.EventDetail.Host;
-import com.bookyrself.bookyrself.data.ServerModels.User.User;
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.Host;
+import com.bookyrself.bookyrself.data.serverModels.User.User;
 import com.bookyrself.bookyrself.presenters.EventCreationPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.views.fragments.DatePickerDialogFragment;

@@ -6,9 +6,9 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 
 import com.bookyrself.bookyrself.R
-import com.bookyrself.bookyrself.data.Contacts.ContactsRepository
-import com.bookyrself.bookyrself.data.Events.EventsRepository
-import com.bookyrself.bookyrself.data.Profile.ProfileRepo
+import com.bookyrself.bookyrself.data.contacts.ContactsRepository
+import com.bookyrself.bookyrself.data.events.EventsRepository
+import com.bookyrself.bookyrself.data.profile.ProfileRepo
 import com.bookyrself.bookyrself.utils.FragmentViewPager
 import com.bookyrself.bookyrself.utils.FragmentViewPagerAdapter
 import com.bookyrself.bookyrself.views.fragments.*

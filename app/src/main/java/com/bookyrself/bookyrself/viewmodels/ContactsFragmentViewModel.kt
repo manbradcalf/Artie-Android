@@ -2,6 +2,7 @@ package com.bookyrself.bookyrself.viewmodels
 
 import androidx.lifecycle.MutableLiveData
 import com.bookyrself.bookyrself.data.ServerModels.User.User
+import com.bookyrself.bookyrself.data.serverModels.User.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

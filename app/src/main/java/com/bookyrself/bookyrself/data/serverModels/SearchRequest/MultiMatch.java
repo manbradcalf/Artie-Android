@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.data.ServerModels.SearchRequest;
+package com.bookyrself.bookyrself.data.serverModels.SearchRequest;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

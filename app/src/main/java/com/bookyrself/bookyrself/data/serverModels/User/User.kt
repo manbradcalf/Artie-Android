@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.data.ServerModels.User
+package com.bookyrself.bookyrself.data.serverModels.User
 
 import android.graphics.drawable.Drawable
 import android.net.Uri

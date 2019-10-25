@@ -1,5 +1,5 @@
 
-package com.bookyrself.bookyrself.data.ServerModels.User;
+package com.bookyrself.bookyrself.data.serverModels.User;
 
 import com.google.gson.annotations.SerializedName;
 

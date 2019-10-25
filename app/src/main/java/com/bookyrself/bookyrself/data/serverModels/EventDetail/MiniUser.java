@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.data.ServerModels.EventDetail;
+package com.bookyrself.bookyrself.data.serverModels.EventDetail;
 
 import com.google.gson.annotations.SerializedName;
 

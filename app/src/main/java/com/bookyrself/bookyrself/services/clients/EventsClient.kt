@@ -2,7 +2,7 @@ package com.bookyrself.bookyrself.services.clients
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

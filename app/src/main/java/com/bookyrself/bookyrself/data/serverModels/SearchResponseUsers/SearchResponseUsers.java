@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers;
+package com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -15,7 +15,7 @@ public class SearchResponseUsers {
     @SerializedName("took")
     private Long mTook;
     @SerializedName("_shards")
-    private com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers._shards m_shards;
+    private com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers._shards m_shards;
 
     public Hits getHits() {
         return mHits;
@@ -41,11 +41,11 @@ public class SearchResponseUsers {
         mTook = took;
     }
 
-    public com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers._shards get_shards() {
+    public com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers._shards get_shards() {
         return m_shards;
     }
 
-    public void set_shards(com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers._shards _shards) {
+    public void set_shards(com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers._shards _shards) {
         m_shards = _shards;
     }
 

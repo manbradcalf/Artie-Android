@@ -1,9 +1,9 @@
 package com.bookyrself.bookyrself.presenters
 
-import com.bookyrself.bookyrself.data.Contacts.ContactsRepository
-import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
-import com.bookyrself.bookyrself.data.ServerModels.User.EventInviteInfo
-import com.bookyrself.bookyrself.data.ServerModels.User.User
+import com.bookyrself.bookyrself.data.contacts.ContactsRepository
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
+import com.bookyrself.bookyrself.data.serverModels.User.EventInviteInfo
+import com.bookyrself.bookyrself.data.serverModels.User.User
 import com.bookyrself.bookyrself.services.FirebaseService
 import com.bookyrself.bookyrself.views.activities.MainActivity
 import com.google.firebase.auth.FirebaseAuth

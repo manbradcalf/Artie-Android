@@ -2,20 +2,17 @@ package com.bookyrself.bookyrself.presenters
 
 import android.content.Context
 import android.util.Log
-
-import com.bookyrself.bookyrself.data.Events.EventsRepository
-import com.bookyrself.bookyrself.data.Profile.ProfileRepo
-import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
-import com.bookyrself.bookyrself.data.ServerModels.User.User
+import com.bookyrself.bookyrself.data.events.EventsRepository
+import com.bookyrself.bookyrself.data.profile.ProfileRepo
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
+import com.bookyrself.bookyrself.data.serverModels.User.User
 import com.bookyrself.bookyrself.services.FirebaseService
 import com.bookyrself.bookyrself.views.activities.MainActivity
 import com.google.firebase.auth.FirebaseAuth
-
-import java.util.NoSuchElementException
-
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import java.util.*
 
 class ProfileFragmentPresenter
 /**

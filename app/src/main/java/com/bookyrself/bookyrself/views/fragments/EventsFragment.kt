@@ -12,7 +12,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.bookyrself.bookyrself.R
-import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.utils.EventDecorator
 import com.bookyrself.bookyrself.viewmodels.EventsFragmentViewModel
 import com.bookyrself.bookyrself.viewmodels.EventsFragmentViewModel.EventsFragmentViewModelFactory

@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.data.ServerModels
+package com.bookyrself.bookyrself.data.serverModels
 
 import javax.annotation.Generated
 import com.google.gson.annotations.SerializedName

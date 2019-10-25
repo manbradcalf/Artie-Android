@@ -26,8 +26,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.bookyrself.bookyrself.R;
-import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.data.ServerModels.User.User;
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail;
+import com.bookyrself.bookyrself.data.serverModels.User.User;
 import com.bookyrself.bookyrself.presenters.ProfileFragmentPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.EventDecorator;

@@ -1,8 +1,8 @@
 package com.bookyrself.bookyrself.services
 
-import com.bookyrself.bookyrself.data.ServerModels.SearchRequest.RequestBody
-import com.bookyrself.bookyrself.data.ServerModels.SearchResponseEvents.SearchResponse2
-import com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers.SearchResponseUsers
+import com.bookyrself.bookyrself.data.serverModels.SearchRequest.RequestBody
+import com.bookyrself.bookyrself.data.serverModels.SearchResponseEvents.SearchResponse2
+import com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers.SearchResponseUsers
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

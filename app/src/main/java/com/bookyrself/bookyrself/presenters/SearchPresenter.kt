@@ -1,10 +1,10 @@
 package com.bookyrself.bookyrself.presenters
 
 import android.util.Log
-import com.bookyrself.bookyrself.data.ServerModels.SearchRequest.*
-import com.bookyrself.bookyrself.data.ServerModels.SearchRequest.Date
-import com.bookyrself.bookyrself.data.ServerModels.SearchResponseEvents.SearchResponse2
-import com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers.SearchResponseUsers
+import com.bookyrself.bookyrself.data.serverModels.SearchRequest.*
+import com.bookyrself.bookyrself.data.serverModels.SearchRequest.Date
+import com.bookyrself.bookyrself.data.serverModels.SearchResponseEvents.SearchResponse2
+import com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers.SearchResponseUsers
 import com.bookyrself.bookyrself.services.SearchService
 import retrofit2.Call
 import retrofit2.Callback
@@ -139,9 +139,9 @@ class SearchPresenter
      * Contract / Listener
      */
     interface SearchPresenterListener {
-        fun searchEventsResponseReady(hits: MutableList<com.bookyrself.bookyrself.data.ServerModels.SearchResponseEvents.Hit>)
+        fun searchEventsResponseReady(hits: MutableList<com.bookyrself.bookyrself.data.serverModels.SearchResponseEvents.Hit>)
 
-        fun searchUsersResponseReady(hits: MutableList<com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers.Hit>)
+        fun searchUsersResponseReady(hits: MutableList<com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers.Hit>)
 
         fun startDateChanged(date: String)
 
