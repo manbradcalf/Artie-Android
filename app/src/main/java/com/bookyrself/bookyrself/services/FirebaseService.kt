@@ -61,7 +61,6 @@ object FirebaseService {
         @PUT("/events/{eventId}/users/{userId}.json")
         fun setEventUserAsAttending(@Body bool: Boolean?, @Path("userId") userId: String, @Path("eventId") eventId: String): Flowable<Boolean>
 
-
         @PATCH("/users/{userId}.json")
         fun patchUser(@Body user: User, @Path("userId") userId: String): Flowable<User>
 
