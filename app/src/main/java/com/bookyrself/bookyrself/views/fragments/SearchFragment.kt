@@ -29,7 +29,7 @@ import kotlinx.android.synthetic.main.item_event.view.*
 class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
     private var presenter: SearchPresenter? = null
     private var eventsResults = mutableListOf<Hit>()
-    private var usersResults = mutableListOf<com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers.Hit>()
+    private var usersResults = mutableListOf<com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers.Hit>()
     private var adapter: ResultsAdapter? = null
     private var boolSearchEditable: Boolean? = false
     private var storageReference: StorageReference? = null
@@ -187,7 +187,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         showProgressbar(false)
     }
 
-    override fun searchUsersResponseReady(hits: MutableList<com.bookyrself.bookyrself.data.ServerModels.SearchResponseUsers.Hit>) {
+    override fun searchUsersResponseReady(hits: MutableList<com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers.Hit>) {
 
         if (search_recycler_view.visibility == View.GONE) {
             search_recycler_view.visibility = View.VISIBLE
