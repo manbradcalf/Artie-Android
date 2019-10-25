@@ -37,8 +37,6 @@ object FirebaseService {
     }
 
     interface FirebaseApi {
-        @GET("/events/{id}.json")
-        fun getEventData(@Path("id") eventId: String): Flowable<EventDetail>
 
         @GET("/users/{id}.json")
         fun getUserDetails(@Path("id") userId: String): Flowable<User>
@@ -52,29 +50,14 @@ object FirebaseService {
         @PUT("/users/{userId}.json")
         fun updateUser(@Body user: User, @Path("userId") userId: String): Flowable<User>
 
-        @PUT("/users/{userId}/events/{eventId}/isInviteRejected.json")
-        fun rejectInvite(@Body bool: Boolean?, @Path("userId") userId: String, @Path("eventId") eventId: String): Flowable<Boolean>
-
-        @PUT("/users/{userId}/events/{eventId}/isInviteAccepted.json")
-        fun acceptInvite(@Body bool: Boolean?, @Path("userId") userId: String, @Path("eventId") eventId: String): Flowable<Boolean>
-
-        @PUT("/events/{eventId}/users/{userId}.json")
-        fun setEventUserAsAttending(@Body bool: Boolean?, @Path("userId") userId: String, @Path("eventId") eventId: String): Flowable<Boolean>
-
         @PATCH("/users/{userId}.json")
         fun patchUser(@Body user: User, @Path("userId") userId: String): Flowable<User>
-
-        @PATCH("/users/{userId}/contacts.json")
-        fun addContactToUser(@Body request: HashMap<String, Boolean>, @Path("userId") userId: String): Flowable<HashMap<String, Boolean>>
 
         @POST("/events.json")
         fun createEvent(@Body request: EventDetail): Flowable<EventCreationResponse>
 
         @PUT("/users/{userId}/events/{eventId}.json")
         fun addEventToUser(@Body eventInviteInfo: EventInviteInfo, @Path("userId") userId: String, @Path("eventId") eventId: String): Flowable<EventInviteInfo>
-
-        @DELETE("/events/{eventId}/users/{userId}.json")
-        fun removeUserFromEvent(@Path("eventId") eventId: String, @Path("userId") userId: String): Flowable<Response<Void>>
 
         @PUT("/events/{eventId}/host.json")
         fun updateEventHost(@Body host: Host, @Path("eventId") eventId: String): Flowable<Host>
