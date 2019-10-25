@@ -1,24 +1,24 @@
 package com.bookyrself.bookyrself.viewmodels
 
+import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.bookyrself.bookyrself.data.ServerModels.EventDetail.EventDetail
-import com.bookyrself.bookyrself.data.ServerModels.User.User
-import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
+import com.bookyrself.bookyrself.data.serverModels.User.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class UserDetailViewModel(userId: String) : BaseViewModel() {
+class UserDetailViewModel(application: Application, userDetailId: String) : BaseViewModel(application, false) {
 
     var user = MutableLiveData<User?>()
     var events = MutableLiveData<HashMap<EventDetail, String>>()
     var contactWasAdded = MutableLiveData<Boolean>()
 
     init {
-        loadUserData(userId)
+        loadUserData(userId!!)
     }
 
     private fun loadUserData(userId: String) {
@@ -71,11 +71,10 @@ class UserDetailViewModel(userId: String) : BaseViewModel() {
         }
     }
 
-    //TODO: Genericize this?
-    class UserDetailViewModelFactory(private val userId: String) : ViewModelProvider.Factory {
-
+    class UserDetailViewModelFactory(private val application: Application,
+                                      private val userId: String) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return UserDetailViewModel(userId) as T
+            return UserDetailViewModel(application, userId) as T
         }
     }
 }
