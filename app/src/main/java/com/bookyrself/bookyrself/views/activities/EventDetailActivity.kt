@@ -15,8 +15,9 @@ import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.MiniUser
 import com.bookyrself.bookyrself.utils.CircleTransform
+import com.bookyrself.bookyrself.viewmodels.BaseViewModel
+import com.bookyrself.bookyrself.viewmodels.ContactsFragmentViewModel
 import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel
-import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel.EventDetailViewModelFactory
 import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_event_detail.*
@@ -64,7 +65,7 @@ class EventDetailActivity : BaseActivity() {
     private fun initData(eventId: String) {
         // Set up the model
         model = ViewModelProviders.of(this,
-                EventDetailViewModelFactory(eventId))
+                EventDetailViewModel.EventDetailViewModelFactory(application, eventId))
                 .get(EventDetailViewModel::class.java)
 
         model.event.observe(this) { eventDetail ->

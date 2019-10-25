@@ -15,7 +15,6 @@ import com.bookyrself.bookyrself.data.serverModels.User.User
 import com.bookyrself.bookyrself.utils.CircleTransform
 import com.bookyrself.bookyrself.utils.EventDecorator
 import com.bookyrself.bookyrself.viewmodels.UserDetailViewModel
-import com.bookyrself.bookyrself.viewmodels.UserDetailViewModel.UserDetailViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -35,7 +34,7 @@ import kotlin.collections.HashMap
 class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
     private val contactsRepository = MainActivity.contactsRepo
     private val compositeDisposable = CompositeDisposable()
-    private var userId: String? = null
+    private var userDetailId: String? = null
     private var calendarDaysWithEventIds: HashMap<CalendarDay, String> = HashMap()
     private val acceptedEventsCalendarDays = ArrayList<CalendarDay>()
     private val unavailableCalendarDays = ArrayList<CalendarDay>()
@@ -45,18 +44,17 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_detail)
-        userId = intent.getStringExtra("userId")
         user_detail_calendar.setOnDateChangedListener(this)
         toolbar_user_detail.title = "User Details"
         user_detail_empty_state.visibility = View.GONE
-
         displayLoadingState()
-        initData(userId)
+        initData(intent.getStringExtra("userId"))
     }
 
-    private fun initData(userId: String?) {
+    private fun initData(userId: String) {
         model = ViewModelProviders.of(this,
-                UserDetailViewModelFactory(userId!!)).get(UserDetailViewModel::class.java)
+                UserDetailViewModel.UserDetailViewModelFactory(application, userId))
+                .get(UserDetailViewModel::class.java)
 
         model.user.observe(this) {
             displayUserInfo(it, userId)
@@ -162,7 +160,7 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
             add_user_to_contacts_textview.setText(R.string.contact_button_signed_out)
         }
 
-        val profileImageReference = imageStorage.child("images/users/" + this.userId!!)
+        val profileImageReference = imageStorage.child("images/users/" + this.userDetailId!!)
         profileImageReference
                 .downloadUrl
                 .addOnSuccessListener { uri ->
@@ -192,7 +190,7 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
         val day = Integer.parseInt(s[2])
         val calendarDay = CalendarDay.from(year, month, day)
 
-        if (event.host.userId == userId) {
+        if (event.host.userId == userDetailId) {
             // If the user is hosting this event
             // add this event to the user's calendar
             acceptedEventsCalendarDays.add(calendarDay)
@@ -205,7 +203,7 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
                 // Loop through the users
                 for ((eventUserId, isAttending) in event.users) {
                     // If this event's user is the user we're viewing and they're attending
-                    if (eventUserId == userId && isAttending) {
+                    if (eventUserId == userDetailId && isAttending) {
                         // add this event to the user's calendar
                         acceptedEventsCalendarDays.add(calendarDay)
                         calendarDaysWithEventIds[calendarDay] = eventId
@@ -237,7 +235,6 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
             }
         }
     }
-
 
     private fun presentSuccessForContactAdded() {
         Toast.makeText(this, "Contact successfully added!", Toast.LENGTH_SHORT).show()

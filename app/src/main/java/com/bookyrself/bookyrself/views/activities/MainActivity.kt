@@ -18,14 +18,15 @@ import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
 
-    internal val profileFragment = ProfileFragment()
-    internal val searchFragment = SearchFragment()
-    internal val eventsFragment = EventsFragment()
-    internal val contactsFragment = ContactsFragment()
-    internal val eventInvitesFragment = EventInvitesFragment()
+    private val profileFragment = ProfileFragment()
+    private val searchFragment = SearchFragment()
+    private val eventsFragment = EventsFragment()
+    private val contactsFragment = ContactsFragment()
+    private val eventInvitesFragment = EventInvitesFragment()
 
     val db = FirebaseDatabase.getInstance("https://bookyrself-staging.firebaseio.com/")
     val firebaseApp = FirebaseApp.initializeApp(this)
+
     lateinit var adapter: FragmentViewPagerAdapter
     lateinit var viewPager: FragmentViewPager
     lateinit var navigationView: BottomNavigationView
@@ -81,7 +82,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         private const val CONTACTS_FRAGMENT_INDEX = 3
         private const val PROFILE_FRAGMENT_INDEX = 4
 
-        private var EVENT_INVITES_REPO: EventsRepository? = null
         private var CONTACTS_REPO: ContactsRepository? = null
         private var PROFILE_REPO: ProfileRepo? = null
 
@@ -101,12 +101,5 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                 }
                 return PROFILE_REPO!!
             }
-
-        fun getEventsRepo(context: Context): EventsRepository {
-            if (EVENT_INVITES_REPO == null) {
-                EVENT_INVITES_REPO = EventsRepository(context)
-            }
-            return EVENT_INVITES_REPO!!
-        }
     }
 }
