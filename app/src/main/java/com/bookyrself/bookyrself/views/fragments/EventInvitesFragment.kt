@@ -40,8 +40,8 @@ class EventInvitesFragment : BaseFragment() {
     }
 
     override fun onResume() {
-        init()
         super.onResume()
+        init()
     }
 
     private fun init() {
