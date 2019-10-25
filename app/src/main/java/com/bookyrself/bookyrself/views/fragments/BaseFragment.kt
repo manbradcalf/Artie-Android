@@ -3,14 +3,11 @@ package com.bookyrself.bookyrself.views.fragments
 import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.fragment.app.Fragment
+import com.bookyrself.bookyrself.R
 import com.firebase.ui.auth.AuthUI
 import kotlinx.android.synthetic.main.empty_state_template.*
 
 open class BaseFragment : Fragment() {
-
-    open fun showContent(show: Boolean) {}
-
-    open fun showLoadingState(show: Boolean) {}
 
     fun showEmptyState(header: String, subHeader: String, image: Drawable?, buttonText: String? = null) {
         showContent(false)
@@ -50,12 +47,27 @@ open class BaseFragment : Fragment() {
         empty_state_text_subheader.visibility = View.GONE
     }
 
-    open fun presentError(message: String) {}
+    fun showSignedOutEmptyState(message: String, img: Drawable) {
+        showEmptyState(
+                getString(R.string.empty_state_signed_out_header),
+                message,
+                img,
+                "Sign In!"
+        )
+    }
 
-    open fun showSignedOutEmptyState() {}
+    fun presentError(message: String) {
+        showEmptyState(getString(R.string.error_header),
+                message,
+                activity!!.getDrawable(R.drawable.ic_error_empty_state))
+    }
+
+    open fun showContent(show: Boolean) {}
+
+    open fun showLoadingState(show: Boolean) {}
 
     companion object {
         const val RC_SIGN_IN = 123
+        const val RC_EVENT_CREATION = 456
     }
-
 }

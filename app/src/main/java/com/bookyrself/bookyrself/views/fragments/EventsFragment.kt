@@ -15,7 +15,6 @@ import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.utils.EventDecorator
 import com.bookyrself.bookyrself.viewmodels.EventsFragmentViewModel
-import com.bookyrself.bookyrself.viewmodels.EventsFragmentViewModel.EventsFragmentViewModelFactory
 import com.bookyrself.bookyrself.views.activities.EventCreationActivity
 import com.bookyrself.bookyrself.views.activities.EventDetailActivity
 import com.firebase.ui.auth.AuthUI
@@ -36,16 +35,18 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
     private val calendarDaysWithEventIds = HashMap<CalendarDay, String>()
 
     private fun init() {
-        // Set up view
         events_toolbar?.title = "Your Calendar"
+
         event_creation_fab?.setOnClickListener {
             val intent = Intent(activity, EventCreationActivity::class.java)
             startActivityForResult(intent, RC_EVENT_CREATION)
         }
+
         events_calendar?.setOnDateChangedListener(this)
 
         model = ViewModelProviders.of(this,
-                EventsFragmentViewModelFactory()).get(EventsFragmentViewModel::class.java)
+                EventsFragmentViewModel.EventsFragmentViewModelFactory(activity!!.application))
+                .get(EventsFragmentViewModel::class.java)
 
         model.eventDetailsHashMap.observe(this) { events ->
             if (events.isNotEmpty()) {
@@ -61,10 +62,12 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
             presentError(it)
         }
 
-        model.signedOutMessage.observe(this) {
-            if (FirebaseAuth.getInstance().uid == null) {
-                showContent(false)
-                showSignedOutEmptyState()
+        model.isSignedIn.observe(this) { userIsSignedIn ->
+            if (!userIsSignedIn) {
+                showLoadingState(false)
+                showSignedOutEmptyState(
+                        getString(R.string.events_fragment_empty_state_signed_out_subheader),
+                        activity!!.getDrawable(R.drawable.ic_calendar)!!)
             }
         }
     }
@@ -156,11 +159,6 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
         hideEmptyState()
     }
 
-    override fun presentError(error: String) {
-        showContent(false)
-        showEmptyState(getString(R.string.error_header), error, "", activity!!.getDrawable(R.drawable.ic_error_empty_state))
-    }
-
 
     //TODO: Should i update min api or somn
     @SuppressLint("RestrictedApi")
@@ -214,19 +212,6 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
                         RC_SIGN_IN)
             }
         }
-    }
-
-    override fun showSignedOutEmptyState() {
-        showEmptyState(
-                getString(R.string.events_fragment_empty_state_signed_out_header),
-                getString(R.string.events_fragment_empty_state_signed_out_subheader),
-                getString(R.string.sign_in),
-                activity!!.getDrawable(R.drawable.ic_calendar))
-    }
-
-    companion object {
-        private const val RC_SIGN_IN = 123
-        private const val RC_EVENT_CREATION = 456
     }
 }
 

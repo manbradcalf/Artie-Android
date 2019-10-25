@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.utils.CircleTransform
-import com.bookyrself.bookyrself.viewmodels.BaseViewModel
 import com.bookyrself.bookyrself.viewmodels.EventInvitesFragmentViewModel
 import com.bookyrself.bookyrself.views.activities.EventDetailActivity
 import com.google.firebase.storage.FirebaseStorage
@@ -51,16 +50,16 @@ class EventInvitesFragment : BaseFragment() {
 
         // create and observe the view model
         model = ViewModelProviders.of(this,
-                BaseViewModel.BaseViewModelFactory())
+                EventInvitesFragmentViewModel.EventInvitesFragmentViewModelFactory(activity!!.application))
                 .get(EventInvitesFragmentViewModel::class.java)
 
         model.eventsWithPendingInvites.observe(this) {
             if (!it.isNullOrEmpty()) {
+                showLoadingState(false)
                 adapter = EventInvitesAdapter()
                 event_invites_recycler_view?.adapter = adapter
                 layoutManager = LinearLayoutManager(activity)
                 event_invites_recycler_view?.layoutManager = layoutManager
-                showLoadingState(false)
                 hideEmptyState()
                 showContent(true)
 
@@ -75,17 +74,14 @@ class EventInvitesFragment : BaseFragment() {
 
         model.isSignedIn.observe(this) {
             if (!it) {
-                showSignedOutEmptyState()
+                showSignedOutEmptyState(
+                        getString(R.string.empty_state_event_invites_signed_out_subheader),
+                        activity!!.getDrawable(R.drawable.ic_invitation)!!
+                )
             }
         }
     }
 
-    override fun presentError(message: String) {
-        showLoadingState(false)
-        showEmptyState(getString(R.string.error_header),
-                message,
-                activity!!.getDrawable(R.drawable.ic_error_empty_state))
-    }
 
     private fun showEmptyStateForNoInvites() {
         showEmptyState(getString(R.string.empty_state_event_invites_no_invites_header),
@@ -111,12 +107,6 @@ class EventInvitesFragment : BaseFragment() {
         }
     }
 
-    override fun showSignedOutEmptyState() {
-        showEmptyState(getString(R.string.event_invites_signed_out_header),
-                getString(R.string.empty_state_event_invites_signed_out_subheader),
-                activity!!.getDrawable(R.drawable.ic_invitation),
-                getString(R.string.sign_in))
-    }
 
     /**
      * Adapter
@@ -187,8 +177,4 @@ class EventInvitesFragment : BaseFragment() {
             }
         }
     }
-
-    companion object {
-        private val RC_SIGN_IN = 123
-    }
-}// Required empty public constructor
+}

@@ -23,7 +23,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail;
@@ -37,7 +36,6 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.FirebaseUserMetadata;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -110,7 +108,6 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         presenter = new ProfileFragmentPresenter(this, getContext());
         user = new User();
@@ -121,7 +118,6 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, view);
         setHasOptionsMenu(true);
@@ -133,9 +129,7 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
 
     @Override
     public void onResume() {
-
         super.onResume();
-
         if (FirebaseAuth.getInstance().getUid() != null) {
             showContent(false);
             hideEmptyState();
@@ -176,7 +170,6 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
 
     @Override
     public void eventReady(String eventId, EventDetail event) {
-
         if (event.getUsers() != null) {
             if (!event.getUsers().isEmpty()) {
 
@@ -202,14 +195,6 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
                 }
             }
         }
-    }
-
-    @Override
-    public void presentError(String error) {
-        showEmptyState(getString(R.string.error_header),
-                error,
-                "",
-                getActivity().getDrawable(R.drawable.ic_error_empty_state));
     }
 
     private void setLayout(final User user) {
@@ -299,9 +284,8 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
             if (fbUser != null) {
                 switch (requestCode) {
                     case RC_SIGN_IN:
-                        if (isNewSignUp()) {
+                        if (presenter.isNewSignUp()) {
                             // Successfully signed up
-
                             // Clear out activity's old user data if it exists
                             if (user.getTags() != null) {
                                 user.setTags(null);
@@ -320,8 +304,7 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
                             user.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
                             user.setUsername(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
                             presenter.updateUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
-
-                            showToast("Signing Up!");
+                            showCreatingUserLoadingToast();
                         } else {
                             // Successfully signed in
                             showLoadingState(true);
@@ -330,6 +313,7 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
                         }
                         setMenuVisibility(true);
                         return;
+
                     case RC_PROFILE_EDIT:
                         showToast("Profile Updated!");
                         return;
@@ -411,8 +395,7 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
         }
     }
 
-    public void showEmptyState(String header, String subHeader, String buttonText, Drawable image) {
-
+    private void showEmptyState(String header, String subHeader, String buttonText, Drawable image) {
         showContent(false);
         showLoadingState(false);
         emptyState.setVisibility(View.VISIBLE);
@@ -451,11 +434,6 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
         setMenuVisibility(false);
     }
 
-    private boolean isNewSignUp() {
-        FirebaseUserMetadata metadata = FirebaseAuth.getInstance().getCurrentUser().getMetadata();
-        return metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp();
-    }
-
     private void editProfile(User user) {
         Intent intent = new Intent(getActivity(), ProfileEditActivity.class);
 
@@ -482,5 +460,10 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
     // I toast a lot in this fragment so I added this for brevity and readability
     private void showToast(String message) {
         Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void showCreatingUserLoadingToast() {
+        showToast("Signing Up!");
     }
 }

@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.serverModels.User.User
 import com.bookyrself.bookyrself.utils.CircleTransform
-import com.bookyrself.bookyrself.viewmodels.BaseViewModel
 import com.bookyrself.bookyrself.viewmodels.ContactsFragmentViewModel
 import com.bookyrself.bookyrself.views.activities.UserDetailActivity
 import com.google.firebase.storage.FirebaseStorage
@@ -27,8 +27,8 @@ class ContactsFragment : BaseFragment() {
     var contactsMap = hashMapOf<User, String>()
     var contacts = listOf<User>()
 
+    private lateinit var layoutManager: RecyclerView.LayoutManager
     lateinit var adapter: ContactsAdapter
-    lateinit var layoutManager: RecyclerView.LayoutManager
     lateinit var model: ContactsFragmentViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -36,10 +36,6 @@ class ContactsFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_contacts, container, false)
     }
 
-    override fun onResume() {
-        init()
-        super.onResume()
-    }
 
     private fun init() {
         // Set up initial view
@@ -48,13 +44,13 @@ class ContactsFragment : BaseFragment() {
 
         // create and observe the view model
         model = ViewModelProviders.of(this,
-                BaseViewModel.BaseViewModelFactory())
+                ContactsFragmentViewModel.ContactsFragmentViewModelFactory(activity!!.application))
                 .get(ContactsFragmentViewModel::class.java)
 
         model.contactsHashMap.observe(this) {
             // Now we have data so lets fire up the adapter
             if (!it.isNullOrEmpty()) {
-                showContent(it)
+                loadContacts(it)
             } else {
                 noContactsReturned()
             }
@@ -63,17 +59,25 @@ class ContactsFragment : BaseFragment() {
         model.isSignedIn.observe(this) { userIsSignedIn ->
             if (!userIsSignedIn) {
                 showLoadingState(false)
-                showSignedOutEmptyState()
+                showSignedOutEmptyState(
+                        getString(R.string.contacts_empty_state_no_content_subheader),
+                        activity!!.getDrawable(R.drawable.ic_person_add_black_24dp)!!)
             } else if (!contactsMap.isNullOrEmpty()) {
                 //TODO: Will this be victim of a race condition if contactsMap hasn't been set yet
-                showContent(contactsMap)
+                loadContacts(contactsMap)
             } else {
                 noContactsReturned()
             }
         }
     }
 
-    private fun showContent(contactsReturned: HashMap<User, String>?) {
+    override fun onResume() {
+        init()
+        super.onResume()
+    }
+
+    //TODO: Rename this method and / or combine with showContent
+    private fun loadContacts(contactsReturned: HashMap<User, String>?) {
         adapter = ContactsAdapter()
         contacts_recyclerview.adapter = adapter
         layoutManager = LinearLayoutManager(activity)
@@ -86,6 +90,12 @@ class ContactsFragment : BaseFragment() {
         contacts = contactsReturned?.keys?.asSequence()!!.toList()
         contactsMap = contactsReturned
         adapter.notifyDataSetChanged()
+    }
+
+    private fun noContactsReturned() {
+        showEmptyState(getString(R.string.contacts_empty_state_no_content_header),
+                getString(R.string.contacts_empty_state_no_content_subheader),
+                activity!!.getDrawable(R.drawable.ic_person_add_black_24dp))
     }
 
     override fun showLoadingState(show: Boolean) {
@@ -115,25 +125,6 @@ class ContactsFragment : BaseFragment() {
                 }
             }
         }
-    }
-
-    private fun noContactsReturned() {
-        showEmptyState(getString(R.string.contacts_empty_state_no_content_header),
-                getString(R.string.contacts_empty_state_no_content_subheader),
-                activity!!.getDrawable(R.drawable.ic_person_add_black_24dp))
-    }
-
-    override fun presentError(message: String) {
-        showEmptyState(getString(R.string.error_header),
-                message,
-                activity!!.getDrawable(R.drawable.ic_error_empty_state))
-    }
-
-    override fun showSignedOutEmptyState() {
-        showEmptyState(getString(R.string.contacts_empty_state_signed_out_header),
-                getString(R.string.contacts_empty_state_no_content_subheader),
-                activity!!.getDrawable(R.drawable.ic_person_add_black_24dp),
-                getString(R.string.sign_in))
     }
 
     /**
