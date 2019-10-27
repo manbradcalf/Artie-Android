@@ -1,6 +1,6 @@
 package com.bookyrself.bookyrself.presenters
 
-import com.bookyrself.bookyrself.data.contacts.ContactsRepository
+import com.bookyrself.bookyrself.data.contacts.ContactsRepoRxJava
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.serverModels.User.EventInviteInfo
 import com.bookyrself.bookyrself.data.serverModels.User.User
@@ -19,7 +19,7 @@ import io.reactivex.schedulers.Schedulers
 
 class EventCreationPresenter(private val presenterListener: EventCreationPresenterListener) : BasePresenter {
 
-    private val contactsRepository: ContactsRepository = MainActivity.contactsRepo
+    private val contactsRepoRxJava: ContactsRepoRxJava = MainActivity.contactsRepo
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     /**
@@ -27,7 +27,7 @@ class EventCreationPresenter(private val presenterListener: EventCreationPresent
      */
     override fun subscribe() {
         compositeDisposable.add(
-                contactsRepository
+                contactsRepoRxJava
                         .getContactsForUser(FirebaseAuth.getInstance().uid!!)
                         .subscribe(
                                 { stringUserEntry -> presenterListener.contactReturned(stringUserEntry.value, stringUserEntry.key) },

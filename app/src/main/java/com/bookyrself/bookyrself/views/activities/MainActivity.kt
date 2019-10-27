@@ -1,13 +1,11 @@
 package com.bookyrself.bookyrself.views.activities
 
-import android.content.Context
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 
 import com.bookyrself.bookyrself.R
-import com.bookyrself.bookyrself.data.contacts.ContactsRepository
-import com.bookyrself.bookyrself.data.events.EventsRepository
+import com.bookyrself.bookyrself.data.contacts.ContactsRepoRxJava
 import com.bookyrself.bookyrself.data.profile.ProfileRepo
 import com.bookyrself.bookyrself.utils.FragmentViewPager
 import com.bookyrself.bookyrself.utils.FragmentViewPagerAdapter
@@ -82,14 +80,14 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         private const val CONTACTS_FRAGMENT_INDEX = 3
         private const val PROFILE_FRAGMENT_INDEX = 4
 
-        private var CONTACTS_REPO: ContactsRepository? = null
+        private var CONTACTS_REPO: ContactsRepoRxJava? = null
         private var PROFILE_REPO: ProfileRepo? = null
 
         //TODO: Fix all these !! and find a better way to serve up these repos
-        val contactsRepo: ContactsRepository
+        val contactsRepo: ContactsRepoRxJava
             get() {
                 if (CONTACTS_REPO == null) {
-                    CONTACTS_REPO = ContactsRepository()
+                    CONTACTS_REPO = ContactsRepoRxJava()
                 }
                 return CONTACTS_REPO!!
             }
