@@ -15,13 +15,10 @@ open class BaseViewModel(application: Application, requiresAuth: Boolean) : Andr
     val service = FirebaseServiceCoroutines.instance
 
     init {
-        //TODO: I can probably clean this logic up
         if (requiresAuth) {
             if (isSignedIn.value == true) {
                 this.load()
             }
-        } else {
-            this.load()
         }
     }
 
