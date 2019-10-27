@@ -18,7 +18,7 @@ class UserDetailViewModel(application: Application, userDetailId: String) : Base
     var contactWasAdded = MutableLiveData<Boolean>()
 
     init {
-        loadUserData(userId!!)
+        loadUserData(userDetailId)
     }
 
     private fun loadUserData(userId: String) {
@@ -58,7 +58,6 @@ class UserDetailViewModel(application: Application, userDetailId: String) : Base
     }
 
     fun addContactToUser(contactId: String, userId: String) {
-
         CoroutineScope(Dispatchers.Main).launch {
             val addContactResponse = service.addContactToUserAsync(true, userId, contactId)
             if (addContactResponse.isSuccessful) {
