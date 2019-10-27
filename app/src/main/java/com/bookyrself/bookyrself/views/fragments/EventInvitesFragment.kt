@@ -1,5 +1,6 @@
 package com.bookyrself.bookyrself.views.fragments
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -39,8 +40,19 @@ class EventInvitesFragment : BaseFragment() {
     }
 
     override fun onResume() {
-        super.onResume()
         init()
+        super.onResume()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                RC_SIGN_IN -> {
+                    model.load()
+                }
+            }
+        }
     }
 
     private fun init() {

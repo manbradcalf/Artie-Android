@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -37,7 +36,7 @@ class ContactsFragment : BaseFragment() {
     }
 
 
-    private fun init() {
+    fun init() {
         // Set up initial view
         toolbar_contacts_fragment.setTitle(R.string.contacts_toolbar)
         showLoadingState(true)
@@ -50,9 +49,9 @@ class ContactsFragment : BaseFragment() {
         model.contactsHashMap.observe(this) {
             // Now we have data so lets fire up the adapter
             if (!it.isNullOrEmpty()) {
-                loadContacts(it)
+                showUserContacts(it)
             } else {
-                noContactsReturned()
+                noUserContactsReturned()
             }
         }
 
@@ -64,9 +63,9 @@ class ContactsFragment : BaseFragment() {
                         activity!!.getDrawable(R.drawable.ic_person_add_black_24dp)!!)
             } else if (!contactsMap.isNullOrEmpty()) {
                 //TODO: Will this be victim of a race condition if contactsMap hasn't been set yet
-                loadContacts(contactsMap)
+                showUserContacts(contactsMap)
             } else {
-                noContactsReturned()
+                noUserContactsReturned()
             }
         }
     }
@@ -77,7 +76,7 @@ class ContactsFragment : BaseFragment() {
     }
 
     //TODO: Rename this method and / or combine with showContent
-    private fun loadContacts(contactsReturned: HashMap<User, String>?) {
+    private fun showUserContacts(contactsReturned: HashMap<User, String>?) {
         adapter = ContactsAdapter()
         contacts_recyclerview.adapter = adapter
         layoutManager = LinearLayoutManager(activity)
@@ -92,7 +91,7 @@ class ContactsFragment : BaseFragment() {
         adapter.notifyDataSetChanged()
     }
 
-    private fun noContactsReturned() {
+    private fun noUserContactsReturned() {
         showEmptyState(getString(R.string.contacts_empty_state_no_content_header),
                 getString(R.string.contacts_empty_state_no_content_subheader),
                 activity!!.getDrawable(R.drawable.ic_person_add_black_24dp))
@@ -120,8 +119,7 @@ class ContactsFragment : BaseFragment() {
         if (resultCode == RESULT_OK) {
             when (requestCode) {
                 RC_SIGN_IN -> {
-                    hideEmptyState()
-                    showLoadingState(true)
+                    model.load()
                 }
             }
         }

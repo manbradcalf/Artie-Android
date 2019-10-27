@@ -34,7 +34,12 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
     private val pendingEventsCalendarDays = ArrayList<CalendarDay>()
     private val calendarDaysWithEventIds = HashMap<CalendarDay, String>()
 
-    private fun init() {
+    override fun onResume() {
+        init()
+        super.onResume()
+    }
+
+    fun init() {
         events_toolbar?.title = "Your Calendar"
 
         event_creation_fab?.setOnClickListener {
@@ -68,13 +73,10 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
                 showSignedOutEmptyState(
                         getString(R.string.events_fragment_empty_state_signed_out_subheader),
                         activity!!.getDrawable(R.drawable.ic_calendar)!!)
+            } else {
+                showContent(true)
             }
         }
-    }
-
-    override fun onResume() {
-        init()
-        super.onResume()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -94,7 +96,7 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK) {
-            init()
+            model.load()
         }
     }
 
@@ -159,7 +161,6 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
         hideEmptyState()
     }
 
-
     //TODO: Should i update min api or somn
     @SuppressLint("RestrictedApi")
     override fun showContent(show: Boolean) {
@@ -179,38 +180,6 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
             events_progressbar?.visibility = View.VISIBLE
         } else {
             events_progressbar?.visibility = View.INVISIBLE
-        }
-    }
-
-    private fun showEmptyState(header: String, subHeader: String, buttonText: String, image: Drawable?) {
-        showContent(false)
-        showLoadingState(false)
-        empty_state_view?.visibility = View.VISIBLE
-        empty_state_image?.visibility = View.VISIBLE
-        empty_state_text_header?.visibility = View.VISIBLE
-        empty_state_text_subheader?.visibility = View.VISIBLE
-
-        empty_state_image?.setImageDrawable(image)
-        empty_state_text_header?.text = header
-        empty_state_text_subheader?.text = subHeader
-
-        if (buttonText == "") {
-            empty_state_button?.visibility = View.GONE
-        } else {
-            empty_state_button?.visibility = View.VISIBLE
-            empty_state_button?.text = buttonText
-            empty_state_button?.setOnClickListener {
-                val providers = listOf(AuthUI.IdpConfig.GoogleBuilder().build(),
-                        AuthUI.IdpConfig.EmailBuilder().build())
-                // Authenticate
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                .createSignInIntentBuilder()
-                                .setIsSmartLockEnabled(false, true)
-                                .setAvailableProviders(providers)
-                                .build(),
-                        RC_SIGN_IN)
-            }
         }
     }
 }
