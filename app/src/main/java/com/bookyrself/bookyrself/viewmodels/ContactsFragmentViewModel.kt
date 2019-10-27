@@ -12,15 +12,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ContactsFragmentViewModel(application: Application) : BaseViewModel(application, true) {
+    private val repo = ContactsRepo.getInstance(getApplication())
     val contactsHashMap = MutableLiveData<HashMap<User, String>?>()
 
     override fun load() {
-        //TODO: Move to UserRepo
         CoroutineScope(Dispatchers.IO).launch {
-            when (val response =
-                    ContactsRepo
-                            .getInstance(getApplication())
-                            .getContacts(userId!!)) {
+            when (val response = repo.getContacts(userId!!)) {
                 is Success -> {
                     contactsHashMap.postValue(response.contacts)
                 }
