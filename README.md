@@ -1,2 +1,2 @@
-# BookYrself
-Bookyrself is an event management tool that connects artists, promoters, producers and everything in between. If you’re in a band trying to book a tour, Bookyrself will show you who, when and where is booking. If you’re an artist wanting to show your work in a gallery, Bookyrself will help you browse vacancies. If you’re a booker, a talent buyer or run a DIY venue, you can use Bookyrself to seek out artists proactively and curate your establishment’s aesthetic.
+# Artie
+Artie is an event management tool that connects artists, promoters, producers and everything in between. If you’re in a band trying to book a tour, Artie will show you who, when and where is booking. If you’re an artist wanting to show your work in a gallery, Artie will help you browse vacancies. If you’re a booker, a talent buyer or run a DIY venue, you can use Artie to seek out artists proactively and curate your establishment’s aesthetic.
