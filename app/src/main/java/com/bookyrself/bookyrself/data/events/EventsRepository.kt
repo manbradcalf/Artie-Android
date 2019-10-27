@@ -16,9 +16,8 @@ class EventsRepository private constructor(context: Context) {
     private val eventsOfPendingInvites = HashMap<EventDetail, String>()
     private val eventsAttending = HashMap<EventDetail, String>()
 
-    private var cacheIsDirty: Boolean = false
+    private var cacheIsDirty: Boolean = true
     private var db: DatabaseReference? = null
-    private val tinyDB: TinyDB = TinyDB(context)
     private val service = FirebaseServiceCoroutines.instance
 
     companion object : SingletonHolder<EventsRepository, Context>(::EventsRepository)
@@ -28,7 +27,6 @@ class EventsRepository private constructor(context: Context) {
         FirebaseAuth.getInstance().addAuthStateListener()
         { auth ->
             if (auth.uid == null) {
-                tinyDB.clear()
                 allUsersEvents.clear()
                 cacheIsDirty = true
             }
@@ -82,6 +80,7 @@ class EventsRepository private constructor(context: Context) {
                                 "\n${eventResponse.errorBody()}")
                     }
                 }
+                cacheIsDirty = false
                 EventsRepositoryResponse.Success(allUsersEvents)
             } else {
                 EventsRepositoryResponse.Failure("Unable to find user with userId $userId")
@@ -92,23 +91,23 @@ class EventsRepository private constructor(context: Context) {
     }
 
     suspend fun getEventsWithPendingInvites(userId: String): EventsRepositoryResponse {
-        return if (cacheIsDirty) {
-            if (service.getUserDetails(userId).isSuccessful) {
+        if (cacheIsDirty) {
+            val userResponse = service.getUserDetails(userId)
+            if (userResponse.isSuccessful) {
                 eventsOfPendingInvites.clear()
 
-                service.getUserDetails(userId).body()?.events?.filter { isInvitePendingResponse(it) }?.keys?.forEach { eventId ->
+                userResponse.body()?.events?.filter { isInvitePendingResponse(it) }?.keys?.forEach { eventId ->
                     val eventWithPendingInviteResponse = service.getEventData(eventId)
                     if (eventWithPendingInviteResponse.isSuccessful) {
                         eventWithPendingInviteResponse.body()?.let { eventsOfPendingInvites[it] = eventId }
                     }
                 }
-                EventsRepositoryResponse.Success(eventsOfPendingInvites)
+                cacheIsDirty = false
             } else {
-                EventsRepositoryResponse.Failure("Unable to find user with userId $userId")
+                return EventsRepositoryResponse.Failure("Unable to find user with userId $userId")
             }
-        } else {
-            EventsRepositoryResponse.Success(allUsersEvents)
         }
+        return EventsRepositoryResponse.Success(eventsOfPendingInvites)
     }
 
     suspend fun respondToInvite(accepted: Boolean, userId: String, eventId: String, eventDetail: EventDetail): EventsRepositoryResponse {
