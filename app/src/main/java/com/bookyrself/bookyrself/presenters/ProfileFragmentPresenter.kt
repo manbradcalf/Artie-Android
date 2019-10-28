@@ -1,8 +1,6 @@
 package com.bookyrself.bookyrself.presenters
 
 import android.content.Context
-import android.util.Log
-import com.bookyrself.bookyrself.data.events.EventsRepository
 import com.bookyrself.bookyrself.data.profile.ProfileRepo
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.serverModels.User.User
@@ -65,10 +63,10 @@ class ProfileFragmentPresenter
 //                    listener.showCreatingUserLoadingToast()
 //                }
 //                false -> {
-                    // load the profile
-                    userId = FirebaseAuth.getInstance().uid
-                    loadProfile()
-                    loadEventDetails()
+            // load the profile
+            userId = FirebaseAuth.getInstance().uid
+            loadProfile()
+            loadEventDetails()
 //                }
 //            }
         } else {

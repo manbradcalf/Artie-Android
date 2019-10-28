@@ -13,14 +13,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class EventsFragmentViewModel(application: Application) : BaseViewModel(application, true) {
-    private val repo = EventsRepository.getInstance(getApplication())
-    var eventDetailsHashMap = MutableLiveData<HashMap<EventDetail, String>>()
+    var eventDetails = MutableLiveData<HashMap<EventDetail, String>>()
 
     override fun load() {
         CoroutineScope(Dispatchers.IO).launch {
-            when (val response = repo.getAllEvents(userId!!)) {
+            when (val response =
+                    EventsRepository
+                            .getInstance(getApplication())
+                            .getAllEventsForUser(userId!!)) {
                 is Success -> {
-                    eventDetailsHashMap.postValue(response.events)
+                    eventDetails.postValue(response.events)
                 }
                 is Failure -> {
                     errorMessage.postValue(response.errorMessage)

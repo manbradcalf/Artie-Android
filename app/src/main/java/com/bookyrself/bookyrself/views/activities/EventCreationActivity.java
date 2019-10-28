@@ -43,6 +43,7 @@ import butterknife.ButterKnife;
 public class EventCreationActivity extends AppCompatActivity implements EventCreationPresenter.EventCreationPresenterListener {
 
 
+    private static final int RC_PHOTO_SELECT = 789;
     @BindView(R.id.event_creation_toolbar)
     Toolbar toolbar;
     @BindView(R.id.event_creation_scrollview)
@@ -61,8 +62,6 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     ChipsInput contactChipsInput;
     @BindView(R.id.event_image)
     ImageView eventImage;
-
-    private static final int RC_PHOTO_SELECT = 789;
     private StorageReference storageReference;
     private EventCreationPresenter presenter;
     private List<User> contacts;

@@ -15,8 +15,6 @@ import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.MiniUser
 import com.bookyrself.bookyrself.utils.CircleTransform
-import com.bookyrself.bookyrself.viewmodels.BaseViewModel
-import com.bookyrself.bookyrself.viewmodels.ContactsFragmentViewModel
 import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel
 import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso

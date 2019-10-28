@@ -2,12 +2,9 @@ package com.bookyrself.bookyrself.data.serverModels.User
 
 import android.graphics.drawable.Drawable
 import android.net.Uri
-
 import com.google.gson.annotations.SerializedName
 import com.pchmn.materialchips.model.ChipInterface
-
-import java.util.HashMap
-
+import java.util.*
 import javax.annotation.Generated
 
 @Generated("net.hexar.json2pojo")

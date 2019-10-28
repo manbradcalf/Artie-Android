@@ -77,8 +77,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="@color/acceptInviteButtonBackground"
-                android:textColor="@android:color/white"
-                android:text="Accept" />
+                android:text="Accept"
+                android:textColor="@android:color/white" />
 
             <Button
                 android:id="@+id/event_item_invite_deny_button"

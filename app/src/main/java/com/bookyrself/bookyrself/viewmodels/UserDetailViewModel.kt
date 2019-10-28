@@ -71,7 +71,7 @@ class UserDetailViewModel(application: Application, userDetailId: String) : Base
     }
 
     class UserDetailViewModelFactory(private val application: Application,
-                                      private val userId: String) : ViewModelProvider.Factory {
+                                     private val userId: String) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return UserDetailViewModel(application, userId) as T
         }

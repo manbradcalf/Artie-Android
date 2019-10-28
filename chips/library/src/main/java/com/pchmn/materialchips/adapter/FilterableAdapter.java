@@ -101,20 +101,6 @@ public class FilterableAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         });
     }
 
-    private class ItemViewHolder extends RecyclerView.ViewHolder {
-
-        private CircleImageView mAvatar;
-        private TextView mLabel;
-        private TextView mInfo;
-
-        ItemViewHolder(View view) {
-            super(view);
-            mAvatar = (CircleImageView) view.findViewById(R.id.avatar);
-            mLabel = (TextView) view.findViewById(R.id.label);
-            mInfo = (TextView) view.findViewById(R.id.info);
-        }
-    }
-
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.item_list_filterable, parent, false);
@@ -185,6 +171,57 @@ public class FilterableAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         return mFilter;
     }
 
+    private void removeChip(ChipInterface chip) {
+        int position = mFilteredList.indexOf(chip);
+        if (position >= 0)
+            mFilteredList.remove(position);
+
+        position = mChipList.indexOf(chip);
+        if (position >= 0)
+            mChipList.remove(position);
+
+        notifyDataSetChanged();
+    }
+
+    private void addChip(ChipInterface chip) {
+        if (contains(chip)) {
+            mChipList.add(chip);
+            mFilteredList.add(chip);
+            // sort original list
+            sortList(mChipList);
+            // sort filtered list
+            sortList(mFilteredList);
+
+            notifyDataSetChanged();
+        }
+    }
+
+    private boolean contains(ChipInterface chip) {
+        for (ChipInterface item : mOriginalList) {
+            if (item.equals(chip))
+                return true;
+        }
+        return false;
+    }
+
+    private void sortList(List<? extends ChipInterface> list) {
+        Collections.sort(list, mComparator);
+    }
+
+    private class ItemViewHolder extends RecyclerView.ViewHolder {
+
+        private CircleImageView mAvatar;
+        private TextView mLabel;
+        private TextView mInfo;
+
+        ItemViewHolder(View view) {
+            super(view);
+            mAvatar = (CircleImageView) view.findViewById(R.id.avatar);
+            mLabel = (TextView) view.findViewById(R.id.label);
+            mInfo = (TextView) view.findViewById(R.id.info);
+        }
+    }
+
     private class ChipFilter extends Filter {
 
         private FilterableAdapter adapter;
@@ -226,42 +263,5 @@ public class FilterableAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             mFilteredList.addAll((ArrayList<ChipInterface>) results.values);
             notifyDataSetChanged();
         }
-    }
-
-    private void removeChip(ChipInterface chip) {
-        int position = mFilteredList.indexOf(chip);
-        if (position >= 0)
-            mFilteredList.remove(position);
-
-        position = mChipList.indexOf(chip);
-        if (position >= 0)
-            mChipList.remove(position);
-
-        notifyDataSetChanged();
-    }
-
-    private void addChip(ChipInterface chip) {
-        if (contains(chip)) {
-            mChipList.add(chip);
-            mFilteredList.add(chip);
-            // sort original list
-            sortList(mChipList);
-            // sort filtered list
-            sortList(mFilteredList);
-
-            notifyDataSetChanged();
-        }
-    }
-
-    private boolean contains(ChipInterface chip) {
-        for (ChipInterface item : mOriginalList) {
-            if (item.equals(chip))
-                return true;
-        }
-        return false;
-    }
-
-    private void sortList(List<? extends ChipInterface> list) {
-        Collections.sort(list, mComparator);
     }
 }

@@ -30,8 +30,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class DetailedChipView extends RelativeLayout {
 
     private static final String TAG = DetailedChipView.class.toString();
-    // context
-    private Context mContext;
+    // letter tile provider
+    private static LetterTileProvider mLetterTileProvider;
     // xml elements
     @BindView(R2.id.content)
     RelativeLayout mContentLayout;
@@ -43,8 +43,8 @@ public class DetailedChipView extends RelativeLayout {
     TextView mInfoTextView;
     @BindView(R2.id.delete_button)
     ImageButton mDeleteButton;
-    // letter tile provider
-    private static LetterTileProvider mLetterTileProvider;
+    // context
+    private Context mContext;
     // attributes
     private ColorStateList mBackgroundColor;
 
@@ -58,6 +58,41 @@ public class DetailedChipView extends RelativeLayout {
         super(context, attrs);
         mContext = context;
         init(attrs);
+    }
+
+    private static DetailedChipView newInstance(Builder builder) {
+        DetailedChipView detailedChipView = new DetailedChipView(builder.context);
+        // avatar
+        if (builder.avatarUri != null)
+            detailedChipView.setAvatarIcon(builder.avatarUri);
+        else if (builder.avatarDrawable != null)
+            detailedChipView.setAvatarIcon(builder.avatarDrawable);
+        else
+            detailedChipView.setAvatarIcon(mLetterTileProvider.getLetterTile(builder.name));
+
+        // background color
+        if (builder.backgroundColor != null)
+            detailedChipView.setBackGroundcolor(builder.backgroundColor);
+
+        // text color
+        if (builder.textColor != null)
+            detailedChipView.setTextColor(builder.textColor);
+        else if (ColorUtil.isColorDark(detailedChipView.getBackgroundColor()))
+            detailedChipView.setTextColor(ColorStateList.valueOf(Color.WHITE));
+        else
+            detailedChipView.setTextColor(ColorStateList.valueOf(Color.BLACK));
+
+        // delete icon color
+        if (builder.deleteIconColor != null)
+            detailedChipView.setDeleteIconColor(builder.deleteIconColor);
+        else if (ColorUtil.isColorDark(detailedChipView.getBackgroundColor()))
+            detailedChipView.setDeleteIconColor(ColorStateList.valueOf(Color.WHITE));
+        else
+            detailedChipView.setDeleteIconColor(ColorStateList.valueOf(Color.BLACK));
+
+        detailedChipView.setName(builder.name);
+        detailedChipView.setInfo(builder.info);
+        return detailedChipView;
     }
 
     /**
@@ -233,40 +268,5 @@ public class DetailedChipView extends RelativeLayout {
         public DetailedChipView build() {
             return DetailedChipView.newInstance(this);
         }
-    }
-
-    private static DetailedChipView newInstance(Builder builder) {
-        DetailedChipView detailedChipView = new DetailedChipView(builder.context);
-        // avatar
-        if (builder.avatarUri != null)
-            detailedChipView.setAvatarIcon(builder.avatarUri);
-        else if (builder.avatarDrawable != null)
-            detailedChipView.setAvatarIcon(builder.avatarDrawable);
-        else
-            detailedChipView.setAvatarIcon(mLetterTileProvider.getLetterTile(builder.name));
-
-        // background color
-        if (builder.backgroundColor != null)
-            detailedChipView.setBackGroundcolor(builder.backgroundColor);
-
-        // text color
-        if (builder.textColor != null)
-            detailedChipView.setTextColor(builder.textColor);
-        else if (ColorUtil.isColorDark(detailedChipView.getBackgroundColor()))
-            detailedChipView.setTextColor(ColorStateList.valueOf(Color.WHITE));
-        else
-            detailedChipView.setTextColor(ColorStateList.valueOf(Color.BLACK));
-
-        // delete icon color
-        if (builder.deleteIconColor != null)
-            detailedChipView.setDeleteIconColor(builder.deleteIconColor);
-        else if (ColorUtil.isColorDark(detailedChipView.getBackgroundColor()))
-            detailedChipView.setDeleteIconColor(ColorStateList.valueOf(Color.WHITE));
-        else
-            detailedChipView.setDeleteIconColor(ColorStateList.valueOf(Color.BLACK));
-
-        detailedChipView.setName(builder.name);
-        detailedChipView.setInfo(builder.info);
-        return detailedChipView;
     }
 }

@@ -1,4 +1,3 @@
-
 package com.bookyrself.bookyrself.data.serverModels.User;
 
 import com.google.gson.annotations.SerializedName;

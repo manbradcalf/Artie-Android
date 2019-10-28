@@ -38,7 +38,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".views.activities.EventDetailActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".views.activities.UserDetailActivity"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -56,12 +56,11 @@
             android:name=".views.activities.EventCreationActivity"
             android:label="@string/title_activity_event_creation"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustPan"/>
+            android:windowSoftInputMode="adjustPan" />
         <service
             android:name=".widget.EventsWidgetService"
             android:exported="false"
-            android:permission="android.permission.BIND_REMOTEVIEWS" >
-        </service>
+            android:permission="android.permission.BIND_REMOTEVIEWS"></service>
     </application>
 
 </manifest>

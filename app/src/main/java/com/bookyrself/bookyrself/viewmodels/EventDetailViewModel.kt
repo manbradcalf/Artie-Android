@@ -19,7 +19,6 @@ class EventDetailViewModel(application: Application, private val eventId: String
     var invitees = MutableLiveData<MutableList<Pair<String, MiniUser>>>()
 
     override fun load() {
-        // TODO: Should this use the eventsRepo or nah?
         CoroutineScope(Dispatchers.IO).launch {
             val eventDetailCall = service.getEventData(eventId)
             if (eventDetailCall.isSuccessful) {

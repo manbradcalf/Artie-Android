@@ -28,8 +28,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ChipView extends RelativeLayout {
 
     private static final String TAG = ChipView.class.toString();
-    // context
-    private Context mContext;
+    // attributes
+    private static final int NONE = -1;
     // xml elements
     @BindView(R2.id.content)
     LinearLayout mContentLayout;
@@ -39,8 +39,8 @@ public class ChipView extends RelativeLayout {
     TextView mLabelTextView;
     @BindView(R2.id.delete_button)
     ImageButton mDeleteButton;
-    // attributes
-    private static final int NONE = -1;
+    // context
+    private Context mContext;
     private String mLabel;
     private ColorStateList mLabelColor;
     private boolean mHasAvatarIcon = false;
@@ -65,6 +65,23 @@ public class ChipView extends RelativeLayout {
         super(context, attrs);
         mContext = context;
         init(attrs);
+    }
+
+    private static ChipView newInstance(Builder builder) {
+        ChipView chipView = new ChipView(builder.context);
+        chipView.mLabel = builder.label;
+        chipView.mLabelColor = builder.labelColor;
+        chipView.mHasAvatarIcon = builder.hasAvatarIcon;
+        chipView.mAvatarIconUri = builder.avatarIconUri;
+        chipView.mAvatarIconDrawable = builder.avatarIconDrawable;
+        chipView.mDeletable = builder.deletable;
+        chipView.mDeleteIcon = builder.deleteIcon;
+        chipView.mDeleteIconColor = builder.deleteIconColor;
+        chipView.mBackgroundColor = builder.backgroundColor;
+        chipView.mChip = builder.chip;
+        chipView.inflateWithAttributes();
+
+        return chipView;
     }
 
     /**
@@ -431,22 +448,5 @@ public class ChipView extends RelativeLayout {
         public ChipView build() {
             return newInstance(this);
         }
-    }
-
-    private static ChipView newInstance(Builder builder) {
-        ChipView chipView = new ChipView(builder.context);
-        chipView.mLabel = builder.label;
-        chipView.mLabelColor = builder.labelColor;
-        chipView.mHasAvatarIcon = builder.hasAvatarIcon;
-        chipView.mAvatarIconUri = builder.avatarIconUri;
-        chipView.mAvatarIconDrawable = builder.avatarIconDrawable;
-        chipView.mDeletable = builder.deletable;
-        chipView.mDeleteIcon = builder.deleteIcon;
-        chipView.mDeleteIconColor = builder.deleteIconColor;
-        chipView.mBackgroundColor = builder.backgroundColor;
-        chipView.mChip = builder.chip;
-        chipView.inflateWithAttributes();
-
-        return chipView;
     }
 }

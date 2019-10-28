@@ -25,27 +25,27 @@
 
     <ProgressBar
         android:id="@+id/contacts_fragment_progressbar"
-        android:layout_centerInParent="true"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
 
     <include
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
         android:id="@+id/contacts_empty_state"
         layout="@layout/empty_state_template"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/contacts_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/appBarLayout"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_below="@+id/appBarLayout"
-        android:layout_marginBottom="?attr/actionBarSize"
-        android:layout_marginTop="?attr/actionBarSize" />
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_marginBottom="?attr/actionBarSize" />
 
     <include
         layout="@layout/element_bottom_nav"

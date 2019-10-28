@@ -32,10 +32,10 @@ import butterknife.ButterKnife;
 public class FilterableListView extends RelativeLayout {
 
     private static final String TAG = FilterableListView.class.toString();
-    private Context mContext;
     // list
     @BindView(R2.id.recycler_view)
     RecyclerView mRecyclerView;
+    private Context mContext;
     private FilterableAdapter mAdapter;
     private List<? extends ChipInterface> mFilterableList;
     // others
