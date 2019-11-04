@@ -13,20 +13,23 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class ContactsFragmentViewModel(application: Application) : BaseViewModel(application, true) {
+class ContactsFragmentViewModel(application: Application) : BaseViewModel(application) {
     val contactsHashMap = MutableLiveData<HashMap<User, String>>()
 
     override fun load() {
-        CoroutineScope(Dispatchers.IO).launch {
-            when (val response =
-                    ContactsRepo
-                            .getInstance(getApplication())
-                            .getContacts(FirebaseAuth.getInstance().uid!!)) {
-                is Success -> {
-                    contactsHashMap.postValue(response.contacts)
-                }
-                is Failure -> {
-                    errorMessage.postValue(response.errorMessage)
+        val userId = FirebaseAuth.getInstance().uid
+        if (userId != null) {
+            CoroutineScope(Dispatchers.IO).launch {
+                when (val response =
+                        ContactsRepo
+                                .getInstance(getApplication())
+                                .getContacts(userId)) {
+                    is Success -> {
+                        contactsHashMap.postValue(response.contacts)
+                    }
+                    is Failure -> {
+                        errorMessage.postValue(response.errorMessage)
+                    }
                 }
             }
         }

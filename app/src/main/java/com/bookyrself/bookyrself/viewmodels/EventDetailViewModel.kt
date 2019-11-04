@@ -13,7 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class EventDetailViewModel(application: Application, private val eventId: String) : BaseViewModel(application, false) {
+class EventDetailViewModel(application: Application, private val eventId: String) : BaseViewModel(application) {
 
     var event = MutableLiveData<EventDetail?>()
     var invitees = MutableLiveData<MutableList<Pair<String, MiniUser>>>()

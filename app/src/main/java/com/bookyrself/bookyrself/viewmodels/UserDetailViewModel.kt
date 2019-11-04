@@ -11,7 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class UserDetailViewModel(application: Application, userDetailId: String) : BaseViewModel(application, false) {
+class UserDetailViewModel(application: Application, userDetailId: String) : BaseViewModel(application) {
 
     var user = MutableLiveData<User?>()
     var events = MutableLiveData<HashMap<EventDetail, String>>()

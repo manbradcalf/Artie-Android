@@ -1,8 +1,6 @@
 package com.bookyrself.bookyrself.views.fragments
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -32,6 +30,13 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
     private val pendingEventsCalendarDays = ArrayList<CalendarDay>()
     private val calendarDaysWithEventIds = HashMap<CalendarDay, String>()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        model = ViewModelProviders.of(this,
+                EventsFragmentViewModel.EventsFragmentViewModelFactory(activity!!.application))
+                .get(EventsFragmentViewModel::class.java)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_events, container, false)
@@ -41,24 +46,10 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
         super.onResume()
         setLayout()
         setListeners()
+        model.load()
     }
 
     private fun setListeners() {
-        FirebaseAuth.getInstance().addAuthStateListener {
-            if (it.currentUser != null) {
-                model.load()
-            } else {
-                showLoadingState(false)
-                showSignedOutEmptyState(
-                        getString(R.string.events_fragment_empty_state_signed_out_subheader),
-                        activity!!.getDrawable(R.drawable.ic_calendar)!!)
-            }
-        }
-
-        model = ViewModelProviders.of(this,
-                EventsFragmentViewModel.EventsFragmentViewModelFactory(activity!!.application))
-                .get(EventsFragmentViewModel::class.java)
-
         model.eventDetails.observe(this) { events ->
             if (events.isNotEmpty()) {
                 showContent(true)
@@ -66,7 +57,14 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
                     eventDetailReturned(event.key, event.value)
                 }
             } else {
-                noEventDetailsReturned()
+                if (FirebaseAuth.getInstance().uid != null) {
+                    noEventDetailsReturned()
+                } else {
+                    showSignedOutEmptyState(
+                            getString(R.string.events_fragment_empty_state_signed_out_subheader),
+                            activity!!.getDrawable(R.drawable.ic_no_events_black_24dp)
+                    )
+                }
             }
         }
 
@@ -141,10 +139,9 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
                         pendingEventsCalendarDays.add(calendarDay)
                         calendarDaysWithEventIds[calendarDay] = eventId
                         events_calendar?.addDecorator(EventDecorator(EventDecorator.INVITE_PENDING, pendingEventsCalendarDays, this.context!!))
-                    }// or if I'm not attending yet, set invite to pending
-                } else
-                    Log.e("Test", "User not attending")
-        }// If I'm not hosting and there are users invited
+                    }
+                }
+        }
     }
 
     private fun noEventDetailsReturned() {

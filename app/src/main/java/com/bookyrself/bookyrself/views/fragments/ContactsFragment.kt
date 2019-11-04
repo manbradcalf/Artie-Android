@@ -35,33 +35,32 @@ class ContactsFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_contacts, container, false)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        model = ViewModelProviders.of(this,
+                ContactsFragmentViewModel.ContactsFragmentViewModelFactory(activity!!.application))
+                .get(ContactsFragmentViewModel::class.java)
+    }
+
     override fun onResume() {
         super.onResume()
         setLayout()
         setListeners()
+        model.load()
     }
 
     private fun setListeners() {
-        FirebaseAuth.getInstance().addAuthStateListener {
-            if (it.currentUser != null) {
-                model.load()
-            } else {
-                showLoadingState(false)
-                showSignedOutEmptyState(
-                        getString(R.string.contacts_empty_state_signed_out_subheader),
-                        activity!!.getDrawable(R.drawable.ic_calendar)!!)
-            }
-        }
-
-        model = ViewModelProviders.of(this,
-                ContactsFragmentViewModel.ContactsFragmentViewModelFactory(activity!!.application))
-                .get(ContactsFragmentViewModel::class.java)
-
         model.contactsHashMap.observe(this) {
             if (!it.isNullOrEmpty()) {
                 showUserContacts(it)
             } else {
-                showNoContactsEmptyState()
+                if (FirebaseAuth.getInstance().uid != null) {
+                    showNoContactsEmptyState()
+                } else {
+                    showSignedOutEmptyState(
+                            getString(R.string.contacts_empty_state_no_content_subheader),
+                            activity!!.getDrawable(R.drawable.ic_person_add_black_24dp))
+                }
             }
         }
     }

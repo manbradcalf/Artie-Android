@@ -33,6 +33,13 @@ class EventInvitesFragment : BaseFragment() {
     lateinit var adapter: EventInvitesAdapter
     lateinit var model: EventInvitesFragmentViewModel
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        model = ViewModelProviders.of(this,
+                EventInvitesFragmentViewModel.EventInvitesFragmentViewModelFactory(activity!!.application))
+                .get(EventInvitesFragmentViewModel::class.java)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_event_invites, container, false)
@@ -42,29 +49,22 @@ class EventInvitesFragment : BaseFragment() {
         super.onResume()
         setLayout()
         setListeners()
+        model.load()
     }
 
     private fun setListeners() {
-        FirebaseAuth.getInstance().addAuthStateListener {
-            if (it.currentUser != null) {
-                model.load()
-            } else {
-                showLoadingState(false)
-                showSignedOutEmptyState(
-                        getString(R.string.empty_state_event_invites_signed_out_subheader),
-                        activity!!.getDrawable(R.drawable.ic_calendar)!!)
-            }
-        }
-
-        model = ViewModelProviders.of(this,
-                EventInvitesFragmentViewModel.EventInvitesFragmentViewModelFactory(activity!!.application))
-                .get(EventInvitesFragmentViewModel::class.java)
-
         model.eventsWithPendingInvites.observe(this) {
             if (!it.isNullOrEmpty()) {
                 showEventInvites(it)
             } else {
-                showEmptyStateForNoInvites()
+                if (FirebaseAuth.getInstance().uid != null) {
+                    showEmptyStateForNoInvites()
+                } else {
+                    showSignedOutEmptyState(
+                            getString(R.string.empty_state_event_invites_signed_out_subheader),
+                            activity!!.getDrawable(R.drawable.ic_no_events_black_24dp)
+                    )
+                }
             }
         }
     }
@@ -128,6 +128,7 @@ class EventInvitesFragment : BaseFragment() {
 
         inner class ViewHolderEvents(itemView: View) : RecyclerView.ViewHolder(itemView) {
             fun bind(eventDetail: EventDetail) = with(itemView) {
+                //TODO: NPE here, sometimes the hashMap is null?
                 val eventId = eventInvitesHashMap[eventDetail]!!
 
                 val eventNameTextView = this.event_item_invite_line1

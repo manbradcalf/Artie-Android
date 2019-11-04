@@ -13,20 +13,23 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class EventsFragmentViewModel(application: Application) : BaseViewModel(application, true) {
+class EventsFragmentViewModel(application: Application) : BaseViewModel(application) {
     var eventDetails = MutableLiveData<HashMap<EventDetail, String>>()
 
     override fun load() {
-        CoroutineScope(Dispatchers.IO).launch {
-            when (val response =
-                    EventsRepository
-                            .getInstance(getApplication())
-                            .getAllEventsForUser(FirebaseAuth.getInstance().uid!!)) {
-                is Success -> {
-                    eventDetails.postValue(response.events)
-                }
-                is Failure -> {
-                    errorMessage.postValue(response.errorMessage)
+        val userId = FirebaseAuth.getInstance().uid
+        if (userId != null) {
+            CoroutineScope(Dispatchers.IO).launch {
+                when (val response =
+                        EventsRepository
+                                .getInstance(getApplication())
+                                .getAllEventsForUser(userId)) {
+                    is Success -> {
+                        eventDetails.postValue(response.events)
+                    }
+                    is Failure -> {
+                        errorMessage.postValue(response.errorMessage)
+                    }
                 }
             }
         }

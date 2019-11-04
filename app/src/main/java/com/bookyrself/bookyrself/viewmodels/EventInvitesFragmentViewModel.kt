@@ -14,22 +14,27 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 
-class EventInvitesFragmentViewModel(application: Application) : BaseViewModel(application, true) {
+class EventInvitesFragmentViewModel(application: Application) : BaseViewModel(application) {
     val eventsWithPendingInvites = MutableLiveData<HashMap<EventDetail, String>>()
 
     override fun load() {
-        CoroutineScope(Dispatchers.IO).launch {
-            when (val response =
-                    EventsRepository
-                            .getInstance(getApplication())
-                            .getEventsWithPendingInvites(FirebaseAuth.getInstance().uid!!)) {
-                is Success -> {
-                    eventsWithPendingInvites.postValue(response.events)
-                }
-                is Failure -> {
-                    errorMessage.postValue(response.errorMessage)
+        val userId = FirebaseAuth.getInstance().uid
+        if (userId != null) {
+            CoroutineScope(Dispatchers.IO).launch {
+                when (val response =
+                        EventsRepository
+                                .getInstance(getApplication())
+                                .getEventsWithPendingInvites(userId)) {
+                    is Success -> {
+                        eventsWithPendingInvites.postValue(response.events)
+                    }
+                    is Failure -> {
+                        errorMessage.postValue(response.errorMessage)
+                    }
                 }
             }
+        } else {
+            // Notify fragment to show signed out empty state
         }
     }
 
