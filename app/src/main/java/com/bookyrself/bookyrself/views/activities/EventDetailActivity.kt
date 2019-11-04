@@ -7,6 +7,9 @@ import android.text.util.Linkify
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -108,7 +111,6 @@ class EventDetailActivity : BaseActivity() {
             // Handle any errors
             item_event_detail_userthumb!!.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_profile_black_24dp))
         }
-
 
         // Set the date
         val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
@@ -225,12 +227,12 @@ class EventDetailActivity : BaseActivity() {
 
 
         inner class InviteeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            val rowView = itemView.search_result_card_users
-            val userThumb = rowView.item_event_detail_userthumb
-            val userName = rowView.item_event_detail_username
-            val cityState = rowView.item_event_detail_citystate
-            val userUrl = rowView.item_event_detail_url
-            val attendingStatusTextView = rowView.item_event_detail_attending_textview
+            val rowView: CardView = itemView.search_result_card_users
+            val userThumb: ImageView = rowView.item_event_detail_userthumb
+            val userName: TextView = rowView.item_event_detail_username
+            val cityState: TextView = rowView.item_event_detail_citystate
+            val userUrl: TextView = rowView.item_event_detail_url
+            val attendingStatusTextView: TextView = rowView.item_event_detail_attending_textview
         }
     }
 }

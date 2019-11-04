@@ -190,12 +190,13 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     @Override
     public void eventCreated(String eventId) {
 
-        // Upload to firebase
-
-        StorageReference profilePhotoRef = storageReference.child("images/events/" + eventId);
-        UploadTask uploadTask = profilePhotoRef.putFile(selectedImage);
-        uploadTask.addOnSuccessListener(taskSnapshot -> Toast.makeText(this, "image upload completed", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(this, "image upload failed", Toast.LENGTH_SHORT).show());
+        if (selectedImage != null) {
+            // Upload to firebase
+            StorageReference profilePhotoRef = storageReference.child("images/events/" + eventId);
+            UploadTask uploadTask = profilePhotoRef.putFile(selectedImage);
+            uploadTask.addOnSuccessListener(taskSnapshot -> Toast.makeText(this, "image upload completed", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e -> Toast.makeText(this, "image upload failed", Toast.LENGTH_SHORT).show());
+        }
 
         Intent returnIntent = new Intent();
         setResult(RESULT_OK, returnIntent);
