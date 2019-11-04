@@ -60,7 +60,6 @@ class ContactsRepo private constructor(context: Context) {
     suspend fun getContacts(userId: String): ContactsRepoResponse {
         if (cacheIsDirty) {
             contacts.clear()
-            // Do stuff
             val contactsResponse = service.getUserContacts(userId)
             if (contactsResponse.isSuccessful) {
                 contactsResponse.body()?.keys?.forEach { contactUserId ->

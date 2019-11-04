@@ -13,8 +13,6 @@ class EventsRepository private constructor(context: Context) {
 
     private val allUsersEvents = HashMap<EventDetail, String>()
     private val eventsOfPendingInvites = HashMap<EventDetail, String>()
-    private val eventsAttending = HashMap<EventDetail, String>()
-
     private var cacheIsDirty: Boolean = true
     private var db: DatabaseReference? = null
     private val service = FirebaseServiceCoroutines.instance
@@ -63,6 +61,7 @@ class EventsRepository private constructor(context: Context) {
 
     suspend fun getAllEventsForUser(userId: String): EventsRepositoryResponse {
         return if (cacheIsDirty) {
+            allUsersEvents.clear()
             // go to server
             val userResponse = service.getUserDetails(userId)
             if (userResponse.isSuccessful) {
@@ -90,11 +89,9 @@ class EventsRepository private constructor(context: Context) {
 
     suspend fun getEventsWithPendingInvites(userId: String): EventsRepositoryResponse {
         if (cacheIsDirty) {
+            eventsOfPendingInvites.clear()
             val userResponse = service.getUserDetails(userId)
-
             if (userResponse.isSuccessful) {
-                eventsOfPendingInvites.clear()
-
                 userResponse.body()?.events?.filter { isInvitePendingResponse(it) }?.keys?.forEach { eventId ->
                     val eventWithPendingInviteResponse = service.getEventData(eventId)
                     if (eventWithPendingInviteResponse.isSuccessful) {
