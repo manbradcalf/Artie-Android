@@ -6,7 +6,6 @@ import com.bookyrself.bookyrself.data.SingletonHolder
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.serverModels.User.EventInviteInfo
 import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
-import com.bookyrself.bookyrself.utils.TinyDB
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
@@ -62,7 +61,7 @@ class EventsRepository private constructor(context: Context) {
         }
     }
 
-    suspend fun getAllEvents(userId: String): EventsRepositoryResponse {
+    suspend fun getAllEventsForUser(userId: String): EventsRepositoryResponse {
         return if (cacheIsDirty) {
             // go to server
             val userResponse = service.getUserDetails(userId)
@@ -80,7 +79,6 @@ class EventsRepository private constructor(context: Context) {
                                 "\n${eventResponse.errorBody()}")
                     }
                 }
-                cacheIsDirty = false
                 EventsRepositoryResponse.Success(allUsersEvents)
             } else {
                 EventsRepositoryResponse.Failure("Unable to find user with userId $userId")
@@ -93,6 +91,7 @@ class EventsRepository private constructor(context: Context) {
     suspend fun getEventsWithPendingInvites(userId: String): EventsRepositoryResponse {
         if (cacheIsDirty) {
             val userResponse = service.getUserDetails(userId)
+
             if (userResponse.isSuccessful) {
                 eventsOfPendingInvites.clear()
 
@@ -102,7 +101,6 @@ class EventsRepository private constructor(context: Context) {
                         eventWithPendingInviteResponse.body()?.let { eventsOfPendingInvites[it] = eventId }
                     }
                 }
-                cacheIsDirty = false
             } else {
                 return EventsRepositoryResponse.Failure("Unable to find user with userId $userId")
             }
@@ -112,7 +110,7 @@ class EventsRepository private constructor(context: Context) {
 
     suspend fun respondToInvite(accepted: Boolean, userId: String, eventId: String, eventDetail: EventDetail): EventsRepositoryResponse {
         return if (accepted) {
-            if ( service.acceptInvite(true, userId, eventId).isSuccessful &&
+            if (service.acceptInvite(true, userId, eventId).isSuccessful &&
                     service.setEventUserAsAttending(true, userId, eventId).isSuccessful) {
                 eventsOfPendingInvites.remove(eventDetail)
                 EventsRepositoryResponse.Success(eventsOfPendingInvites)
