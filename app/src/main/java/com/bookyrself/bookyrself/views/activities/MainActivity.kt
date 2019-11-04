@@ -22,9 +22,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     private val contactsFragment = ContactsFragment()
     private val eventInvitesFragment = EventInvitesFragment()
 
-    val db = FirebaseDatabase.getInstance("https://bookyrself-staging.firebaseio.com/")
-    val firebaseApp = FirebaseApp.initializeApp(this)
-
     lateinit var adapter: FragmentViewPagerAdapter
     lateinit var viewPager: FragmentViewPager
     lateinit var navigationView: BottomNavigationView
