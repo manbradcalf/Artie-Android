@@ -68,6 +68,7 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
     <string name="user_detail_error_header">There was a problem loading the user</string>
+    <string name="edit_search_btn_text">Edit Search</string>
 
 
 </resources>
