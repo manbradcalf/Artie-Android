@@ -18,6 +18,10 @@ class EventDetailViewModel(application: Application, private val eventId: String
     var event = MutableLiveData<EventDetail?>()
     var invitees = MutableLiveData<MutableList<Pair<String, MiniUser>>>()
 
+    init {
+        load()
+    }
+
     override fun load() {
         CoroutineScope(Dispatchers.IO).launch {
             val eventDetailCall = service.getEventData(eventId)

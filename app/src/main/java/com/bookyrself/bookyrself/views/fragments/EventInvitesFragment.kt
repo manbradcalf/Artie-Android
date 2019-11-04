@@ -129,7 +129,7 @@ class EventInvitesFragment : BaseFragment() {
         inner class ViewHolderEvents(itemView: View) : RecyclerView.ViewHolder(itemView) {
             fun bind(eventDetail: EventDetail) = with(itemView) {
                 //TODO: NPE here, sometimes the hashMap is null?
-                val eventId = eventInvitesHashMap[eventDetail]!!
+                val eventId = eventInvitesHashMap[eventDetail]
 
                 val eventNameTextView = this.event_item_invite_line1
                 val eventLocationTextView = this.event_item_invite_line2
@@ -166,16 +166,16 @@ class EventInvitesFragment : BaseFragment() {
                         }
 
                 acceptButton.setOnClickListener {
-                    model.respondToInvite(true, eventId, eventDetail)
+                    model.respondToInvite(true, eventId!!, eventDetail)
                 }
 
                 denyButton.setOnClickListener {
-                    model.respondToInvite(false, eventId, eventDetail)
+                    model.respondToInvite(false, eventId!!, eventDetail)
                 }
 
                 itemView.setOnClickListener {
                     val intent = Intent(activity, EventDetailActivity::class.java)
-                    intent.putExtra("eventId", eventId)
+                    intent.putExtra("eventId", eventId!!)
                     startActivity(intent)
                 }
             }

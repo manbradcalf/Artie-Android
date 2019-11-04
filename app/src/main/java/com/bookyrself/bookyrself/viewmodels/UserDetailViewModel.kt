@@ -11,19 +11,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class UserDetailViewModel(application: Application, userDetailId: String) : BaseViewModel(application) {
+class UserDetailViewModel(application: Application, private val userDetailId: String) : BaseViewModel(application) {
 
     var user = MutableLiveData<User?>()
     var events = MutableLiveData<HashMap<EventDetail, String>>()
     var contactWasAdded = MutableLiveData<Boolean>()
 
     init {
-        loadUserData(userDetailId)
+        load()
     }
 
-    private fun loadUserData(userId: String) {
+    override fun load() {
         CoroutineScope(Dispatchers.IO).launch {
-            val userResponse = service.getUserDetails(userId)
+            val userResponse = service.getUserDetails(userDetailId)
             withContext(Dispatchers.Main) {
                 if (userResponse.isSuccessful) {
                     user.value = userResponse.body()
