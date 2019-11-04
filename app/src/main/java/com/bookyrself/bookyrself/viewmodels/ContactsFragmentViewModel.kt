@@ -5,19 +5,23 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.bookyrself.bookyrself.data.contacts.ContactsRepo
-import com.bookyrself.bookyrself.data.contacts.ContactsRepoResponse.*
+import com.bookyrself.bookyrself.data.contacts.ContactsRepoResponse.Failure
+import com.bookyrself.bookyrself.data.contacts.ContactsRepoResponse.Success
 import com.bookyrself.bookyrself.data.serverModels.User.User
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ContactsFragmentViewModel(application: Application) : BaseViewModel(application, true) {
-    private val repo = ContactsRepo.getInstance(getApplication())
-    val contactsHashMap = MutableLiveData<HashMap<User, String>?>()
+    val contactsHashMap = MutableLiveData<HashMap<User, String>>()
 
     override fun load() {
         CoroutineScope(Dispatchers.IO).launch {
-            when (val response = repo.getContacts(userId!!)) {
+            when (val response =
+                    ContactsRepo
+                            .getInstance(getApplication())
+                            .getContacts(FirebaseAuth.getInstance().uid!!)) {
                 is Success -> {
                     contactsHashMap.postValue(response.contacts)
                 }

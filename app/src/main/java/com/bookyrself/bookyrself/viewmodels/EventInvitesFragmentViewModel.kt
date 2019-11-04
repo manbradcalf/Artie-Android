@@ -8,18 +8,21 @@ import com.bookyrself.bookyrself.data.events.EventsRepository
 import com.bookyrself.bookyrself.data.events.EventsRepositoryResponse.Failure
 import com.bookyrself.bookyrself.data.events.EventsRepositoryResponse.Success
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 
 class EventInvitesFragmentViewModel(application: Application) : BaseViewModel(application, true) {
-    private val repo = EventsRepository.getInstance(application)
     val eventsWithPendingInvites = MutableLiveData<HashMap<EventDetail, String>>()
 
     override fun load() {
         CoroutineScope(Dispatchers.IO).launch {
-            when (val response = repo.getEventsWithPendingInvites(userId!!)) {
+            when (val response =
+                    EventsRepository
+                            .getInstance(getApplication())
+                            .getEventsWithPendingInvites(FirebaseAuth.getInstance().uid!!)) {
                 is Success -> {
                     eventsWithPendingInvites.postValue(response.events)
                 }
@@ -32,7 +35,9 @@ class EventInvitesFragmentViewModel(application: Application) : BaseViewModel(ap
 
     fun respondToInvite(accepted: Boolean, eventId: String, eventDetail: EventDetail) {
         CoroutineScope(Dispatchers.IO).launch {
-            when (val response = repo.respondToInvite(accepted, userId!!, eventId, eventDetail)) {
+            when (val response =
+                    EventsRepository.getInstance(getApplication())
+                            .respondToInvite(accepted, FirebaseAuth.getInstance().uid!!, eventId, eventDetail)) {
                 is Success -> {
                     eventsWithPendingInvites.postValue(response.events)
                 }
