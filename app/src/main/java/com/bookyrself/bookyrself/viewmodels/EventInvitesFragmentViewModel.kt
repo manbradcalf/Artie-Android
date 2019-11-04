@@ -33,8 +33,6 @@ class EventInvitesFragmentViewModel(application: Application) : BaseViewModel(ap
                     }
                 }
             }
-        } else {
-            // Notify fragment to show signed out empty state
         }
     }
 
