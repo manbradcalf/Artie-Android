@@ -17,7 +17,7 @@ class ContactsRepo private constructor(context: Context) {
     companion object : SingletonHolder<ContactsRepo, Context>(::ContactsRepo)
 
     init {
-        // Clear events on Sign Out
+        // Clear contacts on Sign Out
         FirebaseAuth.getInstance().addAuthStateListener()
         { auth ->
             if (auth.uid == null) {
