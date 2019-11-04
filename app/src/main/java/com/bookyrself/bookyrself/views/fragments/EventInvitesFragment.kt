@@ -1,6 +1,5 @@
 package com.bookyrself.bookyrself.views.fragments
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -16,6 +15,7 @@ import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.utils.CircleTransform
 import com.bookyrself.bookyrself.viewmodels.EventInvitesFragmentViewModel
 import com.bookyrself.bookyrself.views.activities.EventDetailActivity
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_event_invites.*
@@ -26,13 +26,12 @@ import java.util.*
 
 
 class EventInvitesFragment : BaseFragment() {
+    private var storageReference = FirebaseStorage.getInstance().reference
     private var eventInvitesHashMap = hashMapOf<EventDetail, String>()
     private var events = mutableListOf<EventDetail>()
-    private var storageReference = FirebaseStorage.getInstance().reference
-
-    lateinit var model: EventInvitesFragmentViewModel
-    lateinit var layoutManager: RecyclerView.LayoutManager
+    private lateinit var layoutManager: RecyclerView.LayoutManager
     lateinit var adapter: EventInvitesAdapter
+    lateinit var model: EventInvitesFragmentViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -40,58 +39,54 @@ class EventInvitesFragment : BaseFragment() {
     }
 
     override fun onResume() {
-        init()
         super.onResume()
+        setLayout()
+        setListeners()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                RC_SIGN_IN -> {
-                    model.load()
-                }
+    private fun setListeners() {
+        FirebaseAuth.getInstance().addAuthStateListener {
+            if (it.currentUser != null) {
+                model.load()
+            } else {
+                showLoadingState(false)
+                showSignedOutEmptyState(
+                        getString(R.string.empty_state_event_invites_signed_out_subheader),
+                        activity!!.getDrawable(R.drawable.ic_calendar)!!)
             }
         }
-    }
 
-    private fun init() {
-        toolbar_event_invites_fragment?.setTitle(R.string.title_event_invites)
-        hideEmptyState()
-        showLoadingState(true)
-
-        // create and observe the view model
         model = ViewModelProviders.of(this,
                 EventInvitesFragmentViewModel.EventInvitesFragmentViewModelFactory(activity!!.application))
                 .get(EventInvitesFragmentViewModel::class.java)
 
         model.eventsWithPendingInvites.observe(this) {
             if (!it.isNullOrEmpty()) {
-                showLoadingState(false)
-                adapter = EventInvitesAdapter()
-                event_invites_recycler_view?.adapter = adapter
-                layoutManager = LinearLayoutManager(activity)
-                event_invites_recycler_view?.layoutManager = layoutManager
-                hideEmptyState()
-                showContent(true)
-
-                //TODO: Double check this data conversion here
-                events = it.keys.asSequence().toMutableList()
-                eventInvitesHashMap = it
-                adapter.notifyDataSetChanged()
+                showEventInvites(it)
             } else {
                 showEmptyStateForNoInvites()
             }
         }
+    }
 
-        model.isSignedIn.observe(this) {
-            if (!it) {
-                showSignedOutEmptyState(
-                        getString(R.string.empty_state_event_invites_signed_out_subheader),
-                        activity!!.getDrawable(R.drawable.ic_invitation)!!
-                )
-            }
-        }
+    private fun setLayout() {
+        adapter = EventInvitesAdapter()
+        layoutManager = LinearLayoutManager(activity)
+        toolbar_event_invites_fragment?.setTitle(R.string.title_event_invites)
+        event_invites_recycler_view?.adapter = adapter
+        event_invites_recycler_view?.layoutManager = layoutManager
+        hideEmptyState()
+        showLoadingState(true)
+    }
+
+    private fun showEventInvites(invitesReturned: HashMap<EventDetail, String>) {
+        showLoadingState(false)
+        hideEmptyState()
+        showContent(true)
+
+        events = invitesReturned.keys.asSequence().toMutableList()
+        eventInvitesHashMap = invitesReturned
+        adapter.notifyDataSetChanged()
     }
 
 
@@ -119,7 +114,6 @@ class EventInvitesFragment : BaseFragment() {
         }
     }
 
-
     /**
      * Adapter
      */
@@ -130,9 +124,7 @@ class EventInvitesFragment : BaseFragment() {
 
         override fun onBindViewHolder(holder: ViewHolderEvents, position: Int) = holder.bind(events[position])
 
-        override fun getItemCount(): Int {
-            return events.size
-        }
+        override fun getItemCount() = events.size
 
         inner class ViewHolderEvents(itemView: View) : RecyclerView.ViewHolder(itemView) {
             fun bind(eventDetail: EventDetail) = with(itemView) {
@@ -144,7 +136,6 @@ class EventInvitesFragment : BaseFragment() {
                 val eventImageThumbnail = this.event_item_invite_image
                 val acceptButton = this.event_item_invite_accept_button
                 val denyButton = this.event_item_invite_deny_button
-
 
                 eventNameTextView?.text = eventDetail.eventname
                 eventLocationTextView?.text = eventDetail.citystate

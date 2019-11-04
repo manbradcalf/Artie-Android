@@ -1,9 +1,9 @@
 package com.bookyrself.bookyrself.views.fragments
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,12 +17,10 @@ import com.bookyrself.bookyrself.utils.EventDecorator
 import com.bookyrself.bookyrself.viewmodels.EventsFragmentViewModel
 import com.bookyrself.bookyrself.views.activities.EventCreationActivity
 import com.bookyrself.bookyrself.views.activities.EventDetailActivity
-import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener
-import kotlinx.android.synthetic.main.empty_state_template.*
 import kotlinx.android.synthetic.main.fragment_events.*
 import java.util.*
 import kotlin.collections.HashMap
@@ -34,26 +32,34 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
     private val pendingEventsCalendarDays = ArrayList<CalendarDay>()
     private val calendarDaysWithEventIds = HashMap<CalendarDay, String>()
 
-    override fun onResume() {
-        init()
-        super.onResume()
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_events, container, false)
     }
 
-    fun init() {
-        events_toolbar?.title = "Your Calendar"
+    override fun onResume() {
+        super.onResume()
+        setLayout()
+        setListeners()
+    }
 
-        event_creation_fab?.setOnClickListener {
-            val intent = Intent(activity, EventCreationActivity::class.java)
-            startActivityForResult(intent, RC_EVENT_CREATION)
+    private fun setListeners() {
+        FirebaseAuth.getInstance().addAuthStateListener {
+            if (it.currentUser != null) {
+                model.load()
+            } else {
+                showLoadingState(false)
+                showSignedOutEmptyState(
+                        getString(R.string.events_fragment_empty_state_signed_out_subheader),
+                        activity!!.getDrawable(R.drawable.ic_calendar)!!)
+            }
         }
-
-        events_calendar?.setOnDateChangedListener(this)
 
         model = ViewModelProviders.of(this,
                 EventsFragmentViewModel.EventsFragmentViewModelFactory(activity!!.application))
                 .get(EventsFragmentViewModel::class.java)
 
-        model.eventDetailsHashMap.observe(this) { events ->
+        model.eventDetails.observe(this) { events ->
             if (events.isNotEmpty()) {
                 showContent(true)
                 for (event in events) {
@@ -63,25 +69,19 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
                 noEventDetailsReturned()
             }
         }
+
         model.errorMessage.observe(this) {
             presentError(it)
         }
-
-        model.isSignedIn.observe(this) { userIsSignedIn ->
-            if (!userIsSignedIn) {
-                showLoadingState(false)
-                showSignedOutEmptyState(
-                        getString(R.string.events_fragment_empty_state_signed_out_subheader),
-                        activity!!.getDrawable(R.drawable.ic_calendar)!!)
-            } else {
-                showContent(true)
-            }
-        }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_events, container, false)
+    private fun setLayout() {
+        events_toolbar?.title = "Your Calendar"
+        event_creation_fab?.setOnClickListener {
+            val intent = Intent(activity, EventCreationActivity::class.java)
+            startActivityForResult(intent, RC_EVENT_CREATION)
+        }
+        events_calendar?.setOnDateChangedListener(this)
     }
 
     override fun onDestroyView() {
@@ -91,15 +91,6 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
         acceptedEventsCalendarDays.clear()
         events_calendar?.removeDecorators()
     }
-
-    // Re-init after signing in or creating event
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK) {
-            model.load()
-        }
-    }
-
 
     override fun onDateSelected(materialCalendarView: MaterialCalendarView, calendarDay: CalendarDay, b: Boolean) {
         if (acceptedEventsCalendarDays.contains(calendarDay)) {
@@ -175,11 +166,12 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
         }
     }
 
+    @SuppressLint("RestrictedApi")
     override fun showLoadingState(show: Boolean) {
         if (show) {
             events_progressbar?.visibility = View.VISIBLE
         } else {
-            events_progressbar?.visibility = View.INVISIBLE
+            events_progressbar?.visibility = View.GONE
         }
     }
 }
