@@ -213,7 +213,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         }.toMutableList()
         adapter!!.setViewType(USER_VIEW_TYPE)
         boolSearchEditable = true
-        search_btn.text = "Edit Search"
+        search_btn.text = getString(R.string.edit_search_btn_text)
         adapter!!.notifyDataSetChanged()
         showProgressbar(false)
     }
@@ -319,8 +319,8 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
 
         override fun getItemCount(): Int {
             return when {
-                eventsResults.isNotEmpty() -> eventsResults!!.size
-                usersResults.isNotEmpty() -> usersResults!!.size
+                eventsResults.isNotEmpty() -> eventsResults.size
+                usersResults.isNotEmpty() -> usersResults.size
                 else -> 0
             }
         }
@@ -328,7 +328,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         private fun buildEventViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             if (eventsResults.size > position) {
 
-                val event = eventsResults!![position]._source
+                val event = eventsResults[position]._source
                 val viewHolderEvents = holder as ViewHolderEvents
 
                 // Set Event Name
