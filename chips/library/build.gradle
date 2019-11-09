@@ -11,7 +11,7 @@ android {
         versionCode 9
         versionName "1.0.8"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
     buildTypes {

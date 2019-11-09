@@ -40,13 +40,22 @@ class ContactsFragment : BaseFragment() {
         model = ViewModelProviders.of(this,
                 ContactsFragmentViewModel.ContactsFragmentViewModelFactory(activity!!.application))
                 .get(ContactsFragmentViewModel::class.java)
+
+        FirebaseAuth.getInstance().addAuthStateListener {
+            if (it.uid == null) {
+                showSignedOutEmptyState("Sign in to view your contacts!",
+                        activity!!.getDrawable(R.drawable.ic_person_add_black_24dp))
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        setLayout()
-        setListeners()
-        model.load()
+        if (FirebaseAuth.getInstance().uid != null) {
+            setLayout()
+            setListeners()
+            model.load()
+        }
     }
 
     private fun setListeners() {
@@ -54,13 +63,7 @@ class ContactsFragment : BaseFragment() {
             if (!it.isNullOrEmpty()) {
                 showUserContacts(it)
             } else {
-                if (FirebaseAuth.getInstance().uid != null) {
-                    showNoContactsEmptyState()
-                } else {
-                    showSignedOutEmptyState(
-                            getString(R.string.contacts_empty_state_no_content_subheader),
-                            activity!!.getDrawable(R.drawable.ic_person_add_black_24dp))
-                }
+                showNoContactsEmptyState()
             }
         }
     }

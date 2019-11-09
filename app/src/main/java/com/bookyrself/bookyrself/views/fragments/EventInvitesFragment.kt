@@ -38,6 +38,13 @@ class EventInvitesFragment : BaseFragment() {
         model = ViewModelProviders.of(this,
                 EventInvitesFragmentViewModel.EventInvitesFragmentViewModelFactory(activity!!.application))
                 .get(EventInvitesFragmentViewModel::class.java)
+
+        FirebaseAuth.getInstance().addAuthStateListener {
+            if (it.uid == null) {
+                showSignedOutEmptyState("Sign in to view your invites!",
+                        activity!!.getDrawable(R.drawable.ic_invitation))
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -51,11 +58,6 @@ class EventInvitesFragment : BaseFragment() {
             setLayout()
             setListeners()
             model.load()
-        } else {
-            showSignedOutEmptyState(
-                    getString(R.string.empty_state_event_invites_signed_out_subheader),
-                    activity!!.getDrawable(R.drawable.ic_no_events_black_24dp)
-            )
         }
     }
 

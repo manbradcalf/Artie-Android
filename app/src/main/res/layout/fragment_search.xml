@@ -110,7 +110,8 @@
         android:layout_height="match_parent"
         android:layout_below="@id/appBarLayout"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="false">
+        android:layout_alignParentTop="false"
+        android:layout_marginBottom="@dimen/bottom_navigation_bar_height">
 
         <ProgressBar
             android:id="@+id/progress_bar"
@@ -133,11 +134,6 @@
             android:layout_alignParentTop="true"
             android:scrollbars="vertical" />
 
-        <include
-            layout="@layout/element_bottom_nav"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true" />
     </RelativeLayout>
 
 

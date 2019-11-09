@@ -45,12 +45,6 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="?attr/actionBarSize"
-        android:layout_marginBottom="?attr/actionBarSize" />
-
-    <include
-        layout="@layout/element_bottom_nav"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" />
+        android:layout_marginBottom="@dimen/bottom_navigation_bar_height" />
 
 </RelativeLayout>

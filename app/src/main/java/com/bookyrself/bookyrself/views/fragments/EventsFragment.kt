@@ -3,7 +3,6 @@ package com.bookyrself.bookyrself.views.fragments
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,6 +34,15 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
         model = ViewModelProviders.of(this,
                 EventsFragmentViewModel.EventsFragmentViewModelFactory(activity!!.application))
                 .get(EventsFragmentViewModel::class.java)
+
+        FirebaseAuth.getInstance().addAuthStateListener {
+            if (it.uid == null) {
+                showSignedOutEmptyState(
+                        getString(R.string.events_fragment_empty_state_signed_out_subheader),
+                        activity!!.getDrawable(R.drawable.ic_no_events_black_24dp)
+                )
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -44,9 +52,11 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
 
     override fun onResume() {
         super.onResume()
-        setLayout()
-        setListeners()
-        model.load()
+        if (FirebaseAuth.getInstance().uid != null) {
+            setLayout()
+            setListeners()
+            model.load()
+        }
     }
 
     private fun setListeners() {
@@ -57,17 +67,9 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
                     eventDetailReturned(event.key, event.value)
                 }
             } else {
-                if (FirebaseAuth.getInstance().uid != null) {
-                    noEventDetailsReturned()
-                } else {
-                    showSignedOutEmptyState(
-                            getString(R.string.events_fragment_empty_state_signed_out_subheader),
-                            activity!!.getDrawable(R.drawable.ic_no_events_black_24dp)
-                    )
-                }
+                noEventDetailsReturned()
             }
         }
-
         model.errorMessage.observe(this) {
             presentError(it)
         }
