@@ -120,7 +120,6 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, view);
-        setHasOptionsMenu(true);
         ((AppCompatActivity) Objects.requireNonNull(getActivity())).setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.title_profile);
 
@@ -134,6 +133,7 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
             showContent(false);
             hideEmptyState();
             showLoadingState(true);
+            setHasOptionsMenu(true);
             presenter.subscribe();
         } else {
             showSignedOutEmptyState();

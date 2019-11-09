@@ -34,15 +34,6 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
         model = ViewModelProviders.of(this,
                 EventsFragmentViewModel.EventsFragmentViewModelFactory(activity!!.application))
                 .get(EventsFragmentViewModel::class.java)
-
-        FirebaseAuth.getInstance().addAuthStateListener {
-            if (it.uid == null) {
-                showSignedOutEmptyState(
-                        getString(R.string.events_fragment_empty_state_signed_out_subheader),
-                        activity!!.getDrawable(R.drawable.ic_no_events_black_24dp)
-                )
-            }
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -56,6 +47,11 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
             setLayout()
             setListeners()
             model.load()
+        } else {
+            showSignedOutEmptyState(
+                    getString(R.string.events_fragment_empty_state_signed_out_subheader),
+                    activity!!.getDrawable(R.drawable.ic_no_events_black_24dp)
+            )
         }
     }
 

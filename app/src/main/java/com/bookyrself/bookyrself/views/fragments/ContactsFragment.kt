@@ -40,13 +40,6 @@ class ContactsFragment : BaseFragment() {
         model = ViewModelProviders.of(this,
                 ContactsFragmentViewModel.ContactsFragmentViewModelFactory(activity!!.application))
                 .get(ContactsFragmentViewModel::class.java)
-
-        FirebaseAuth.getInstance().addAuthStateListener {
-            if (it.uid == null) {
-                showSignedOutEmptyState("Sign in to view your contacts!",
-                        activity!!.getDrawable(R.drawable.ic_person_add_black_24dp))
-            }
-        }
     }
 
     override fun onResume() {
@@ -55,6 +48,11 @@ class ContactsFragment : BaseFragment() {
             setLayout()
             setListeners()
             model.load()
+        } else {
+            showSignedOutEmptyState(
+                    getString(R.string.contacts_empty_state_signed_out_subheader),
+                    activity!!.getDrawable(R.drawable.ic_person_add_black_24dp)
+            )
         }
     }
 
