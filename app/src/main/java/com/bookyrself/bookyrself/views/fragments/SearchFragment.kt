@@ -367,7 +367,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                 }.addOnFailureListener { exception ->
 
                     // Set placeholder image, log error
-                    viewHolderEvents.eventImageThumb.setImageDrawable(context!!.getDrawable(R.drawable.ic_calendar_black_24dp))
+                    viewHolderEvents.eventImageThumb.setBackgroundResource(R.drawable.ic_event_black_48dp)
                     Log.e("Event image  not loaded", exception.localizedMessage)
                 }
 

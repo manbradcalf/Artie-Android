@@ -126,7 +126,6 @@ class EventInvitesFragment : BaseFragment() {
 
             inner class ViewHolderEvents(itemView: View) : RecyclerView.ViewHolder(itemView) {
                 fun bind(eventDetail: EventDetail) = with(itemView) {
-                    //TODO: NPE here, sometimes the hashMap is null?
                     val eventId = eventInvitesHashMap[eventDetail]
 
                     val eventNameTextView = this.event_item_invite_line1
@@ -160,7 +159,7 @@ class EventInvitesFragment : BaseFragment() {
                                         .into(eventImageThumbnail)
                             }.addOnFailureListener {
                                 Log.e("EventInvitesFragment", "Event image not downloaded")
-                                eventImageThumbnail.setImageDrawable(context!!.getDrawable(R.drawable.ic_calendar))
+                                eventImageThumbnail.setImageDrawable(context!!.getDrawable(R.drawable.ic_event_black_48dp))
                             }
 
                     acceptButton.setOnClickListener {
