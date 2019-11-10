@@ -74,7 +74,7 @@ public class EventDetail {
         mTags = tags;
     }
 
-    public HashMap<String,Boolean> getUsers() {
+    public HashMap<String, Boolean> getUsers() {
         return mUserIds;
     }
 

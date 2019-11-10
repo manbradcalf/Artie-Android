@@ -13,13 +13,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class EventDetailViewModel(application: Application, private val eventId: String) : BaseViewModel(application, false) {
+class EventDetailViewModel(application: Application, private val eventId: String) : BaseViewModel(application) {
 
     var event = MutableLiveData<EventDetail?>()
     var invitees = MutableLiveData<MutableList<Pair<String, MiniUser>>>()
 
+    init {
+        load()
+    }
+
     override fun load() {
-        // TODO: Should this use the eventsRepo or nah?
         CoroutineScope(Dispatchers.IO).launch {
             val eventDetailCall = service.getEventData(eventId)
             if (eventDetailCall.isSuccessful) {

@@ -10,7 +10,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.util.*
 
-class ContactsRepository : ContactsDataSource {
+class ContactsRepoRxJava : ContactsDataSource {
 
     private var cacheIsDirty: Boolean? = null
     private val contactsMap: HashMap<String, User> = HashMap()

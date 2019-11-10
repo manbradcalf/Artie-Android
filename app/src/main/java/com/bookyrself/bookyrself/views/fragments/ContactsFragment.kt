@@ -1,13 +1,11 @@
 package com.bookyrself.bookyrself.views.fragments
 
-import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,15 +15,16 @@ import com.bookyrself.bookyrself.data.serverModels.User.User
 import com.bookyrself.bookyrself.utils.CircleTransform
 import com.bookyrself.bookyrself.viewmodels.ContactsFragmentViewModel
 import com.bookyrself.bookyrself.views.activities.UserDetailActivity
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_contacts.*
 import kotlinx.android.synthetic.main.item_user_search_result.view.*
 
 class ContactsFragment : BaseFragment() {
-    var storageReference = FirebaseStorage.getInstance().reference
-    var contactsMap = hashMapOf<User, String>()
-    var contacts = listOf<User>()
+    private var storageReference = FirebaseStorage.getInstance().reference
+    private var contactsMap = hashMapOf<User, String>()
+    private var contacts = listOf<User>()
 
     private lateinit var layoutManager: RecyclerView.LayoutManager
     lateinit var adapter: ContactsAdapter
@@ -36,72 +35,65 @@ class ContactsFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_contacts, container, false)
     }
 
-
-    private fun init() {
-        // Set up initial view
-        toolbar_contacts_fragment.setTitle(R.string.contacts_toolbar)
-        showLoadingState(true)
-
-        // create and observe the view model
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         model = ViewModelProviders.of(this,
                 ContactsFragmentViewModel.ContactsFragmentViewModelFactory(activity!!.application))
                 .get(ContactsFragmentViewModel::class.java)
-
-        model.contactsHashMap.observe(this) {
-            // Now we have data so lets fire up the adapter
-            if (!it.isNullOrEmpty()) {
-                loadContacts(it)
-            } else {
-                noContactsReturned()
-            }
-        }
-
-        model.isSignedIn.observe(this) { userIsSignedIn ->
-            if (!userIsSignedIn) {
-                showLoadingState(false)
-                showSignedOutEmptyState(
-                        getString(R.string.contacts_empty_state_no_content_subheader),
-                        activity!!.getDrawable(R.drawable.ic_person_add_black_24dp)!!)
-            } else if (!contactsMap.isNullOrEmpty()) {
-                //TODO: Will this be victim of a race condition if contactsMap hasn't been set yet
-                loadContacts(contactsMap)
-            } else {
-                noContactsReturned()
-            }
-        }
     }
 
     override fun onResume() {
-        init()
         super.onResume()
+        if (FirebaseAuth.getInstance().uid != null) {
+            setLayout()
+            setListeners()
+            model.load()
+        } else {
+            showSignedOutEmptyState(
+                    getString(R.string.contacts_empty_state_signed_out_subheader),
+                    activity!!.getDrawable(R.drawable.ic_person_add_black_24dp)
+            )
+        }
     }
 
-    //TODO: Rename this method and / or combine with showContent
-    private fun loadContacts(contactsReturned: HashMap<User, String>?) {
+    private fun setListeners() {
+        model.contactsHashMap.observe(this) {
+            if (!it.isNullOrEmpty()) {
+                showUserContacts(it)
+            } else {
+                showNoContactsEmptyState()
+            }
+        }
+    }
+
+    private fun setLayout() {
+        toolbar_contacts_fragment.setTitle(R.string.contacts_toolbar)
+        hideEmptyState()
+        showLoadingState(true)
         adapter = ContactsAdapter()
         contacts_recyclerview.adapter = adapter
         layoutManager = LinearLayoutManager(activity)
         contacts_recyclerview.layoutManager = layoutManager
+    }
+
+    private fun showUserContacts(contactsReturned: HashMap<User, String>) {
         showLoadingState(false)
         hideEmptyState()
         showContent(true)
-
-        //TODO: Double check this data conversion here
-        contacts = contactsReturned?.keys?.asSequence()!!.toList()
+        contacts = contactsReturned.keys.asSequence().toList()
         contactsMap = contactsReturned
         adapter.notifyDataSetChanged()
     }
 
-    private fun noContactsReturned() {
+    private fun showNoContactsEmptyState() {
         showEmptyState(getString(R.string.contacts_empty_state_no_content_header),
                 getString(R.string.contacts_empty_state_no_content_subheader),
                 activity!!.getDrawable(R.drawable.ic_person_add_black_24dp))
     }
 
     override fun showLoadingState(show: Boolean) {
-        if (show && contacts_fragment_progressbar.visibility == View.GONE) {
+        if (show) {
             contacts_fragment_progressbar.visibility = View.VISIBLE
-            hideEmptyState()
         } else {
             contacts_fragment_progressbar.visibility = View.GONE
         }
@@ -112,18 +104,6 @@ class ContactsFragment : BaseFragment() {
             contacts_recyclerview.visibility = View.VISIBLE
         } else {
             contacts_recyclerview.visibility = View.GONE
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK) {
-            when (requestCode) {
-                RC_SIGN_IN -> {
-                    hideEmptyState()
-                    showLoadingState(true)
-                }
-            }
         }
     }
 

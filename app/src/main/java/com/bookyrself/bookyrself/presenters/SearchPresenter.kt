@@ -35,7 +35,6 @@ class SearchPresenter
             service.api.executeEventsSearch(body)
                     .enqueue(object : Callback<SearchResponse2> {
                         override fun onResponse(call: Call<SearchResponse2>, response: Response<SearchResponse2>) {
-                            Log.i(this.toString(), response.toString())
                             if (response.body() != null) {
                                 val hits = response.body()!!.hits.hits
                                 listener.searchEventsResponseReady(hits)

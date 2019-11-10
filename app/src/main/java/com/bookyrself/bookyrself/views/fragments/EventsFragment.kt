@@ -1,11 +1,8 @@
 package com.bookyrself.bookyrself.views.fragments
 
 import android.annotation.SuppressLint
-import android.app.Activity.RESULT_OK
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,12 +14,10 @@ import com.bookyrself.bookyrself.utils.EventDecorator
 import com.bookyrself.bookyrself.viewmodels.EventsFragmentViewModel
 import com.bookyrself.bookyrself.views.activities.EventCreationActivity
 import com.bookyrself.bookyrself.views.activities.EventDetailActivity
-import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener
-import kotlinx.android.synthetic.main.empty_state_template.*
 import kotlinx.android.synthetic.main.fragment_events.*
 import java.util.*
 import kotlin.collections.HashMap
@@ -34,21 +29,34 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
     private val pendingEventsCalendarDays = ArrayList<CalendarDay>()
     private val calendarDaysWithEventIds = HashMap<CalendarDay, String>()
 
-    private fun init() {
-        events_toolbar?.title = "Your Calendar"
-
-        event_creation_fab?.setOnClickListener {
-            val intent = Intent(activity, EventCreationActivity::class.java)
-            startActivityForResult(intent, RC_EVENT_CREATION)
-        }
-
-        events_calendar?.setOnDateChangedListener(this)
-
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         model = ViewModelProviders.of(this,
                 EventsFragmentViewModel.EventsFragmentViewModelFactory(activity!!.application))
                 .get(EventsFragmentViewModel::class.java)
+    }
 
-        model.eventDetailsHashMap.observe(this) { events ->
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_events, container, false)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (FirebaseAuth.getInstance().uid != null) {
+            setLayout()
+            setListeners()
+            model.load()
+        } else {
+            showSignedOutEmptyState(
+                    getString(R.string.events_fragment_empty_state_signed_out_subheader),
+                    activity!!.getDrawable(R.drawable.ic_no_events_black_24dp)
+            )
+        }
+    }
+
+    private fun setListeners() {
+        model.eventDetails.observe(this) { events ->
             if (events.isNotEmpty()) {
                 showContent(true)
                 for (event in events) {
@@ -61,25 +69,15 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
         model.errorMessage.observe(this) {
             presentError(it)
         }
+    }
 
-        model.isSignedIn.observe(this) { userIsSignedIn ->
-            if (!userIsSignedIn) {
-                showLoadingState(false)
-                showSignedOutEmptyState(
-                        getString(R.string.events_fragment_empty_state_signed_out_subheader),
-                        activity!!.getDrawable(R.drawable.ic_calendar)!!)
-            }
+    private fun setLayout() {
+        events_toolbar?.title = "Your Calendar"
+        event_creation_fab?.setOnClickListener {
+            val intent = Intent(activity, EventCreationActivity::class.java)
+            startActivityForResult(intent, RC_EVENT_CREATION)
         }
-    }
-
-    override fun onResume() {
-        init()
-        super.onResume()
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_events, container, false)
+        events_calendar?.setOnDateChangedListener(this)
     }
 
     override fun onDestroyView() {
@@ -89,15 +87,6 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
         acceptedEventsCalendarDays.clear()
         events_calendar?.removeDecorators()
     }
-
-    // Re-init after signing in or creating event
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK) {
-            init()
-        }
-    }
-
 
     override fun onDateSelected(materialCalendarView: MaterialCalendarView, calendarDay: CalendarDay, b: Boolean) {
         if (acceptedEventsCalendarDays.contains(calendarDay)) {
@@ -148,17 +137,15 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
                         pendingEventsCalendarDays.add(calendarDay)
                         calendarDaysWithEventIds[calendarDay] = eventId
                         events_calendar?.addDecorator(EventDecorator(EventDecorator.INVITE_PENDING, pendingEventsCalendarDays, this.context!!))
-                    }// or if I'm not attending yet, set invite to pending
-                } else
-                    Log.e("Test", "User not attending")
-        }// If I'm not hosting and there are users invited
+                    }
+                }
+        }
     }
 
     private fun noEventDetailsReturned() {
         showContent(true)
         hideEmptyState()
     }
-
 
     //TODO: Should i update min api or somn
     @SuppressLint("RestrictedApi")
@@ -174,43 +161,12 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
         }
     }
 
+    @SuppressLint("RestrictedApi")
     override fun showLoadingState(show: Boolean) {
         if (show) {
             events_progressbar?.visibility = View.VISIBLE
         } else {
-            events_progressbar?.visibility = View.INVISIBLE
-        }
-    }
-
-    private fun showEmptyState(header: String, subHeader: String, buttonText: String, image: Drawable?) {
-        showContent(false)
-        showLoadingState(false)
-        empty_state_view?.visibility = View.VISIBLE
-        empty_state_image?.visibility = View.VISIBLE
-        empty_state_text_header?.visibility = View.VISIBLE
-        empty_state_text_subheader?.visibility = View.VISIBLE
-
-        empty_state_image?.setImageDrawable(image)
-        empty_state_text_header?.text = header
-        empty_state_text_subheader?.text = subHeader
-
-        if (buttonText == "") {
-            empty_state_button?.visibility = View.GONE
-        } else {
-            empty_state_button?.visibility = View.VISIBLE
-            empty_state_button?.text = buttonText
-            empty_state_button?.setOnClickListener {
-                val providers = listOf(AuthUI.IdpConfig.GoogleBuilder().build(),
-                        AuthUI.IdpConfig.EmailBuilder().build())
-                // Authenticate
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                .createSignInIntentBuilder()
-                                .setIsSmartLockEnabled(false, true)
-                                .setAvailableProviders(providers)
-                                .build(),
-                        RC_SIGN_IN)
-            }
+            events_progressbar?.visibility = View.GONE
         }
     }
 }

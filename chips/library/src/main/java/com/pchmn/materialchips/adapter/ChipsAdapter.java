@@ -49,26 +49,6 @@ public class ChipsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         initEditText();
     }
 
-    private class ItemViewHolder extends RecyclerView.ViewHolder {
-
-        private final ChipView chipView;
-
-        ItemViewHolder(View view) {
-            super(view);
-            chipView = (ChipView) view;
-        }
-    }
-
-    private class EditTextViewHolder extends RecyclerView.ViewHolder {
-
-        private final EditText editText;
-
-        EditTextViewHolder(View view) {
-            super(view);
-            editText = (EditText) view;
-        }
-    }
-
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == TYPE_EDIT_TEXT)
@@ -389,5 +369,25 @@ public class ChipsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
 
         return false;
+    }
+
+    private class ItemViewHolder extends RecyclerView.ViewHolder {
+
+        private final ChipView chipView;
+
+        ItemViewHolder(View view) {
+            super(view);
+            chipView = (ChipView) view;
+        }
+    }
+
+    private class EditTextViewHolder extends RecyclerView.ViewHolder {
+
+        private final EditText editText;
+
+        EditTextViewHolder(View view) {
+            super(view);
+            editText = (EditText) view;
+        }
     }
 }

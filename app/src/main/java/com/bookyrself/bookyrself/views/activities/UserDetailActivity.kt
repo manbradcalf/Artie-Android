@@ -34,10 +34,10 @@ import kotlin.collections.HashMap
 class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
     private val contactsRepository = MainActivity.contactsRepo
     private val compositeDisposable = CompositeDisposable()
-    private var userDetailId: String? = null
     private var calendarDaysWithEventIds: HashMap<CalendarDay, String> = HashMap()
     private val acceptedEventsCalendarDays = ArrayList<CalendarDay>()
     private val unavailableCalendarDays = ArrayList<CalendarDay>()
+    lateinit var userDetailId: String
 
     lateinit var model: UserDetailViewModel
 
@@ -48,7 +48,8 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
         toolbar_user_detail.title = "User Details"
         user_detail_empty_state.visibility = View.GONE
         displayLoadingState()
-        initData(intent.getStringExtra("userId"))
+        userDetailId = intent.getStringExtra("userId")
+        initData(userDetailId)
     }
 
     private fun initData(userId: String) {
@@ -160,7 +161,7 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
             add_user_to_contacts_textview.setText(R.string.contact_button_signed_out)
         }
 
-        val profileImageReference = imageStorage.child("images/users/" + this.userDetailId!!)
+        val profileImageReference = imageStorage.child("images/users/$userDetailId")
         profileImageReference
                 .downloadUrl
                 .addOnSuccessListener { uri ->

@@ -21,4 +21,5 @@ http://developer.android.com/guide/topics/appwidgets/index.html#CreatingLayout
     -->
     <dimen name="widget_margin">8dp</dimen>
     <dimen name="widget_header_padding">8dp</dimen>
+    <dimen name="bottom_navigation_bar_height">56dp</dimen>
 </resources>

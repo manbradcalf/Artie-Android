@@ -34,15 +34,15 @@ import butterknife.ButterKnife;
 public class ChipsInput extends ScrollViewMaxHeight {
 
     private static final String TAG = ChipsInput.class.toString();
-    // context
-    private Context mContext;
+    // attributes
+    private static final int NONE = -1;
     // xml element
     @BindView(R2.id.chips_recycler)
     RecyclerView mRecyclerView;
+    // context
+    private Context mContext;
     // adapter
     private ChipsAdapter mChipsAdapter;
-    // attributes
-    private static final int NONE = -1;
     private String mHint;
     private ColorStateList mHintColor;
     private ColorStateList mTextColor;
@@ -320,13 +320,13 @@ public class ChipsInput extends ScrollViewMaxHeight {
         this.mChipBackgroundColor = mBackgroundColor;
     }
 
+    public boolean isShowChipDetailed() {
+        return mShowChipDetailed;
+    }
+
     public ChipsInput setShowChipDetailed(boolean mShowChipDetailed) {
         this.mShowChipDetailed = mShowChipDetailed;
         return this;
-    }
-
-    public boolean isShowChipDetailed() {
-        return mShowChipDetailed;
     }
 
     public void setChipDetailedTextColor(ColorStateList mChipDetailedTextColor) {
@@ -341,15 +341,15 @@ public class ChipsInput extends ScrollViewMaxHeight {
         this.mChipDetailedBackgroundColor = mChipDetailedBackgroundColor;
     }
 
+    public List<? extends ChipInterface> getFilterableList() {
+        return mChipList;
+    }
+
     public void setFilterableList(List<? extends ChipInterface> list) {
         mChipList = list;
         mFilterableListView = new FilterableListView(mContext);
         mFilterableListView.build(mChipList, this, mFilterableListBackgroundColor, mFilterableListTextColor);
         mChipsAdapter.setFilterableListView(mFilterableListView);
-    }
-
-    public List<? extends ChipInterface> getFilterableList() {
-        return mChipList;
     }
 
     public ChipValidator getChipValidator() {

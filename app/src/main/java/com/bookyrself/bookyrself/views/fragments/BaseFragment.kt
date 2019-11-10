@@ -47,7 +47,7 @@ open class BaseFragment : Fragment() {
         empty_state_text_subheader.visibility = View.GONE
     }
 
-    fun showSignedOutEmptyState(message: String, img: Drawable) {
+    fun showSignedOutEmptyState(message: String, img: Drawable?) {
         showEmptyState(
                 getString(R.string.empty_state_signed_out_header),
                 message,

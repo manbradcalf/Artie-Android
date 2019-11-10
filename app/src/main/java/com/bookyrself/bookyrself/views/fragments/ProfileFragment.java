@@ -2,9 +2,11 @@ package com.bookyrself.bookyrself.views.fragments;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -44,6 +46,8 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -120,7 +124,6 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, view);
-        setHasOptionsMenu(true);
         ((AppCompatActivity) Objects.requireNonNull(getActivity())).setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.title_profile);
 
@@ -134,6 +137,7 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
             showContent(false);
             hideEmptyState();
             showLoadingState(true);
+            setHasOptionsMenu(true);
             presenter.subscribe();
         } else {
             showSignedOutEmptyState();
@@ -322,10 +326,19 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
 
                         // Upload to firebase
                         StorageReference profilePhotoRef = storageReference.child("images/users/" + fbUser.getUid());
-                        UploadTask uploadTask = profilePhotoRef.putFile(selectedImage);
+
+                        Bitmap bmp = null;
+                        try {
+                            bmp = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), selectedImage);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+                        byte[] imgData = baos.toByteArray();
+                        UploadTask uploadTask = profilePhotoRef.putBytes(imgData);
 
                         uploadTask.addOnSuccessListener(taskSnapshot -> {
-
                             // Set the image to the profileImageThumb
                             Picasso.with(getActivity().getApplicationContext())
                                     .load(selectedImage)
@@ -339,7 +352,6 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
                         }).addOnFailureListener(e -> {
                             showToast("upload failed");
                             Picasso.with(getActivity().getApplicationContext()).load(R.drawable.ic_user).into(profileImage);
-
                         });
                 }
             }

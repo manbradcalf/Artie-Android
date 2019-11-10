@@ -4,29 +4,31 @@ import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.bookyrself.bookyrself.data.contacts.ContactsRepo
+import com.bookyrself.bookyrself.data.contacts.ContactsRepoResponse.Failure
+import com.bookyrself.bookyrself.data.contacts.ContactsRepoResponse.Success
 import com.bookyrself.bookyrself.data.serverModels.User.User
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-class ContactsFragmentViewModel(application: Application): BaseViewModel(application, true) {
-
-    var contactsHashMap = MutableLiveData<HashMap<User, String>?>()
+class ContactsFragmentViewModel(application: Application) : BaseViewModel(application) {
+    val contactsHashMap = MutableLiveData<HashMap<User, String>>()
 
     override fun load() {
-        //TODO: Move to UserRepo
-        CoroutineScope(Dispatchers.IO).launch {
-            val contactsResponse = service.getUserContacts(userId!!)
-            if (contactsResponse.isSuccessful) {
-                contactsResponse.body()?.keys?.forEach { contactId ->
-                    val contactsUserInfoResponse = service.getUserDetails(contactId)
-                    withContext(Dispatchers.Main) {
-                        if (contactsUserInfoResponse.isSuccessful) {
-                            contactsHashMap.value?.set(contactsUserInfoResponse.body()!!, contactId)
-                        } else {
-                            errorMessage.value = contactsUserInfoResponse.message()
-                        }
+        val userId = FirebaseAuth.getInstance().uid
+        if (userId != null) {
+            CoroutineScope(Dispatchers.IO).launch {
+                when (val response =
+                        ContactsRepo
+                                .getInstance(getApplication())
+                                .getContacts(userId)) {
+                    is Success -> {
+                        contactsHashMap.postValue(response.contacts)
+                    }
+                    is Failure -> {
+                        errorMessage.postValue(response.errorMessage)
                     }
                 }
             }

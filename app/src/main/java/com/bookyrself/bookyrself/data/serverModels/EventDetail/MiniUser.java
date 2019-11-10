@@ -3,6 +3,7 @@ package com.bookyrself.bookyrself.data.serverModels.EventDetail;
 import com.google.gson.annotations.SerializedName;
 
 import javax.annotation.Generated;
+
 @Generated("net.hexar.json2pojo")
 @SuppressWarnings("unused")
 public class MiniUser {
