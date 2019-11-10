@@ -1,13 +1,16 @@
 package com.bookyrself.bookyrself.views.activities;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -19,6 +22,8 @@ import com.bookyrself.bookyrself.presenters.EventCreationPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.views.fragments.DatePickerDialogFragment;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
@@ -27,6 +32,8 @@ import com.google.firebase.storage.UploadTask;
 import com.pchmn.materialchips.ChipsInput;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -192,12 +199,24 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
 
         if (selectedImage != null) {
             // Upload to firebase
-            StorageReference profilePhotoRef = storageReference.child("images/events/" + eventId);
-            UploadTask uploadTask = profilePhotoRef.putFile(selectedImage);
-            uploadTask.addOnSuccessListener(taskSnapshot -> Toast.makeText(this, "image upload completed", Toast.LENGTH_SHORT).show())
+            StorageReference eventImageRef = storageReference.child("images/events/" + eventId);
+
+            Bitmap bmp = null;
+            try {
+                bmp = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+            byte[] data = baos.toByteArray();
+            //uploading the image
+            UploadTask uploadTask = eventImageRef.putBytes(data);
+            uploadTask
+                    .addOnSuccessListener(taskSnapshot ->
+                            Toast.makeText(this, "image upload completed", Toast.LENGTH_SHORT).show())
                     .addOnFailureListener(e -> Toast.makeText(this, "image upload failed", Toast.LENGTH_SHORT).show());
         }
-
         Intent returnIntent = new Intent();
         setResult(RESULT_OK, returnIntent);
         finish();
