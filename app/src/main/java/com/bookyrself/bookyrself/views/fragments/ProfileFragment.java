@@ -384,7 +384,6 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
 
     public void showLoadingState(boolean show) {
         if (show) {
-            showToast("Signing In!");
             progressbar.setVisibility(View.VISIBLE);
         } else {
             progressbar.setVisibility(View.GONE);
