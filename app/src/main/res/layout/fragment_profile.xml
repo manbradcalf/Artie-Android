@@ -40,7 +40,7 @@
                 app:popupTheme="@style/AppTheme.PopupOverlay"
                 app:titleTextColor="@color/colorAccentLight" />
 
-            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            <RelativeLayout
                 android:id="@+id/profile_content"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -106,21 +106,21 @@
                                     android:id="@+id/city_state_profile_activity"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Add Your Location"
+                                    android:text="@string/default_profile_citystate_text"
                                     android:textAppearance="@android:style/TextAppearance.Material.Body1" />
 
                                 <TextView
                                     android:id="@+id/tags_profile_activity"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Add Your Tags"
+                                    android:text="@string/default_profile_tags_text"
                                     android:textAppearance="@android:style/TextAppearance.Material.Body1" />
 
                                 <TextView
                                     android:id="@+id/user_url_profile_activity"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Add Your Website"
+                                    android:text="@string/default_profile_url_text"
                                     android:textAppearance="@android:style/TextAppearance.Material.Body1" />
 
                             </LinearLayout>
@@ -163,7 +163,7 @@
                                 android:layout_below="@id/bio_header_user_detail_activity"
                                 android:layout_centerHorizontal="true"
                                 android:layout_gravity="center_horizontal"
-                                android:text="Add your bio!"
+                                android:text="@string/default_profile_bio_text"
                                 android:textAppearance="@android:style/TextAppearance.Material.Body1" />
 
                         </RelativeLayout>

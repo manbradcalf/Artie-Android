@@ -70,6 +70,10 @@
     <string name="user_detail_error_header">There was a problem loading the user</string>
     <string name="edit_search_btn_text">Edit Search</string>
     <string name="auth_activity_text">Join the fun!</string>
+    <string name="default_profile_tags_text">Add some tags!</string>
+    <string name="default_profile_citystate_text">Add your city!</string>
+    <string name="default_profile_url_text">Add your website!</string>
+    <string name="default_profile_bio_text">Tell us about yourself!</string>
 
 
 </resources>
