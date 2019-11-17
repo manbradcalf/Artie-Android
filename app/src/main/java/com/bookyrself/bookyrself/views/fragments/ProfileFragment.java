@@ -53,19 +53,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.bookyrself.bookyrself.views.activities.AuthenticationActivity.USERNAME_KEY;
+import static java.util.Objects.requireNonNull;
+
 public class ProfileFragment extends BaseFragment implements OnDateSelectedListener, ProfileFragmentPresenter.ProfilePresenterListener {
 
     private static final int RC_SIGN_IN = 123;
-    private static final int RC_SIGN_UP = 456;
     private static final int RC_PROFILE_EDIT = 789;
     private static final int RC_PHOTO_SELECT = 101;
-    private static final int RC_ERROR = 500;
-    private static final int RC_CANCELED = 111;
 
     @BindView(R.id.profile_content)
     RelativeLayout profileContent;
@@ -124,7 +123,7 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, view);
-        ((AppCompatActivity) Objects.requireNonNull(getActivity())).setSupportActionBar(toolbar);
+        ((AppCompatActivity) requireNonNull(getActivity())).setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.title_profile);
 
         return view;
@@ -168,6 +167,7 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
 
     @Override
     public void profileInfoReady(String userId, User user) {
+        setMenuVisibility(true);
         setLayout(user);
         showContent(true);
     }
@@ -203,32 +203,29 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
 
     private void setLayout(final User user) {
         if (user != null) {
+            resetView();
             emptyState.setVisibility(View.GONE);
             showLoadingState(false);
             calendarView.setOnDateChangedListener(this);
             userNameTextView.setText(user.getUsername());
-
-            // Set your URL
             urlTextView.setClickable(true);
             urlTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
             if (user.getUrl() != null) {
                 String linkedText =
                         String.format("<a href=\"%s\">%s</a> ", ("http://" + user.getUrl()), user.getUrl());
                 urlTextView.setText(Html.fromHtml(linkedText));
             }
-
             if (user.getTags() != null) {
                 tagsTextView.setText(user.getTags().toString().replaceAll("\\[|]|, $", ""));
             }
             if (user.getCitystate() != null) {
                 cityStateTextView.setText(user.getCitystate());
             }
-
             if (user.getBio() != null) {
                 bioTextView.setText(user.getBio());
             }
 
-            // Both edit buttons start the profile creation activity
             editBioButton.setOnClickListener(view -> editProfile(user));
             editInfoButton.setOnClickListener(view -> editProfile(user));
 
@@ -287,45 +284,29 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
             switch (requestCode) {
                 case RC_SIGN_IN:
                     boolean isNewUser = data.getBooleanExtra("isNewUser", false);
-                    String username = data.getExtras().get("username").toString();
                     if (isNewUser) {
-                        // Successfully signed up
-                        // Clear out activity's old user data if it exists
-                        if (user.getTags() != null) {
-                            user.setTags(null);
-                        }
-                        if (user.getBio() != null) {
-                            user.setBio(null);
-                        }
-                        if (user.getCitystate() != null) {
-                            user.setCitystate(null);
-                        }
-                        if (user.getUrl() != null) {
-                            user.setUrl(null);
-                        }
+                        user = new User();
                         // Update user object to push to FB DB
                         user.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
-                        user.setUsername(username);
+                        user.setUsername(data.getExtras().get(USERNAME_KEY).toString());
                         presenter.updateUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
                         showCreatingUserLoadingToast();
                     } else {
                         // Successfully signed in
                         showLoadingState(true);
-                        showToast("Signing In!");
                         presenter.subscribe();
-                        setMenuVisibility(true);
                         return;
                     }
 
                 case RC_PROFILE_EDIT:
                     showToast("Profile Updated!");
                     return;
+
                 case RC_PHOTO_SELECT:
                     Uri selectedImage = data.getData();
 
                     // Upload to firebase
                     StorageReference profilePhotoRef = storageReference.child("images/users/" + fbUser.getUid());
-
                     Bitmap bmp = null;
                     try {
                         bmp = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), selectedImage);
@@ -336,7 +317,6 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
                     bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
                     byte[] imgData = baos.toByteArray();
                     UploadTask uploadTask = profilePhotoRef.putBytes(imgData);
-
                     uploadTask.addOnSuccessListener(taskSnapshot -> {
                         // Set the image to the profileImageThumb
                         Picasso.with(getActivity().getApplicationContext())
@@ -352,21 +332,22 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
                         showToast("upload failed");
                         Picasso.with(getActivity().getApplicationContext()).load(R.drawable.ic_user).into(profileImage);
                     });
-                case RC_ERROR:
-                    showToast("Something went wrong with login!");
             }
-            // Not logged in and backed out of Auth Activity
-        } else if (resultCode == RC_CANCELED) {
-            showToast("Canceled Sign In");
         }
-        // No fbUser but authentication was _not_ canceled. Theoretically shouldn't get here
-        else {
-            presentError("We're looking into it");
-        }
+
+
+    }
+
+    private void resetView() {
+        tagsTextView.setText(getString(R.string.default_profile_tags_text));
+        bioTextView.setText(getString(R.string.default_profile_bio_text));
+        cityStateTextView.setText(getString(R.string.default_profile_citystate_text));
+        urlTextView.setText(getString(R.string.default_profile_url_text));
     }
 
     @Override
-    public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay calendarDay, boolean selected) {
+    public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay
+            calendarDay, boolean selected) {
         if (acceptedEventsCalendarDays.contains(calendarDay)) {
             Intent intent = new Intent(getActivity(), EventDetailActivity.class);
             intent.putExtra("eventId", calendarDaysWithEventIds.get(calendarDay));
@@ -409,7 +390,8 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
         }
     }
 
-    private void showEmptyState(String header, String subHeader, String buttonText, Drawable image) {
+    private void showEmptyState(String header, String subHeader, String buttonText, Drawable
+            image) {
         showContent(false);
         showLoadingState(false);
         emptyState.setVisibility(View.VISIBLE);
@@ -424,7 +406,6 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
             emptyStateButton.setVisibility(View.VISIBLE);
             emptyStateButton.setText(buttonText);
             emptyStateButton.setOnClickListener(view -> {
-
                 // Authenticate
                 Intent intent = new Intent(getActivity(), AuthenticationActivity.class);
                 startActivityForResult(intent, RC_SIGN_IN);

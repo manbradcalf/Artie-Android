@@ -1,9 +1,11 @@
 package com.bookyrself.bookyrself.views.fragments
 
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.bookyrself.bookyrself.R
+import com.bookyrself.bookyrself.views.activities.AuthenticationActivity
 import com.firebase.ui.auth.AuthUI
 import kotlinx.android.synthetic.main.empty_state_template.*
 
@@ -24,16 +26,9 @@ open class BaseFragment : Fragment() {
             empty_state_button?.visibility = View.VISIBLE
             empty_state_button?.text = buttonText
             empty_state_button?.setOnClickListener {
-                val providers = listOf(AuthUI.IdpConfig.GoogleBuilder().build(),
-                        AuthUI.IdpConfig.EmailBuilder().build())
                 // Authenticate
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                .createSignInIntentBuilder()
-                                .setIsSmartLockEnabled(false, true)
-                                .setAvailableProviders(providers)
-                                .build(),
-                        RC_SIGN_IN)
+                val intent = Intent(context,AuthenticationActivity::class.java)
+                startActivityForResult(intent, RC_SIGN_IN)
             }
         } else {
             empty_state_button?.visibility = View.GONE
