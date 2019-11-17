@@ -32,10 +32,10 @@ import com.bookyrself.bookyrself.data.serverModels.User.User;
 import com.bookyrself.bookyrself.presenters.ProfileFragmentPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.EventDecorator;
+import com.bookyrself.bookyrself.views.activities.AuthenticationActivity;
 import com.bookyrself.bookyrself.views.activities.EventDetailActivity;
 import com.bookyrself.bookyrself.views.activities.ProfileEditActivity;
 import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
@@ -50,7 +50,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,13 +58,14 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static android.app.Activity.RESULT_OK;
-
 public class ProfileFragment extends BaseFragment implements OnDateSelectedListener, ProfileFragmentPresenter.ProfilePresenterListener {
 
     private static final int RC_SIGN_IN = 123;
-    private static final int RC_PROFILE_EDIT = 456;
-    private static final int RC_PHOTO_SELECT = 789;
+    private static final int RC_SIGN_UP = 456;
+    private static final int RC_PROFILE_EDIT = 789;
+    private static final int RC_PHOTO_SELECT = 101;
+    private static final int RC_ERROR = 500;
+    private static final int RC_CANCELED = 111;
 
     @BindView(R.id.profile_content)
     RelativeLayout profileContent;
@@ -278,88 +278,90 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
         });
     }
 
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        IdpResponse response = IdpResponse.fromResultIntent(data);
-        if (resultCode == RESULT_OK) {
-            FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
-            if (fbUser != null) {
-                switch (requestCode) {
-                    case RC_SIGN_IN:
-                        if (presenter.isNewSignUp()) {
-                            // Successfully signed up
-                            // Clear out activity's old user data if it exists
-                            if (user.getTags() != null) {
-                                user.setTags(null);
-                            }
-                            if (user.getBio() != null) {
-                                user.setBio(null);
-                            }
-                            if (user.getCitystate() != null) {
-                                user.setCitystate(null);
-                            }
-                            if (user.getUrl() != null) {
-                                user.setUrl(null);
-                            }
+        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
 
-                            // Update user object to push to FB DB
-                            user.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
-                            user.setUsername(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
-                            presenter.updateUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
-                            showCreatingUserLoadingToast();
-                        } else {
-                            // Successfully signed in
-                            showLoadingState(true);
-                            showToast("Signing In!");
-                            presenter.subscribe();
+        if (fbUser != null) {
+            switch (requestCode) {
+                case RC_SIGN_IN:
+                    boolean isNewUser = data.getBooleanExtra("isNewUser", false);
+                    String username = data.getExtras().get("username").toString();
+                    if (isNewUser) {
+                        // Successfully signed up
+                        // Clear out activity's old user data if it exists
+                        if (user.getTags() != null) {
+                            user.setTags(null);
                         }
+                        if (user.getBio() != null) {
+                            user.setBio(null);
+                        }
+                        if (user.getCitystate() != null) {
+                            user.setCitystate(null);
+                        }
+                        if (user.getUrl() != null) {
+                            user.setUrl(null);
+                        }
+                        // Update user object to push to FB DB
+                        user.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                        user.setUsername(username);
+                        presenter.updateUser(user, FirebaseAuth.getInstance().getCurrentUser().getUid());
+                        showCreatingUserLoadingToast();
+                    } else {
+                        // Successfully signed in
+                        showLoadingState(true);
+                        showToast("Signing In!");
+                        presenter.subscribe();
                         setMenuVisibility(true);
                         return;
+                    }
 
-                    case RC_PROFILE_EDIT:
-                        showToast("Profile Updated!");
-                        return;
-                    case RC_PHOTO_SELECT:
-                        Uri selectedImage = data.getData();
+                case RC_PROFILE_EDIT:
+                    showToast("Profile Updated!");
+                    return;
+                case RC_PHOTO_SELECT:
+                    Uri selectedImage = data.getData();
 
-                        // Upload to firebase
-                        StorageReference profilePhotoRef = storageReference.child("images/users/" + fbUser.getUid());
+                    // Upload to firebase
+                    StorageReference profilePhotoRef = storageReference.child("images/users/" + fbUser.getUid());
 
-                        Bitmap bmp = null;
-                        try {
-                            bmp = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), selectedImage);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
-                        byte[] imgData = baos.toByteArray();
-                        UploadTask uploadTask = profilePhotoRef.putBytes(imgData);
+                    Bitmap bmp = null;
+                    try {
+                        bmp = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), selectedImage);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+                    byte[] imgData = baos.toByteArray();
+                    UploadTask uploadTask = profilePhotoRef.putBytes(imgData);
 
-                        uploadTask.addOnSuccessListener(taskSnapshot -> {
-                            // Set the image to the profileImageThumb
-                            Picasso.with(getActivity().getApplicationContext())
-                                    .load(selectedImage)
-                                    .resize(148, 148)
-                                    .centerCrop()
-                                    .transform(new CircleTransform())
-                                    .into(profileImage);
+                    uploadTask.addOnSuccessListener(taskSnapshot -> {
+                        // Set the image to the profileImageThumb
+                        Picasso.with(getActivity().getApplicationContext())
+                                .load(selectedImage)
+                                .resize(148, 148)
+                                .centerCrop()
+                                .transform(new CircleTransform())
+                                .into(profileImage);
 
-                            showToast("upload succeeded");
+                        showToast("upload succeeded");
 
-                        }).addOnFailureListener(e -> {
-                            showToast("upload failed");
-                            Picasso.with(getActivity().getApplicationContext()).load(R.drawable.ic_user).into(profileImage);
-                        });
-                }
+                    }).addOnFailureListener(e -> {
+                        showToast("upload failed");
+                        Picasso.with(getActivity().getApplicationContext()).load(R.drawable.ic_user).into(profileImage);
+                    });
+                case RC_ERROR:
+                    showToast("Something went wrong with login!");
             }
-        } else if (response == null) {
-            // User pressed back button
-            showToast("Canceled");
-        } else if (response.getError() != null) {
-            showToast(response.getError().getMessage());
+            // Not logged in and backed out of Auth Activity
+        } else if (resultCode == RC_CANCELED) {
+            showToast("Canceled Sign In");
+        }
+        // No fbUser but authentication was _not_ canceled. Theoretically shouldn't get here
+        else {
+            presentError("We're looking into it");
         }
     }
 
@@ -422,16 +424,10 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
             emptyStateButton.setVisibility(View.VISIBLE);
             emptyStateButton.setText(buttonText);
             emptyStateButton.setOnClickListener(view -> {
-                List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
-                        new AuthUI.IdpConfig.EmailBuilder().build());
+
                 // Authenticate
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                .createSignInIntentBuilder()
-                                .setIsSmartLockEnabled(false, true)
-                                .setAvailableProviders(providers)
-                                .build(),
-                        RC_SIGN_IN);
+                Intent intent = new Intent(getActivity(), AuthenticationActivity.class);
+                startActivityForResult(intent, RC_SIGN_IN);
             });
         } else {
             emptyStateButton.setVisibility(View.GONE);
