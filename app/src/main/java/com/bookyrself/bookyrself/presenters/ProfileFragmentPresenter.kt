@@ -57,18 +57,9 @@ class ProfileFragmentPresenter
 
     override fun subscribe() {
         if (FirebaseAuth.getInstance().uid != null) {
-//            when (isNewSignUp()) {
-//                true -> {
-//                    // Don't do anything, we've already called createUser in onActivityResult in Fragment
-//                    listener.showCreatingUserLoadingToast()
-//                }
-//                false -> {
-            // load the profile
             userId = FirebaseAuth.getInstance().uid
             loadProfile()
             loadEventDetails()
-//                }
-//            }
         } else {
             // No uid in Firebase Auth, user must be signed out
             listener.showSignedOutEmptyState()
