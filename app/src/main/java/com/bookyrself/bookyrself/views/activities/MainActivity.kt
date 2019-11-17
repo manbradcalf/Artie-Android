@@ -15,7 +15,6 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
-
     private val profileFragment = ProfileFragment()
     private val searchFragment = SearchFragment()
     private val eventsFragment = EventsFragment()
@@ -43,17 +42,12 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        val itemId = item.itemId
-        if (itemId == R.id.navigation_search) {
-            viewPager.currentItem = SEARCH_FRAGMENT_INDEX
-        } else if (itemId == R.id.navigation_calendar) {
-            viewPager.currentItem = CALENDAR_FRAGMENT_INDEX
-        } else if (itemId == R.id.navigation_contacts) {
-            viewPager.currentItem = CONTACTS_FRAGMENT_INDEX
-        } else if (itemId == R.id.navigation_profile) {
-            viewPager.currentItem = PROFILE_FRAGMENT_INDEX
-        } else if (itemId == R.id.navigation_event_invites_list) {
-            viewPager.currentItem = EVENTS_INVITE_LIST
+        when (item.itemId) {
+            R.id.navigation_search -> viewPager.currentItem = SEARCH_FRAGMENT_INDEX
+            R.id.navigation_calendar -> viewPager.currentItem = CALENDAR_FRAGMENT_INDEX
+            R.id.navigation_contacts -> viewPager.currentItem = CONTACTS_FRAGMENT_INDEX
+            R.id.navigation_profile -> viewPager.currentItem = PROFILE_FRAGMENT_INDEX
+            R.id.navigation_event_invites_list -> viewPager.currentItem = EVENTS_INVITE_LIST
         }
         return true
     }
