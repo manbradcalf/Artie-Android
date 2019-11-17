@@ -87,12 +87,6 @@ class ProfileFragmentPresenter
                 .subscribe()
     }
 
-    // This shit sucks because it can be off by 1 milli
-    fun isNewSignUp(): Boolean {
-        val metadata = FirebaseAuth.getInstance().currentUser!!.metadata
-        return metadata!!.creationTimestamp == metadata.lastSignInTimestamp
-    }
-
     /**
      * PresenterListener Definition
      */
