@@ -49,10 +49,10 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
         user_detail_empty_state.visibility = View.GONE
         displayLoadingState()
         userDetailId = intent.getStringExtra("userId")
-        initData(userDetailId)
+        setListeners(userDetailId)
     }
 
-    private fun initData(userId: String) {
+    private fun setListeners(userId: String) {
         model = ViewModelProviders.of(this,
                 UserDetailViewModel.UserDetailViewModelFactory(application, userId))
                 .get(UserDetailViewModel::class.java)
@@ -74,6 +74,7 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
         model.errorMessage.observe(this) {
             presentError(it)
         }
+        model.load()
     }
 
 

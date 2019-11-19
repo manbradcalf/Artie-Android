@@ -59,12 +59,10 @@ class EventDetailActivity : BaseActivity() {
         setSupportActionBar(event_detail_toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         showProgressbar(true)
-
-        initData(intent.getStringExtra("eventId"))
+        setListeners(intent.getStringExtra("eventId"))
     }
 
-    private fun initData(eventId: String) {
-        // Set up the model
+    private fun setListeners(eventId: String) {
         model = ViewModelProviders.of(this,
                 EventDetailViewModel.EventDetailViewModelFactory(application, eventId))
                 .get(EventDetailViewModel::class.java)
@@ -76,6 +74,7 @@ class EventDetailActivity : BaseActivity() {
         model.invitees.observe(this) { invitees ->
             showInvitedUsers(invitees)
         }
+        model.load()
     }
 
     private fun showEventData(eventDetailData: EventDetail, eventId: String) {

@@ -17,10 +17,6 @@ class UserDetailViewModel(application: Application, private val userDetailId: St
     var events = MutableLiveData<HashMap<EventDetail, String>>()
     var contactWasAdded = MutableLiveData<Boolean>()
 
-    init {
-        load()
-    }
-
     override fun load() {
         CoroutineScope(Dispatchers.IO).launch {
             val userResponse = service.getUserDetails(userDetailId)
