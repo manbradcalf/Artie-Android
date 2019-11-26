@@ -5,11 +5,16 @@ import com.bookyrself.bookyrself.data.profile.ProfileRepo
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.serverModels.User.User
 import com.bookyrself.bookyrself.services.FirebaseService
+import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
 import com.bookyrself.bookyrself.views.activities.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 class ProfileFragmentPresenter
@@ -30,7 +35,10 @@ class ProfileFragmentPresenter
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
-                                { listener.profileInfoReady(userId, user) },
+                                {
+                                    loadEventDetails(it.events?.keys)
+                                    listener.profileInfoReady(userId, user)
+                                },
                                 { throwable -> throwable.message?.let { listener.presentError(it) } }
                         ))
     }
@@ -39,6 +47,8 @@ class ProfileFragmentPresenter
         compositeDisposable.add(
                 profileRepo.getProfileInfo(userId!!).subscribe(
                         { user ->
+                            // load up events now that we have user data
+                            loadEventDetails(user.events?.keys)
                             // Notify view the profile is ready
                             listener.profileInfoReady(userId, user)
                         },
@@ -51,15 +61,28 @@ class ProfileFragmentPresenter
                         }))
     }
 
-    private fun loadEventDetails() {
-
+    private fun loadEventDetails(eventIds: Set<String>?) {
+        CoroutineScope(Dispatchers.IO).launch {
+            eventIds?.forEach { eventId ->
+                val eventDetailResponse = FirebaseServiceCoroutines.instance.getEventData(eventId)
+                if (eventDetailResponse.isSuccessful) {
+                    val eventDetail = eventDetailResponse.body()
+                    if (eventDetail != null) {
+                        withContext(Dispatchers.Main) {
+                            listener.eventReady(eventId, eventDetail)
+                        }
+                    } else {
+                        listener.presentError(eventDetailResponse.message())
+                    }
+                }
+            }
+        }
     }
 
     override fun subscribe() {
         if (FirebaseAuth.getInstance().uid != null) {
             userId = FirebaseAuth.getInstance().uid
             loadProfile()
-            loadEventDetails()
         } else {
             // No uid in Firebase Auth, user must be signed out
             listener.showSignedOutEmptyState()
@@ -69,7 +92,6 @@ class ProfileFragmentPresenter
     override fun unsubscribe() {
         compositeDisposable.clear()
     }
-
 
     fun markDateAsUnavailable(userId: String, date: String) {
         FirebaseService.instance.setDateUnavailableForUser(true, userId, date)
