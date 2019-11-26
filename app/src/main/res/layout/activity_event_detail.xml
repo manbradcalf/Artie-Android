@@ -52,7 +52,6 @@
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
         tools:context="com.bookyrself.bookyrself.views.activities.EventDetailActivity">
 
-
         <LinearLayout
             android:id="@+id/event_detail_linearlayout"
             android:layout_width="match_parent"
