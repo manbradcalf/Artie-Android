@@ -51,6 +51,17 @@
         <item name="closeIcon">@drawable/ic_close_black_24dp</item>
     </style>
 
+    <style name="Theme.AppCompat.Translucent" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@color/semiTransparentBlack</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
     <!--You can use any theme here as parent theme -->
     <style name="OnboardingTheme" parent="AppTheme">
         <item name="android:textViewStyle">@style/myTextViewStyle</item>
@@ -76,5 +87,5 @@
         <item name="android:textSize">12sp</item>
     </style>
 
-
+    <color name="semiTransparentBlack">#00000000</color>
 </resources>

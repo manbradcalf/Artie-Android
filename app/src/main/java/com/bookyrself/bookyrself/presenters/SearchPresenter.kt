@@ -25,7 +25,7 @@ class SearchPresenter
     /**
      * Methods
      */
-    fun executeSearch(searchType: Int, what: String, where: String, fromWhen: String, toWhen: String) {
+    fun executeSearch(searchType: Int, what: String, where: String, fromWhen: String?, toWhen: String?) {
         listener.showProgressbar(true)
         val query = createQuery(what, where, fromWhen, toWhen)
         val body = RequestBody()
@@ -68,7 +68,7 @@ class SearchPresenter
         }
     }
 
-    private fun createQuery(what: String, where: String, fromWhen: String, toWhen: String): Query {
+    private fun createQuery(what: String, where: String, fromWhen: String?, toWhen: String?): Query {
         val fields = Arrays.asList("username", "tags", "eventname")
         val query = Query()
         val bool = Bool()
@@ -93,14 +93,12 @@ class SearchPresenter
             musts.add(must2)
         }
 
-        if (!musts.isEmpty()) {
+        if (musts.isNotEmpty()) {
             bool.must = musts
         }
         query.bool = bool
 
-        //TODO: this coniditional check with string literals is gross, fix this at some point
-        // Set the daterange
-        if (toWhen != "To" && fromWhen != "From") {
+        if (toWhen != null && fromWhen != null) {
             val filter = Filter()
             val bool_ = Bool_()
             val must_ = Must_()
@@ -114,7 +112,6 @@ class SearchPresenter
             filter.bool = bool_
             bool.filter = filter
         }
-
         return query
     }
 

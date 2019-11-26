@@ -136,6 +136,13 @@ class EventDetailActivity : BaseActivity() {
                     .into(event_image_detail)
         }.addOnFailureListener { Log.e(this.javaClass.name, "Unable to load Event Image") }
 
+        event_image_detail.setOnClickListener {
+            val intent = Intent(this, ViewImageActivity::class.java)
+            intent.putExtra("id", eventId)
+            intent.putExtra("imageType", "events")
+            startActivity(intent)
+        }
+
         // Make it visible
         event_detail_linearlayout!!.visibility = View.VISIBLE
     }

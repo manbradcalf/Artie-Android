@@ -88,9 +88,6 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.title = getString(R.string.user_detail_toolbar, user?.username)
 
-        // Set default contact card text
-        add_user_to_contacts_textview.text = getString(R.string.add_user_to_contacts, user?.username)
-
         // Set tags
         val listString = StringBuilder()
         user?.tags?.forEach { tag ->
@@ -102,8 +99,7 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
         username_user_detail_activity.text = user?.username
         city_state_user_detail_activity.text = user?.citystate
         bio_body_user_detail_activity.text = user?.bio
-        message_user_detail_activity_text.text = getString(R.string.email_user, user?.username)
-        message_user_detail_activity_card?.setOnClickListener { emailUser() }
+        email_user_detail_activity_image?.setOnClickListener { emailUser() }
         user_url_user_detail_activity.isClickable = true
         user_url_user_detail_activity.movementMethod = LinkMovementMethod.getInstance()
 
@@ -112,7 +108,6 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
 
         // Set unavailable dates
         user?.unavailableDates?.keys?.forEach { date ->
-
             val s = date.split("-".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()
             val year = Integer.parseInt(s[0])
             // I have to do weird logic on the month because months are 0 indexed
@@ -124,13 +119,10 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
             unavailableCalendarDays.add(calendarDay)
 
             user_detail_calendar.addDecorator(EventDecorator(EventDecorator.DATE_UNAVAILABLE, unavailableCalendarDays, applicationContext))
-
         }
-
 
         // If I'm signed in
         if (FirebaseAuth.getInstance().uid != null) {
-
             // Check if this user is already contact and if so update the textview to portray that
             // TODO Leftover from old rxJava ways. refactor repo layer and this block
             compositeDisposable.add(
@@ -141,8 +133,8 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
                             .map { it.key }
                             .filter { s -> s == userId }
                             .subscribe({
-                                add_user_to_contacts_textview.setText(R.string.user_detail_contact_already_added)
-                                add_user_to_contacts_card.isClickable = false
+                                add_user_to_contacts_imageview.setImageDrawable(getDrawable(R.drawable.ic_contact_added_24dp))
+                                add_user_to_contacts_imageview.isClickable = false
                             },
                                     { throwable ->
                                         if (throwable.message != null) {
@@ -151,15 +143,17 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
                                         throwable.printStackTrace()
                                     }))
 
-            // Since I'm signed in and thus able to add user as contact,
-            // set the default click listener for the contact add button
-            add_user_to_contacts_card.setOnClickListener {
+//            // Since I'm signed in and thus able to add user as contact,
+//            // set the default click listener for the contact add button
+            add_user_to_contacts_imageview.setOnClickListener {
                 model.addContactToUser(userId!!, FirebaseAuth.getInstance().uid!!)
             }
         } else {
             // If I'm signed out
-            //TODO: Add intent to login here
-            add_user_to_contacts_textview.setText(R.string.contact_button_signed_out)
+            // TODO: Add intent to login here
+            add_user_to_contacts_imageview.setOnClickListener {
+                Toast.makeText(this, "Log in to add to contacts", Toast.LENGTH_SHORT).show()
+            }
         }
 
         val profileImageReference = imageStorage.child("images/users/$userDetailId")
@@ -180,6 +174,12 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
                     profile_image_progressbar.visibility = View.GONE
                 }
 
+        profile_image_user_detail_activity.setOnClickListener {
+            val intent = Intent(this, ViewImageActivity::class.java)
+            intent.putExtra("id", userId)
+            intent.putExtra("imageType", "users")
+            startActivity(intent)
+        }
         user_detail_content.visibility = View.VISIBLE
     }
 
@@ -239,6 +239,7 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
     }
 
     private fun presentSuccessForContactAdded() {
+        add_user_to_contacts_imageview.setImageDrawable(getDrawable(R.drawable.ic_contact_added_24dp))
         Toast.makeText(this, "Contact successfully added!", Toast.LENGTH_SHORT).show()
     }
 

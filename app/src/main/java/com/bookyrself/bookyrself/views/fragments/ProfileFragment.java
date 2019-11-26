@@ -303,35 +303,37 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
                     return;
 
                 case RC_PHOTO_SELECT:
-                    Uri selectedImage = data.getData();
+                    if (data != null) {
+                        Uri selectedImage = data.getData();
 
-                    // Upload to firebase
-                    StorageReference profilePhotoRef = storageReference.child("images/users/" + fbUser.getUid());
-                    Bitmap bmp = null;
-                    try {
-                        bmp = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), selectedImage);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        // Upload to firebase
+                        StorageReference profilePhotoRef = storageReference.child("images/users/" + fbUser.getUid());
+                        Bitmap bmp = null;
+                        try {
+                            bmp = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), selectedImage);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+                        byte[] imgData = baos.toByteArray();
+                        UploadTask uploadTask = profilePhotoRef.putBytes(imgData);
+                        uploadTask.addOnSuccessListener(taskSnapshot -> {
+                            // Set the image to the profileImageThumb
+                            Picasso.with(getActivity().getApplicationContext())
+                                    .load(selectedImage)
+                                    .resize(148, 148)
+                                    .centerCrop()
+                                    .transform(new CircleTransform())
+                                    .into(profileImage);
+
+                            showToast("upload succeeded");
+
+                        }).addOnFailureListener(e -> {
+                            showToast("upload failed");
+                            Picasso.with(getActivity().getApplicationContext()).load(R.drawable.ic_user).into(profileImage);
+                        });
                     }
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
-                    byte[] imgData = baos.toByteArray();
-                    UploadTask uploadTask = profilePhotoRef.putBytes(imgData);
-                    uploadTask.addOnSuccessListener(taskSnapshot -> {
-                        // Set the image to the profileImageThumb
-                        Picasso.with(getActivity().getApplicationContext())
-                                .load(selectedImage)
-                                .resize(148, 148)
-                                .centerCrop()
-                                .transform(new CircleTransform())
-                                .into(profileImage);
-
-                        showToast("upload succeeded");
-
-                    }).addOnFailureListener(e -> {
-                        showToast("upload failed");
-                        Picasso.with(getActivity().getApplicationContext()).load(R.drawable.ic_user).into(profileImage);
-                    });
             }
         }
 

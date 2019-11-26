@@ -42,6 +42,9 @@
             android:name=".views.activities.UserDetailActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".views.activities.ViewImageActivity"
+            android:theme="@style/Theme.AppCompat.Translucent"/>
+        <activity
             android:name=".views.activities.AuthenticationActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
