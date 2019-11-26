@@ -74,6 +74,12 @@
     <string name="default_profile_citystate_text">Add your city!</string>
     <string name="default_profile_url_text">Add your website!</string>
     <string name="default_profile_bio_text">Tell us about yourself!</string>
+    <string name="website_user_detail">Website</string>
+    <string name="tags_user_detail">Tags</string>
+    <string name="username_user_detail">Username</string>
+    <string name="profile_image_content_desc">profile image</string>
+    <string name="users_toggle_option_search">Users</string>
+    <string name="events_toggle_option_search">Events</string>
 
 
 </resources>

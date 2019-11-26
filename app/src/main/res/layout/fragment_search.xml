@@ -87,7 +87,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/radio_button_background"
                 android:button="@android:color/transparent"
-                android:text="Users"
+                android:text="@string/users_toggle_option_search"
                 android:textAlignment="center" />
 
             <RadioButton
@@ -98,7 +98,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/radio_button_background"
                 android:button="@android:color/transparent"
-                android:text="Events"
+                android:text="@string/events_toggle_option_search"
                 android:textAlignment="center" />
 
         </RadioGroup>
