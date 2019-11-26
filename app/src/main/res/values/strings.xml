@@ -80,6 +80,10 @@
     <string name="profile_image_content_desc">profile image</string>
     <string name="users_toggle_option_search">Users</string>
     <string name="events_toggle_option_search">Events</string>
+    <string name="city_state_user_detail">City, State</string>
+    <string name="user_detail_bio">Bio</string>
+    <string name="user_detail_email_btn_text">Email</string>
+    <string name="user_detail_image_cont_desc">User Image</string>
 
 
 </resources>

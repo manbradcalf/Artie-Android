@@ -78,7 +78,6 @@ class EventDetailActivity : BaseActivity() {
     }
 
     private fun showEventData(eventDetailData: EventDetail, eventId: String) {
-
         showProgressbar(false)
         event_detail_collapsing_toolbar!!.title = eventDetailData.eventname
         event_detail_collapsing_toolbar!!.setExpandedTitleColor(resources.getColor(R.color.cardview_light_background))
@@ -121,7 +120,6 @@ class EventDetailActivity : BaseActivity() {
         } catch (e: ParseException) {
             e.printStackTrace()
         }
-
 
         // Set the city state
         item_event_detail_citystate!!.text = hostCityState

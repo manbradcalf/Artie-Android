@@ -12,9 +12,9 @@ import androidx.lifecycle.observe
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.serverModels.User.User
-import com.bookyrself.bookyrself.utils.CircleTransform
 import com.bookyrself.bookyrself.utils.EventDecorator
 import com.bookyrself.bookyrself.viewmodels.UserDetailViewModel
+import com.bookyrself.bookyrself.views.fragments.BaseFragment.Companion.RC_SIGN_IN
 import com.google.firebase.auth.FirebaseAuth
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -23,6 +23,7 @@ import com.squareup.picasso.Picasso
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_event_detail.*
 import kotlinx.android.synthetic.main.activity_user_detail.*
 import kotlinx.android.synthetic.main.empty_state_template.*
 import java.util.*
@@ -38,14 +39,14 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
     private val acceptedEventsCalendarDays = ArrayList<CalendarDay>()
     private val unavailableCalendarDays = ArrayList<CalendarDay>()
     lateinit var userDetailId: String
-
     lateinit var model: UserDetailViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_detail)
+        setSupportActionBar(user_detail_toolbar)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         user_detail_calendar.setOnDateChangedListener(this)
-        toolbar_user_detail.title = "User Details"
         user_detail_empty_state.visibility = View.GONE
         displayLoadingState()
         userDetailId = intent.getStringExtra("userId")
@@ -84,9 +85,10 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
     }
 
     private fun displayUserInfo(user: User?, userId: String?) {
-        setSupportActionBar(toolbar_user_detail)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        supportActionBar!!.title = getString(R.string.user_detail_toolbar, user?.username)
+        user_detail_collapsing_toolbar!!.title = user?.username
+        user_detail_collapsing_toolbar!!.setExpandedTitleColor(resources.getColor(R.color.cardview_light_background))
+        user_detail_collapsing_toolbar!!.setCollapsedTitleTextColor(resources.getColor(R.color.cardview_light_background))
+        user_detail_empty_state_card_view.visibility = View.GONE
 
         // Set tags
         val listString = StringBuilder()
@@ -96,10 +98,10 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
         val tagsText = listString.toString().replace(", $".toRegex(), "")
 
         tags_user_detail_activity.text = tagsText
-        username_user_detail_activity.text = user?.username
         city_state_user_detail_activity.text = user?.citystate
         bio_body_user_detail_activity.text = user?.bio
-        email_user_detail_activity_image?.setOnClickListener { emailUser() }
+        email_user_detail_btn?.setOnClickListener { emailUser() }
+        email_user_detail_btn.setCompoundDrawablesRelative(getDrawable(R.drawable.ic_mail_accent_24dp), null, null, null)
         user_url_user_detail_activity.isClickable = true
         user_url_user_detail_activity.movementMethod = LinkMovementMethod.getInstance()
 
@@ -108,7 +110,7 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
 
         // Set unavailable dates
         user?.unavailableDates?.keys?.forEach { date ->
-            val s = date.split("-".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()
+            val s = date.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
             val year = Integer.parseInt(s[0])
             // I have to do weird logic on the month because months are 0 indexed
             // I can't use JodaTime because MaterialCalendarView only accepts Java Calendar
@@ -133,8 +135,9 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
                             .map { it.key }
                             .filter { s -> s == userId }
                             .subscribe({
-                                add_user_to_contacts_imageview.setImageDrawable(getDrawable(R.drawable.ic_contact_added_24dp))
-                                add_user_to_contacts_imageview.isClickable = false
+                                // TODO: Create a tint list so I can fill this button with the accent at this point
+                                // https://developer.android.com/guide/topics/resources/color-list-resource.html
+                                setSaveButton(true)
                             },
                                     { throwable ->
                                         if (throwable.message != null) {
@@ -143,17 +146,15 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
                                         throwable.printStackTrace()
                                     }))
 
-//            // Since I'm signed in and thus able to add user as contact,
-//            // set the default click listener for the contact add button
-            add_user_to_contacts_imageview.setOnClickListener {
+            // Since I'm signed in and thus able to add user as contact,
+            // set the default click listener for the contact add button
+            user_detail_save_btn.setOnClickListener {
                 model.addContactToUser(userId!!, FirebaseAuth.getInstance().uid!!)
             }
         } else {
-            // If I'm signed out
-            // TODO: Add intent to login here
-            add_user_to_contacts_imageview.setOnClickListener {
-                Toast.makeText(this, "Log in to add to contacts", Toast.LENGTH_SHORT).show()
-            }
+            // I'm signed out, so clicking the btn fires auth intent
+            val intent = Intent(this, AuthenticationActivity::class.java)
+            startActivityForResult(intent, RC_SIGN_IN)
         }
 
         val profileImageReference = imageStorage.child("images/users/$userDetailId")
@@ -162,25 +163,34 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
                 .addOnSuccessListener { uri ->
                     Picasso.with(applicationContext)
                             .load(uri)
-                            .resize(148, 148)
+                            .resize(500, 500)
                             .centerCrop()
-                            .transform(CircleTransform())
-                            .into(profile_image_user_detail_activity)
+                            .into(user_image_detail)
                     profile_image_progressbar.visibility = View.GONE
-                }.addOnFailureListener { exception ->
+                }.addOnFailureListener {
                     // Handle any errors
                     Toast.makeText(applicationContext, "Profile Image Unavailable", Toast.LENGTH_SHORT).show()
-                    profile_image_user_detail_activity!!.setImageDrawable(getDrawable(R.drawable.ic_profile_black_24dp))
+                    user_image_detail!!.setImageDrawable(getDrawable(R.drawable.ic_profile_black_24dp))
                     profile_image_progressbar.visibility = View.GONE
                 }
 
-        profile_image_user_detail_activity.setOnClickListener {
+        user_image_detail.setOnClickListener {
             val intent = Intent(this, ViewImageActivity::class.java)
             intent.putExtra("id", userId)
             intent.putExtra("imageType", "users")
             startActivity(intent)
         }
         user_detail_content.visibility = View.VISIBLE
+    }
+
+    private fun setSaveButton(userIsSaved: Boolean) {
+        if (userIsSaved) {
+            user_detail_save_btn.text = "Saved"
+            user_detail_save_btn.isClickable = false
+        } else {
+            user_detail_save_btn.text = "Save"
+            user_detail_save_btn.isClickable = true
+        }
     }
 
     private fun displayUserEvent(event: EventDetail, eventId: String) {
@@ -225,7 +235,6 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
     }
 
     private fun emailUser() {
-
         if (model.user.value?.email != null) {
             val intent = Intent(Intent.ACTION_SENDTO)
             intent.data = Uri.parse("mailto:")
@@ -239,7 +248,7 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
     }
 
     private fun presentSuccessForContactAdded() {
-        add_user_to_contacts_imageview.setImageDrawable(getDrawable(R.drawable.ic_contact_added_24dp))
+        setSaveButton(true)
         Toast.makeText(this, "Contact successfully added!", Toast.LENGTH_SHORT).show()
     }
 
