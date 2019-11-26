@@ -58,16 +58,11 @@
             android:layout_height="wrap_content"
             tools:context="com.bookyrself.bookyrself.views.activities.UserDetailActivity">
 
-            <com.google.android.material.appbar.AppBarLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-            </com.google.android.material.appbar.AppBarLayout>
-
             <RelativeLayout
                 android:id="@+id/user_detail_content"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="16dp">
+                android:layout_marginTop="8dp">
 
                 <ProgressBar
                     android:id="@+id/profile_image_progressbar"
@@ -199,31 +194,30 @@
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/user_detail_save_btn"
-                                android:layout_width="140dp"
-                                android:layout_height="40dp"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_marginStart="16dp"
-                                android:backgroundTint="@color/cardview_light_background"
-                                android:checked="true"
-                                android:singleLine="true"
-                                android:textColor="@color/colorAccent"
-                                android:drawableLeft="@drawable/ic_person_add_accent_24dp"
                                 android:text="Save"
+                                app:icon="@drawable/ic_person_add_accent_24dp"
+                                app:iconGravity="textStart"
                                 app:layout_constraintEnd_toStartOf="@id/right_guideline"
                                 app:layout_constraintStart_toEndOf="@id/center_guideline_vertical"
                                 app:layout_constraintTop_toBottomOf="@id/top_guideline" />
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/email_user_detail_btn"
-                                android:drawableLeft="@drawable/ic_mail_accent_24dp"
-                                android:layout_width="140dp"
-                                android:layout_height="40dp"
-                                android:backgroundTint="@color/cardview_light_background"
-                                android:textColor="@color/colorAccent"
-                                android:text="@string/user_detail_email_btn_text"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_marginStart="16dp"
+                                android:text="@string/user_detail_email_btn_text"
+                                app:icon="@drawable/ic_mail_accent_24dp"
+                                app:iconGravity="textStart"
                                 app:layout_constraintEnd_toStartOf="@id/right_guideline"
                                 app:layout_constraintStart_toEndOf="@id/center_guideline_vertical"
-                                app:layout_constraintTop_toBottomOf="@id/user_detail_save_btn" />
+                                app:layout_constraintTop_toBottomOf="@id/user_detail_save_btn"
+                                app:textColor="@color/colorAccent" />
 
                         </androidx.constraintlayout.widget.ConstraintLayout>
 

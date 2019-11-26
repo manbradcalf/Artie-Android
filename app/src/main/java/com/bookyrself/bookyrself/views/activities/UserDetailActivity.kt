@@ -186,11 +186,9 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
     private fun setSaveButton(userIsSaved: Boolean) {
         if (userIsSaved) {
             user_detail_save_btn.text = "Saved"
-            user_detail_save_btn.setCompoundDrawablesRelative(getDrawable(R.drawable.ic_person_accent_24dp), null, null, null)
             user_detail_save_btn.isClickable = false
         } else {
             user_detail_save_btn.text = "Save"
-            user_detail_save_btn.setCompoundDrawablesRelative(getDrawable(R.drawable.ic_person_add_accent_24dp), null, null, null)
             user_detail_save_btn.isClickable = true
         }
     }
