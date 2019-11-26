@@ -100,15 +100,8 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         }
 
         search_what.setOnSearchClickListener {
-            search_where.visibility = View.VISIBLE
-            from_button.visibility = View.VISIBLE
-            to_button.visibility = View.VISIBLE
-            search_btn.visibility = View.VISIBLE
-            events_toggle.visibility = View.VISIBLE
-            users_toggle.visibility = View.VISIBLE
-            search_btn.setText(R.string.search_fragment_search_button_text)
+            showFullSearchBar(true)
         }
-
 
         from_button.setOnClickListener {
             val dialog = DatePickerDialogFragment()
@@ -124,6 +117,11 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
             dialog.show(activity!!.fragmentManager, "datePicker")
         }
 
+        // Get radio group selected item using on checked change listener
+        radio_group_search.setOnCheckedChangeListener { _, checkedId ->
+            setDateSelectionOptions()
+        }
+
         search_btn.setOnClickListener {
             if (!boolSearchEditable!!) {
                 if (events_toggle.isChecked) {
@@ -133,8 +131,8 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                             EVENT_SEARCH_FLAG,
                             search_what.query.toString(),
                             search_where.query.toString(),
-                            from_button.text.toString(),
-                            to_button.text.toString())
+                            null,
+                            null)
                     showFullSearchBar(false)
                 } else if (users_toggle.isChecked) {
                     eventsResults.clear()
@@ -143,8 +141,8 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                             USER_SEARCH_FLAG,
                             search_what.query.toString(),
                             search_where.query.toString(),
-                            from_button.text.toString(),
-                            to_button.text.toString())
+                            null,
+                            null)
                     showFullSearchBar(false)
                 }
             } else {
@@ -153,12 +151,9 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                 showFullSearchBar(true)
             }
         }
-
     }
 
-
     override fun searchEventsResponseReady(hits: MutableList<Hit>) {
-
         if (search_recycler_view.visibility == View.GONE) {
             search_recycler_view.visibility = View.VISIBLE
         }
@@ -188,7 +183,6 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
     }
 
     override fun searchUsersResponseReady(hits: MutableList<com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers.Hit>) {
-
         if (search_recycler_view.visibility == View.GONE) {
             search_recycler_view.visibility = View.VISIBLE
         }
@@ -218,22 +212,34 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         showProgressbar(false)
     }
 
+    //TODO: Find where this can be used and use it (prolly most places)
     private fun showFullSearchBar(bool: Boolean) {
         if (bool) {
             boolSearchEditable = false
-            search_what.visibility = View.VISIBLE
-            search_where.visibility = View.VISIBLE
-            to_button.visibility = View.VISIBLE
-            from_button.visibility = View.VISIBLE
-            search_btn.visibility = View.VISIBLE
+            setDateSelectionOptions()
             search_btn.setText(R.string.title_search)
-            radio_group_search!!.visibility = View.VISIBLE
+            search_btn.visibility = View.VISIBLE
+            search_where.visibility = View.VISIBLE
+            radio_group_search.visibility = View.VISIBLE
         } else {
             boolSearchEditable = true
+            search_btn.text = getString(R.string.edit_search_btn_text)
             search_where.visibility = View.GONE
             to_button.visibility = View.GONE
             from_button.visibility = View.GONE
             radio_group_search.visibility = View.GONE
+        }
+    }
+
+    private fun setDateSelectionOptions() {
+        if (users_toggle.isChecked) {
+            to_button.visibility = View.GONE
+            from_button.visibility = View.GONE
+            search_btn.visibility = View.VISIBLE
+        } else {
+            search_btn.visibility = View.VISIBLE
+            to_button.visibility = View.VISIBLE
+            from_button.visibility = View.VISIBLE
         }
     }
 
@@ -354,7 +360,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
 
                 // Set Event Image thumbnail
 
-                val eventImageReference = storageReference!!.child("images/events/" + eventsResults!![position]._id)
+                val eventImageReference = storageReference!!.child("images/events/" + eventsResults[position]._id)
                 eventImageReference.downloadUrl.addOnSuccessListener { uri ->
 
                     // Add downloaded image to event item's ImageView
@@ -380,17 +386,17 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         }
 
         private fun buildUserViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            if (usersResults!!.size > position) {
+            if (usersResults.size > position) {
                 val viewHolderUsers = holder as ViewHolderUsers
-                viewHolderUsers.userCityStateTextView.text = usersResults!![position]._source.citystate
+                viewHolderUsers.userCityStateTextView.text = usersResults[position]._source.citystate
 
                 // Set username
-                viewHolderUsers.userNameTextView.text = usersResults!![position]._source.username
+                viewHolderUsers.userNameTextView.text = usersResults[position]._source.username
 
                 // Set tags
-                if (usersResults!![position]._source.tags != null) {
+                if (usersResults[position]._source.tags != null) {
                     val listString = StringBuilder()
-                    for (s in usersResults!![position]._source.tags) {
+                    for (s in usersResults[position]._source.tags) {
                         listString.append("$s, ")
                     }
                     // Regex to trim the trailing comma
@@ -399,7 +405,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
 
 
                 // Set user image thumbnail
-                val profileImageReference = storageReference!!.child("images/users/" + usersResults!![position]._id)
+                val profileImageReference = storageReference!!.child("images/users/" + usersResults[position]._id)
                 profileImageReference.downloadUrl.addOnSuccessListener { uri ->
 
                     // Add downloaded image to the user item's ImageView
@@ -418,7 +424,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
 
                 // Set onClickListener to fire off intent in itemSelected()
                 viewHolderUsers.userCardView.setOnClickListener {
-                    itemSelected(usersResults!![position]._id, USER_VIEW_TYPE)
+                    itemSelected(usersResults[position]._id, USER_VIEW_TYPE)
                 }
             }
         }
@@ -433,7 +439,6 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
             var eventNameTextView: TextView = itemView.event_item_line1
             var eventImageThumb: ImageView = itemView.event_item_image
         }
-
 
         /**
          * ViewHolder for users

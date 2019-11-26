@@ -9,6 +9,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
 import retrofit2.http.POST
 
 /**
@@ -33,10 +34,10 @@ class SearchService {
 
     interface SearchAPI {
         @POST("/events/_search")
-        fun executeEventsSearch(@retrofit2.http.Body query: RequestBody): Call<SearchResponse2>
+        fun executeEventsSearch(@Body query: RequestBody): Call<SearchResponse2>
 
         @POST("/users/_search")
-        fun executeUsersSearch(@retrofit2.http.Body query: RequestBody): Call<SearchResponseUsers>
+        fun executeUsersSearch(@Body query: RequestBody): Call<SearchResponseUsers>
     }
 
     companion object {
