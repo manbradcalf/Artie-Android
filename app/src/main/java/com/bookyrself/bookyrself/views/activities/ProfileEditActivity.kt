@@ -3,20 +3,22 @@ package com.bookyrself.bookyrself.views.activities
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.profile.ProfileRepo
+import com.bookyrself.bookyrself.data.profile.ProfileRepo.ProfileRepoResponse.Failure
+import com.bookyrself.bookyrself.data.profile.ProfileRepo.ProfileRepoResponse.Success
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.Host
-import com.bookyrself.bookyrself.data.serverModels.User.EventInviteInfo
 import com.bookyrself.bookyrself.data.serverModels.User.User
-import com.bookyrself.bookyrself.services.FirebaseService
+import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_profile_edit.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 class ProfileEditActivity : AppCompatActivity() {
@@ -54,35 +56,33 @@ class ProfileEditActivity : AppCompatActivity() {
 
             // Update the user
             //TODO: Move to viewmodel
-            profileRepo!!.updateProfileInfo(FirebaseAuth.getInstance().uid!!, user)
-                    // Get my event Invites
-                    .flatMap<HashMap<String, EventInviteInfo>> {
-                        FirebaseService.instance
+            CoroutineScope(Dispatchers.IO).launch {
+                when (profileRepo!!.updateProfileInfo(FirebaseAuth.getInstance().uid!!, user)) {
+                    is Success -> {
+                        val userEventsResponse = FirebaseServiceCoroutines
+                                .instance
                                 .getUsersEventInvites(FirebaseAuth.getInstance().uid!!)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                    }
-                    .firstOrError()
-                    .toFlowable()
-                    .flatMapIterable<Map.Entry<String, EventInviteInfo>> { it.entries }
-                    // Only get events I'm hosting
-                    .filter { stringEventInviteInfoEntry -> stringEventInviteInfoEntry.value.isHost }
-                    // Update the events I'm hosting with the new data
-                    .doOnNext { eventInviteInfoEntry ->
-                        val host = Host()
-                        host.userId = FirebaseAuth.getInstance().uid
-                        host.username = user.username
-                        host.url = user.url
-                        host.citystate = user.citystate
 
-                        FirebaseService.instance
-                                .updateEventHost(host, eventInviteInfoEntry.key)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe()
-                    }
-                    .doOnComplete {
-                        // Update the firebase user
+                        if (userEventsResponse.isSuccessful) {
+                            if (userEventsResponse.body() != null) {
+                                // Update events I'm hosting
+                                val host = Host()
+                                host.userId = FirebaseAuth.getInstance().uid
+                                host.username = user.username
+                                host.url = user.url
+                                host.citystate = user.citystate
+                                userEventsResponse.body()!!.filter { it.value.isHost }.forEach {
+                                    val updateEventHostResponse = FirebaseServiceCoroutines.instance.updateEventHost(host, it.key)
+                                    if (updateEventHostResponse.errorBody() != null) {
+                                        withContext(Dispatchers.Main) {
+                                            Toast.makeText(applicationContext, "Oh no! Something went wrong updating your events", Toast.LENGTH_LONG).show()
+                                            setResult(Activity.RESULT_OK)
+                                            finish()
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         val profileUpdate = UserProfileChangeRequest.Builder()
                                 .setDisplayName(profile_edit_username.text.toString())
                                 .build()
@@ -92,25 +92,13 @@ class ProfileEditActivity : AppCompatActivity() {
                         setResult(Activity.RESULT_OK, returnIntent)
                         finish()
                     }
-                    .doOnError { throwable ->
-                        if (throwable is NoSuchElementException) {
-                            // User has no events to update, so update the FBUser and bail
-                            Log.e(this.localClassName, "User has no events to update")
-                            val profileUpdate = UserProfileChangeRequest.Builder()
-                                    .setDisplayName(profile_edit_username.text.toString())
-                                    .build()
-                            FirebaseAuth.getInstance().currentUser?.updateProfile(profileUpdate)
-
-                            // Bail
-                            setResult(Activity.RESULT_OK, returnIntent)
-                            finish()
-
-                        } else {
-                            Toast.makeText(this, "Unable to update profile!", Toast.LENGTH_SHORT).show()
-                            Log.e("ProfileEditActivity: ", throwable.message, throwable)
-                        }
+                    is Failure -> {
+                        Toast.makeText(applicationContext, "Oh no! Something went wrong updating your profile", Toast.LENGTH_LONG).show()
+                        setResult(Activity.RESULT_OK)
+                        finish()
                     }
-                    .subscribe()
+                }
+            }
         }
     }
 }

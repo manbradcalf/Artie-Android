@@ -85,13 +85,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content">
 
-                            <Button
+                            <ImageView
                                 android:id="@+id/profile_content_edit_info"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
+                                android:background="@drawable/ic_edit_accent_24dp"
                                 android:layout_alignParentTop="true"
-                                android:layout_alignParentEnd="true"
-                                android:background="@drawable/ic_edit_black_24dp" />
+                                android:layout_alignParentEnd="true" />
 
 
                             <LinearLayout
@@ -140,13 +140,13 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal">
 
-                            <Button
+                            <ImageView
                                 android:id="@+id/profile_content_edit_bio"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
+                                android:background="@drawable/ic_edit_accent_24dp"
                                 android:layout_alignParentTop="true"
-                                android:layout_alignParentEnd="true"
-                                android:background="@drawable/ic_edit_black_24dp" />
+                                android:layout_alignParentEnd="true" />
 
                             <TextView
                                 android:id="@+id/bio_header_user_detail_activity"
