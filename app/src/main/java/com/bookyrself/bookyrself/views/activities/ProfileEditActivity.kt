@@ -54,11 +54,7 @@ class ProfileEditActivity : AppCompatActivity() {
 
             // Update the user
             //TODO: Move to viewmodel
-            profileRepo!!.updateProfileInfo(
-                    FirebaseAuth.getInstance().uid!!, user)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-
+            profileRepo!!.updateProfileInfo(FirebaseAuth.getInstance().uid!!, user)
                     // Get my event Invites
                     .flatMap<HashMap<String, EventInviteInfo>> {
                         FirebaseService.instance
@@ -69,13 +65,10 @@ class ProfileEditActivity : AppCompatActivity() {
                     .firstOrError()
                     .toFlowable()
                     .flatMapIterable<Map.Entry<String, EventInviteInfo>> { it.entries }
-
                     // Only get events I'm hosting
                     .filter { stringEventInviteInfoEntry -> stringEventInviteInfoEntry.value.isHost }
-
                     // Update the events I'm hosting with the new data
                     .doOnNext { eventInviteInfoEntry ->
-
                         val host = Host()
                         host.userId = FirebaseAuth.getInstance().uid
                         host.username = user.username
@@ -88,9 +81,7 @@ class ProfileEditActivity : AppCompatActivity() {
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe()
                     }
-
-                    .subscribe({
-
+                    .doOnComplete {
                         // Update the firebase user
                         val profileUpdate = UserProfileChangeRequest.Builder()
                                 .setDisplayName(profile_edit_username.text.toString())
@@ -100,26 +91,26 @@ class ProfileEditActivity : AppCompatActivity() {
                         // Finish the activity with a success
                         setResult(Activity.RESULT_OK, returnIntent)
                         finish()
-                    },
-                            { throwable ->
+                    }
+                    .doOnError { throwable ->
+                        if (throwable is NoSuchElementException) {
+                            // User has no events to update, so update the FBUser and bail
+                            Log.e(this.localClassName, "User has no events to update")
+                            val profileUpdate = UserProfileChangeRequest.Builder()
+                                    .setDisplayName(profile_edit_username.text.toString())
+                                    .build()
+                            FirebaseAuth.getInstance().currentUser?.updateProfile(profileUpdate)
 
-                                if (throwable is NoSuchElementException) {
-                                    // User has no events to update, so update the FBUser and bail
-                                    Log.e(this.localClassName, "User has no events to update")
-                                    val profileUpdate = UserProfileChangeRequest.Builder()
-                                            .setDisplayName(profile_edit_username.text.toString())
-                                            .build()
-                                    FirebaseAuth.getInstance().currentUser?.updateProfile(profileUpdate)
+                            // Bail
+                            setResult(Activity.RESULT_OK, returnIntent)
+                            finish()
 
-                                    // Bail
-                                    setResult(Activity.RESULT_OK, returnIntent)
-                                    finish()
-
-                                } else {
-                                    Toast.makeText(this, "Unable to update profile!", Toast.LENGTH_SHORT).show()
-                                    Log.e("ProfileEditActivity: ", throwable.message, throwable)
-                                }
-                            })
+                        } else {
+                            Toast.makeText(this, "Unable to update profile!", Toast.LENGTH_SHORT).show()
+                            Log.e("ProfileEditActivity: ", throwable.message, throwable)
+                        }
+                    }
+                    .subscribe()
         }
     }
 }
