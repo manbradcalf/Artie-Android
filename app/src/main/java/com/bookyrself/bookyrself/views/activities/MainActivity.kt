@@ -3,7 +3,6 @@ package com.bookyrself.bookyrself.views.activities
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.contacts.ContactsRepoRxJava
 import com.bookyrself.bookyrself.data.profile.ProfileRepo
@@ -11,8 +10,6 @@ import com.bookyrself.bookyrself.utils.FragmentViewPager
 import com.bookyrself.bookyrself.utils.FragmentViewPagerAdapter
 import com.bookyrself.bookyrself.views.fragments.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.FirebaseApp
-import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     private val profileFragment = ProfileFragment()
