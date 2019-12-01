@@ -42,7 +42,7 @@ class SearchPresenter
                         }
 
                         override fun onFailure(call: Call<SearchResponse2>, t: Throwable) {
-                            Log.e(javaClass.toString(), call.request().body()!!.toString())
+                            Log.e(javaClass.toString(), call.request().body!!.toString())
                             Log.e(javaClass.toString(), t.message)
                             listener.showError()
                         }
@@ -60,7 +60,7 @@ class SearchPresenter
                         }
 
                         override fun onFailure(call: Call<SearchResponseUsers>, t: Throwable) {
-                            Log.e(javaClass.toString(), call.request().body()!!.toString())
+                            Log.e(javaClass.toString(), call.request().body!!.toString())
                             Log.e(javaClass.toString(), t.message)
                             listener.showError()
                         }
