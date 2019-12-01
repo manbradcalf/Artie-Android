@@ -42,8 +42,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
     private var adapter: ResultsAdapter? = null
     private var boolSearchEditable: Boolean? = false
     private var storageReference: StorageReference? = null
-    private lateinit var cityStateSearch: String
-    private lateinit var autoCompleteFragment: AutocompleteSupportFragment
+    private var cityStateSearch: String = ""
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -63,6 +62,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
     override fun onPause() {
         super.onPause()
         search_what.clearFocus()
+        cityStateSearch = ""
     }
 
     override fun onResume() {
@@ -73,7 +73,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
     private fun setLayout() {
         // Initialize the AutocompleteSupportFragment.
         Places.initialize(activity!!, resources.getString(R.string.google_api_key))
-        autoCompleteFragment = this.childFragmentManager.fragments[0] as AutocompleteSupportFragment
+        val autoCompleteFragment = this.childFragmentManager.fragments[0] as AutocompleteSupportFragment
 
         // Set the search icon for the autoCompleteFragment
         ((autoCompleteFragment.view as LinearLayout).getChildAt(0) as ImageView).setImageDrawable(activity!!.getDrawable(R.drawable.ic_location_search))

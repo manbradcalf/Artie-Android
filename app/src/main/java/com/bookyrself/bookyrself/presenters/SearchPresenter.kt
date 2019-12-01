@@ -69,7 +69,7 @@ class SearchPresenter
     }
 
     private fun createQuery(what: String, where: String, fromWhen: String?, toWhen: String?): Query {
-        val fields = Arrays.asList("username", "tags", "eventname")
+        val fields = listOf("username", "tags", "eventname")
         val query = Query()
         val bool = Bool()
         val musts = ArrayList<Must>()
