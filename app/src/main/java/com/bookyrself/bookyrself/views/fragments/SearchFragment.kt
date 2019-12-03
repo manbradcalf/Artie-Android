@@ -169,8 +169,8 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                             EVENT_SEARCH_FLAG,
                             search_what.query.toString(),
                             cityStateSearch,
-                            null,
-                            null)
+                            from_button.text.toString(),
+                            to_button.text.toString())
                     showFullSearchBar(false)
                 } else if (users_toggle.isChecked) {
                     eventsResults.clear()
