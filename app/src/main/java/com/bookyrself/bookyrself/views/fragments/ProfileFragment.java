@@ -79,9 +79,9 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
     @BindView(R.id.user_url_profile_activity)
     TextView urlTextView;
     @BindView(R.id.profile_content_edit_info)
-    Button editInfoButton;
+    ImageView editInfoButton;
     @BindView(R.id.profile_content_edit_bio)
-    Button editBioButton;
+    ImageView editBioButton;
     @BindView(R.id.username_profile_fragment)
     TextView userNameTextView;
     @BindView(R.id.profile_empty_state)

@@ -42,7 +42,7 @@ class SearchPresenter
                         }
 
                         override fun onFailure(call: Call<SearchResponse2>, t: Throwable) {
-                            Log.e(javaClass.toString(), call.request().body()!!.toString())
+                            Log.e(javaClass.toString(), call.request().body!!.toString())
                             Log.e(javaClass.toString(), t.message)
                             listener.showError()
                         }
@@ -60,7 +60,7 @@ class SearchPresenter
                         }
 
                         override fun onFailure(call: Call<SearchResponseUsers>, t: Throwable) {
-                            Log.e(javaClass.toString(), call.request().body()!!.toString())
+                            Log.e(javaClass.toString(), call.request().body!!.toString())
                             Log.e(javaClass.toString(), t.message)
                             listener.showError()
                         }
@@ -69,7 +69,7 @@ class SearchPresenter
     }
 
     private fun createQuery(what: String, where: String, fromWhen: String?, toWhen: String?): Query {
-        val fields = Arrays.asList("username", "tags", "eventname")
+        val fields = listOf("username", "tags", "eventname")
         val query = Query()
         val bool = Bool()
         val musts = ArrayList<Must>()

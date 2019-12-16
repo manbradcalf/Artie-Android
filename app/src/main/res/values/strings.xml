@@ -5,7 +5,7 @@
     <string name="title_notifications">Notifications</string>
     <string name="title_search">Search</string>
     <string name="title_calendar">Calendar</string>
-    <string name="title_profile">Your Profile</string>
+    <string name="title_profile">Profile</string>
     <string name="title_activity_search">SearchActivity</string>
     <string name="title_activity_messages">MessagesActivity</string>
     <string name="title_activity_calendar">CalendarActivity</string>
@@ -50,7 +50,7 @@
     <string name="search_fragment_edit_search_btn_text">EDIT SEARCH</string>
     <string name="event_creation_contacts_required">Please select contacts to invite!</string>
     <string name="profile_creation_title">Edit Your Profile</string>
-    <string name="title_event_invites">Event Invites</string>
+    <string name="title_event_invites">Invites</string>
     <string name="events_fragment_empty_state_no_content_header">You have no events!</string>
     <string name="events_fragment_empty_state_no_content_subheader">Tap the button to create one!</string>
     <string name="events_fragment_empty_state_signed_out_subheader">Please sign in to view your events.</string>
@@ -84,6 +84,7 @@
     <string name="user_detail_bio">Bio</string>
     <string name="user_detail_email_btn_text">Email</string>
     <string name="user_detail_image_cont_desc">User Image</string>
+    <string name="event_creation_profile_edit_hint">City, State</string>
 
 
 </resources>

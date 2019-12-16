@@ -2,15 +2,17 @@ package com.bookyrself.bookyrself.views.activities;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -22,8 +24,12 @@ import com.bookyrself.bookyrself.presenters.EventCreationPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.views.fragments.DatePickerDialogFragment;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.common.api.Status;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.TypeFilter;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
@@ -42,6 +48,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -55,8 +62,6 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     Toolbar toolbar;
     @BindView(R.id.event_creation_scrollview)
     ScrollView scrollView;
-    @BindView(R.id.event_creation_city_state)
-    EditText cityStateEditText;
     @BindView(R.id.event_creation_event_name)
     EditText eventNameEditText;
     @BindView(R.id.event_creation_tags)
@@ -83,7 +88,43 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_event_creation);
+        EventDetail event = new EventDetail();
         ButterKnife.bind(this);
+        Places.initialize(getApplicationContext(), getResources().getString(R.string.google_api_key));
+
+        // Initialize the AutocompleteSupportFragment.
+        AutocompleteSupportFragment autoCompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        // Specify the types of place data to return.
+        autoCompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
+        autoCompleteFragment.setHint(getString(R.string.event_creation_city_state));
+        autoCompleteFragment.setTypeFilter(TypeFilter.CITIES);
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+
+        // Set up a PlaceSelectionListener to handle the response.
+        autoCompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                try {
+                    List<Address> addresses = geocoder.getFromLocation(place.getLatLng().latitude, place.getLatLng().longitude, 1);
+                    if (addresses != null && addresses.size() > 0) {
+                        String cityState = addresses.get(0).getLocality() + ", " + addresses.get(0).getAdminArea();
+                        EditText etPlace = (EditText) autoCompleteFragment.getView().findViewById(R.id.places_autocomplete_search_input);
+                        etPlace.setText(cityState);
+                        event.setCitystate(cityState);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i("ERROR SELECTING PLACE", "An error occurred: " + status);
+            }
+        });
 
         selectedContacts = new HashMap<>();
         contacts = new ArrayList<>();
@@ -107,8 +148,6 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
 
 
         submitButton.setOnClickListener(view -> {
-            //TODO: Find a better control flow for validating required fields
-            EventDetail event = new EventDetail();
             // Contacts are the only required propert for an event
             if (!contactChipsInput.getSelectedChipList().isEmpty()) {
                 List<User> selectedUsers = (List<User>) contactChipsInput.getSelectedChipList();
@@ -132,10 +171,7 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
                 Toast.makeText(getApplicationContext(), "Please name your event!", Toast.LENGTH_LONG).show();
                 return;
             }
-            if (!cityStateEditText.getText().toString().isEmpty()) {
-                event.setCitystate(cityStateEditText.getText().toString());
-            } else {
-                cityStateEditText.requestFocus();
+            if (event.getCitystate() == null) {
                 Toast.makeText(getApplicationContext(), "Please select a location!", Toast.LENGTH_LONG).show();
                 return;
             }

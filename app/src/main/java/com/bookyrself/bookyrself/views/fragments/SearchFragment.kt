@@ -1,30 +1,40 @@
 package com.bookyrself.bookyrself.views.fragments
 
 import android.content.Intent
+import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.ButterKnife
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.serverModels.SearchResponseEvents.Hit
 import com.bookyrself.bookyrself.presenters.SearchPresenter
 import com.bookyrself.bookyrself.utils.CircleTransform
 import com.bookyrself.bookyrself.views.activities.EventDetailActivity
 import com.bookyrself.bookyrself.views.activities.UserDetailActivity
+import com.google.android.gms.common.api.Status
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.empty_state_template.*
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.item_event.view.*
+import java.io.IOException
+import java.util.*
 
 class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
     private var presenter: SearchPresenter? = null
@@ -33,12 +43,11 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
     private var adapter: ResultsAdapter? = null
     private var boolSearchEditable: Boolean? = false
     private var storageReference: StorageReference? = null
+    private var cityStateSearch: String = ""
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_search, container, false)
-        ButterKnife.bind(this, view)
-        return view
+        return inflater.inflate(R.layout.fragment_search, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -46,24 +55,60 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        retainInstance = true
         super.onCreate(savedInstanceState)
+        retainInstance = true
         storageReference = FirebaseStorage.getInstance().reference
     }
 
     override fun onPause() {
         super.onPause()
         search_what.clearFocus()
-        search_where.clearFocus()
+        cityStateSearch = ""
     }
 
     override fun onResume() {
         super.onResume()
-        search_where.clearFocus()
         search_what.clearFocus()
     }
 
     private fun setLayout() {
+        // Initialize the AutocompleteSupportFragment.
+        Places.initialize(activity!!, resources.getString(R.string.google_api_key))
+        val autoCompleteFragment = this.childFragmentManager.fragments[0] as AutocompleteSupportFragment
+
+        // Set the search icon for the autoCompleteFragment
+        ((autoCompleteFragment.view as LinearLayout).getChildAt(0) as ImageView).setImageDrawable(activity!!.getDrawable(R.drawable.ic_location_search))
+
+        // Specify the types of place data to return.
+        autoCompleteFragment.setPlaceFields(listOf(Place.Field.LAT_LNG))
+        autoCompleteFragment.setHint("City and State")
+        autoCompleteFragment.setTypeFilter(TypeFilter.CITIES)
+        val geocoder = Geocoder(activity, Locale.getDefault())
+
+
+        // Set up a PlaceSelectionListener to handle the response.
+        autoCompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onPlaceSelected(place: Place) {
+                // TODO: Get info about the selected place.
+                try {
+                    val addresses = geocoder.getFromLocation(place.latLng!!.latitude, place.latLng!!.longitude, 1)
+                    if (addresses != null && addresses.size > 0) {
+                        val selectedCityState = addresses[0].locality + ", " + addresses[0].adminArea
+                        val etPlace = autoCompleteFragment.view?.findViewById(R.id.places_autocomplete_search_input) as EditText
+                        etPlace.hint = selectedCityState
+                        cityStateSearch = selectedCityState
+                    }
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+
+            override fun onError(status: Status) {
+                // TODO: Handle the error.
+                Log.i("ERROR SELECTING PLACE", "An error occurred: $status")
+            }
+        })
+
         empty_state_button.visibility = View.GONE
         if (presenter == null) {
             presenter = SearchPresenter(this)
@@ -75,8 +120,6 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
         val layoutManager = LinearLayoutManager(activity)
         search_recycler_view.layoutManager = layoutManager
         search_what.queryHint = getString(R.string.search_what_query_hint)
-        search_where.visibility = View.GONE
-        search_where.queryHint = getString(R.string.search_where_query_hint)
         from_button.visibility = View.GONE
         to_button.visibility = View.GONE
         radio_group_search.check(R.id.users_toggle)
@@ -94,9 +137,6 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
             search_what.clearFocus()
             search_what.isSelected = false
             search_what.isIconified = false
-            if (search_where.query != null) {
-                search_where.visibility = View.VISIBLE
-            }
         }
 
         search_what.setOnSearchClickListener {
@@ -130,9 +170,9 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                     presenter!!.executeSearch(
                             EVENT_SEARCH_FLAG,
                             search_what.query.toString(),
-                            search_where.query.toString(),
-                            null,
-                            null)
+                            cityStateSearch,
+                            from_button.text.toString(),
+                            to_button.text.toString())
                     showFullSearchBar(false)
                 } else if (users_toggle.isChecked) {
                     eventsResults.clear()
@@ -140,7 +180,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                     presenter!!.executeSearch(
                             USER_SEARCH_FLAG,
                             search_what.query.toString(),
-                            search_where.query.toString(),
+                            cityStateSearch,
                             null,
                             null)
                     showFullSearchBar(false)
@@ -202,8 +242,9 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
 
         usersResults = hits.filter {
             it._source.username != null
-                    && it._source.citystate != null
-                    && it._source.tags != null
+            //TODO: Uncomment when we have more users maybe
+//                    && it._source.citystate != null
+//                    && it._source.tags != null
         }.toMutableList()
         adapter!!.setViewType(USER_VIEW_TYPE)
         boolSearchEditable = true
@@ -219,12 +260,10 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
             setDateSelectionOptions()
             search_btn.setText(R.string.title_search)
             search_btn.visibility = View.VISIBLE
-            search_where.visibility = View.VISIBLE
             radio_group_search.visibility = View.VISIBLE
         } else {
             boolSearchEditable = true
             search_btn.text = getString(R.string.edit_search_btn_text)
-            search_where.visibility = View.GONE
             to_button.visibility = View.GONE
             from_button.visibility = View.GONE
             radio_group_search.visibility = View.GONE

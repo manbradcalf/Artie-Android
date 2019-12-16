@@ -2,13 +2,14 @@ package com.bookyrself.bookyrself.data.profile
 
 import com.bookyrself.bookyrself.data.serverModels.User.User
 import com.bookyrself.bookyrself.services.FirebaseService
+import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
-class ProfileRepo : ProfileDataSource {
+class ProfileRepo {
 
     private var db: DatabaseReference? = null
 
@@ -47,7 +48,7 @@ class ProfileRepo : ProfileDataSource {
     }
 
 
-    override fun getProfileInfo(userId: String): Flowable<User> {
+    fun getProfileInfo(userId: String): Flowable<User> {
         return FirebaseService.instance
                 .getUserDetails(userId)
                 .firstOrError()
@@ -56,11 +57,17 @@ class ProfileRepo : ProfileDataSource {
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
-    override fun updateProfileInfo(userId: String, user: User): Flowable<User> {
-        return FirebaseService.instance
-                .patchUser(user, userId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+    suspend fun updateProfileInfo(userId: String, user: User): ProfileRepoResponse {
+        val response = FirebaseServiceCoroutines.instance.patchUser(user, userId)
+        return if (response.isSuccessful) {
+            ProfileRepoResponse.Success(response.body())
+        } else {
+            ProfileRepoResponse.Failure(response.message())
+        }
+    }
 
+    sealed class ProfileRepoResponse {
+        class Success(val user: User?) : ProfileRepoResponse()
+        class Failure(val errorMessage: String) : ProfileRepoResponse()
     }
 }
