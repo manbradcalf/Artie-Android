@@ -84,6 +84,7 @@
     <string name="user_detail_bio">Bio</string>
     <string name="user_detail_email_btn_text">Email</string>
     <string name="user_detail_image_cont_desc">User Image</string>
+    <string name="event_creation_profile_edit_hint">City, State</string>
 
 
 </resources>

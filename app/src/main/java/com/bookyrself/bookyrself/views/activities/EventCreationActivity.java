@@ -93,24 +93,25 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
         Places.initialize(getApplicationContext(), getResources().getString(R.string.google_api_key));
 
         // Initialize the AutocompleteSupportFragment.
-        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+        AutocompleteSupportFragment autoCompleteFragment = (AutocompleteSupportFragment)
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
         // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
-        autocompleteFragment.setHint(getString(R.string.event_creation_city_state));
-        autocompleteFragment.setTypeFilter(TypeFilter.CITIES);
+        autoCompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
+        autoCompleteFragment.setHint(getString(R.string.event_creation_city_state));
+        autoCompleteFragment.setTypeFilter(TypeFilter.CITIES);
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
 
         // Set up a PlaceSelectionListener to handle the response.
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+        autoCompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                // TODO: Get info about the selected place.
                 try {
                     List<Address> addresses = geocoder.getFromLocation(place.getLatLng().latitude, place.getLatLng().longitude, 1);
                     if (addresses != null && addresses.size() > 0) {
                         String cityState = addresses.get(0).getLocality() + ", " + addresses.get(0).getAdminArea();
+                        EditText etPlace = (EditText) autoCompleteFragment.getView().findViewById(R.id.places_autocomplete_search_input);
+                        etPlace.setText(cityState);
                         event.setCitystate(cityState);
                     }
                 } catch (IOException e) {

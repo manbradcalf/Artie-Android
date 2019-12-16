@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -93,7 +94,8 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                     val addresses = geocoder.getFromLocation(place.latLng!!.latitude, place.latLng!!.longitude, 1)
                     if (addresses != null && addresses.size > 0) {
                         val selectedCityState = addresses[0].locality + ", " + addresses[0].adminArea
-                        autoCompleteFragment.setHint(selectedCityState)
+                        val etPlace = autoCompleteFragment.view?.findViewById(R.id.places_autocomplete_search_input) as EditText
+                        etPlace.hint = selectedCityState
                         cityStateSearch = selectedCityState
                     }
                 } catch (e: IOException) {

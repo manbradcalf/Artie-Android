@@ -39,17 +39,19 @@
                 android:maxLines="1"
                 android:scrollHorizontally="true" />
 
-            <EditText
-                android:id="@+id/profile_edit_location"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:drawableStart="@drawable/ic_map_black_24dp"
-                android:drawablePadding="16dp"
-                android:hint="Location"
-                android:inputType="text"
-                android:maxLines="1"
-                android:scrollHorizontally="true" />
+            <FrameLayout
+                android:id="@+id/search_where_wrapper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <fragment
+                    android:id="@+id/autocomplete_fragment_profile_edit"
+                    android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:hint="@string/event_creation_profile_edit_hint" />
+            </FrameLayout>
 
             <EditText
                 android:id="@+id/profile_edit_tags"
