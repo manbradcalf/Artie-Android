@@ -98,7 +98,7 @@ class SearchPresenter
         }
         query.bool = bool
 
-        if (toWhen != null && fromWhen != null) {
+        if (toWhen != "To" && fromWhen != "From") {
             val filter = Filter()
             val bool_ = Bool_()
             val must_ = Must_()
