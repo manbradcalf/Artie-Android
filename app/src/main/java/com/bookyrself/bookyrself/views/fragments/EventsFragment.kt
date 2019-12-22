@@ -25,6 +25,7 @@ import kotlin.collections.HashMap
 class EventsFragment : BaseFragment(), OnDateSelectedListener {
 
     lateinit var model: EventsFragmentViewModel
+    lateinit var selectedCalendarDay: String
     private val acceptedEventsCalendarDays = ArrayList<CalendarDay>()
     private val pendingEventsCalendarDays = ArrayList<CalendarDay>()
     private val calendarDaysWithEventIds = HashMap<CalendarDay, String>()
@@ -75,6 +76,7 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
         events_toolbar?.title = "Your Calendar"
         event_creation_fab?.setOnClickListener {
             val intent = Intent(activity, EventCreationActivity::class.java)
+            intent.putExtra("date", selectedCalendarDay)
             startActivityForResult(intent, RC_EVENT_CREATION)
         }
         events_calendar?.setOnDateChangedListener(this)
@@ -89,6 +91,7 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
     }
 
     override fun onDateSelected(materialCalendarView: MaterialCalendarView, calendarDay: CalendarDay, b: Boolean) {
+        selectedCalendarDay = calendarDay.year.toString() + "-" + calendarDay.month.toString() + "-" + calendarDay.day
         if (acceptedEventsCalendarDays.contains(calendarDay)) {
             val intent = Intent(activity, EventDetailActivity::class.java)
             intent.putExtra("eventId", calendarDaysWithEventIds[calendarDay])

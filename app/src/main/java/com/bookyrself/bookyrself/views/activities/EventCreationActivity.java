@@ -86,7 +86,6 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_event_creation);
         EventDetail event = new EventDetail();
         ButterKnife.bind(this);
@@ -201,6 +200,10 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
         if (FirebaseAuth.getInstance().getUid() != null) {
             presenter = new EventCreationPresenter(this);
             presenter.subscribe();
+        }
+
+        if (getIntent().getStringExtra("date") != null) {
+            presenter.setDate(getIntent().getStringExtra("date"));
         }
     }
 
