@@ -41,7 +41,6 @@ class SearchService {
     }
 
     companion object {
-
         private val BASE_URL_ES = "https://dogwood-9512546.us-east-1.bonsaisearch.net"
     }
 }
