@@ -213,16 +213,13 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
         IdpResponse response = IdpResponse.fromResultIntent(data);
         if (resultCode == RESULT_OK) {
             if (requestCode == RC_PHOTO_SELECT) {
-
                 selectedImage = data.getData();
-
                 Picasso.with(getApplicationContext())
                         .load(selectedImage)
                         .resize(148, 148)
                         .centerCrop()
                         .transform(new CircleTransform())
                         .into(eventImage);
-
             }
         } else if (response == null) {
             // User pressed back button
@@ -232,15 +229,13 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
         }
     }
 
-
     @Override
     public void eventCreated(String eventId) {
-
         if (selectedImage != null) {
             // Upload to firebase
             StorageReference eventImageRef = storageReference.child("images/events/" + eventId);
-
             Bitmap bmp = null;
+
             try {
                 bmp = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
             } catch (IOException e) {
