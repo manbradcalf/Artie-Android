@@ -3,7 +3,7 @@ package com.bookyrself.bookyrself.presenters
 import android.util.Log
 import com.bookyrself.bookyrself.data.serverModels.SearchRequest.*
 import com.bookyrself.bookyrself.data.serverModels.SearchRequest.Date
-import com.bookyrself.bookyrself.data.serverModels.SearchResponseEvents.SearchResponse2
+import com.bookyrself.bookyrself.data.serverModels.SearchResponseEvents.SearchResponseEvents
 import com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers.SearchResponseUsers
 import com.bookyrself.bookyrself.services.SearchService
 import retrofit2.Call
@@ -33,15 +33,15 @@ class SearchPresenter
         body.setSize(100)
         if (searchType == EVENT_SEARCH_FLAG) {
             service.api.executeEventsSearch(body)
-                    .enqueue(object : Callback<SearchResponse2> {
-                        override fun onResponse(call: Call<SearchResponse2>, response: Response<SearchResponse2>) {
+                    .enqueue(object : Callback<SearchResponseEvents> {
+                        override fun onResponse(call: Call<SearchResponseEvents>, response: Response<SearchResponseEvents>) {
                             if (response.body() != null) {
                                 val hits = response.body()!!.hits.hits
                                 listener.searchEventsResponseReady(hits)
                             }
                         }
 
-                        override fun onFailure(call: Call<SearchResponse2>, t: Throwable) {
+                        override fun onFailure(call: Call<SearchResponseEvents>, t: Throwable) {
                             Log.e(javaClass.toString(), call.request().body!!.toString())
                             Log.e(javaClass.toString(), t.message)
                             listener.showError()
@@ -76,21 +76,21 @@ class SearchPresenter
 
         // Set the "Where"
         if (where != "") {
-            val must1 = Must()
-            val match1 = Match()
-            match1.citystate = where
-            must1.match = match1
-            musts.add(must1)
+            val mustWhere = Must()
+            val matchWhere = Match()
+            matchWhere.citystate = where
+            mustWhere.match = matchWhere
+            musts.add(mustWhere)
         }
 
         // Set the "what"
         if (what != "") {
-            val must2 = Must()
+            val mustWhat = Must()
             val multiMatch = MultiMatch()
             multiMatch.fields = fields
             multiMatch.query = what
-            must2.multiMatch = multiMatch
-            musts.add(must2)
+            mustWhat.multiMatch = multiMatch
+            musts.add(mustWhat)
         }
 
         if (musts.isNotEmpty()) {
@@ -98,7 +98,9 @@ class SearchPresenter
         }
         query.bool = bool
 
-        if (toWhen != "To" && fromWhen != "From") {
+        //TODO: fix this gross shat
+        // If its an event search, "To" and "From" are defaults. If its user, its always null
+        if (toWhen != null && fromWhen != null) {
             val filter = Filter()
             val bool_ = Bool_()
             val must_ = Must_()

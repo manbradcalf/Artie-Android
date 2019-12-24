@@ -1,7 +1,7 @@
 package com.bookyrself.bookyrself.services
 
 import com.bookyrself.bookyrself.data.serverModels.SearchRequest.RequestBody
-import com.bookyrself.bookyrself.data.serverModels.SearchResponseEvents.SearchResponse2
+import com.bookyrself.bookyrself.data.serverModels.SearchResponseEvents.SearchResponseEvents
 import com.bookyrself.bookyrself.data.serverModels.SearchResponseUsers.SearchResponseUsers
 
 import okhttp3.OkHttpClient
@@ -34,7 +34,7 @@ class SearchService {
 
     interface SearchAPI {
         @POST("/events/_search")
-        fun executeEventsSearch(@Body query: RequestBody): Call<SearchResponse2>
+        fun executeEventsSearch(@Body query: RequestBody): Call<SearchResponseEvents>
 
         @POST("/users/_search")
         fun executeUsersSearch(@Body query: RequestBody): Call<SearchResponseUsers>

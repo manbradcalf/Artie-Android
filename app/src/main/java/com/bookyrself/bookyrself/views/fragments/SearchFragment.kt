@@ -167,12 +167,23 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                 if (events_toggle.isChecked) {
                     eventsResults.clear()
                     usersResults.clear()
+
+                    var to : String? = null
+                    if (to_button.text != "To") {
+                        to = to_button.text.toString()
+                    }
+
+                    var from : String? = null
+                    if (from_button.text != "From") {
+                        from = from_button.text.toString()
+                    }
+
                     presenter!!.executeSearch(
                             EVENT_SEARCH_FLAG,
                             search_what.query.toString(),
                             cityStateSearch,
-                            from_button.text.toString(),
-                            to_button.text.toString())
+                            from,
+                            to)
                     showFullSearchBar(false)
                 } else if (users_toggle.isChecked) {
                     eventsResults.clear()
