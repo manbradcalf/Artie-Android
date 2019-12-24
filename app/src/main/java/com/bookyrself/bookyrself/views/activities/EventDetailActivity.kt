@@ -141,6 +141,23 @@ class EventDetailActivity : BaseActivity() {
             startActivity(intent)
         }
 
+        if (FirebaseAuth.getInstance().uid != host?.userId) {
+            event_detail_edit_fab.hide()
+        } else {
+            event_detail_edit_fab.setOnClickListener {
+                val intent = Intent(this, EventCreationActivity::class.java)
+                intent.putExtra("eventname", eventDetailData.eventname)
+                intent.putExtra("citystate", eventDetailData.citystate)
+                intent.putExtra("date", eventDetailData.date)
+                var inviteeChipsList = ArrayList<User>()
+                for (invitedUser in invitedUsers) {
+                    inviteeChipsList.add(invitedUser.second)
+                }
+                intent.putParcelableArrayListExtra("contacts", inviteeChipsList)
+                startActivity(intent)
+            }
+        }
+
         // Make it visible
         event_detail_linearlayout!!.visibility = View.VISIBLE
     }

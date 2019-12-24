@@ -52,63 +52,68 @@
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
         tools:context="com.bookyrself.bookyrself.views.activities.EventDetailActivity">
 
-        <LinearLayout
-            android:id="@+id/event_detail_linearlayout"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/event_detail_app_bar_layout"
-            android:orientation="vertical">
+            android:layout_height="wrap_content">
 
-            <ProgressBar
-                android:id="@+id/event_detail_progressBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/event_detail_date"
+            <LinearLayout
+                android:id="@+id/event_detail_linearlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:layout_marginBottom="16dp"
-                android:text="Nov 20th"
-                android:textAlignment="center"
-                android:textAppearance="@android:style/TextAppearance.Material.Title"
-                android:textSize="24sp" />
+                android:layout_below="@id/event_detail_app_bar_layout"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/event_detail_hosted_by_textview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="Hosted By"
-                android:textAlignment="center"
-                android:textAppearance="@android:style/TextAppearance.Material.Subhead" />
+                <ProgressBar
+                    android:id="@+id/event_detail_progressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
-            <include
-                android:id="@+id/event_detail_host_item"
-                layout="@layout/item_event_detail_user"
-                android:layout_width="400dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="32dp" />
+                <TextView
+                    android:id="@+id/event_detail_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="Nov 20th"
+                    android:textAlignment="center"
+                    android:textAppearance="@android:style/TextAppearance.Material.Title"
+                    android:textSize="24sp" />
 
-            <TextView
-                android:id="@+id/event_detail_with_textview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="With"
-                android:textAlignment="center"
-                android:textAppearance="@android:style/TextAppearance.Material.Subhead" />
+                <TextView
+                    android:id="@+id/event_detail_hosted_by_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="Hosted By"
+                    android:textAlignment="center"
+                    android:textAppearance="@android:style/TextAppearance.Material.Subhead" />
+
+                <include
+                    android:id="@+id/event_detail_host_item"
+                    layout="@layout/item_event_detail_user"
+                    android:layout_width="400dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="32dp" />
+
+                <TextView
+                    android:id="@+id/event_detail_with_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="With"
+                    android:textAlignment="center"
+                    android:textAppearance="@android:style/TextAppearance.Material.Subhead" />
 
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/event_detail_users_list"
-                android:layout_width="400dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/event_detail_users_list"
+                    android:layout_width="400dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal" />
 
-        </LinearLayout>
+            </LinearLayout>
+        </FrameLayout>
 
     </androidx.core.widget.NestedScrollView>
 
@@ -120,5 +125,13 @@
         android:layout_centerInParent="true"
         android:layout_margin="16dp" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/event_detail_edit_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="32dp"
+        android:tint="@android:color/white"
+        android:layout_gravity="bottom|end"
+        app:srcCompat="@drawable/ic_edit_white_24dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
