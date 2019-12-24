@@ -17,8 +17,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.MiniUser
+import com.bookyrself.bookyrself.data.serverModels.User.User
 import com.bookyrself.bookyrself.utils.CircleTransform
 import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_event_detail.*
@@ -149,11 +151,6 @@ class EventDetailActivity : BaseActivity() {
                 intent.putExtra("eventname", eventDetailData.eventname)
                 intent.putExtra("citystate", eventDetailData.citystate)
                 intent.putExtra("date", eventDetailData.date)
-                var inviteeChipsList = ArrayList<User>()
-                for (invitedUser in invitedUsers) {
-                    inviteeChipsList.add(invitedUser.second)
-                }
-                intent.putParcelableArrayListExtra("contacts", inviteeChipsList)
                 startActivity(intent)
             }
         }
