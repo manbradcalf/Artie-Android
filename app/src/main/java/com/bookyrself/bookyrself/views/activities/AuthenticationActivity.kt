@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.bookyrself.bookyrself.R
-import com.bookyrself.bookyrself.data.serverModels.User.User
+import com.bookyrself.bookyrself.data.serverModels.user.User
 import com.bookyrself.bookyrself.viewmodels.AuthenticationActivityViewModel
 import com.bookyrself.bookyrself.viewmodels.AuthenticationActivityViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
