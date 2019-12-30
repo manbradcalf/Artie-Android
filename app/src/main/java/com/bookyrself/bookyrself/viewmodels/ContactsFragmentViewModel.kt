@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.bookyrself.bookyrself.data.contacts.ContactsRepo
 import com.bookyrself.bookyrself.data.contacts.ContactsRepoResponse.Failure
 import com.bookyrself.bookyrself.data.contacts.ContactsRepoResponse.Success
-import com.bookyrself.bookyrself.data.serverModels.User.User
+import com.bookyrself.bookyrself.data.serverModels.user.User
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
