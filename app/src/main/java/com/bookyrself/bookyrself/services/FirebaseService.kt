@@ -3,8 +3,8 @@ package com.bookyrself.bookyrself.services
 import com.bookyrself.bookyrself.data.serverModels.EventCreationResponse
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.Host
-import com.bookyrself.bookyrself.data.serverModels.User.EventInviteInfo
-import com.bookyrself.bookyrself.data.serverModels.User.User
+import com.bookyrself.bookyrself.data.serverModels.user.EventInviteInfo
+import com.bookyrself.bookyrself.data.serverModels.user.User
 import io.reactivex.Flowable
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -54,6 +54,9 @@ object FirebaseService {
 
         @POST("/events.json")
         fun createEvent(@Body request: EventDetail): Flowable<EventCreationResponse>
+
+        @PUT("/events/{eventId}.json")
+        fun updateEvent(@Body request: EventDetail, @Path("eventId") eventId: String): Flowable<EventDetail>
 
         @PUT("/users/{userId}/events/{eventId}.json")
         fun addEventToUser(@Body eventInviteInfo: EventInviteInfo, @Path("userId") userId: String, @Path("eventId") eventId: String): Flowable<EventInviteInfo>

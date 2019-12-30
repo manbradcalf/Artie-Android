@@ -4,8 +4,8 @@ package com.bookyrself.bookyrself.services
 import com.bookyrself.bookyrself.data.serverModels.EventCreationResponse
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.Host
-import com.bookyrself.bookyrself.data.serverModels.User.EventInviteInfo
-import com.bookyrself.bookyrself.data.serverModels.User.User
+import com.bookyrself.bookyrself.data.serverModels.user.EventInviteInfo
+import com.bookyrself.bookyrself.data.serverModels.user.User
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
@@ -75,11 +75,15 @@ object FirebaseServiceCoroutines {
         @DELETE("/events/{eventId}/users/{userId}.json")
         suspend fun removeUserFromEvent(@Path("eventId") eventId: String, @Path("userId") userId: String): Response<Response<Void>>
 
+        @DELETE("/users/{userId}/events/{eventId}.json")
+        suspend fun removeEventFromUser(@Path("userId") userId: String, @Path("eventId") eventId: String): Response<Response<Void>>
+
         @PUT("/events/{eventId}/host.json")
         suspend fun updateEventHost(@Body host: Host, @Path("eventId") eventId: String): Response<Host>
 
         @PUT("/users/{userId}/unavailable_dates/{date}.json")
         suspend fun setDateUnavailableForUser(@Body unavailable: Boolean?, @Path("userId") userId: String,
                                               @Path("date") date: String): Response<Boolean>
+
     }
 }
