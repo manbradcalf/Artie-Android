@@ -25,10 +25,10 @@ import kotlin.collections.HashMap
 class EventsFragment : BaseFragment(), OnDateSelectedListener {
 
     lateinit var model: EventsFragmentViewModel
-    lateinit var selectedCalendarDay: String
     private val acceptedEventsCalendarDays = ArrayList<CalendarDay>()
     private val pendingEventsCalendarDays = ArrayList<CalendarDay>()
     private val calendarDaysWithEventIds = HashMap<CalendarDay, String>()
+    var selectedCalendarDay: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,12 +74,14 @@ class EventsFragment : BaseFragment(), OnDateSelectedListener {
 
     private fun setLayout() {
         events_toolbar?.title = "Your Calendar"
+        events_calendar?.setOnDateChangedListener(this)
         event_creation_fab?.setOnClickListener {
             val intent = Intent(activity, EventCreationActivity::class.java)
-            intent.putExtra("date", selectedCalendarDay)
+            if (selectedCalendarDay != null) {
+                intent.putExtra("date", selectedCalendarDay)
+            }
             startActivityForResult(intent, RC_EVENT_CREATION)
         }
-        events_calendar?.setOnDateChangedListener(this)
     }
 
     override fun onDestroyView() {
