@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -95,10 +96,7 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
             presenter.subscribe();
         }
 
-        eventId = getIntent().getStringExtra("eventId");
-        event = getIntent().getParcelableExtra("event");
-        originalInvitees = new ArrayList(event.getUsers().keySet());
-
+        getEventDataFromIntent();
         setUpImage();
         setUpInviteeSelection();
         setUpEventName();
@@ -108,13 +106,36 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
         setUpFAB();
     }
 
+    private void getEventDataFromIntent() {
+        eventId = getIntent().getStringExtra("eventId");
+
+        if (getIntent().getStringExtra("date") != null) {
+            event.setDate(getIntent().getStringExtra("date"));
+        }
+
+        if (getIntent().getParcelableExtra("event") != null) {
+            // if we've been passed an event, overwrite the default blank event for this activity
+            event = getIntent().getParcelableExtra("event");
+
+            // If this event has users, grab a snapshot of the original invitations
+            // so we can determine what updates to user nodes need to be made
+            // if the invitations change
+            if (event.getUsers() != null) {
+                originalInvitees = new ArrayList(event.getUsers().keySet());
+            }
+        }
+    }
+
     private void setUpTags() {
         if (event.getTags() != null) {
+            List<String> tags = event.getTags();
             StringBuilder builder = new StringBuilder();
 
-            for (String tag : event.getTags()) {
-                builder.append(tag);
-                builder.append(", ");
+            for (Iterator i = tags.iterator(); i.hasNext(); ) {
+                builder.append(i.next());
+                if (i.hasNext()) {
+                    builder.append(", ");
+                }
             }
             String tagsString = builder.toString();
             tagsEditText.setText(tagsString);
@@ -123,35 +144,32 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
 
     private void setUpInviteeSelection() {
         if (getIntent().getParcelableArrayListExtra("invitees") != null) {
-            ArrayList<User> invitees = getIntent().getParcelableArrayListExtra("invitees");
-            for (User invitee : invitees) {
-                selectedContacts.put(invitee.getUserId(), false);
-                contactChipsInput.addChip(invitee);
+            ArrayList<User> userDetailsOfInvitees = getIntent().getParcelableArrayListExtra("invitees");
+            for (User user : userDetailsOfInvitees) {
+                selectedContacts.put(user.getUserId(), false);
+                contactChipsInput.addChip(user);
             }
         }
     }
 
     private void setUpEventName() {
-        if (event.getEventname() != null) {
-            eventNameEditText.setText(event.getEventname());
+        if (event != null) {
+            if (event.getEventname() != null) {
+                eventNameEditText.setText(event.getEventname());
+            }
         }
     }
 
     private void setUpFAB() {
         submitButton.setOnClickListener(view -> {
-            // Contacts are the only required propert for an event
-            if (!contactChipsInput.getSelectedChipList().isEmpty()) {
-                List<User> selectedUsers = (List<User>) contactChipsInput.getSelectedChipList();
-                selectedContacts.clear();
-                for (User user : selectedUsers) {
-                    // Set userId's attending boolean to false
-                    selectedContacts.put(user.getUserId(), false);
-                }
-                event.setUsers(selectedContacts);
-            } else {
-                Toast.makeText(getApplicationContext(), "Please select contacts to invite!", Toast.LENGTH_LONG).show();
-                return;
+            selectedContacts.clear();
+            List<User> selectedUsers = (List<User>) contactChipsInput.getSelectedChipList();
+            for (User user : selectedUsers) {
+                // Set userId's attending boolean to false
+                selectedContacts.put(user.getUserId(), false);
             }
+            event.setUsers(selectedContacts);
+
             if (!eventNameEditText.getText().toString().isEmpty()) {
                 event.setEventname(eventNameEditText.getText().toString());
             } else {
@@ -182,7 +200,7 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
                 host.setUserId(FirebaseAuth.getInstance().getCurrentUser().getUid());
                 event.setHost(host);
 
-                if (getIntent().getStringExtra("eventId") != null) {
+                if (eventId != null) {
                     presenter.updateEventAndInvites(event, eventId, originalInvitees);
                 } else {
                     presenter.createEvent(event);
@@ -200,7 +218,9 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
             datePickerDialogFragment.setmEventCreationPresenter(presenter);
             datePickerDialogFragment.show(getFragmentManager(), "datePicker");
         });
+
         if (event.getDate() != null) {
+            // we're working with an existing event
             presenter.setDate(event.getDate());
         }
     }

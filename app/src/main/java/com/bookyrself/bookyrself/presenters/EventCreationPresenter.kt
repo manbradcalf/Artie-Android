@@ -72,7 +72,9 @@ class EventCreationPresenter(private val presenterListener: EventCreationPresent
 
                         // Set the event to the invitees
                         .doOnNext { eventCreationResponse ->
-                            createAndSendInvitations(event, eventCreationResponse.name!!)
+                            if (event.users != null) {
+                                createAndSendInvitations(event, eventCreationResponse.name!!)
+                            }
                         }
                         .subscribe(
                                 { eventCreationResponse -> eventCreationResponse.name?.let { presenterListener.eventCreated(it) } },
@@ -93,7 +95,7 @@ class EventCreationPresenter(private val presenterListener: EventCreationPresent
                                             if (originalInvitations != updatedInvitations) {
                                                 updateInvitations(originalInvitations, updatedInvitations, eventId)
                                             }
-                                        } else {
+                                        } else if (eventCreationResponse.users != null) {
                                             createAndSendInvitations(event, eventId)
                                         }
                                         presenterListener.eventUpdated()

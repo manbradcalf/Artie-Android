@@ -1,5 +1,6 @@
 package com.bookyrself.bookyrself.views.activities
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -75,6 +76,7 @@ class EventDetailActivity : BaseActivity() {
         }
 
         model.invitees.observe(this) { invitees ->
+            invitedUsersList.clear()
             invitedUsersList.addAll(invitees)
             showInvitedUsers()
         }
@@ -153,7 +155,7 @@ class EventDetailActivity : BaseActivity() {
                 intent.putExtra("eventId", eventId)
                 intent.putExtra("event", eventDetailData)
                 intent.putParcelableArrayListExtra("invitees", invitedUsersList)
-                startActivity(intent)
+                startActivityForResult(intent, REQUEST_CODE)
             }
         }
 
@@ -170,6 +172,14 @@ class EventDetailActivity : BaseActivity() {
             event_detail_progressBar!!.visibility = View.VISIBLE
         } else {
             event_detail_progressBar!!.visibility = View.GONE
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            // reload event with new data
+            model.load()
         }
     }
 
@@ -255,5 +265,9 @@ class EventDetailActivity : BaseActivity() {
             val userUrl: TextView = rowView.item_event_detail_url
             val attendingStatusTextView: TextView = rowView.item_event_detail_attending_textview
         }
+    }
+
+    companion object {
+        const val REQUEST_CODE = 1
     }
 }
