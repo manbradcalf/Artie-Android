@@ -13,7 +13,7 @@ import com.bookyrself.bookyrself.data.profile.ProfileRepo
 import com.bookyrself.bookyrself.data.profile.ProfileRepo.ProfileRepoResponse.Failure
 import com.bookyrself.bookyrself.data.profile.ProfileRepo.ProfileRepoResponse.Success
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.Host
-import com.bookyrself.bookyrself.data.serverModels.User.User
+import com.bookyrself.bookyrself.data.serverModels.user.User
 import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
 import com.google.android.gms.common.api.Status
 import com.google.android.libraries.places.api.Places

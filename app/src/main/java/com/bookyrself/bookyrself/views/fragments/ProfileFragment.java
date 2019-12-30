@@ -28,7 +28,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail;
-import com.bookyrself.bookyrself.data.serverModels.User.User;
+import com.bookyrself.bookyrself.data.serverModels.user.User;
 import com.bookyrself.bookyrself.presenters.ProfileFragmentPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.utils.EventDecorator;
@@ -456,5 +456,10 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
     @Override
     public void showCreatingUserLoadingToast() {
         showToast("Signing Up!");
+    }
+
+    @Override
+    public void presentError(String error) {
+        showToast(error);
     }
 }

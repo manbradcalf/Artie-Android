@@ -51,7 +51,7 @@ open class BaseFragment : Fragment() {
         )
     }
 
-    fun presentError(message: String) {
+    open fun presentError(message: String) {
         showEmptyState(getString(R.string.error_header),
                 message,
                 activity!!.getDrawable(R.drawable.ic_error_empty_state))
