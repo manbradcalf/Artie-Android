@@ -5,9 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
-import com.bookyrself.bookyrself.data.serverModels.EventDetail.MiniUser
-import com.bookyrself.bookyrself.data.serverModels.User.EventInviteInfo
-import com.bookyrself.bookyrself.data.serverModels.User.User
+import com.bookyrself.bookyrself.data.serverModels.EventDetail.MinifiedUser
+import com.bookyrself.bookyrself.data.serverModels.user.EventInviteInfo
+import com.bookyrself.bookyrself.data.serverModels.user.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
 class EventDetailViewModel(application: Application, private val eventId: String) : BaseViewModel(application) {
 
     var event = MutableLiveData<EventDetail?>()
-    var invitees = MutableLiveData<MutableList<Pair<String, MiniUser>>>()
+    var invitees = MutableLiveData<MutableList<User>>()
 
     override fun load() {
         CoroutineScope(Dispatchers.IO).launch {
@@ -33,28 +33,27 @@ class EventDetailViewModel(application: Application, private val eventId: String
     }
 
     private fun loadEventsUsers(userIds: MutableSet<String>?) {
-        val listOfInvitees = mutableListOf<Pair<String, MiniUser>>()
+        val listOfInvitees = mutableListOf<User>()
 
         CoroutineScope(Dispatchers.Main).launch {
             userIds?.forEach { userId ->
                 //TODO handle network errors here via sealed Result class:
                 val userDetailResponse = service.getUserDetails(userId)
 
-                if (userDetailResponse.isSuccessful) {
+                if (userDetailResponse.isSuccessful && userDetailResponse.body() != null) {
                     // TODO: ugly not null assertion for unwrapping userDetailResponse.body
-                    val miniUser = minifyUserDetailsForEventDetailDisplay(userId, userDetailResponse.body()!!)
-                    val inviteeWithUserId = Pair(userId, miniUser)
-                    listOfInvitees.add(inviteeWithUserId)
+                    val user = userDetailResponse.body()
+                    user?.userId = userId
+                    user?.let { listOfInvitees.add(it) }
                 }
 
             }
-
             invitees.value = listOfInvitees
         }
     }
 
-    private fun minifyUserDetailsForEventDetailDisplay(userId: String, user: User): MiniUser {
-        val miniUser = MiniUser()
+    private fun minifyUserDetailsForEventDetailDisplay(userId: String, user: User): MinifiedUser {
+        val miniUser = MinifiedUser()
         miniUser.citystate = user.citystate
         miniUser.url = user.url
         miniUser.username = user.username
@@ -63,7 +62,7 @@ class EventDetailViewModel(application: Application, private val eventId: String
         return miniUser
     }
 
-    private fun getAttendingStatus(eventInviteInfo: EventInviteInfo?): String {
+    fun getAttendingStatus(eventInviteInfo: EventInviteInfo?): String {
         var status = "Invited"
         if (eventInviteInfo != null) {
             if (eventInviteInfo.isInviteRejected != null) {

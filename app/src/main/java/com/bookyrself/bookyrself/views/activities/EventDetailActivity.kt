@@ -16,8 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
-import com.bookyrself.bookyrself.data.serverModels.EventDetail.MiniUser
-import com.bookyrself.bookyrself.data.serverModels.User.User
+import com.bookyrself.bookyrself.data.serverModels.user.User
 import com.bookyrself.bookyrself.utils.CircleTransform
 import com.bookyrself.bookyrself.viewmodels.EventDetailViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -30,24 +29,24 @@ import kotlinx.android.synthetic.main.item_event_detail_user.view.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Created by benmedcalf on 11/22/17.
  */
 
 class EventDetailActivity : BaseActivity() {
-
-    lateinit var model: EventDetailViewModel
-    lateinit var invitedUsers: MutableList<Pair<String, MiniUser>>
+    private var originalInvitees: HashMap<String, Boolean>? = null
     private lateinit var adapter: UsersListAdapter
-
+    lateinit var model: EventDetailViewModel
+    lateinit var eventId: String
+    var invitedUsersList = ArrayList<User>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_event_detail)
 
         // Set up the adapter
-        invitedUsers = ArrayList()
         adapter = UsersListAdapter(this, imageStorage)
         event_detail_users_list.adapter = adapter
         val recyclerView = event_detail_users_list
@@ -61,7 +60,8 @@ class EventDetailActivity : BaseActivity() {
         setSupportActionBar(event_detail_toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         showProgressbar(true)
-        setListeners(intent.getStringExtra("eventId"))
+        eventId = intent.getStringExtra("eventId")
+        setListeners(eventId)
     }
 
     private fun setListeners(eventId: String) {
@@ -70,11 +70,13 @@ class EventDetailActivity : BaseActivity() {
                 .get(EventDetailViewModel::class.java)
 
         model.event.observe(this) { eventDetail ->
+            originalInvitees = eventDetail?.users
             showEventData(eventDetail!!, eventId)
         }
 
         model.invitees.observe(this) { invitees ->
-            showInvitedUsers(invitees)
+            invitedUsersList.addAll(invitees)
+            showInvitedUsers()
         }
         model.load()
     }
@@ -148,9 +150,9 @@ class EventDetailActivity : BaseActivity() {
         } else {
             event_detail_edit_fab.setOnClickListener {
                 val intent = Intent(this, EventCreationActivity::class.java)
-                intent.putExtra("eventname", eventDetailData.eventname)
-                intent.putExtra("citystate", eventDetailData.citystate)
-                intent.putExtra("date", eventDetailData.date)
+                intent.putExtra("eventId", eventId)
+                intent.putExtra("event", eventDetailData)
+                intent.putParcelableArrayListExtra("invitees", invitedUsersList)
                 startActivity(intent)
             }
         }
@@ -159,8 +161,7 @@ class EventDetailActivity : BaseActivity() {
         event_detail_linearlayout!!.visibility = View.VISIBLE
     }
 
-    private fun showInvitedUsers(users: MutableList<Pair<String, MiniUser>>) {
-        invitedUsers = users
+    private fun showInvitedUsers() {
         adapter.notifyDataSetChanged()
     }
 
@@ -203,19 +204,22 @@ class EventDetailActivity : BaseActivity() {
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
             val viewHolder = holder as InviteeViewHolder
+            val user = invitedUsersList[position]
 
-            val miniUser = invitedUsers[position].second
+            viewHolder.userName.text = user.username
+            viewHolder.cityState.text = user.citystate
 
-
-            viewHolder.userName.text = miniUser.username
-            viewHolder.cityState.text = miniUser.citystate
-            viewHolder.attendingStatusTextView.text = miniUser.attendingStatus
-            viewHolder.userUrl.text = miniUser.url
+            try {
+                val eventInviteInfo = user.events?.entries?.first { it.key == eventId }?.value
+                viewHolder.attendingStatusTextView.text = model.getAttendingStatus(eventInviteInfo)
+            } catch (e: Exception) {
+                Log.e("EventDetailActivity", e.message)
+            }
+            viewHolder.userUrl.text = user.url
             viewHolder.userUrl.isClickable = true
             Linkify.addLinks(viewHolder.userUrl, Linkify.WEB_URLS)
 
-
-            val profileImageReference = mStorageReference.child("images/users/" + miniUser.userId)
+            val profileImageReference = mStorageReference.child("images/users/${user.userId}")
             profileImageReference.downloadUrl.addOnSuccessListener { uri ->
                 Picasso.with(mContext)
                         .load(uri)
@@ -230,7 +234,7 @@ class EventDetailActivity : BaseActivity() {
 
             viewHolder.rowView.setOnClickListener {
                 val intent = Intent(mContext, UserDetailActivity::class.java)
-                intent.putExtra("userId", miniUser.userId)
+                intent.putExtra("userId", user.userId)
                 mContext.startActivity(intent)
             }
         }
@@ -240,9 +244,8 @@ class EventDetailActivity : BaseActivity() {
         }
 
         override fun getItemCount(): Int {
-            return invitedUsers.size
+            return invitedUsersList.size
         }
-
 
         inner class InviteeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             val rowView: CardView = itemView.search_result_card_users

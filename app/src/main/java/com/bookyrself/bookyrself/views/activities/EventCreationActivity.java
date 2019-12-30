@@ -19,7 +19,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.bookyrself.bookyrself.R;
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail;
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.Host;
-import com.bookyrself.bookyrself.data.serverModels.User.User;
+import com.bookyrself.bookyrself.data.serverModels.user.User;
 import com.bookyrself.bookyrself.presenters.EventCreationPresenter;
 import com.bookyrself.bookyrself.utils.CircleTransform;
 import com.bookyrself.bookyrself.views.fragments.DatePickerDialogFragment;
@@ -49,14 +49,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class EventCreationActivity extends AppCompatActivity implements EventCreationPresenter.EventCreationPresenterListener {
-
-
     private static final int RC_PHOTO_SELECT = 789;
     @BindView(R.id.event_creation_toolbar)
     Toolbar toolbar;
@@ -74,89 +71,81 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     ChipsInput contactChipsInput;
     @BindView(R.id.event_image)
     ImageView eventImage;
+
+    private String eventId;
+    private List<String> originalInvitees;
     private StorageReference storageReference;
     private EventCreationPresenter presenter;
-    private List<User> contacts;
-    private Map<User, String> contactsAndUserIdsMap;
-    private HashMap<String, Boolean> selectedContacts;
+    private List<User> contacts = new ArrayList<>();
+    private HashMap<String, Boolean> selectedContacts = new HashMap<>();
     private String date;
     private Uri selectedImage;
     private int FLAG_EVENT_CREATION = 1;
+    private EventDetail event = new EventDetail();
+    private AutocompleteSupportFragment autocompleteSupportFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_creation);
-        EventDetail event = new EventDetail();
         ButterKnife.bind(this);
-        Places.initialize(getApplicationContext(), getResources().getString(R.string.google_api_key));
 
-        // Initialize the AutocompleteSupportFragment.
-        AutocompleteSupportFragment autoCompleteFragment = (AutocompleteSupportFragment)
-                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+        if (FirebaseAuth.getInstance().getUid() != null) {
+            presenter = new EventCreationPresenter(this);
+            presenter.subscribe();
+        }
 
-        // Specify the types of place data to return.
-        autoCompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
-        autoCompleteFragment.setHint(getString(R.string.event_creation_city_state));
-        autoCompleteFragment.setTypeFilter(TypeFilter.CITIES);
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        eventId = getIntent().getStringExtra("eventId");
+        event = getIntent().getParcelableExtra("event");
+        originalInvitees = new ArrayList(event.getUsers().keySet());
 
-        // Set up a PlaceSelectionListener to handle the response.
-        autoCompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
-                try {
-                    List<Address> addresses = geocoder.getFromLocation(place.getLatLng().latitude, place.getLatLng().longitude, 1);
-                    if (addresses != null && addresses.size() > 0) {
-                        String cityState = addresses.get(0).getLocality() + ", " + addresses.get(0).getAdminArea();
-                        EditText etPlace = (EditText) autoCompleteFragment.getView().findViewById(R.id.places_autocomplete_search_input);
-                        etPlace.setText(cityState);
-                        event.setCitystate(cityState);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        setUpImage();
+        setUpInviteeSelection();
+        setUpEventName();
+        setUpLocationSelect();
+        setUpTags();
+        setUpDate();
+        setUpFAB();
+    }
+
+    private void setUpTags() {
+        if (event.getTags() != null) {
+            StringBuilder builder = new StringBuilder();
+
+            for (String tag : event.getTags()) {
+                builder.append(tag);
+                builder.append(", ");
             }
+            String tagsString = builder.toString();
+            tagsEditText.setText(tagsString);
+        }
+    }
 
-            @Override
-            public void onError(Status status) {
-                // TODO: Handle the error.
-                Log.i("ERROR SELECTING PLACE", "An error occurred: " + status);
+    private void setUpInviteeSelection() {
+        if (getIntent().getParcelableArrayListExtra("invitees") != null) {
+            ArrayList<User> invitees = getIntent().getParcelableArrayListExtra("invitees");
+            for (User invitee : invitees) {
+                selectedContacts.put(invitee.getUserId(), false);
+                contactChipsInput.addChip(invitee);
             }
-        });
+        }
+    }
 
-        selectedContacts = new HashMap<>();
-        contacts = new ArrayList<>();
-        contactsAndUserIdsMap = new HashMap<>();
-        storageReference = FirebaseStorage.getInstance().getReference();
+    private void setUpEventName() {
+        if (event.getEventname() != null) {
+            eventNameEditText.setText(event.getEventname());
+        }
+    }
 
-        eventImage.setImageDrawable(getDrawable((R.drawable.ic_add_a_photo_black_24dp)));
-        eventImage.setOnClickListener(view -> {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Choose Picture"), RC_PHOTO_SELECT);
-        });
-
-        dateButton.setOnClickListener(view -> {
-            DatePickerDialogFragment datePickerDialogFragment = new DatePickerDialogFragment();
-            datePickerDialogFragment.setFlag(FLAG_EVENT_CREATION);
-            datePickerDialogFragment.setmEventCreationPresenter(presenter);
-            datePickerDialogFragment.show(getFragmentManager(), "datePicker");
-        });
-
-
+    private void setUpFAB() {
         submitButton.setOnClickListener(view -> {
             // Contacts are the only required propert for an event
             if (!contactChipsInput.getSelectedChipList().isEmpty()) {
                 List<User> selectedUsers = (List<User>) contactChipsInput.getSelectedChipList();
-
+                selectedContacts.clear();
                 for (User user : selectedUsers) {
-                    // Get the user Id
-                    String userId = contactsAndUserIdsMap.get(user);
-
                     // Set userId's attending boolean to false
-                    selectedContacts.put(userId, false);
+                    selectedContacts.put(user.getUserId(), false);
                 }
                 event.setUsers(selectedContacts);
             } else {
@@ -186,24 +175,94 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
                 return;
             }
 
+            // Fire
             if (FirebaseAuth.getInstance().getCurrentUser() != null) {
                 Host host = new Host();
                 host.setUsername(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
                 host.setUserId(FirebaseAuth.getInstance().getCurrentUser().getUid());
                 event.setHost(host);
-                presenter.createEvent(event);
+
+                if (getIntent().getStringExtra("eventId") != null) {
+                    presenter.updateEventAndInvites(event, eventId, originalInvitees);
+                } else {
+                    presenter.createEvent(event);
+                }
             } else {
                 Toast.makeText(EventCreationActivity.this, "You must be logged in to host an event!", Toast.LENGTH_SHORT).show();
             }
         });
+    }
 
-        if (FirebaseAuth.getInstance().getUid() != null) {
-            presenter = new EventCreationPresenter(this);
-            presenter.subscribe();
+    private void setUpDate() {
+        dateButton.setOnClickListener(view -> {
+            DatePickerDialogFragment datePickerDialogFragment = new DatePickerDialogFragment();
+            datePickerDialogFragment.setFlag(FLAG_EVENT_CREATION);
+            datePickerDialogFragment.setmEventCreationPresenter(presenter);
+            datePickerDialogFragment.show(getFragmentManager(), "datePicker");
+        });
+        if (event.getDate() != null) {
+            presenter.setDate(event.getDate());
         }
+    }
 
-        if (getIntent().getStringExtra("date") != null) {
-            presenter.setDate(getIntent().getStringExtra("date"));
+    private void setUpImage() {
+        storageReference = FirebaseStorage.getInstance().getReference();
+
+        eventImage.setImageDrawable(getDrawable((R.drawable.ic_add_a_photo_black_24dp)));
+        eventImage.setOnClickListener(view -> {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Choose Picture"), RC_PHOTO_SELECT);
+        });
+
+        if (getIntent().getStringExtra("eventId") != null) {
+            String eventId = getIntent().getStringExtra("eventId");
+            StorageReference eventImageStorageReference = storageReference.child("images/events/" + eventId);
+            eventImageStorageReference.getDownloadUrl()
+                    .addOnSuccessListener(uri -> Picasso.with(this).load(uri).into(eventImage))
+                    .addOnFailureListener(e -> eventImage.setImageDrawable(getDrawable((R.drawable.ic_add_a_photo_black_24dp))));
+        }
+    }
+
+    private void setUpLocationSelect() {
+        // Initialize the AutocompleteSupportFragment.
+        autocompleteSupportFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+        Places.initialize(getApplicationContext(), getResources().getString(R.string.google_api_key));
+
+        // Specify the types of place data to return.
+        autocompleteSupportFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
+        autocompleteSupportFragment.setHint(getString(R.string.event_creation_city_state));
+        autocompleteSupportFragment.setTypeFilter(TypeFilter.CITIES);
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+
+        // Set up a PlaceSelectionListener to handle the response.
+        autocompleteSupportFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                try {
+                    List<Address> addresses = geocoder.getFromLocation(place.getLatLng().latitude, place.getLatLng().longitude, 1);
+                    if (addresses != null && addresses.size() > 0) {
+                        String cityState = addresses.get(0).getLocality() + ", " + addresses.get(0).getAdminArea();
+                        EditText editTextPlace = autocompleteSupportFragment.getView().findViewById(R.id.places_autocomplete_search_input);
+                        editTextPlace.setText(cityState);
+                        event.setCitystate(cityState);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i("ERROR SELECTING PLACE", "An error occurred: " + status);
+            }
+        });
+
+        if (event.getCitystate() != null) {
+            autocompleteSupportFragment.setText(event.getCitystate());
         }
     }
 
@@ -232,24 +291,7 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     @Override
     public void eventCreated(String eventId) {
         if (selectedImage != null) {
-            // Upload to firebase
-            StorageReference eventImageRef = storageReference.child("images/events/" + eventId);
-            Bitmap bmp = null;
-
-            try {
-                bmp = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
-            byte[] data = baos.toByteArray();
-            //uploading the image
-            UploadTask uploadTask = eventImageRef.putBytes(data);
-            uploadTask
-                    .addOnSuccessListener(taskSnapshot ->
-                            Toast.makeText(this, "image upload completed", Toast.LENGTH_SHORT).show())
-                    .addOnFailureListener(e -> Toast.makeText(this, "image upload failed", Toast.LENGTH_SHORT).show());
+            uploadImage(eventId);
         }
         Intent returnIntent = new Intent();
         setResult(RESULT_OK, returnIntent);
@@ -257,15 +299,45 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     }
 
     @Override
+    public void eventUpdated() {
+        if (selectedImage != null) {
+            uploadImage(getIntent().getStringExtra("eventId"));
+        }
+        Intent returnIntent = new Intent();
+        setResult(RESULT_OK, returnIntent);
+        finish();
+    }
+
+    private void uploadImage(String eventId) {
+        // Upload said image to firebase
+        StorageReference eventImageRef = storageReference.child("images/events/" + eventId);
+        Bitmap bmp = null;
+        try {
+            bmp = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+        byte[] data = baos.toByteArray();
+        //uploading the image
+        UploadTask uploadTask = eventImageRef.putBytes(data);
+        uploadTask
+                .addOnSuccessListener(taskSnapshot ->
+                        Toast.makeText(this, "image upload completed", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(this, "image upload failed", Toast.LENGTH_SHORT).show());
+    }
+
+
+    @Override
     public void contactReturned(User contact, String userId) {
+        contact.setUserId(userId);
         contacts.add(contact);
-        contactsAndUserIdsMap.put(contact, userId);
         contactChipsInput.setFilterableList(contacts);
     }
 
     @Override
     public void dateSelectedFromDatePickerDialog(String dateSelected) {
-
         // Set the date for the event
         date = dateSelected;
 
@@ -285,5 +357,4 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
     public void presentError(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
-
 }
