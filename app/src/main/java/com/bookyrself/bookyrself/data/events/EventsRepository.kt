@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.bookyrself.bookyrself.data.SingletonHolder
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
-import com.bookyrself.bookyrself.data.serverModels.User.EventInviteInfo
+import com.bookyrself.bookyrself.data.serverModels.user.EventInviteInfo
 import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*

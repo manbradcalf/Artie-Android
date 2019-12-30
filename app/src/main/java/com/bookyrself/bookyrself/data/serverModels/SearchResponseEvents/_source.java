@@ -23,7 +23,7 @@ public class _source {
     @SerializedName("tags")
     private List<String> mTags;
     @SerializedName("users")
-    private List<User> mUsers;
+    private List<UserSearchResponse> mUserSearchResponses;
 
     public String getCitystate() {
         return mCitystate;
@@ -73,12 +73,12 @@ public class _source {
         mTags = tags;
     }
 
-    public List<User> getUsers() {
-        return mUsers;
+    public List<UserSearchResponse> getUsers() {
+        return mUserSearchResponses;
     }
 
-    public void setUsers(List<User> users) {
-        mUsers = users;
+    public void setUsers(List<UserSearchResponse> userSearchResponses) {
+        mUserSearchResponses = userSearchResponses;
     }
 
 }

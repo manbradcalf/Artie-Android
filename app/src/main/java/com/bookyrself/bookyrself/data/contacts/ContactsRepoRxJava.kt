@@ -1,7 +1,7 @@
 package com.bookyrself.bookyrself.data.contacts
 
 import android.util.Log
-import com.bookyrself.bookyrself.data.serverModels.User.User
+import com.bookyrself.bookyrself.data.serverModels.user.User
 import com.bookyrself.bookyrself.services.FirebaseService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*

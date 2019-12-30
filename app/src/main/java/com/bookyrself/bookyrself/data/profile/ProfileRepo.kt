@@ -1,6 +1,6 @@
 package com.bookyrself.bookyrself.data.profile
 
-import com.bookyrself.bookyrself.data.serverModels.User.User
+import com.bookyrself.bookyrself.data.serverModels.user.User
 import com.bookyrself.bookyrself.services.FirebaseService
 import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
 import com.google.firebase.auth.FirebaseAuth

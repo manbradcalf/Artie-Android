@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.data.serverModels.EventDetail;
+package com.bookyrself.bookyrself.data.serverModels.SearchResponseEvents;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -6,7 +6,7 @@ import javax.annotation.Generated;
 
 @Generated("net.hexar.json2pojo")
 @SuppressWarnings("unused")
-public class MiniUser {
+public class UserSearchResponse {
 
     @SerializedName("citystate")
     private String mCitystate;
@@ -16,8 +16,6 @@ public class MiniUser {
     private String mUserId;
     @SerializedName("username")
     private String mUsername;
-    @SerializedName("attendingStatus")
-    private String mAttendingStatus;
 
     public String getCitystate() {
         return mCitystate;
@@ -51,11 +49,4 @@ public class MiniUser {
         mUsername = username;
     }
 
-    public String getAttendingStatus() {
-        return mAttendingStatus;
-    }
-
-    public void setAttendingStatus(String mAttendingStatus) {
-        this.mAttendingStatus = mAttendingStatus;
-    }
 }
