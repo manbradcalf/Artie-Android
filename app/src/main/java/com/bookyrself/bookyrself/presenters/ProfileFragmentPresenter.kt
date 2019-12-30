@@ -3,7 +3,7 @@ package com.bookyrself.bookyrself.presenters
 import android.content.Context
 import com.bookyrself.bookyrself.data.profile.ProfileRepo
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
-import com.bookyrself.bookyrself.data.serverModels.User.User
+import com.bookyrself.bookyrself.data.serverModels.user.User
 import com.bookyrself.bookyrself.services.FirebaseService
 import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
 import com.bookyrself.bookyrself.views.activities.MainActivity
@@ -72,7 +72,9 @@ class ProfileFragmentPresenter
                             listener.eventReady(eventId, eventDetail)
                         }
                     } else {
-                        listener.presentError(eventDetailResponse.message())
+                        withContext(Dispatchers.Main) {
+                            listener.presentError(eventDetailResponse.message())
+                        }
                     }
                 }
             }
