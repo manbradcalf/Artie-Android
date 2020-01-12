@@ -180,9 +180,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                     presenter!!.executeSearch(
                             USER_SEARCH_FLAG,
                             search_what.query.toString(),
-                            cityStateSearch,
-                            null,
-                            null)
+                            cityStateSearch)
                     showFullSearchBar(false)
                 }
             } else {

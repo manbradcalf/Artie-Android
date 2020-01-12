@@ -25,13 +25,13 @@ class SearchPresenter
     /**
      * Methods
      */
-    fun executeSearch(searchType: Int, what: String, where: String, fromWhen: String?, toWhen: String?) {
+    fun executeSearch(searchType: Int, what: String, where: String, fromWhen: String? = null, toWhen: String? = null) {
         listener.showProgressbar(true)
-        val query = createQuery(what, where, fromWhen, toWhen)
-        val body = RequestBody()
-        body.query = query
-        body.setSize(100)
         if (searchType == EVENT_SEARCH_FLAG) {
+            val query = createEventSearchQuery(what, where, fromWhen, toWhen)
+            val body = RequestBody()
+            body.query = query
+            body.setSize(100)
             service.api.executeEventsSearch(body)
                     .enqueue(object : Callback<SearchResponse2> {
                         override fun onResponse(call: Call<SearchResponse2>, response: Response<SearchResponse2>) {
@@ -48,6 +48,10 @@ class SearchPresenter
                         }
                     })
         } else {
+            val query = createUserSearchQuery(what, where)
+            val body = RequestBody()
+            body.query = query
+            body.setSize(100)
             service.api.executeUsersSearch(body)
                     .enqueue(object : Callback<SearchResponseUsers> {
                         override fun onResponse(call: Call<SearchResponseUsers>, response: Response<SearchResponseUsers>) {
@@ -68,7 +72,7 @@ class SearchPresenter
         }
     }
 
-    private fun createQuery(what: String, where: String, fromWhen: String?, toWhen: String?): Query {
+    private fun createEventSearchQuery(what: String, where: String, fromWhen: String?, toWhen: String?): Query {
         val fields = listOf("username", "tags", "eventname")
         val query = Query()
         val bool = Bool()
@@ -112,6 +116,38 @@ class SearchPresenter
             filter.bool = bool_
             bool.filter = filter
         }
+        return query
+    }
+
+    private fun createUserSearchQuery(what: String, where: String): Query {
+        val fields = listOf("username", "tags", "eventname")
+        val query = Query()
+        val bool = Bool()
+        val musts = ArrayList<Must>()
+
+        // Set the "Where"
+        if (where != "") {
+            val must1 = Must()
+            val match1 = Match()
+            match1.citystate = where
+            must1.match = match1
+            musts.add(must1)
+        }
+
+        // Set the "what"
+        if (what != "") {
+            val must2 = Must()
+            val multiMatch = MultiMatch()
+            multiMatch.fields = fields
+            multiMatch.query = what
+            must2.multiMatch = multiMatch
+            musts.add(must2)
+        }
+
+        if (musts.isNotEmpty()) {
+            bool.must = musts
+        }
+        query.bool = bool
         return query
     }
 
