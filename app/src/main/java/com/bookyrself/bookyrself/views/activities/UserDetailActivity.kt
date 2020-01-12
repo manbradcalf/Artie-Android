@@ -15,6 +15,8 @@ import com.bookyrself.bookyrself.data.serverModels.User.User
 import com.bookyrself.bookyrself.utils.EventDecorator
 import com.bookyrself.bookyrself.viewmodels.UserDetailViewModel
 import com.bookyrself.bookyrself.views.fragments.BaseFragment.Companion.RC_SIGN_IN
+import com.bookyrself.bookyrself.views.fragments.BaseFragment.Companion.RC_SIGN_IN_AND_SAVE_USER
+import com.firebase.ui.auth.ResultCodes
 import com.google.firebase.auth.FirebaseAuth
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -50,6 +52,16 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
         displayLoadingState()
         userDetailId = intent.getStringExtra("userId")
         setListeners(userDetailId)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            RC_SIGN_IN_AND_SAVE_USER -> {
+                if (resultCode == RESULT_OK && FirebaseAuth.getInstance().uid != null)
+                model.addContactToUser(userDetailId, FirebaseAuth.getInstance().uid!!)
+            }
+        }
     }
 
     private fun setListeners(userId: String) {
@@ -154,7 +166,7 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
             // I'm signed out, so clicking the btn fires auth intent
             user_detail_save_btn.setOnClickListener {
                 val intent = Intent(this, AuthenticationActivity::class.java)
-                startActivityForResult(intent, RC_SIGN_IN)
+                startActivityForResult(intent, RC_SIGN_IN_AND_SAVE_USER)
             }
         }
 

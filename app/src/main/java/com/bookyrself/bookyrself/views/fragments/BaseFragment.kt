@@ -64,5 +64,6 @@ open class BaseFragment : Fragment() {
     companion object {
         const val RC_SIGN_IN = 123
         const val RC_EVENT_CREATION = 456
+        const val RC_SIGN_IN_AND_SAVE_USER = 789
     }
 }
