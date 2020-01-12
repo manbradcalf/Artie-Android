@@ -23,7 +23,6 @@ import com.squareup.picasso.Picasso
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.activity_event_detail.*
 import kotlinx.android.synthetic.main.activity_user_detail.*
 import kotlinx.android.synthetic.main.empty_state_template.*
 import java.util.*
@@ -153,8 +152,10 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
             }
         } else {
             // I'm signed out, so clicking the btn fires auth intent
-            val intent = Intent(this, AuthenticationActivity::class.java)
-            startActivityForResult(intent, RC_SIGN_IN)
+            user_detail_save_btn.setOnClickListener {
+                val intent = Intent(this, AuthenticationActivity::class.java)
+                startActivityForResult(intent, RC_SIGN_IN)
+            }
         }
 
         val profileImageReference = imageStorage.child("images/users/$userDetailId")

@@ -416,7 +416,7 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
 
                 // Set onClickListener to fire off intent in itemSelected()
                 viewHolderEvents.eventCardView.setOnClickListener {
-                    itemSelected(eventsResults!![position]
+                    itemSelected(eventsResults[position]
                             ._id, EVENT_VIEW_TYPE)
                 }
             }
