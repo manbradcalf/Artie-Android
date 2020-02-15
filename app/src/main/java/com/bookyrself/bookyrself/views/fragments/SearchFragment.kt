@@ -438,8 +438,9 @@ class SearchFragment : Fragment(), SearchPresenter.SearchPresenterListener {
                     }
                     // Regex to trim the trailing comma
                     viewHolderUsers.userTagsTextView.text = listString.toString().replace(", $".toRegex(), "")
+                } else {
+                    viewHolderUsers.userTagsTextView.text = ""
                 }
-
 
                 // Set user image thumbnail
                 val profileImageReference = storageReference!!.child("images/users/" + usersResults[position]._id)
