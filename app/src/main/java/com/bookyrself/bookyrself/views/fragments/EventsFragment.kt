@@ -25,7 +25,7 @@ import kotlin.collections.HashMap
 class EventsFragment : BaseFragment(), OnDateSelectedListener {
 
     lateinit var model: EventsFragmentViewModel
-    lateinit var selectedCalendarDay: String
+    var selectedCalendarDay: String? = null
     private val acceptedEventsCalendarDays = ArrayList<CalendarDay>()
     private val pendingEventsCalendarDays = ArrayList<CalendarDay>()
     private val calendarDaysWithEventIds = HashMap<CalendarDay, String>()
