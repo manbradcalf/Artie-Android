@@ -89,42 +89,8 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
         setContentView(R.layout.activity_event_creation);
         EventDetail event = new EventDetail();
         ButterKnife.bind(this);
-        Places.initialize(getApplicationContext(), getResources().getString(R.string.google_api_key));
 
-        // Initialize the AutocompleteSupportFragment.
-        AutocompleteSupportFragment autoCompleteFragment = (AutocompleteSupportFragment)
-                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
-
-        // Specify the types of place data to return.
-        autoCompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
-        autoCompleteFragment.setHint(getString(R.string.event_creation_city_state));
-        autoCompleteFragment.setTypeFilter(TypeFilter.CITIES);
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-
-        // Set up a PlaceSelectionListener to handle the response.
-        autoCompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
-                try {
-                    List<Address> addresses = geocoder.getFromLocation(place.getLatLng().latitude, place.getLatLng().longitude, 1);
-                    if (addresses != null && addresses.size() > 0) {
-                        String cityState = addresses.get(0).getLocality() + ", " + addresses.get(0).getAdminArea();
-                        EditText etPlace = (EditText) autoCompleteFragment.getView().findViewById(R.id.places_autocomplete_search_input);
-                        etPlace.setText(cityState);
-                        event.setCitystate(cityState);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onError(Status status) {
-                // TODO: Handle the error.
-                Log.i("ERROR SELECTING PLACE", "An error occurred: " + status);
-            }
-        });
-
+        setUpLocationSearch(event);
         selectedContacts = new HashMap<>();
         contacts = new ArrayList<>();
         contactsAndUserIdsMap = new HashMap<>();
@@ -145,7 +111,6 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
             datePickerDialogFragment.show(getFragmentManager(), "datePicker");
         });
 
-
         submitButton.setOnClickListener(view -> {
             // Contacts are the only required propert for an event
             if (!contactChipsInput.getSelectedChipList().isEmpty()) {
@@ -163,6 +128,7 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
                 Toast.makeText(getApplicationContext(), "Please select contacts to invite!", Toast.LENGTH_LONG).show();
                 return;
             }
+
             if (!eventNameEditText.getText().toString().isEmpty()) {
                 event.setEventname(eventNameEditText.getText().toString());
             } else {
@@ -170,10 +136,12 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
                 Toast.makeText(getApplicationContext(), "Please name your event!", Toast.LENGTH_LONG).show();
                 return;
             }
+
             if (event.getCitystate() == null) {
                 Toast.makeText(getApplicationContext(), "Please select a location!", Toast.LENGTH_LONG).show();
                 return;
             }
+
             if (!tagsEditText.getText().toString().isEmpty()) {
                 List<String> tagsList = Arrays.asList(tagsEditText.getText().toString().split(", "));
                 event.setTags(tagsList);
@@ -205,6 +173,43 @@ public class EventCreationActivity extends AppCompatActivity implements EventCre
         if (getIntent().getStringExtra("date") != null) {
             presenter.setDate(getIntent().getStringExtra("date"));
         }
+    }
+
+    private void setUpLocationSearch(EventDetail event) {
+        Places.initialize(getApplicationContext(), getResources().getString(R.string.google_api_key));
+
+        // Initialize the AutocompleteSupportFragment.
+        AutocompleteSupportFragment autoCompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        // Specify the types of place data to return.
+        autoCompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
+        autoCompleteFragment.setHint(getString(R.string.event_creation_city_state));
+        autoCompleteFragment.setTypeFilter(TypeFilter.CITIES);
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+
+        // Set up a PlaceSelectionListener to handle the response.
+        autoCompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                try {
+                    List<Address> addresses = geocoder.getFromLocation(place.getLatLng().latitude, place.getLatLng().longitude, 1);
+                    if (addresses != null && addresses.size() > 0) {
+                        String cityState = addresses.get(0).getLocality() + ", " + addresses.get(0).getAdminArea();
+                        EditText etPlace = autoCompleteFragment.getView().findViewById(R.id.places_autocomplete_search_input);
+                        etPlace.setText(cityState);
+                        event.setCitystate(cityState);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onError(Status status) {
+                Log.e("ERROR SELECTING PLACE", "An error occurred: " + status);
+            }
+        });
     }
 
     @Override
