@@ -1,6 +1,9 @@
 *.iml
 .gradle
-/local.properties
+keystore.properties
+app/release.jsk
+app/google-services.json
+local.properties
 /.idea/workspace.xml
 /.idea/libraries
 .DS_Store
@@ -9,4 +12,4 @@
 .externalNativeBuild
 app/gradle/wrapper/gradle-wrapper.jar
 app/gradle/wrapper/gradle-wrapper.properties
-.idea
+/.idea/
