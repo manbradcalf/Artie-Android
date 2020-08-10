@@ -21,10 +21,9 @@ class ProfileFragmentPresenter
 /**
  * Construction
  */
-(private val listener: ProfilePresenterListener, context: Context) : BasePresenter {
+(private val listener: ProfilePresenterListener) : BasePresenter {
     private val profileRepo: ProfileRepo = MainActivity.profileRepo
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
-    private var userId: String? = null
 
     /**
      * Methods
@@ -43,9 +42,9 @@ class ProfileFragmentPresenter
                         ))
     }
 
-    private fun loadProfile() {
+    private fun loadProfile(userId: String) {
         compositeDisposable.add(
-                profileRepo.getProfileInfo(userId!!).subscribe(
+                profileRepo.getProfileInfo(userId).subscribe(
                         { user ->
                             // load up events now that we have user data
                             loadEventDetails(user.events?.keys)
@@ -80,9 +79,9 @@ class ProfileFragmentPresenter
     }
 
     override fun subscribe() {
-        if (FirebaseAuth.getInstance().uid != null) {
-            userId = FirebaseAuth.getInstance().uid
-            loadProfile()
+        val userId = FirebaseAuth.getInstance().uid?: ""
+        if (FirebaseAuth.getInstance().uid != "") {
+            loadProfile(userId)
         } else {
             // No uid in Firebase Auth, user must be signed out
             listener.showSignedOutEmptyState()

@@ -112,7 +112,7 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = new ProfileFragmentPresenter(this, getContext());
+        presenter = new ProfileFragmentPresenter(this);
         user = new User();
         storageReference = FirebaseStorage.getInstance().getReference();
         calendarDaysWithEventIds = new HashMap<>();

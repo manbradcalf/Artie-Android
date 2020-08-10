@@ -14,9 +14,7 @@ import com.bookyrself.bookyrself.data.serverModels.EventDetail.EventDetail
 import com.bookyrself.bookyrself.data.serverModels.User.User
 import com.bookyrself.bookyrself.utils.EventDecorator
 import com.bookyrself.bookyrself.viewmodels.UserDetailViewModel
-import com.bookyrself.bookyrself.views.fragments.BaseFragment.Companion.RC_SIGN_IN
 import com.bookyrself.bookyrself.views.fragments.BaseFragment.Companion.RC_SIGN_IN_AND_SAVE_USER
-import com.firebase.ui.auth.ResultCodes
 import com.google.firebase.auth.FirebaseAuth
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -59,7 +57,7 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
         when (requestCode) {
             RC_SIGN_IN_AND_SAVE_USER -> {
                 if (resultCode == RESULT_OK && FirebaseAuth.getInstance().uid != null)
-                model.addContactToUser(userDetailId, FirebaseAuth.getInstance().uid!!)
+                    model.addContactToUser(userDetailId, FirebaseAuth.getInstance().uid!!)
             }
         }
     }
@@ -95,32 +93,42 @@ class UserDetailActivity : BaseActivity(), OnDateSelectedListener {
         return true
     }
 
-    private fun displayUserInfo(user: User?, userId: String?) {
-        user_detail_collapsing_toolbar!!.title = user?.username
-        user_detail_collapsing_toolbar!!.setExpandedTitleColor(resources.getColor(R.color.cardview_light_background))
-        user_detail_collapsing_toolbar!!.setCollapsedTitleTextColor(resources.getColor(R.color.cardview_light_background))
+    private fun displayUserInfo(user: User, userId: String) {
+        user_detail_collapsing_toolbar.title = user.username
+        user_detail_collapsing_toolbar.setExpandedTitleColor(resources.getColor(R.color.cardview_light_background))
+        user_detail_collapsing_toolbar.setCollapsedTitleTextColor(resources.getColor(R.color.cardview_light_background))
         user_detail_empty_state_card_view.visibility = View.GONE
 
         // Set tags
-        val listString = StringBuilder()
-        user?.tags?.forEach { tag ->
-            listString.append(tag).append(", ")
+        if (user.tags != null) {
+            val listString = StringBuilder()
+            user.tags?.forEach { tag ->
+                listString.append(tag).append(", ")
+            }
+            val tagsText = listString.toString().replace(", $".toRegex(), "")
+            tags_user_detail_activity.text = tagsText
+        } else {
+            tags_user_detail_activity.text = "${user.username} hasn't shared any tags :("
         }
-        val tagsText = listString.toString().replace(", $".toRegex(), "")
 
-        tags_user_detail_activity.text = tagsText
-        city_state_user_detail_activity.text = user?.citystate
-        bio_body_user_detail_activity.text = user?.bio
+        city_state_user_detail_activity.text = user.citystate
+                ?: "${user.username} hasn't shared their city"
+
+        bio_body_user_detail_activity.text = user.bio ?: "${user.username} hasn't shared their bio"
         email_user_detail_btn?.setOnClickListener { emailUser() }
         email_user_detail_btn.setCompoundDrawablesRelative(getDrawable(R.drawable.ic_mail_accent_24dp), null, null, null)
-        user_url_user_detail_activity.isClickable = true
-        user_url_user_detail_activity.movementMethod = LinkMovementMethod.getInstance()
 
-        val linkedText = String.format("<a href=\"%s\">%s</a> ", "http://" + user?.url, user?.url)
-        user_url_user_detail_activity.text = Html.fromHtml(linkedText)
+        if (user.url != null) {
+            user_url_user_detail_activity.isClickable = true
+            user_url_user_detail_activity.movementMethod = LinkMovementMethod.getInstance()
+            val linkedText = String.format("<a href=\"%s\">%s</a> ", "http://" + user.url, user.url)
+            user_url_user_detail_activity.text = Html.fromHtml(linkedText)
+        } else {
+            user_url_user_detail_activity.text = "${user.username} hasn't shared any links :("
+        }
 
         // Set unavailable dates
-        user?.unavailableDates?.keys?.forEach { date ->
+        user.unavailableDates?.keys?.forEach { date ->
             val s = date.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
             val year = Integer.parseInt(s[0])
             // I have to do weird logic on the month because months are 0 indexed

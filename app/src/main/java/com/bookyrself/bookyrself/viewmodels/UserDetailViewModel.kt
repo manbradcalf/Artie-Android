@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 
 class UserDetailViewModel(application: Application, private val userDetailId: String) : BaseViewModel(application) {
 
-    var user = MutableLiveData<User?>()
+    var user = MutableLiveData<User>()
     var events = MutableLiveData<HashMap<EventDetail, String>>()
     var contactWasAdded = MutableLiveData<Boolean>()
 
