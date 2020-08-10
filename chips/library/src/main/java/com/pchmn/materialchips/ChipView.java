@@ -31,13 +31,9 @@ public class ChipView extends RelativeLayout {
     // attributes
     private static final int NONE = -1;
     // xml elements
-    @BindView(R2.id.content)
     LinearLayout mContentLayout;
-    @BindView(R2.id.icon)
     CircleImageView mAvatarIconImageView;
-    @BindView(R2.id.label)
     TextView mLabelTextView;
-    @BindView(R2.id.delete_button)
     ImageButton mDeleteButton;
     // context
     private Context mContext;

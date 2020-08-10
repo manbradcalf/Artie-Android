@@ -33,15 +33,10 @@ public class DetailedChipView extends RelativeLayout {
     // letter tile provider
     private static LetterTileProvider mLetterTileProvider;
     // xml elements
-    @BindView(R2.id.content)
     RelativeLayout mContentLayout;
-    @BindView(R2.id.avatar_icon)
     CircleImageView mAvatarIconImageView;
-    @BindView(R2.id.name)
     TextView mNameTextView;
-    @BindView(R2.id.info)
     TextView mInfoTextView;
-    @BindView(R2.id.delete_button)
     ImageButton mDeleteButton;
     // context
     private Context mContext;
