@@ -9,7 +9,7 @@ import com.google.firebase.database.*
 
 class ContactsRepo private constructor(context: Context) {
 
-    private var db: DatabaseReference? = null
+    lateinit var db: DatabaseReference
     private var cacheIsDirty: Boolean = true
     private val contacts = HashMap<User, String>()
     private val service = FirebaseServiceCoroutines.instance
@@ -32,7 +32,7 @@ class ContactsRepo private constructor(context: Context) {
                     .child(FirebaseAuth.getInstance().uid!!)
                     .child("contacts")
 
-            this.db!!.addChildEventListener(object : ChildEventListener {
+            this.db.addChildEventListener(object : ChildEventListener {
                 override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
                     cacheIsDirty = true
                 }
