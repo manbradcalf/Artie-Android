@@ -46,9 +46,7 @@ class EventDetailViewModel(application: Application, private val eventId: String
                     val inviteeWithUserId = Pair(userId, miniUser)
                     listOfInvitees.add(inviteeWithUserId)
                 }
-
             }
-
             invitees.value = listOfInvitees
         }
     }
