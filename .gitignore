@@ -14,3 +14,4 @@ app/gradle/wrapper/gradle-wrapper.jar
 app/gradle/wrapper/gradle-wrapper.properties
 /.idea/
 chips/.settings
+chips/library/.settings
