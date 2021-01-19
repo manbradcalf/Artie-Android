@@ -22,18 +22,18 @@ class NewTest : BaseTest() {
 
     @Test
     fun onboardingTest() {
-        sleep(2000)
+        // Wait until the onboarding flow has loaded
+        BaseRobot().assertOnView(withText("Find Artists"), matches(isDisplayed()))
         onView(isRoot()).perform(ViewActions.swipeLeft())
         onView(isRoot()).perform(ViewActions.swipeLeft())
         onView(isRoot()).perform(ViewActions.swipeLeft())
-        signInWithEmail("artie-tester+1@gmail.com", "testing123")
-        BaseRobot().doOnView(withId(R.id.navigation_contacts), click())
-        BaseRobot().assertOnView(withSubstring("Artie Fufkinn"), matches(isDisplayed()))
+        signInWithEmail("artie-tester@gmail.com", "qwerty12!")
+        BaseRobot().assertOnView(withSubstring("ArtieTester"), matches(isDisplayed()))
         BaseRobot().doOnView(withId(R.id.navigation_profile), click())
 
         // Not sure why this would fail to find "Sign Out" after clicking it
         openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext)
-        onView(withId(R.id.sign_out)).perform(click())
+        BaseRobot().doOnView(withId(R.id.sign_out), click())
         sleep(3000)
 
         BaseRobot().doOnView(withId(R.id.navigation_event_invites_list), click())
@@ -45,15 +45,11 @@ class NewTest : BaseTest() {
     private fun signInWithEmail(email: String, password: String) {
         BaseRobot().doOnView(withId(R.id.navigation_profile), click())
         BaseRobot().doOnView(allOf(isDisplayed(), withId(R.id.empty_state_button)), click())
-        BaseRobot().doOnView(withText("Sign in with email"), click())
+        BaseRobot().doOnView(withText("Already signed up? Click here to log in"), click())
 
-        // Dismiss the dialog
-        BaseRobot().device.pressBack()
-
-        BaseRobot().doOnView(withId(R.id.email), typeText(email))
-        BaseRobot().doOnView(withId(R.id.button_next), click())
-        BaseRobot().doOnView(withId(R.id.password), typeText(password))
+        BaseRobot().doOnView(withId(R.id.email_edit_text), typeText(email))
+        BaseRobot().doOnView(withId(R.id.password_edit_text), typeText(password))
         closeSoftKeyboard()
-        BaseRobot().doOnView(withId(R.id.button_done), click())
+        BaseRobot().doOnView(withId(R.id.auth_button), click())
     }
 }
