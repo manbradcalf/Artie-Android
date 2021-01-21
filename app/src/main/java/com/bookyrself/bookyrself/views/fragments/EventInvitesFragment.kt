@@ -52,7 +52,7 @@ class EventInvitesFragment : BaseFragment() {
             setListeners()
             model.load()
         } else {
-            showSignedOutEmptyState("Sign in to view your invites!",
+            showSignedOutEmptyState(getString(R.string.empty_state_event_invites_signed_out_subheader),
                     activity!!.getDrawable(R.drawable.ic_invitation))
         }
     }
