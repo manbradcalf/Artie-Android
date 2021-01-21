@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.base
+package com.bookyrself.bookyrself.tests
 
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4

@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.base
+package com.bookyrself.bookyrself.robots
 
 import android.util.Log
 import android.view.View
@@ -12,8 +12,7 @@ import org.hamcrest.Matcher
 import java.lang.Thread.sleep
 
 open class BaseRobot {
-
-    val device: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+    val device: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
 
     fun doOnView(viewMatcher: Matcher<View>, vararg actions: ViewAction) {
         actions.forEach {
@@ -48,31 +47,21 @@ open class BaseRobot {
     }
 
     fun doOnAdapterView(
-            position: Int? = null,
             dataInteraction: DataInteraction,
             vararg actions: ViewAction
     ) {
         actions.forEach {
-            if (position != null) {
-                waitFor { dataInteraction.atPosition(position).perform(it) }
-            } else {
-                waitFor { dataInteraction.perform(it) }
-            }
+            waitFor { dataInteraction.perform(it) }
         }
     }
 
-    fun doOnAdapterView(
+    fun doOnAdapterViewAtPosition(
             dataInteraction: DataInteraction,
-            position: Int? = null,
-            waitMillis: Int,
+            position: Int,
             vararg actions: ViewAction
     ) {
         actions.forEach {
-            if (position != null) {
-                waitFor({ dataInteraction.atPosition(position).perform(it) }, waitMillis)
-            } else {
-                waitFor({ dataInteraction.perform(it) }, waitMillis)
-            }
+            waitFor { dataInteraction.atPosition(position).perform(it) }
         }
     }
 
@@ -81,7 +70,7 @@ open class BaseRobot {
      * @param func The block to try until success
      */
     fun waitFor(func: () -> Unit) {
-        waitFor(func, waitMillis = 3000)
+        waitFor(func, waitMillis = 5000)
     }
 
     /**
@@ -89,7 +78,7 @@ open class BaseRobot {
      * @param func The block to try until success
      * @param waitMillis The amount of time to wait until a successful execution
      */
-    private fun waitFor(
+    fun waitFor(
             func: () -> Unit,
             waitMillis: Int
     ) {

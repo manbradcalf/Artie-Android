@@ -1,4 +1,4 @@
-package com.bookyrself.bookyrself.base
+package com.bookyrself.bookyrself.tests
 
 import androidx.test.espresso.Espresso.*
 import androidx.test.espresso.action.ViewActions
@@ -10,7 +10,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.bookyrself.bookyrself.R
-import com.google.firebase.auth.FirebaseAuth
+import com.bookyrself.bookyrself.robots.BaseRobot
+import com.bookyrself.bookyrself.tests.BaseTest
 import org.hamcrest.CoreMatchers.allOf
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,7 +19,7 @@ import java.lang.Thread.sleep
 
 @LargeTest
 @RunWith(AndroidJUnit4::class)
-class NewTest : BaseTest() {
+class OnboardingTest : BaseTest() {
 
     @Test
     fun onboardingTest() {

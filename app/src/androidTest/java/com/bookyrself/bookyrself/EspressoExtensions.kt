@@ -1,7 +1,6 @@
-package com.bookyrself.bookyrself.base
+package com.bookyrself.bookyrself
 
 import android.view.View
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.NoMatchingViewException
 import androidx.test.espresso.UiController
