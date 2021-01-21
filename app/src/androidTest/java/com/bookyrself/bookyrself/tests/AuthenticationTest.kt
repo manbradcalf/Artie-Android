@@ -11,6 +11,7 @@ import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.robots.BaseRobot
+import com.bookyrself.bookyrself.robots.ProfileRobot
 import com.bookyrself.bookyrself.tests.BaseTest
 import org.hamcrest.CoreMatchers.allOf
 import org.junit.Test
@@ -31,7 +32,7 @@ class AuthenticationTest : BaseTest() {
         signInWithEmail("artie-tester@gmail.com", "qwerty12!")
 
         // TODO: Do more profile validation
-        baseRobot.assertOnView(withSubstring("ArtieTester"), matches(isDisplayed()))
+        baseRobot.assertOnView(ProfileRobot.userNameField, matches(isDisplayed()))
         baseRobot.doOnView(withId(R.id.navigation_profile), click())
 
         // Not sure why this would fail to find "Sign Out" after clicking it
@@ -40,10 +41,10 @@ class AuthenticationTest : BaseTest() {
         // TODO: Make this pretty (
         baseRobot.doOnView(withText(baseRobot.getContext().getString(R.string.sign_out)), click())
 
-        // TODO: Can we get rid of this? (assertOnView profile fragment signed out )
+        // TODO: Can we get rid of this? (assertOnView profile fragment signed out)
         sleep(3000)
 
-        // validate invites signed out enmpty state
+        // validate invites signed out empty state
         baseRobot.doOnView(withId(R.id.navigation_event_invites_list), click())
         baseRobot.assertOnView(
                 // TODO: Lets move this into its own robot
