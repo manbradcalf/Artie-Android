@@ -7,12 +7,14 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.ViewAction
 import androidx.test.espresso.ViewAssertion
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.UiDevice
 import org.hamcrest.Matcher
 import java.lang.Thread.sleep
 
 open class BaseRobot {
-    val device: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+    val device: UiDevice = UiDevice.getInstance(getInstrumentation());
+    fun getContext() = getInstrumentation().targetContext
 
     fun doOnView(viewMatcher: Matcher<View>, vararg actions: ViewAction) {
         actions.forEach {
