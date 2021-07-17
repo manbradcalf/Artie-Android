@@ -5,13 +5,9 @@ import com.bookyrself.bookyrself.data.serverModels.User.User
 import com.bookyrself.bookyrself.services.FirebaseService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import io.reactivex.Flowable
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.PublishSubject
-import io.reactivex.subjects.Subject
 import java.util.*
 
 class ContactsRepoRxJava : ContactsDataSource {
@@ -28,13 +24,13 @@ class ContactsRepoRxJava : ContactsDataSource {
             cacheIsDirty = true
         }
 
-        if (FirebaseAuth.getInstance().uid != null) {
+        FirebaseAuth.getInstance().uid?.let {
             this.db = FirebaseDatabase.getInstance().reference
-                    .child("users")
-                    .child(FirebaseAuth.getInstance().uid!!)
-                    .child("contacts")
+                .child("users")
+                .child(it)
+                .child("contacts")
 
-            this.db!!.addChildEventListener(object : ChildEventListener {
+            this.db?.addChildEventListener(object : ChildEventListener {
                 override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
                     cacheIsDirty = true
                     Log.e("Contacts Repo: ", "Child added")
@@ -71,29 +67,29 @@ class ContactsRepoRxJava : ContactsDataSource {
         if (cacheIsDirty!!) {
             // Cache is dirty, get from network
             return FirebaseService.instance
-                    .getUserContacts(userId)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .map { it.entries }
-                    .firstOrError()
-                    .flattenAsObservable { it }
-                    .flatMap { entry ->
-                        FirebaseService.instance
+                .getUserContacts(userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .map { it.entries }
+                .firstOrError()
+                .flattenAsObservable { it }
+                .flatMap { entry ->
+                    FirebaseService.instance
                         // Get each contacts user info
-                                .getUserDetails(entry.key)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .map {
-                                    // add the contact to our user's contacts repository
-                                    contactsMap[entry.key] = it
-                                    cacheIsDirty = false
-                                    AbstractMap.SimpleEntry<String, User>(entry.key, it)
-                                }
-                    }
+                        .getUserDetails(entry.key)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .map {
+                            // add the contact to our user's contacts repository
+                            contactsMap[entry.key] = it
+                            cacheIsDirty = false
+                            AbstractMap.SimpleEntry<String, User>(entry.key, it)
+                        }
+                }
         } else {
             // Cache is clean, get local copy
             return Observable.fromIterable(contactsMap.entries)
-                    .map { AbstractMap.SimpleEntry<String, User>(it.key, it.value) }
+                .map { AbstractMap.SimpleEntry<String, User>(it.key, it.value) }
         }
     }
 }

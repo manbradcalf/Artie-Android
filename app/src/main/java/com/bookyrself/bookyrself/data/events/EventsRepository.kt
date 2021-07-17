@@ -35,7 +35,7 @@ class EventsRepository private constructor(context: Context) {
                     .child(FirebaseAuth.getInstance().uid!!)
                     .child("events")
 
-            this.db!!.addChildEventListener(object : ChildEventListener {
+            this.db?.addChildEventListener(object : ChildEventListener {
                 override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
                     cacheIsDirty = true
                 }
