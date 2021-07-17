@@ -6,6 +6,8 @@ import com.bookyrself.bookyrself.data.serverModels.EventDetail.Host
 import com.bookyrself.bookyrself.data.serverModels.User.EventInviteInfo
 import com.bookyrself.bookyrself.data.serverModels.User.User
 import io.reactivex.Flowable
+import io.reactivex.Observable
+import io.reactivex.Single
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -38,7 +40,7 @@ object FirebaseService {
     interface FirebaseApi {
 
         @GET("/users/{id}.json")
-        fun getUserDetails(@Path("id") userId: String): Flowable<User>
+        fun getUserDetails(@Path("id") userId: String): Observable<User>
 
         @GET("/users/{id}/events.json")
         fun getUsersEventInvites(@Path("id") userId: String): Flowable<HashMap<String, EventInviteInfo>>

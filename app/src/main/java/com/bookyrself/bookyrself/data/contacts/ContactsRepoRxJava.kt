@@ -6,8 +6,12 @@ import com.bookyrself.bookyrself.services.FirebaseService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import io.reactivex.Flowable
+import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 import java.util.*
 
 class ContactsRepoRxJava : ContactsDataSource {
@@ -62,7 +66,7 @@ class ContactsRepoRxJava : ContactsDataSource {
     /**
      * Methods
      */
-    override fun getContactsForUser(userId: String): Flowable<Map.Entry<String, User>> {
+    override fun getContactsForUser(userId: String): Observable<Map.Entry<String, User>> {
 
         if (cacheIsDirty!!) {
             // Cache is dirty, get from network
@@ -72,14 +76,15 @@ class ContactsRepoRxJava : ContactsDataSource {
                     .observeOn(AndroidSchedulers.mainThread())
                     .map { it.entries }
                     .firstOrError()
-                    .toFlowable()
-                    .flatMapIterable { entries -> entries }
+                    .flattenAsObservable { it }
                     .flatMap { entry ->
                         FirebaseService.instance
+                        // Get each contacts user info
                                 .getUserDetails(entry.key)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .map {
+                                    // add the contact to our user's contacts repository
                                     contactsMap[entry.key] = it
                                     cacheIsDirty = false
                                     AbstractMap.SimpleEntry<String, User>(entry.key, it)
@@ -87,7 +92,7 @@ class ContactsRepoRxJava : ContactsDataSource {
                     }
         } else {
             // Cache is clean, get local copy
-            return Flowable.fromIterable(contactsMap.entries)
+            return Observable.fromIterable(contactsMap.entries)
                     .map { AbstractMap.SimpleEntry<String, User>(it.key, it.value) }
         }
     }

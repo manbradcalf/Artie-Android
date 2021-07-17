@@ -5,7 +5,7 @@ import com.bookyrself.bookyrself.services.FirebaseService
 import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import io.reactivex.Flowable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
@@ -19,8 +19,8 @@ class ProfileRepo {
             val userId = FirebaseAuth.getInstance().uid
 
             this.db = FirebaseDatabase.getInstance().reference
-                    .child("users")
-                    .child(userId!!)
+                .child("users")
+                .child(userId!!)
 
             this.db!!.addChildEventListener(object : ChildEventListener {
                 override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
@@ -48,13 +48,12 @@ class ProfileRepo {
     }
 
 
-    fun getProfileInfo(userId: String): Flowable<User> {
+    fun getProfileInfo(userId: String): Single<User> {
         return FirebaseService.instance
-                .getUserDetails(userId)
-                .firstOrError()
-                .toFlowable()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+            .getUserDetails(userId)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .singleOrError()
     }
 
     suspend fun updateProfileInfo(userId: String, user: User): ProfileRepoResponse {

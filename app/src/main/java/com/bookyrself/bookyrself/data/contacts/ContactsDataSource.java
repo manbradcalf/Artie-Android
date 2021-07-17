@@ -5,9 +5,10 @@ import com.bookyrself.bookyrself.data.serverModels.User.User;
 import java.util.Map;
 
 import io.reactivex.Flowable;
+import io.reactivex.Observable;
 
 interface ContactsDataSource {
 
-    Flowable<Map.Entry<String, User>> getContactsForUser(String userId);
+    Observable<Map.Entry<String, User>> getContactsForUser(String userId);
 
 }
