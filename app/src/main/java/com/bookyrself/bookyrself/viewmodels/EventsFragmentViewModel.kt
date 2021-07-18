@@ -17,13 +17,12 @@ class EventsFragmentViewModel(application: Application) : BaseViewModel(applicat
     var eventDetails = MutableLiveData<HashMap<EventDetail, String>>()
 
     override fun load() {
-        val userId = FirebaseAuth.getInstance().uid
-        if (userId != null) {
+        FirebaseAuth.getInstance().uid?.let {
             CoroutineScope(Dispatchers.IO).launch {
                 when (val response =
                         EventsRepository
                                 .getInstance(getApplication())
-                                .getAllEventsForUser(userId)) {
+                                .getAllEventsForUser(it)) {
                     is Success -> {
                         eventDetails.postValue(response.events)
                     }

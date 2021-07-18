@@ -85,6 +85,11 @@
     <string name="user_detail_email_btn_text">Email</string>
     <string name="user_detail_image_cont_desc">User Image</string>
     <string name="event_creation_profile_edit_hint">City, State</string>
+    <string name="profile_tags_placeholder">Add some tags!</string>
+    <string name="profile_bio_placeholder">Tell us about yourself!</string>
+    <string name="profile_citystate_placeholder">Add your city!</string>
+    <string name="profile_url_placeholder">Add your website!</string>
+    <string name="profile_toolbar_placeholder">Your Profile</string>
 
 
 </resources>

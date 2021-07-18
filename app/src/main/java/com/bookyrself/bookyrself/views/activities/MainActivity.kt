@@ -69,7 +69,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         private const val PROFILE_FRAGMENT_INDEX = 4
 
         private var CONTACTS_REPO: ContactsRepoRxJava? = null
-        private var PROFILE_REPO: ProfileRepo? = null
 
         //TODO: Fix all these !! and find a better way to serve up these repos
         val contactsRepo: ContactsRepoRxJava
@@ -78,14 +77,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                     CONTACTS_REPO = ContactsRepoRxJava()
                 }
                 return CONTACTS_REPO!!
-            }
-
-        val profileRepo: ProfileRepo
-            get() {
-                if (PROFILE_REPO == null) {
-                    PROFILE_REPO = ProfileRepo()
-                }
-                return PROFILE_REPO!!
             }
     }
 }

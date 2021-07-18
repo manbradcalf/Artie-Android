@@ -60,7 +60,7 @@ import butterknife.ButterKnife;
 import static com.bookyrself.bookyrself.views.activities.AuthenticationActivity.USERNAME_KEY;
 import static java.util.Objects.requireNonNull;
 
-public class ProfileFragment extends BaseFragment implements OnDateSelectedListener, ProfileFragmentPresenter.ProfilePresenterListener {
+public class ProfileFragmentJava extends BaseFragment implements OnDateSelectedListener, ProfileFragmentPresenter.ProfilePresenterListener {
 
     private static final int RC_SIGN_IN = 123;
     private static final int RC_PROFILE_EDIT = 789;
@@ -105,9 +105,9 @@ public class ProfileFragment extends BaseFragment implements OnDateSelectedListe
     private StorageReference storageReference;
     private HashMap<CalendarDay, String> calendarDaysWithEventIds;
     private User user;
-    private List<CalendarDay> acceptedEventsCalendarDays = new ArrayList<>();
-    private List<CalendarDay> pendingEventsCalendarDays = new ArrayList<>();
-    private List<CalendarDay> unavailableDates = new ArrayList<>();
+    private final List<CalendarDay> acceptedEventsCalendarDays = new ArrayList<>();
+    private final List<CalendarDay> pendingEventsCalendarDays = new ArrayList<>();
+    private final List<CalendarDay> unavailableDates = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
