@@ -10,8 +10,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bookyrself.bookyrself.R
 import com.bookyrself.bookyrself.data.profile.ProfileRepo
-import com.bookyrself.bookyrself.data.profile.ProfileRepo.ProfileRepoResponse.Failure
-import com.bookyrself.bookyrself.data.profile.ProfileRepo.ProfileRepoResponse.Success
+import com.bookyrself.bookyrself.data.profile.ProfileRepoResponse.Success
+import com.bookyrself.bookyrself.data.profile.ProfileRepoResponse.Failure
 import com.bookyrself.bookyrself.data.serverModels.EventDetail.Host
 import com.bookyrself.bookyrself.data.serverModels.User.User
 import com.bookyrself.bookyrself.services.FirebaseServiceCoroutines
@@ -39,7 +39,7 @@ class ProfileEditActivity : AppCompatActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //TODO: Move to viewmodel
-        this.profileRepo = MainActivity.profileRepo
+        this.profileRepo = ProfileRepo.getInstance(this)
         setContentView(R.layout.activity_profile_edit)
 
         // Set any existing data
@@ -51,10 +51,17 @@ class ProfileEditActivity : AppCompatActivity() {
 
         // TODO: The following code is mostly duplicated from eventcreationactivity
         // Initialize the AutocompleteSupportFragment.
-        val autocompleteFragment = supportFragmentManager.findFragmentById(R.id.autocomplete_fragment_profile_edit) as AutocompleteSupportFragment?
+        val autocompleteFragment =
+            supportFragmentManager.findFragmentById(R.id.autocomplete_fragment_profile_edit) as AutocompleteSupportFragment?
 
         // Specify the types of place data to return.
-        autocompleteFragment!!.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG))
+        autocompleteFragment!!.setPlaceFields(
+            listOf(
+                Place.Field.ID,
+                Place.Field.NAME,
+                Place.Field.LAT_LNG
+            )
+        )
         autocompleteFragment.setHint(intent.getStringExtra("Location"))
         autocompleteFragment.setTypeFilter(TypeFilter.CITIES)
         val geocoder = Geocoder(this, Locale.getDefault())
@@ -64,10 +71,15 @@ class ProfileEditActivity : AppCompatActivity() {
             override fun onPlaceSelected(place: Place) {
                 // TODO: Get info about the selected place.
                 try {
-                    val addresses = geocoder.getFromLocation(place.latLng!!.latitude, place.latLng!!.longitude, 1)
+                    val addresses = geocoder.getFromLocation(
+                        place.latLng!!.latitude,
+                        place.latLng!!.longitude,
+                        1
+                    )
                     if (addresses != null && addresses.size > 0) {
                         val cityState = addresses[0].locality + ", " + addresses[0].adminArea
-                        val etPlace = autocompleteFragment.view?.findViewById(R.id.places_autocomplete_search_input) as EditText
+                        val etPlace =
+                            autocompleteFragment.view?.findViewById(R.id.places_autocomplete_search_input) as EditText
                         etPlace.hint = cityState
                         user.citystate = cityState
                     }
@@ -84,7 +96,8 @@ class ProfileEditActivity : AppCompatActivity() {
         })
 
         if (intent.getStringExtra("Tags") != null) {
-            intent.getStringExtra("Tags").let { profile_edit_tags.setText(it.replace("\\[|]|, $".toRegex(), "")) }
+            intent.getStringExtra("Tags")
+                .let { profile_edit_tags.setText(it.replace("\\[|]|, $".toRegex(), "")) }
         }
 
         profile_edit_fab.setOnClickListener {
@@ -95,7 +108,10 @@ class ProfileEditActivity : AppCompatActivity() {
             user.url = profile_edit_url.text.toString()
 
             val tagsString = profile_edit_tags.text.toString()
-            val tagsList = Arrays.asList(*tagsString.split("\\s*,\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
+            val tagsList = Arrays.asList(
+                *tagsString.split("\\s*,\\s*".toRegex()).dropLastWhile { it.isEmpty() }
+                    .toTypedArray()
+            )
             user.tags = tagsList
 
             // Update the user
@@ -104,8 +120,8 @@ class ProfileEditActivity : AppCompatActivity() {
                 when (profileRepo!!.updateProfileInfo(FirebaseAuth.getInstance().uid!!, user)) {
                     is Success -> {
                         val userEventsResponse = FirebaseServiceCoroutines
-                                .instance
-                                .getUsersEventInvites(FirebaseAuth.getInstance().uid!!)
+                            .instance
+                            .getUsersEventInvites(FirebaseAuth.getInstance().uid!!)
 
                         if (userEventsResponse.isSuccessful) {
                             if (userEventsResponse.body() != null) {
@@ -116,10 +132,18 @@ class ProfileEditActivity : AppCompatActivity() {
                                 host.url = user.url
                                 host.citystate = user.citystate
                                 userEventsResponse.body()!!.filter { it.value.isHost }.forEach {
-                                    val updateEventHostResponse = FirebaseServiceCoroutines.instance.updateEventHost(host, it.key)
+                                    val updateEventHostResponse =
+                                        FirebaseServiceCoroutines.instance.updateEventHost(
+                                            host,
+                                            it.key
+                                        )
                                     if (updateEventHostResponse.errorBody() != null) {
                                         withContext(Dispatchers.Main) {
-                                            Toast.makeText(applicationContext, "Oh no! Something went wrong updating your events", Toast.LENGTH_LONG).show()
+                                            Toast.makeText(
+                                                applicationContext,
+                                                "Oh no! Something went wrong updating your events",
+                                                Toast.LENGTH_LONG
+                                            ).show()
                                             setResult(Activity.RESULT_OK)
                                             finish()
                                         }
@@ -128,8 +152,8 @@ class ProfileEditActivity : AppCompatActivity() {
                             }
                         }
                         val profileUpdate = UserProfileChangeRequest.Builder()
-                                .setDisplayName(profile_edit_username.text.toString())
-                                .build()
+                            .setDisplayName(profile_edit_username.text.toString())
+                            .build()
                         FirebaseAuth.getInstance().currentUser!!.updateProfile(profileUpdate)
 
                         // Finish the activity with a success
@@ -137,7 +161,11 @@ class ProfileEditActivity : AppCompatActivity() {
                         finish()
                     }
                     is Failure -> {
-                        Toast.makeText(applicationContext, "Oh no! Something went wrong updating your profile", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            applicationContext,
+                            "Oh no! Something went wrong updating your profile",
+                            Toast.LENGTH_LONG
+                        ).show()
                         setResult(Activity.RESULT_OK)
                         finish()
                     }
